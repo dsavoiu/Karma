@@ -1,0 +1,37 @@
+<lcgdict>
+    <class name="dijet::Event"/>
+    <class name="edm::Wrapper<dijet::Event>"/>
+    <class name="dijet::EventCollection"/>
+    <class name="edm::Wrapper<dijet::EventCollection>"/>
+
+    <class name="dijet::Lumi"/>
+    <class name="edm::Wrapper<dijet::Lumi>"/>
+    <class name="dijet::LumiCollection"/>
+    <class name="edm::Wrapper<dijet::LumiCollection>"/>
+
+    <class name="dijet::Run"/>
+    <class name="edm::Wrapper<dijet::Run>"/>
+    <class name="dijet::RunCollection"/>
+    <class name="edm::Wrapper<dijet::RunCollection>"/>
+
+    <class name="dijet::HLTPathInfo"/>
+    <class name="edm::Wrapper<dijet::HLTPathInfo>"/>
+    <class name="dijet::HLTPathInfos"/>
+    <class name="edm::Wrapper<dijet::HLTPathInfos>"/>
+
+    <class name="dijet::LV"/>
+    <class name="edm::Wrapper<dijet::LV>"/>
+    <class name="dijet::LVCollection"/>
+    <class name="edm::Wrapper<dijet::LVCollection>"/>
+
+    <class name="dijet::Jet"/>
+    <class name="edm::Wrapper<dijet::Jet>"/>
+    <class name="dijet::JetCollection"/>
+    <class name="edm::Wrapper<dijet::JetCollection>"/>
+
+    <class name="dijet::TriggerObject"/>
+    <class name="edm::Wrapper<dijet::TriggerObject>"/>
+    <class name="dijet::TriggerObjectCollection"/>
+    <class name="edm::Wrapper<dijet::TriggerObjectCollection>"/>
+
+</lcgdict>
