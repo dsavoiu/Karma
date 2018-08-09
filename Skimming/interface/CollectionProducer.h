@@ -70,21 +70,23 @@ namespace dijet {
             // call produceSingle() for every element of the input collection
             for (size_t i = 0; i < this->inputCollectionHandle_->size(); ++i) {
                 // skip elements rejected by `acceptSingle()`
-                if (!this->acceptSingle(this->inputCollectionHandle_->at(i))) {
+                if (!this->acceptSingle(this->inputCollectionHandle_->at(i), event, setup)) {
                     continue;
                 }
                 // default-construct an output object in-place in the output collection
                 outputJetCollection->emplace_back();
-                this->produceSingle(this->inputCollectionHandle_->at(i), outputJetCollection->back());
+                // call `productSingle()` to fill the newly created output object
+                this->produceSingle(this->inputCollectionHandle_->at(i), outputJetCollection->back(), event, setup);
             }
 
             event.put(std::move(outputJetCollection));
         };
 
-        virtual void produceSingle(const TInputSingle& in, TOutputSingle& out) = 0;
-        inline virtual bool acceptSingle(const TInputSingle& in) {
+        virtual void produceSingle(const TInputSingle& in, TOutputSingle& out, const edm::Event&, const edm::EventSetup& setup) = 0;
+
+        inline virtual bool acceptSingle(const TInputSingle& in, const edm::Event&, const edm::EventSetup& setup) {
             return true;  // accept all by default
-        };
+        }
 
 
         // ----------member data ---------------------------

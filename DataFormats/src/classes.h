@@ -30,26 +30,32 @@ namespace {
         edm::Wrapper<dijet::HLTPathInfo> dict_edmWrapperDijetHLTPathInfo;
         dijet::HLTPathInfos dict_dijetHLTPathInfos;
         edm::Wrapper<dijet::HLTPathInfos> dict_edmWrapperDijetHLTPathInfos;
-        
+
         // -- event objects
-        
+
         // lvs
         dijet::LV dict_dijetLV;
         edm::Wrapper<dijet::LV> dict_edmWrapperDijetLV;
         dijet::LVCollection dict_dijetLVCollection;
         edm::Wrapper<dijet::LVCollection> dict_edmWrapperDijetLVCollection;
-        
+
         // jets
         dijet::Jet dict_dijetJet;
         edm::Wrapper<dijet::Jet> dict_edmWrapperDijetJet;
         dijet::JetCollection dict_dijetJetCollection;
         edm::Wrapper<dijet::JetCollection> dict_edmWrapperDijetJetCollection;
-        
+
         // trigger objects
         dijet::TriggerObject dict_dijetTriggerObject;
         edm::Wrapper<dijet::TriggerObject> dict_edmWrapperDijetTriggerObject;
         dijet::TriggerObjectCollection dict_dijetTriggerObjectCollection;
         edm::Wrapper<dijet::TriggerObjectCollection> dict_edmWrapperDijetTriggerObjectCollection;
+
+        // jet-trigger association map
+        dijet::JetTriggerObjectsMap dict_dijetJetTriggerObjectsMap;
+        edm::Wrapper<dijet::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
+        dijet::JetTriggerObjectsMaps dict_dijetJetTriggerObjectsMaps;
+        edm::Wrapper<dijet::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
 
     };
 }

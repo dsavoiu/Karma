@@ -69,19 +69,12 @@ namespace dijet {
                 std::cout << "Adding HLT regex '" << regexString << "'" << std::endl;
                 hltPathRegexes_.push_back(boost::regex(regexString, boost::regex::icase | boost::regex::extended));
             }
-            // create the regex objects for matching HLT filter names
-            const std::vector<std::string>& hltFilterRegexes = pSet_.getParameter<std::vector<std::string>>("hltFilterRegexes");
-            for (const auto& regexString : hltFilterRegexes) {
-                std::cout << "Adding HLT filter regex '" << regexString << "'" << std::endl;
-                hltFilterRegexes_.push_back(boost::regex(regexString, boost::regex::icase | boost::regex::extended));
-            }
 
         };
 
         std::string hltProcessName_;  // name of the process that producer the trigger path information
 
         std::vector<boost::regex> hltPathRegexes_;  // list of pre-compiled regular expressions that 'interesting' trigger paths are required to match
-        std::vector<boost::regex> hltFilterRegexes_;    // list of pre-compiled regular expressions that 'interesting' trigger filters are required to match
 
         mutable HLTConfigProvider hltConfigProvider_;  // helper object to obtain HLT configuration (default-constructed)
 
@@ -169,7 +162,7 @@ namespace dijet {
 
         const edm::ParameterSet& m_configPSet;
 
-        std::unique_ptr<HLTPrescaleProvider> m_hltPrescaleProvider;        
+        std::unique_ptr<HLTPrescaleProvider> m_hltPrescaleProvider;
 
         // -- handles and tokens
         typename edm::Handle<edm::View<pat::Jet>> jetCollectionHandle;
@@ -187,11 +180,19 @@ namespace dijet {
         typename edm::Handle<edm::TriggerResults> triggerResultsHandle;
         edm::EDGetTokenT<edm::TriggerResults> triggerResultsToken;
 
-        typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
-        edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken;
+        //typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
+        //edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken;
 
-        typename edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjectsHandle;
-        edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjectsToken;
+        typename edm::Handle<double> pileupDensityHandle;
+        edm::EDGetTokenT<double> pileupDensityToken;
+
+        typename edm::Handle<edm::View<reco::Vertex>> primaryVerticesHandle;
+        edm::EDGetTokenT<edm::View<reco::Vertex>> primaryVerticesToken;
+
+        typename edm::Handle<edm::View<reco::Vertex>> goodPrimaryVerticesHandle;
+        edm::EDGetTokenT<edm::View<reco::Vertex>> goodPrimaryVerticesToken;
+
+
 
     };
 

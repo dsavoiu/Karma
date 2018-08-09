@@ -16,7 +16,7 @@ dijetTriggerEfficienciesAnalyzer = cms.EDAnalyzer(
         hltPreselectionPathRegex = cms.string("^HLT_IsoMu24_v[0-9]+$"),
         #hltPreselectionPathRegex = cms.string("^HLT_PFJet140_v[0-9]+$"),
         #hltPreselectionPathRegex = cms.string("^HLT_ZeroBias_v[0-9]+$"),
-        
+
         # names of the paths for which to measure the trigger efficiencies on the preselected sample
         hltProbePaths = cms.vstring(
             "HLT_PFJet40",   # "^HLT_PFJet40_v[0-9]+$",

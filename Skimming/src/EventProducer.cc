@@ -11,22 +11,19 @@
 dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet::GlobalCache* globalCache) : m_configPSet(config) {
     // -- register products
     produces<dijet::Event>();
-    produces<dijet::JetCollection>();
     produces<dijet::Lumi, edm::InLumi>();
     produces<dijet::Run, edm::InRun>();
 
     // -- process configuration
 
     // -- declare which collections are consumed and create tokens
-    jetCollectionToken = consumes<edm::View<pat::Jet>>(edm::InputTag("slimmedJets"));
-    electronCollectionToken = consumes<edm::View<pat::Electron>>(edm::InputTag("slimmedElectrons"));
-    electronCollection2Token = consumes<edm::View<reco::GsfElectron>>(edm::InputTag("slimmedElectrons"));
-    electronIDBoolValueMapToken = consumes<edm::ValueMap<bool>>(edm::InputTag("egmGsfElectronIDs", "cutBasedElectronID-Summer16-80X-V1-loose"));
+    pileupDensityToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("pileupDensitySrc"));
+    triggerResultsToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("triggerResultsSrc"));
+    //triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesSrc"));
+    primaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("primaryVerticesSrc"));
+    goodPrimaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("goodPrimaryVerticesSrc"));
 
-    triggerResultsToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"));
-    triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
-    triggerObjectsToken = consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"));
-
+    // due to CMSSW constraints, need to have one HLTPrescaleProvider per EDProducer instance
     m_hltPrescaleProvider = std::unique_ptr<HLTPrescaleProvider>(
         new HLTPrescaleProvider(
             m_configPSet.getParameter<edm::ParameterSet>("hltPrescaleProvider"),
@@ -34,13 +31,6 @@ dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet
             *this
         )
     );
-
-    /*
-    // need to have one HLTPrescaleProvider per EDProducer instance (unfortunately)
-    const edm::ParameterSet& hltPrescaleProviderConfigPSet = m_configPSet.getParameter<edm::ParameterSet>("hltPrescaleProviderConfig")
-    m_hltPrescaleProvider = std::unique_ptr<HLTPrescaleProvider>(new HLTPrescaleProvider(hltPrescaleProviderConfigPSet, consumesCollector, *this))
-    */
-
 }
 
 
@@ -71,7 +61,7 @@ dijet::EventProducer::~EventProducer() {
         }
     }
     else {
-        edm::LogError("DijetEventProducer") << " HLT config extraction failure with process name " << globalCache->hltProcessName_;
+        edm::LogError("EventProducer") << " HLT config extraction failure with process name " << globalCache->hltProcessName_;
     }
 
     // -- get trigger menu information
@@ -108,7 +98,7 @@ dijet::EventProducer::~EventProducer() {
                 /*name = */name,
                 /*indexInMenu = */idxInMenu,
                 /*filtersStartIndex = */filtersNextStartIndex,
-                /*filterNamse = */filterNames
+                /*filterNames = */filterNames
             );
         }
 
@@ -122,8 +112,6 @@ dijet::EventProducer::~EventProducer() {
         std::cout << "  indexInMenu: " << hltPathInfo.indexInMenu_ << std::endl;
         std::cout << "  numFilters: " << hltPathInfo.numFilters() << std::endl;
         for (size_t iFilter = 0; iFilter < hltPathInfo.numFilters(); ++iFilter) {
-        //for (const auto& label : triggerObjectsHandle->at(hltPathInfo.indexInMenu).filterLabels()) {
-            //std::cout << triggerObjectsHandle->at(i) << std::endl;
             std::cout << "    Filter #" << iFilter << " (#" << hltPathInfo.filtersStartIndex_ + iFilter << "): " << hltPathInfo.filterNames_[iFilter] << std::endl;
         }
     }
@@ -182,35 +170,31 @@ void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     // -- get object collections for event
     bool obtained = true;
-    // jets
-    obtained &= event.getByToken(this->jetCollectionToken, this->jetCollectionHandle);
+    // pileup density
+    obtained &= event.getByToken(this->pileupDensityToken, this->pileupDensityHandle);
     // trigger results and prescales
     obtained &= event.getByToken(this->triggerResultsToken, this->triggerResultsHandle);
-    obtained &= event.getByToken(this->triggerPrescalesToken, this->triggerPrescalesHandle);
-    // trigger objects
-    obtained &= event.getByToken(this->triggerObjectsToken, this->triggerObjectsHandle);
+    //obtained &= event.getByToken(this->triggerPrescalesToken, this->triggerPrescalesHandle);
+    // primary vertices
+    obtained &= event.getByToken(this->primaryVerticesToken, this->primaryVerticesHandle);
+    obtained &= event.getByToken(this->goodPrimaryVerticesToken, this->goodPrimaryVerticesHandle);
 
     assert(obtained);  // raise if one collection could not be obtained
 
     // -- populate outputs
 
-    // event metadata
-    outputEvent->run = event.id().run();
-    outputEvent->lumi = event.id().luminosityBlock();
-    outputEvent->event = event.id().event();
-    outputEvent->bx = event.bunchCrossing();
 
-    // jets
-    for (size_t iJet = 0; iJet < this->jetCollectionHandle->size(); ++iJet) {
-        outputJetCollection->emplace_back();  // default-construct a jet in-place in the output collection
-        outputJetCollection->back().p4 = this->jetCollectionHandle->at(iJet).p4();
-    }
+    // pileup density (rho)
+    outputEvent->rho = *this->pileupDensityHandle;
+    outputEvent->npv = this->primaryVerticesHandle->size();
+    outputEvent->npvGood = this->goodPrimaryVerticesHandle->size();
 
     // -- trigger decisions (bits) and prescales
     bool hltChanged(true);
     // must be called on each event, since there is no guarantee that
     // the HLTPrescaleProvider has been re-initialized correctly on new run transition
     bool hltInitSuccess = m_hltPrescaleProvider->init(event.getRun(), setup, globalCache()->hltProcessName_, hltChanged);
+    assert(hltInitSuccess);
 
     const size_t numSelectedHLTPaths = runCache()->hltPathInfos_.size();
     outputEvent->hltBits.resize(numSelectedHLTPaths);
@@ -223,13 +207,12 @@ void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
         const std::string& triggerName = runCache()->hltPathInfos_[iPath].name_;
         const std::pair<int, int> l1AndHLTPrescales = m_hltPrescaleProvider->prescaleValues(event, setup, triggerName);
 
-        outputEvent->hltBits[iPath] = this->triggerResultsHandle->accept(triggerIndex);        
+        outputEvent->hltBits[iPath] = this->triggerResultsHandle->accept(triggerIndex);
         outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
         outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
     }
 
     // move outputs to event tree
-    event.put(std::move(outputJetCollection));
     event.put(std::move(outputEvent));
 }
 

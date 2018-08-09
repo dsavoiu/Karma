@@ -67,17 +67,17 @@ options.parseArguments()
 # Remote setup #
 ################
 
-# if submitted with grid-control, assume this is a remote skimming job
-# -> override the global tag and data/MC flag options
-if os.getenv("GC_VERSION"):
-    options.globalTag = "__GLOBALTAG__"
-    options.isData = __IS_DATA__
-    options.edmOut = ""
-    options.dumpPythonAndExit = False
-    options.reportEvery = int(max(1, 10**(round(math.log(__MAX_EVENTS__)/math.log(10))-1)))
-
-    # temporary; gc later sets process.source.fileNames directly!
-    options.inputFiles = [__FILE_NAMES__]
+## if submitted with grid-control, assume this is a remote skimming job
+## -> override the global tag and data/MC flag options
+#if os.getenv("GC_VERSION"):
+#    options.globalTag = "__GLOBALTAG__"
+#    options.isData = __IS_DATA__
+#    options.edmOut = options.outputFile  # FIXME #.split('.')[:-1] + "_edmOut.root"
+#    options.dumpPythonAndExit = False
+#    options.reportEvery = int(max(1, 10**(round(math.log(__MAX_EVENTS__)/math.log(10))-1)))
+#
+#    # temporary; gc later sets process.source.fileNames directly!
+#    options.inputFiles = [__FILE_NAMES__]
 
 
 
@@ -150,10 +150,6 @@ def createProcess(process_name, num_threads=1, ):
 
 
 def finalizeAndRun(process, outputCommands=[]):
-
-    #########################
-    # Testing and Debugging #
-    #########################
 
     # write out original collections to a slimmed miniAOD file
     if options.edmOut and outputCommands:
