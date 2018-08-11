@@ -35,19 +35,6 @@
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
 
-namespace {
-    // A dummy producer that does nothing
-    // Note:
-    //   Unfortunately, this is needed when constructing the global
-    //   HLTPrescaleProvider, since the constructor formally requires a
-    //   reference to the parent object instance. Since in multithreaded
-    //   mode, there are multiple instances and we would like to have
-    //   a single, global HLTPrescaleProvider, a dummy module must be
-    //   substituted.
-    class DummyProducer : public edm::EDProducer {
-        virtual void produce(edm::Event&, const edm::EventSetup&) {};
-    };
-}
 
 //
 // class declaration

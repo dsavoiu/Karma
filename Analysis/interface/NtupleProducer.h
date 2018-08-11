@@ -16,6 +16,11 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
+#include <boost/regex.hpp>
+
+#include "DijetAnalysis/Core/interface/Caches.h"
+#include "DijetAnalysis/Core/interface/TriggerEfficienciesProvider.h"
+
 // -- output data formats
 #include "DijetAnalysis/AnalysisFormats/interface/Ntuple.h"
 
@@ -42,13 +47,62 @@ namespace dijet {
         double assignedObjectPt = UNDEFINED_DOUBLE;
     };
 
-    // -- main producer
+    // -- caches
 
-    class NtupleProducer : public edm::stream::EDProducer<> {
+    /** Cache containing resources which do not change
+     *  for the entire duration of the analysis job.
+     */
+    class NtupleProducerGlobalCache : public dijet::CacheBase {
 
       public:
-        explicit NtupleProducer(const edm::ParameterSet&);
+        NtupleProducerGlobalCache(const edm::ParameterSet& pSet) :
+            dijet::CacheBase(pSet),
+            hltVersionPattern_(boost::regex("(HLT_.*)_v[0-9]+", boost::regex::extended)) {
+
+            // // create the global trigger efficiencies provider instance
+            // triggerEfficienciesProvider_ = std::unique_ptr<TriggerEfficienciesProvider>(
+            //     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
+            // );
+
+        };
+
+        const boost::regex hltVersionPattern_;
+
+        std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;
+
+    };
+
+
+    /** Cache containing resources which do not change
+     *  for the entire duration of a run
+     */
+    class NtupleProducerRunCache : public dijet::CacheBase {
+
+      public:
+        NtupleProducerRunCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+
+        std::vector<std::string> triggerPathsUnversionedNames_;
+
+    };
+
+    // -- main producer
+
+    class NtupleProducer : public edm::stream::EDProducer<
+        edm::GlobalCache<dijet::NtupleProducerGlobalCache>,
+        edm::RunCache<dijet::NtupleProducerRunCache>
+    > {
+
+      public:
+        explicit NtupleProducer(const edm::ParameterSet&, const dijet::NtupleProducerGlobalCache*);
         ~NtupleProducer();
+
+        // -- global cache extension
+        static std::unique_ptr<dijet::NtupleProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(const dijet::NtupleProducerGlobalCache*) {/* noop */};
+
+        // -- run cache extension
+        static std::shared_ptr<dijet::NtupleProducerRunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
+        static void globalEndRun(const edm::Run&, const edm::EventSetup&, const RunContext*) {/* noop */};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
@@ -66,6 +120,9 @@ namespace dijet {
         // ----------member data ---------------------------
 
         const edm::ParameterSet& m_configPSet;
+
+        // TODO: move to global cache
+        std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
 
         // -- handles and tokens
         typename edm::Handle<dijet::Event> dijetEventHandle;

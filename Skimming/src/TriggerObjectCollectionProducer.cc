@@ -22,17 +22,17 @@ void dijet::TriggerObjectCollectionProducer::produceSingle(const pat::TriggerObj
         }
     }
 
-    // use trigger filter information in dijetEvent
-    for (const auto& triggeredFilterName : in.filterLabels()) {
-        for (size_t iPath = 0; iPath < this->dijetRunHandle_->triggerPathInfos.size(); ++iPath) {
-            const auto& pathInfo = this->dijetRunHandle_->triggerPathInfos[iPath];
-            for (const auto& filterName : pathInfo.filterNames_) {
-                if (filterName == triggeredFilterName) {
-                    out.filterNames.emplace_back(filterName);
-                }
-            }
-        }
-    }
+    // // use trigger filter information in dijetEvent
+    // for (const auto& triggeredFilterName : in.filterLabels()) {
+    //     for (size_t iPath = 0; iPath < this->dijetRunHandle_->triggerPathInfos.size(); ++iPath) {
+    //         const auto& pathInfo = this->dijetRunHandle_->triggerPathInfos[iPath];
+    //         for (const auto& filterName : pathInfo.filterNames_) {
+    //             if (filterName == triggeredFilterName) {
+    //                 out.filterNames.emplace_back(filterName);
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 

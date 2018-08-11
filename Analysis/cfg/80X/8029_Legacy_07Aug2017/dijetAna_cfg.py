@@ -1,22 +1,26 @@
 from DijetAnalysis.Core.dijetPrelude_cff import *
 
 
-# -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullSkim/testFullSkim_out.root"))
-options.isData=1
-options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-options.edmOut="testFullAnalysis_out.root"
-options.maxEvents=10000
-options.dumpPython=1
+# -- for testing and debugging
+if not os.getenv("GC_VERSION"):
+    # -- override CLI options for test
+    options.inputFiles="file://{}".format(os.path.realpath("../../../../Skimming/test/FullSkim/testFullSkim_out.root"))
+    options.isData=1
+    options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
+    options.edmOut="testSkim_out.root"
+    options.maxEvents=1000
+    options.dumpPython=1
+else:
+    # -- running on grid node
+    options.globalTag = "__GLOBALTAG__"
+    options.isData = __IS_DATA__
+    options.edmOut = options.outputFile  # FIXME #.split('.')[:-1] + "_edmOut.root"
+    options.dumpPython=False
+    options.reportEvery = 100000 #int(max(1, 10**(round(math.log(__MAX_EVENTS__)/math.log(10))-1)))
 
-SPLICES = dict(
-    YS01YB01 = "0<abs(jet12ystar)<=1&&0<abs(jet12yboost)<=1",
-    YS01YB12 = "0<abs(jet12ystar)<=1&&1<abs(jet12yboost)<=2",
-    YS01YB23 = "0<abs(jet12ystar)<=1&&2<abs(jet12yboost)<=3",
-    YS12YB01 = "1<abs(jet12ystar)<=2&&0<abs(jet12yboost)<=1",
-    YS12YB12 = "1<abs(jet12ystar)<=2&&1<abs(jet12yboost)<=2",
-    YS23YB01 = "2<abs(jet12ystar)<=3&&0<abs(jet12yboost)<=1",
-)
+    # temporary; gc later sets process.source.fileNames directly!
+    options.inputFiles = [__FILE_NAMES__]
+
 
 # -- must be called at the beginning
 process = createProcess("DIJETANA", num_threads=1)
@@ -116,37 +120,3 @@ finalizeAndRun(process, outputCommands=['keep *_*_*_DIJETANA', 'drop *_jetTrigge
 process.edmOut.SelectEvents = cms.untracked.PSet(
     SelectEvents = cms.vstring('path')
 )
-
-### # create ystar-yboost splices
-### for splice_name, splice_filter_expr in SPLICES.iteritems():
-###     setattr(
-###         process,
-###         "ntuple{}".format(splice_name),
-###         dijetNtupleSplicer.clone(
-###             dijetNtupleSrc = cms.InputTag("ntuple"),
-###             spliceName = cms.string(splice_name),
-###             spliceFilterExpression = cms.string(splice_filter_expr),
-###         )
-###     )
-###     setattr(
-###         process,
-###         "path{}".format(splice_name),
-###         cms.Path(
-###             preSequence *
-###             getattr(process, "ntuple{}".format(splice_name))
-###         )
-###     )
-###     _file_basename = _output_filename = process.edmOut.fileName.value()
-###     if _file_basename.endswith(".root"):
-###         _file_basename = _file_basename[:-5]
-###     setattr(
-###         process,
-###         "edmOut{}".format(splice_name),
-###         process.edmOut.clone(
-###             fileName = cms.untracked.string("{}_splice_{}.root".format(_file_basename, splice_name)),
-###             SelectEvents = cms.untracked.PSet(
-###                 SelectEvents = cms.vstring("path{}".format(splice_name))
-###             )
-###         )
-###     )
-###     process.endpath *= getattr(process, "edmOut{}".format(splice_name))

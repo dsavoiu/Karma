@@ -3,12 +3,21 @@
 
 #include "DijetAnalysis/Analysis/interface/NtupleProducer.h"
 
+
 // -- constructor
-dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config) : m_configPSet(config) {
+dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dijet::NtupleProducerGlobalCache* globalCache) : m_configPSet(config) {
     // -- register products
     produces<dijet::NtupleEntry>();
 
     // -- process configuration
+    m_triggerEfficienciesProvider = std::unique_ptr<TriggerEfficienciesProvider>(
+        new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
+    );
+
+    std::cout << "Read trigger efficiencies for paths:" << std::endl;
+    for (const auto& mapIter : m_triggerEfficienciesProvider->triggerEfficiencies()) {
+        std::cout << "    " << mapIter.first << " -> " << &(*mapIter.second) << std::endl;
+    }
 
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
@@ -23,6 +32,35 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config) : m_confi
 dijet::NtupleProducer::~NtupleProducer() {
 }
 
+// -- static member functions
+
+/*static*/ std::unique_ptr<dijet::NtupleProducerGlobalCache> dijet::NtupleProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+    // -- create the GlobalCache
+    return std::unique_ptr<dijet::NtupleProducerGlobalCache>(new dijet::NtupleProducerGlobalCache(pSet));
+}
+
+
+/*static*/ std::shared_ptr<dijet::NtupleProducerRunCache> dijet::NtupleProducer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const dijet::NtupleProducer::GlobalCache* globalCache) {
+    // -- create the RunCache
+    auto runCache = std::make_shared<dijet::NtupleProducerRunCache>(globalCache->pSet_);
+
+    typename edm::Handle<dijet::Run> runHandle;
+    run.getByLabel(globalCache->pSet_.getParameter<edm::InputTag>("dijetRunSrc"), runHandle);
+
+    // compute the unversioned HLT path names
+    // (needed later to get the trigger efficiencies)
+    boost::smatch matched_substrings;
+    runCache->triggerPathsUnversionedNames_.resize(runHandle->triggerPathInfos.size());
+    for (size_t iPath = 0; iPath < runHandle->triggerPathInfos.size(); ++iPath) {
+        const std::string& pathName = runHandle->triggerPathInfos[iPath].name_;
+        if (boost::regex_match(pathName, matched_substrings, globalCache->hltVersionPattern_) && matched_substrings.size() > 1) {
+            // need matched_substrings[1] because matched_substrings[0] is always the entire string
+            runCache->triggerPathsUnversionedNames_[iPath] = matched_substrings[1];
+        }
+    }
+
+    return runCache;
+}
 
 // -- member functions
 
@@ -88,6 +126,20 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->jet1HLTAssignedPathIndex
             ];
         }
+
+        // retrieve the efficiency
+        if (outputNtupleEntry->jet1HLTAssignedPathIndex >= 0) {
+            const std::string unversionedPathName = runCache()->triggerPathsUnversionedNames_[
+                outputNtupleEntry->jet1HLTAssignedPathIndex
+            ];
+
+            const TEfficiency* jet1HLTAssignedPathEfficiencyHisto = m_triggerEfficienciesProvider->getEfficiency(unversionedPathName);
+            if (jet1HLTAssignedPathEfficiencyHisto) {
+                int iBin = jet1HLTAssignedPathEfficiencyHisto->FindFixBin(outputNtupleEntry->jet1pt);
+                outputNtupleEntry->jet1HLTAssignedPathEfficiency = jet1HLTAssignedPathEfficiencyHisto->GetEfficiency(iBin);
+            }
+        }
+
         outputNtupleEntry->jet1HLTpt = jet1HLTAssignment.assignedObjectPt;
 
         // second-leading jet kinematics

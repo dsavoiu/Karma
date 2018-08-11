@@ -5,13 +5,25 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyCorrections
 
 
-# -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))
-options.isData=1
-options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-options.edmOut="testFullSkim_out.root"
-options.maxEvents=-1 #10000
-options.dumpPython=1
+# -- for testing and debugging
+if not os.getenv("GC_VERSION"):
+    # -- override CLI options for test
+    options.inputFiles="file://{}".format(os.path.realpath("../../../data/test_JetHT2016G.root"))
+    options.isData=1
+    options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
+    options.edmOut="testSkim_out.root"
+    options.maxEvents=1000
+    options.dumpPython=1
+else:
+    # -- running on grid node
+    options.globalTag = "__GLOBALTAG__"
+    options.isData = __IS_DATA__
+    options.edmOut = options.outputFile  # FIXME #.split('.')[:-1] + "_edmOut.root"
+    options.dumpPython=False
+    options.reportEvery = int(max(1, 10**(round(math.log(__MAX_EVENTS__)/math.log(10))-1)))
+
+    # temporary; gc later sets process.source.fileNames directly!
+    options.inputFiles = [__FILE_NAMES__]
 
 
 # -- must be called at the beginning
@@ -111,10 +123,9 @@ for _jet_collection_name in uncorrected_jet_collection_names:
 process.path = cms.Path(preSequence)
 
 
-#_accumulated_output_commands.append("keep *_selectedPatTrigger_*_*")
-
 # -- must be called at the end
 finalizeAndRun(process, outputCommands=_accumulated_output_commands)
+
 
 # selective writeout based on path decisions
 process.edmOut.SelectEvents = cms.untracked.PSet(

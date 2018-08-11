@@ -43,10 +43,13 @@ namespace dijet {
         unsigned int jet1HLTNumMatchedTriggerObjects = 0;
         int jet1HLTAssignedPathIndex = -1;
         int jet1HLTAssignedPathPrescale = -1;
+        double jet1HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
+
         double jet2HLTpt = UNDEFINED_DOUBLE;
         unsigned int jet2HLTNumMatchedTriggerObjects = 0;
         int jet2HLTAssignedPathIndex = -1;
         int jet2HLTAssignedPathPrescale = -1;
+        double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
     };
     typedef std::vector<dijet::NtupleEntry> Ntuple;
 }

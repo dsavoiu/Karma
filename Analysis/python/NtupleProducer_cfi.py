@@ -12,6 +12,6 @@ dijetNtupleProducer = cms.EDProducer(
 
         # -- other configuration
 
-        # none yet
+        triggerEfficienciesFile = cms.string("trigger_efficiencies.root")
     )
 )

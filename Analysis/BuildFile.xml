@@ -1,5 +1,6 @@
 <use name="DijetAnalysis/DataFormats"/>
 <use name="DijetAnalysis/AnalysisFormats"/>
+<use name="DijetAnalysis/Core"/>
 
 <use name="CondFormats/JetMETObjects"/>
 
