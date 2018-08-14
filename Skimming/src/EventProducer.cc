@@ -143,9 +143,12 @@ dijet::EventProducer::~EventProducer() {
 }
 
 /*static*/ void dijet::EventProducer::globalBeginLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup& setup, const LuminosityBlockContext* lumiContext) {
-    // bug in CMSSW8: upstream code missing "std::move" for unique_ptr
-    //std::unique_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi());
-    std::auto_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi());  //  -> substitute C pointer
+    #if CMSSW_MAJOR_VERSION > 8
+        std::unique_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi()); // -> use unique_ptr
+    #else
+        // bug in CMSSW8: upstream code missing "std::move" for unique_ptr
+        std::auto_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi());  //  -> substitute auto_ptr
+    #endif
 
     // -- populate luminosity block data and fill Lumi tree
     dijetLumi->run = lumi.run();
