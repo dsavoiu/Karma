@@ -5,8 +5,8 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullSkim/testFullSkim_out.root"))
 options.isData=1
 options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-options.edmOut="testFullAnalysis_out.root"
-options.maxEvents=10000
+#options.edmOut="testFullAnalysis_out.root"  # no EDM output
+options.maxEvents=-1 #10 #000
 options.dumpPython=1
 
 SPLICES = dict(
@@ -94,7 +94,17 @@ process.leadingJetPtFilter = cms.EDFilter(
     )
 )
 
-preSequence = cms.Sequence(
+# analyzer for writing out flat ntuple
+process.flatNtupleWriter = cms.EDAnalyzer(
+    "NtupleFlatOutput",
+    cms.PSet(
+        dijetNtupleSrc = cms.InputTag("ntuple"),
+        outputFileName = cms.string("output_flat.root"),
+        treeName = cms.string("Events"),
+    )
+)
+
+_main_sequence = cms.Sequence(
     #process.uncorrectedJets *
     process.correctedJets *
     process.correctedJetsDnShift *
@@ -103,19 +113,20 @@ preSequence = cms.Sequence(
     process.ntuple * 
     process.jetPairFilter * 
     process.leadingJetEtaFilter * 
-    process.leadingJetPtFilter
-);
-
-process.path = cms.Path(preSequence)
+    process.leadingJetPtFilter *
+    process.flatNtupleWriter
+)
+process.path = cms.Path(_main_sequence)
 
 
 # -- must be called at the end
 finalizeAndRun(process, outputCommands=['keep *_*_*_DIJETANA', 'drop *_jetTriggerObjectMap_*_DIJETANA'])
 
-# selective writeout based on path decisions
-process.edmOut.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('path')
-)
+
+## selective writeout based on path decisions
+#process.edmOut.SelectEvents = cms.untracked.PSet(
+#    SelectEvents = cms.vstring('path')
+#)
 
 ### # create ystar-yboost splices
 ### for splice_name, splice_filter_expr in SPLICES.iteritems():
