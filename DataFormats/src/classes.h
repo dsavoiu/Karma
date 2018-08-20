@@ -45,6 +45,12 @@ namespace {
         dijet::JetCollection dict_dijetJetCollection;
         edm::Wrapper<dijet::JetCollection> dict_edmWrapperDijetJetCollection;
 
+        // MET
+        dijet::MET dict_dijetMET;
+        edm::Wrapper<dijet::MET> dict_edmWrapperDijetMET;
+        dijet::METCollection dict_dijetMETCollection;
+        edm::Wrapper<dijet::METCollection> dict_edmWrapperDijetMETCollection;
+
         // trigger objects
         dijet::TriggerObject dict_dijetTriggerObject;
         edm::Wrapper<dijet::TriggerObject> dict_edmWrapperDijetTriggerObject;

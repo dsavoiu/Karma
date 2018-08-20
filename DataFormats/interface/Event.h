@@ -69,6 +69,24 @@ namespace dijet {
     typedef std::vector<dijet::Jet> JetCollection;
 
     /**
+     * MET class
+     */
+    class MET : public dijet::LV {
+      public:
+        double significance = UNDEFINED_DOUBLE;
+        double sumEt = UNDEFINED_DOUBLE;
+
+        double neutralHadronFraction = UNDEFINED_DOUBLE;
+        double chargedHadronFraction = UNDEFINED_DOUBLE;
+        double muonFraction = UNDEFINED_DOUBLE;
+        double photonFraction = UNDEFINED_DOUBLE;
+        double electronFraction = UNDEFINED_DOUBLE;
+        double hfHadronFraction = UNDEFINED_DOUBLE;
+        double hfEMFraction = UNDEFINED_DOUBLE;
+    };
+    typedef std::vector<dijet::MET> METCollection;
+
+    /**
      * Trigger Object class
      */
     class TriggerObject : public dijet::LV {

@@ -163,13 +163,6 @@ dijet::EventProducer::~EventProducer() {
 void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     //std::unique_ptr<dijet::Event> dijetEvent(new dijet::Event());
     std::unique_ptr<dijet::Event> outputEvent(new dijet::Event());
-    std::unique_ptr<dijet::JetCollection> outputJetCollection(new dijet::JetCollection());
-
-    // TODO: populate event using:
-    //   globalCache()
-    //   luminosityBlockCache()
-    //   runCache()
-
 
     // -- get object collections for event
     bool obtained = true;

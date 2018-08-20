@@ -84,7 +84,7 @@ options.parseArguments()
 ########################
 # Create CMSSW Process #
 ########################
-def createProcess(process_name, num_threads=1, ):
+def createProcess(process_name, num_threads=1):
     process = cms.Process(process_name)
 
     # CMSSW producers and analyzers will be added to the path
