@@ -1,5 +1,9 @@
+<use name="DijetAnalysis/DataFormats"/>
+
 <use name="root"/>
 <use name="rootcore"/>
+
+<use name="boost"/>
 
 <export>
   <use name="root"/>

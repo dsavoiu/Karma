@@ -20,6 +20,7 @@
 
 #include "DijetAnalysis/Core/interface/Caches.h"
 #include "DijetAnalysis/Core/interface/TriggerEfficienciesProvider.h"
+#include "DijetAnalysis/Core/interface/JetIDProvider.h"
 
 // -- output data formats
 #include "DijetAnalysis/AnalysisFormats/interface/Ntuple.h"
@@ -64,11 +65,22 @@ namespace dijet {
             //     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
             // );
 
+            // if JetID set to 'None', leave jetIDProvider_ as nullptr
+            if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
+                jetIDProvider_ = std::unique_ptr<JetIDProvider>(
+                    new JetIDProvider(
+                        pSet_.getParameter<std::string>("jetIDSpec"),
+                        pSet_.getParameter<std::string>("jetIDWorkingPoint")
+                    )
+                );
+            }
+
         };
 
         const boost::regex hltVersionPattern_;
 
-        std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;
+        std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
+        std::unique_ptr<JetIDProvider> jetIDProvider_;
 
     };
 

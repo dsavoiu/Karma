@@ -25,11 +25,11 @@ process = createProcess("DIJETANA", num_threads=1)
 # -- configure CMSSW modules
 
 from DijetAnalysis.Analysis.JetTriggerObjectMatchingProducer_cfi import dijetJetTriggerObjectMatchingProducer
-from DijetAnalysis.Analysis.JECProducer_cfi import dijetJECProducer
+from DijetAnalysis.Analysis.CorrectedValidJetsProducer_cfi import dijetCorrectedValidJetsProducer
 from DijetAnalysis.Analysis.NtupleProducer_cfi import dijetNtupleProducer
 from DijetAnalysis.Analysis.NtupleSplicer_cfi import dijetNtupleSplicer
 
-process.correctedJets = dijetJECProducer.clone(
+process.correctedJets = dijetCorrectedValidJetsProducer.clone(
     jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V12_DATA/Summer16_07Aug2017{RUN}_V12_DATA".format(
         os.getenv('CMSSW_BASE'),
         RUN="GH"
@@ -42,7 +42,7 @@ process.correctedJetsDnShift = process.correctedJets.clone(
     jecUncertaintyShift = cms.double(-1.0),
 )
 
-#process.uncorrectedJets = dijetJECProducer.clone(
+#process.uncorrectedJets = dijetCorrectedValidJetsProducer.clone(
 #    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V12_DATA/Summer16_07Aug2017{RUN}_V12_DATA".format(
 #        os.getenv('CMSSW_BASE'),
 #        RUN="GH"
@@ -110,9 +110,9 @@ _main_sequence = cms.Sequence(
     process.correctedJetsDnShift *
     process.correctedJetsUpShift *
     process.jetTriggerObjectMap *
-    process.ntuple * 
-    process.jetPairFilter * 
-    process.leadingJetEtaFilter * 
+    process.ntuple *
+    process.jetPairFilter *
+    process.leadingJetEtaFilter *
     process.leadingJetPtFilter *
     process.flatNtupleWriter
 )

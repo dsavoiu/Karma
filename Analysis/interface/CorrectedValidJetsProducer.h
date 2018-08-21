@@ -13,6 +13,7 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include "DijetAnalysis/Core/interface/Caches.h"
+#include "DijetAnalysis/Core/interface/JetIDProvider.h"
 
 // JEC and JER-related objects
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
@@ -32,14 +33,44 @@
 // class declaration
 //
 namespace dijet {
+    // -- caches
+
+    /** Cache containing resources which do not change
+     *  for the entire duration of the analysis job.
+     */
+    class CorrectedValidJetsProducerGlobalCache : public dijet::CacheBase {
+
+      public:
+        CorrectedValidJetsProducerGlobalCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+
+            // if JetID set to 'None', leave jetIDProvider_ as nullptr
+            if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
+                jetIDProvider_ = std::unique_ptr<JetIDProvider>(
+                    new JetIDProvider(
+                        pSet_.getParameter<std::string>("jetIDSpec"),
+                        pSet_.getParameter<std::string>("jetIDWorkingPoint")
+                    )
+                );
+            }
+        };
+
+        std::unique_ptr<JetIDProvider> jetIDProvider_;
+
+    };
 
     // -- main producer
 
-    class JECProducer : public edm::stream::EDProducer<> {
+    class CorrectedValidJetsProducer : public edm::stream::EDProducer<
+        edm::GlobalCache<dijet::CorrectedValidJetsProducerGlobalCache>
+    > {
 
       public:
-        explicit JECProducer(const edm::ParameterSet&);
-        ~JECProducer();
+        explicit CorrectedValidJetsProducer(const edm::ParameterSet&, const dijet::CorrectedValidJetsProducerGlobalCache*);
+        ~CorrectedValidJetsProducer();
+
+        // -- global cache extension
+        static std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(const dijet::CorrectedValidJetsProducerGlobalCache*) {/* noop */};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

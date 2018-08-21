@@ -12,6 +12,9 @@ dijetNtupleProducer = cms.EDProducer(
 
         # -- other configuration
 
-        triggerEfficienciesFile = cms.string("trigger_efficiencies.root")
+        triggerEfficienciesFile = cms.string("trigger_efficiencies.root"),
+
+        jetIDSpec = cms.string("2016"),
+        jetIDWorkingPoint = cms.string("TightLepVeto"),
     )
 )

@@ -45,10 +45,12 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("jet1phi",                         &m_productForFill->jet1phi,                          "jet1phi/D"                         );
     m_tree->Branch("jet1eta",                         &m_productForFill->jet1eta,                          "jet1eta/D"                         );
     m_tree->Branch("jet1y",                           &m_productForFill->jet1y,                            "jet1y/D"                           );
+    m_tree->Branch("jet1id",                          &m_productForFill->jet1id,                           "jet1id/I"                          );
     m_tree->Branch("jet2pt",                          &m_productForFill->jet2pt,                           "jet2pt/D"                          );
     m_tree->Branch("jet2phi",                         &m_productForFill->jet2phi,                          "jet2phi/D"                         );
     m_tree->Branch("jet2eta",                         &m_productForFill->jet2eta,                          "jet2eta/D"                         );
     m_tree->Branch("jet2y",                           &m_productForFill->jet2y,                            "jet2y/D"                           );
+    m_tree->Branch("jet2id",                          &m_productForFill->jet2id,                           "jet2id/I"                          );
     m_tree->Branch("jet12mass",                       &m_productForFill->jet12mass,                        "jet12mass/D"                       );
     m_tree->Branch("jet12ptave",                      &m_productForFill->jet12ptave,                       "jet12ptave/D"                      );
     m_tree->Branch("jet12ystar",                      &m_productForFill->jet12ystar,                       "jet12ystar/D"                      );
@@ -115,7 +117,7 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         std::cout << "Please register these branches to the NtupleFlatOutput constructor!" << std::endl;
         throw std::runtime_error("Detected incomplete Ntuple writeout in NtupleFlatOutput!");
     }
-    
+
     if (mismatchedBranches.size() > 0) {
         std::cout << "Declared branch type mismatch for the following Ntuple data members: " << std::endl;
         for (const auto branchNameSizePair : mismatchedBranches) {

@@ -1,7 +1,7 @@
-#include "DijetAnalysis/Analysis/interface/JECProducer.h"
+#include "DijetAnalysis/Analysis/interface/CorrectedValidJetsProducer.h"
 
 // -- constructor
-dijet::JECProducer::JECProducer(const edm::ParameterSet& config) : m_configPSet(config) {
+dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::ParameterSet& config, const dijet::CorrectedValidJetsProducerGlobalCache*) : m_configPSet(config) {
     // -- register products
     produces<dijet::JetCollection>();
 
@@ -35,13 +35,21 @@ dijet::JECProducer::JECProducer(const edm::ParameterSet& config) : m_configPSet(
 
 
 // -- destructor
-dijet::JECProducer::~JECProducer() {
+dijet::CorrectedValidJetsProducer::~CorrectedValidJetsProducer() {
+}
+
+
+// -- static member functions
+
+/*static*/ std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache> dijet::CorrectedValidJetsProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+    // -- create the GlobalCache
+    return std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache>(new dijet::CorrectedValidJetsProducerGlobalCache(pSet));
 }
 
 
 // -- member functions
 
-void dijet::JECProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::unique_ptr<dijet::JetCollection> outputJetCollection(new dijet::JetCollection());
 
     // -- get object collections for event
@@ -56,6 +64,10 @@ void dijet::JECProducer::produce(edm::Event& event, const edm::EventSetup& setup
     // -- populate outputs
 
     for (const auto& inputJet : (*this->dijetJetCollectionHandle)) {
+        // reject jets which do not pass JetID (if requested)
+        if (globalCache()->jetIDProvider_ && !globalCache()->jetIDProvider_->getJetID(inputJet))
+            continue;
+
         // setup of FactorizedJetCorrector and JetCorrectionUncertainty
         setupFactorizedJetCorrector(*m_jetCorrector, *this->dijetEventHandle, inputJet);
         setupFactorProvider(*m_jetCorrectionUncertainty, inputJet);
@@ -81,7 +93,7 @@ void dijet::JECProducer::produce(edm::Event& event, const edm::EventSetup& setup
 }
 
 
-void dijet::JECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void dijet::CorrectedValidJetsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -91,5 +103,5 @@ void dijet::JECProducer::fillDescriptions(edm::ConfigurationDescriptions& descri
 
 
 //define this as a plug-in
-using dijet::JECProducer;
-DEFINE_FWK_MODULE(JECProducer);
+using dijet::CorrectedValidJetsProducer;
+DEFINE_FWK_MODULE(CorrectedValidJetsProducer);

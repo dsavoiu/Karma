@@ -111,6 +111,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // leading jet kinematics
     if (jets->size() > 0) {
         const dijet::Jet* jet1 = &jets->at(0);
+        // write out jetID (1 if pass, 0 if fail, -1 if not requested/not available)
+        if (globalCache()->jetIDProvider_)
+            outputNtupleEntry->jet1id = (globalCache()->jetIDProvider_->getJetID(*jet1));
 
         outputNtupleEntry->jet1pt = jet1->p4.pt();
         outputNtupleEntry->jet1phi = jet1->p4.phi();
@@ -145,6 +148,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         // second-leading jet kinematics
         if (jets->size() > 1) {
             const dijet::Jet* jet2 = &jets->at(1);
+            // write out jetID (1 if pass, 0 if fail, -1 if not requested/not available)
+            if (globalCache()->jetIDProvider_)
+                outputNtupleEntry->jet2id = (globalCache()->jetIDProvider_->getJetID(*jet2));
 
             outputNtupleEntry->jet2pt = jet2->p4.pt();
             outputNtupleEntry->jet2phi = jet2->p4.phi();
@@ -249,6 +255,7 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
     // if no matches, the default struct is returned
     return hltAssignment;
 }
+
 
 
 //define this as a plug-in

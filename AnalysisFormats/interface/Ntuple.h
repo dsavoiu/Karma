@@ -22,11 +22,13 @@ namespace dijet {
         double jet1phi = UNDEFINED_DOUBLE;
         double jet1eta = UNDEFINED_DOUBLE;
         double jet1y = UNDEFINED_DOUBLE;
+        int    jet1id = -1;
         // second-leading jet kinematics
         double jet2pt = UNDEFINED_DOUBLE;
         double jet2phi = UNDEFINED_DOUBLE;
         double jet2eta = UNDEFINED_DOUBLE;
         double jet2y = UNDEFINED_DOUBLE;
+        int    jet2id = -1;
         // leading jet pair kinematics
         double jet12mass = UNDEFINED_DOUBLE;
         double jet12ptave = UNDEFINED_DOUBLE;
