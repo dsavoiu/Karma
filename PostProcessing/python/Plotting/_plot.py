@@ -35,6 +35,14 @@ def is_close_to_int(x):
         return False
     return abs(x - round(x)) < 1e-10
 
+def _make_directory(dir_path):
+    try:
+        os.makedirs(dir_path)
+    except OSError as e:
+        if e.errno == 17:  # File exists
+            pass
+        else:
+            raise
 
 class DijetLogFormatterSciNotation(LogFormatter):
 
@@ -106,385 +114,15 @@ class DijetLogFormatterSciNotation(LogFormatter):
     def set_locs(self, *args, **kwargs):
         '''override sublabels'''
         _ret = super(DijetLogFormatterSciNotation, self).set_locs(*args, **kwargs)
-        self._sublabels = {1.0, 2.0, 3.0, 5.0, 10.0}
+
+        # override locations
+        _locs = kwargs.pop("locs", None)
+        if _locs is not None:
+            self._sublabels = _locs
+        else:
+            self._sublabels = {1.0, 2.0, 5.0, 10.0}
+
         return _ret
-
-
-class _PlotController(object):
-
-    FONT_PROPS = dict(
-        big_bold=FontProperties(
-            weight='bold',
-            family='Nimbus Sans',
-            size=20,
-        ),
-        small_bold=FontProperties(
-            weight='bold',
-            family='Nimbus Sans',
-            size=12,
-        ),
-        italic=FontProperties(
-            style='italic',
-            family='Nimbus Sans',
-            size=14,
-        ),
-    )
-
-    def __init__(self, files_spec, file_luminosity_ub, plot_configs, rebin_factor=None, xscale=None, xlim=None, yscale=None, ylim=None):
-        #self._input_controller = InputROOT(files_spec=dict(single_file=filename))
-        self._input_controller = InputROOT(files_spec=files_spec)
-        self._lumi_ub = file_luminosity_ub
-        self._plot_configs = plot_configs
-        self._rebin_factor = rebin_factor
-        self._xscale = xscale
-        self._xlim = xlim
-        self._yscale = yscale
-        self._ylim = ylim
-        self._figures = {}
-
-    def _close_plot(self, ax):
-        ax.text(.05, .9,
-            r"CMS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['big_bold']
-        )
-        ax.text(.03, .03,
-            r"AK4PFCHS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['small_bold']
-        )
-        ax.text(.17, .9,
-            r"Private Work",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['italic']
-        )
-        ax.text(1.0, 1.015,
-            r"$\mathcal{{L}}\,=\,{:.2f}\,\,\mathrm{{fb}}^{{-1}}$ (Run2016G, 13 TeV)".format(self._lumi_ub/1e9),
-            ha='right',
-            transform=ax.transAxes
-        )
-        #plt.text(0.01, 1.015,
-        #    r"Run2016G",
-        #    ha='left',
-        #    transform=plt.gca().transAxes
-        #)
-        ax.legend(ncol=1, numpoints=1, fontsize=12, frameon=False)
-
-        _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-        _formatter._sublabels = {1.0, 2.0, 3.0, 5.0, 10.0}
-        ax.xaxis.set_minor_formatter(_formatter)
-
-    def _get_figure(self, figure_name):
-        if figure_name not in self._figures:
-            self._figures[figure_name] = plt.figure()
-        return self._figures[figure_name]
-
-    def clear_figures(self):
-        for _fign, _fig in self._figures.iteritems():
-            plt.close(_fig)
-        self._figures = {}
-
-
-    def make_plots(self, quantity_spec, quantity_label, output_folder):
-
-        _file_nickname, _quantity_name = quantity_spec.split(':', 1)
-
-        try:
-            os.makedirs(os.path.join(output_folder, _quantity_name))
-        except OSError as e:
-            if e.errno == 17:  # File exists
-                pass
-            else:
-                raise
-
-        # step 1: construct plot config dicts for quantity and request TObjects
-        _pcs_for_quantity = []
-        for _pc in self._plot_configs:
-            _pc_for_quantity = _pc.copy()
-            _object_spec = "{}:{}/{}".format(_file_nickname, _pc_for_quantity['folder'], _quantity_name)
-            _pc_for_quantity.update(quantity=_quantity_name, quantity_label=quantity_label, object_spec=_object_spec)
-            _pcs_for_quantity.append(_pc_for_quantity)
-
-            self._input_controller.request([dict(object_spec=_object_spec)])
-
-        # step 2: retrieve data and plot
-        _mplrc()
-        for _pc in _pcs_for_quantity:
-            #_plot_data = self._input_controller.get(_pc['object_spec'])
-            _plot_data = self._input_controller.get(_pc['object_spec'])
-            self._plot(_pc, _plot_data)
-
-        # step 3: save figures
-        for _figname, _fig in self._figures.iteritems():
-            self._close_plot(_fig.gca())
-            _fig.savefig('{}/fig_{}_{}.png'.format(output_folder, _figname, _quantity_name))
-
-    def make_plots_expr(self, expression, quantity_label, output_folder):
-
-        _expr_printable_name = (
-            expression.replace(':', '_')
-                      .replace("/", '_')
-                      .replace("'", '')
-                      .replace('"', ''))
-
-        try:
-            os.makedirs(output_folder)
-        except OSError as e:
-            if e.errno == 17:  # File exists
-                pass
-            else:
-                raise
-
-        # step 1: construct plot config dicts for quantity and request TObjects
-        _pcs_for_quantity = []
-        for _pc in self._plot_configs:
-            _pc_for_quantity = _pc.copy()
-            #_object_spec = "{}:{}/{}".format(_file_nickname, _pc_for_quantity['folder'], _quantity_name)
-            _pc_for_quantity.update(quantity=_expr_printable_name, quantity_label=quantity_label, object_spec=expression)
-            _pcs_for_quantity.append(_pc_for_quantity)
-
-            self._input_controller._request_all_objects_in_expression(expression)
-
-        # step 2: retrieve data and plot
-        _mplrc()
-        for _pc in _pcs_for_quantity:
-            _plot_data = self._input_controller.get_expr(_pc['object_spec'])
-            self._plot(_pc, _plot_data)
-
-        # step 3: save figures
-        for _figname, _fig in self._figures.iteritems():
-            self._close_plot(_fig.gca())
-            _fig.savefig('{}/fig_{}_{}.png'.format(output_folder, _figname, _expr_printable_name))
-
-
-    def _plot(self, plot_config, plot_data):
-        print("PLT {}".format(plot_config['object_spec']))
-        _fig = self._get_figure(plot_config['figure'])
-        _ax = _fig.gca()
-
-        # -- draw
-        _kwargs = dict(
-            color=plot_config['colors']['light'],
-            label=plot_config['plot_label'],
-            linestyle='',
-            capsize=0,
-            marker=plot_config['marker'],
-            markeredgecolor=plot_config['colors']['light']
-        )
-        if plot_config['marker_style'] == 'full':
-            _kwargs.update(
-                markerfacecolor=_kwargs['color'], markeredgewidth=0,
-            )
-        elif plot_config['marker_style'] == 'empty':
-            _kwargs.update(
-                markerfacecolor='w', markeredgewidth=1,
-            )
-        else:
-            raise ValueError("Unkown value for 'marker_style': {}".format(plot_config['marker_style']))
-
-        _ax.errorbar(
-            plot_data['x'],
-            plot_data['y'],
-            xerr=plot_data['xerr'],
-            yerr=plot_data['yerr'],
-            **_kwargs
-        )
-
-        _ax.set_ylabel(plot_config['y_label'], ha='right', y=1.0)
-        _ax.set_xlabel(r"${{{}}}\,/\,\mathrm{{GeV}}$".format(plot_config['quantity_label']), ha='right', x=1.0)
-
-        if self._xlim is not None:
-            _ax.set_xlim(self._xlim)
-        if self._xscale is not None:
-            _ax.set_xscale(self._xscale)
-
-        if self._ylim is not None:
-            _ax.set_ylim(self._ylim)
-        if self._yscale is not None:
-            _ax.set_yscale(self._yscale)
-
-
-class _OBSOLETE_Figure(object):
-
-    def __init__(self, input_controller):
-        self._input_controller = input_controller
-        self._global_kwargs = {}
-        self._plot_configs = []
-
-    def add_plot(self, input_expression):
-        self._plot_configs.append(
-            dict(
-                input_expression=input_expression
-            )
-        )
-
-    def _close_plot(self, ax):
-        ax.text(.05, .9,
-            r"CMS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['big_bold']
-        )
-        ax.text(.03, .03,
-            r"AK4PFCHS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['small_bold']
-        )
-        ax.text(.17, .9,
-            r"Private Work",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=PlotController.FONT_PROPS['italic']
-        )
-        ax.text(1.0, 1.015,
-            r"$\mathcal{{L}}\,=\,{:.2f}\,\,\mathrm{{fb}}^{{-1}}$ (Run2016G, 13 TeV)".format(self._lumi_ub/1e9),
-            ha='right',
-            transform=ax.transAxes
-        )
-        #plt.text(0.01, 1.015,
-        #    r"Run2016G",
-        #    ha='left',
-        #    transform=plt.gca().transAxes
-        #)
-        ax.legend(ncol=1, numpoints=1, fontsize=12, frameon=False)
-
-        _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-        _formatter._sublabels = {1.0, 2.0, 3.0, 5.0, 10.0}
-        ax.xaxis.set_minor_formatter(_formatter)
-
-    def _get_figure(self, figure_name):
-        if figure_name not in self._figures:
-            self._figures[figure_name] = plt.figure()
-        return self._figures[figure_name]
-
-    def clear_figures(self):
-        for _fign, _fig in self._figures.iteritems():
-            plt.close(_fig)
-        self._figures = {}
-
-
-    def make_plots(self, quantity_spec, quantity_label, output_folder):
-
-        _file_nickname, _quantity_name = quantity_spec.split(':', 1)
-
-        try:
-            os.makedirs(os.path.join(output_folder, _quantity_name))
-        except OSError as e:
-            if e.errno == 17:  # File exists
-                pass
-            else:
-                raise
-
-        # step 1: construct plot config dicts for quantity and request TObjects
-        _pcs_for_quantity = []
-        for _pc in self._plot_configs:
-            _pc_for_quantity = _pc.copy()
-            _object_spec = "{}:{}/{}".format(_file_nickname, _pc_for_quantity['folder'], _quantity_name)
-            _pc_for_quantity.update(quantity=_quantity_name, quantity_label=quantity_label, object_spec=_object_spec)
-            _pcs_for_quantity.append(_pc_for_quantity)
-
-            self._input_controller.request([dict(object_spec=_object_spec)])
-
-        # step 2: retrieve data and plot
-        _mplrc()
-        for _pc in _pcs_for_quantity:
-            #_plot_data = self._input_controller.get(_pc['object_spec'])
-            _plot_data = self._input_controller.get(_pc['object_spec'])
-            self._plot(_pc, _plot_data)
-
-        # step 3: save figures
-        for _figname, _fig in self._figures.iteritems():
-            self._close_plot(_fig.gca())
-            _fig.savefig('{}/fig_{}_{}.png'.format(output_folder, _figname, _quantity_name))
-
-    def make_plots_expr(self, expression, quantity_label, output_folder):
-
-        _expr_printable_name = (
-            expression.replace(':', '_')
-                      .replace("/", '_')
-                      .replace("'", '')
-                      .replace('"', ''))
-
-        try:
-            os.makedirs(output_folder)
-        except OSError as e:
-            if e.errno == 17:  # File exists
-                pass
-            else:
-                raise
-
-        # step 1: construct plot config dicts for quantity and request TObjects
-        _pcs_for_quantity = []
-        for _pc in self._plot_configs:
-            _pc_for_quantity = _pc.copy()
-            #_object_spec = "{}:{}/{}".format(_file_nickname, _pc_for_quantity['folder'], _quantity_name)
-            _pc_for_quantity.update(quantity=_expr_printable_name, quantity_label=quantity_label, object_spec=expression)
-            _pcs_for_quantity.append(_pc_for_quantity)
-
-            self._input_controller._request_all_objects_in_expression(expression)
-
-        # step 2: retrieve data and plot
-        _mplrc()
-        for _pc in _pcs_for_quantity:
-            _plot_data = self._input_controller.get_expr(_pc['object_spec'])
-            self._plot(_pc, _plot_data)
-
-        # step 3: save figures
-        for _figname, _fig in self._figures.iteritems():
-            self._close_plot(_fig.gca())
-            _fig.savefig('{}/fig_{}_{}.png'.format(output_folder, _figname, _expr_printable_name))
-
-
-    def _plot(self, plot_config, plot_data):
-        print("PLT {}".format(plot_config['object_spec']))
-        _fig = self._get_figure(plot_config['figure'])
-        _ax = _fig.gca()
-
-        # -- draw
-        _kwargs = dict(
-            color=plot_config['colors']['light'],
-            label=plot_config['plot_label'],
-            linestyle='',
-            capsize=0,
-            marker=plot_config['marker'],
-            markeredgecolor=plot_config['colors']['light']
-        )
-        if plot_config['marker_style'] == 'full':
-            _kwargs.update(
-                markerfacecolor=_kwargs['color'], markeredgewidth=0,
-            )
-        elif plot_config['marker_style'] == 'empty':
-            _kwargs.update(
-                markerfacecolor='w', markeredgewidth=1,
-            )
-        else:
-            raise ValueError("Unkown value for 'marker_style': {}".format(plot_config['marker_style']))
-
-        _ax.errorbar(
-            plot_data['x'],
-            plot_data['y'],
-            xerr=plot_data['xerr'],
-            yerr=plot_data['yerr'],
-            **_kwargs
-        )
-
-        _ax.set_ylabel(plot_config['y_label'], ha='right', y=1.0)
-        _ax.set_xlabel(r"${{{}}}\,/\,\mathrm{{GeV}}$".format(plot_config['quantity_label']), ha='right', x=1.0)
-
-        if self._xlim is not None:
-            _ax.set_xlim(self._xlim)
-        if self._xscale is not None:
-            _ax.set_xscale(self._xscale)
-
-        if self._ylim is not None:
-            _ax.set_ylim(self._ylim)
-        if self._yscale is not None:
-            _ax.set_yscale(self._yscale)
-
 
 
 def product_dict(**kwargs):
@@ -504,6 +142,7 @@ class ConfigurationEntry(object):
     @abc.abstractmethod
     def get(self, context):
         raise NotImplementedError
+
 
 class ContextValue(ConfigurationEntry):
     """Configuration object. Is replaced by the value corresponding to the `key` in the current context."""
@@ -598,8 +237,9 @@ class Plotter(object):
         loc='upper right'
     )
 
-    def __init__(self, config):
+    def __init__(self, config, output_folder):
         self._config = config
+        self._output_folder = output_folder
         self._input_controller = InputROOT(
             files_spec=self._config['input_files']
         )
@@ -640,10 +280,12 @@ class Plotter(object):
         ax.legend(**_legend_kwargs)
 
         # handle log x-axis formatting
-        _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-        _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-        _formatter._sublabels = _log_decade_ticklabels
-        ax.xaxis.set_minor_formatter(_formatter)
+        if plot_config.get('x_scale', None) == 'log':
+            _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
+            _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+            _formatter.set_locs(locs=_log_decade_ticklabels)
+
+            ax.xaxis.set_minor_formatter(_formatter)
 
     def _get_figure(self, figure_name):
         if figure_name not in self._figures:
@@ -682,7 +324,8 @@ class Plotter(object):
 
         _mplrc()
 
-        _filename = plot_config['filename']
+        _filename = os.path.join(self._output_folder, plot_config['filename'])
+
         _fig = self._get_figure(_filename)
         _ax = _fig.gca()
 
@@ -773,6 +416,7 @@ class Plotter(object):
 
         # step 4: save figures
         self._close_plot(_ax, plot_config)
+        _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
 
 
