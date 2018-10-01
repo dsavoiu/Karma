@@ -30,7 +30,7 @@ def create_histograms(split_dfs, quantity_binnings, weights=None):
         _hs[_split_name] = {}
         for _var, _binning in quantity_binnings.iteritems():
             for _w in weights:
-                _hist_name = '_'.join([_s for _s in (_var, _w) if _s is not None])
+                _hist_name = 'h_' + '_'.join([_s for _s in (_var, _w) if _s is not None])
                 _hist_name_withsplit = '_'.join([_s for _s in (_var, _w, _split_name) if _s is not None])
                 _hist_model = ROOT.RDF.TH1DModel(_hist_name, _hist_name_withsplit, len(_binning)-1, array('f', _binning))
                 if _w is None:
@@ -50,7 +50,7 @@ def create_profiles(split_dfs, quantity_binnings, vars_y):
 
         for _var_x, _binning in quantity_binnings.iteritems():
             for _var_y in vars_y:
-                _hist_name = _var_x
+                _hist_name = 'p_' + _var_x
                 _hist_name_withsplit = '_'.join([_var_y, 'vs', _var_x, _split_name])
                 _hist_model = ROOT.RDF.TProfile1DModel(_hist_name, _hist_name_withsplit, len(_binning)-1, array('f', _binning), "")
                 _ps[_split_name][_var_y][_hist_name] = _split_df.Profile1D(_hist_model, _var_x, _var_y)
