@@ -141,6 +141,15 @@ class _PlotData(object):
     def __repr__(self):
         return repr(self._dict)
 
+    def _yerr_as_y(self):
+        return self.__class__.from_kwargs(
+            x=self.x,
+            y=(self.yerr[0] + self.yerr[1])/2.,  # symmetrize
+            xerr=self.xerr,
+            yerr=None,  # no "errors of errors" yet
+        )
+
+
 # def nansum(*pds):
 #     if not pds:
 #         return None
@@ -296,6 +305,7 @@ class InputROOT(object):
 
     functions = {
         'nanguard_zero': lambda pd: _PlotData.from_kwargs(**{k : np.where(np.isnan(v), 0, v) for k, v in pd._dict.iteritems()}),
+        'yerr': lambda pd: pd._yerr_as_y(),
     }
 
     def __init__(self, files_spec=None):

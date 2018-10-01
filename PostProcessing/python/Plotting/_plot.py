@@ -392,7 +392,7 @@ class Plotter(object):
             _normflag = _kwargs.pop('normalize_to_width', False)
             if _normflag:
                 _y_data /= 2 * _plot_data['xerr']
-                if 'yerr' in _kwargs:
+                if 'yerr' in _kwargs and _kwargs['yerr'] is not None:
                     _kwargs['yerr'] /= 2 * _plot_data['xerr']
 
             # run the plot method
