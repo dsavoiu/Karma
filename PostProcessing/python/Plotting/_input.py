@@ -1,4 +1,5 @@
 import ast
+import collections
 import ROOT
 import numpy as np
 import operator as op
@@ -8,161 +9,142 @@ import uuid
 
 from array import array
 
+from rootpy import asrootpy
+from rootpy.io import root_open
+from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
+from rootpy.plotting.hist import _Hist, _Hist2D
+from rootpy.plotting.profile import _ProfileBase
+
 
 __all__ = ['InputROOTFile', 'InputROOT']
 
 
-class _PlotData(object):
-    def __init__(self, plot_data_dict):
-        self._dict = plot_data_dict
+class _ROOTObjectFunctions(object):
 
-    @classmethod
-    def from_kwargs(cls, **kwargs):
-        return cls(plot_data_dict=kwargs)
+    @staticmethod
+    def _project_or_clone(tobject, projection_options=None):
 
-    # -- delegate to dict
-
-    def __getitem__(self, key):
-        return self._dict[key]
-
-    def __setitem__(self, key, value):
-        self._dict[key] = value
-
-    def update(self, *args, **kwargs):
-        return self._dict.update(*args, **kwargs)
-
-    def __getattr__(self, attr_name):
-        if attr_name in self._dict:
-            return self._dict[attr_name]
-        return self.__dict__[attr_name]
-
-    # -- implement addition, subtraction, division, etc.
-    def __add__(self, other):
-        if isinstance(other, self.__class__):
-            assert(np.allclose(self.x, other.x))
-            assert(np.allclose(self.xerr, other.xerr))
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.add(self.y, other.y),
-                xerr=self.xerr,
-                yerr=np.sqrt(self.yerr**2 + other.yerr**2),  # ignore other errors
-            )
+        if isinstance(tobject, _ProfileBase):
+            # create an "x-projection" with a unique suffix
+            if projection_options is None:
+                return asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex()))
+            else:
+                return asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex(), projection_options))
         else:
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.add(self.y, other),
-                xerr=self.xerr,
-                yerr=self.yerr,
-            )
+            return tobject.Clone()
 
-    def __sub__(self, other):
-        if isinstance(other, self.__class__):
-            assert(np.allclose(self.x, other.x))
-            assert(np.allclose(self.xerr, other.xerr))
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.sub(self.y, other.y),
-                xerr=self.xerr,
-                yerr=op.sub(self.yerr, other.y),  # ignore denom errors
-            )
+    @staticmethod
+    def histdivide(tobject_1, tobject_2, option=""):
+        """divide two histograms, taking error calculation option into account"""
+
+        _new_tobject_1 = _ROOTObjectFunctions._project_or_clone(tobject_1)
+        _new_tobject_2 = _ROOTObjectFunctions._project_or_clone(tobject_2)
+
+        _new_tobject_1.Divide(_new_tobject_1, _new_tobject_2, 1, 1, option)
+
+        return _new_tobject_1
+
+    @staticmethod
+    def efficiency(tobject_numerator, tobject_denominator):
+        """Compute TEfficiency"""
+
+        return Efficiency(tobject_numerator, tobject_denominator)
+
+    @staticmethod
+    def project_x(tobject):
+        """Apply ProjectionX() operation."""
+
+        if hasattr(tobject, 'ProjectionX'):
+            _new_tobject = asrootpy(tobject.ProjectionX())
         else:
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.sub(self.y, other),
-                xerr=self.xerr,
-                yerr=self.yerr,  # scalar subtraction has no effect on errors
-            )
+            print "[INFO] `project_x` not available for object with type {}".format(type(tobject))
+            return tobject
 
-    def __mul__(self, other):
-        if isinstance(other, self.__class__):
-            assert(np.allclose(self.x, other.x))
-            assert(np.allclose(self.xerr, other.xerr))
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.mul(self.y, other.y),
-                xerr=self.xerr,
-                yerr=op.mul(self.yerr, other.y),  # ignore other errors
-            )
-        else:
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.mul(self.y, other),
-                xerr=self.xerr,
-                yerr=op.mul(self.yerr, other),
-            )
+        return _new_tobject
 
-    def __truediv__(self, other):
-        if isinstance(other, self.__class__):
-            assert(np.allclose(self.x, other.x))
-            assert(np.allclose(self.xerr, other.xerr))
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.truediv(self.y, other.y),
-                xerr=self.xerr,
-                yerr=op.truediv(self.yerr, other.y),  # ignore denom errors
-            )
-        else:
-            return self.__class__.from_kwargs(
-                x=self.x,
-                y=op.truediv(self.y, other),
-                xerr=self.xerr,
-                yerr=op.truediv(self.yerr, other),
-            )
+    @staticmethod
+    def yerr(tobject):
+        """replace bin value with bin error and set bin error to zero"""
 
-    def __radd__(self, other):
-        # = other + self
-        return self + other
+        # project preserving errors
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
 
-    def __rsub__(self, other):
-        # = other - self
-        return self.__class__.from_kwargs(
-            x=self.x,
-            y=op.sub(other, self.y),
-            xerr=self.xerr,
-            yerr=self.yerr,
-        )
+        for _bin_proxy in _new_tobject:
+            _bin_proxy.value, _bin_proxy.error = _bin_proxy.error, 0
 
-    def __rmul__(self, other):
-        # = other * self
-        return self * other
+        return _new_tobject
 
-    def __rtruediv__(self, other):
-        # = other / self
-        return self.__class__.from_kwargs(
-            x=self.x,
-            y=op.truediv(other, self.y),
-            xerr=self.xerr,
-            yerr=op.truediv(self.yerr, self.y**2),  # error propagation
-        )
+    @staticmethod
+    def atleast(tobject, min_value):
+        """mask all values below thrashold"""
 
-    def __str__(self):
-        return str(self._dict)
+        # project preserving errors
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
 
-    def __repr__(self):
-        return repr(self._dict)
+        for _bin_proxy in _new_tobject:
+            if _bin_proxy.value < min_value:
+                _bin_proxy.value, _bin_proxy.error = 0, 0
 
-    def _yerr_as_y(self):
-        return self.__class__.from_kwargs(
-            x=self.x,
-            y=(self.yerr[0] + self.yerr[1])/2.,  # symmetrize
-            xerr=self.xerr,
-            yerr=None,  # no "errors of errors" yet
-        )
+        return _new_tobject
 
+    @staticmethod
+    def discard_errors(tobject):
+        """set all bin errors to zero"""
 
-# def nansum(*pds):
-#     if not pds:
-#         return None
-#     for _pd in pds:
-#         assert isinstance(_pd, _PlotData)
-#         assert(np.allclose(pds[0].x, _pd.x))
-#         assert(np.allclose(pds[0].xerr, _pd.xerr))
-#     return _PlotData.from_kwargs(
-#         x=pds[0].x,
-#         y=np.nansum(pd_a.y, pd_b.y),
-#         xerr=pds[0].xerr,
-#         yerr=np.sqrt(pd_a.yerr**2 + pd_b.yerr**2),  # ignore pd_b errors
-#     )
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+
+        for _bin_proxy in _new_tobject:
+            _bin_proxy.error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def bin_width(tobject):
+        """replace bin value with width of bin and set bin error to zero"""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+
+        for _bin_proxy in _new_tobject:
+            _bin_proxy.value, _bin_proxy.error = _bin_proxy.x.width, 0
+
+        return _new_tobject
+
+    @staticmethod
+    def max(*tobjects):
+        """binwise `max` for a collection of histograms with identical binning"""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobjects[0], "e")
+
+        _tobj_clones = []
+        for _tobj in tobjects:
+            _tobj_clones.append(_ROOTObjectFunctions._project_or_clone(_tobj, "e"))
+
+        for _bin_proxies in zip(_new_tobject, *_tobj_clones):
+            _argmax = max(range(1, len(_bin_proxies)), key=lambda idx: _bin_proxies[idx].value)
+            _bin_proxies[0].value = _bin_proxies[_argmax].value
+            _bin_proxies[0].error = _bin_proxies[_argmax].error
+
+        # cleanup
+        for _tobj_clone in _tobj_clones:
+            _tobj_clone.Delete()
+
+        return _new_tobject
+
+    @staticmethod
+    def mask_if_less(tobject, tobject_ref):
+        """set `tobject` bins and their errors to zero if their content is less than the value in `tobject_ref`"""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
+        _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref, "e")
+
+        for _bin_proxy, _bin_proxy_ref in zip(_new_tobject, _new_tobject_ref):
+            if _bin_proxy.value < _bin_proxy_ref.value:
+                _bin_proxy.value, _bin_proxy.error = 0, 0
+
+        # cleanup
+        _new_tobject_ref.Delete()
+
+        return _new_tobject
 
 
 class InputROOTFile(object):
@@ -191,50 +173,26 @@ class InputROOTFile(object):
             return
 
         # process outstanding requests
-        _tfile = ROOT.TFile(self._filename)
-        for tobj_path, request_spec in self._outstanding_requests.iteritems():
-            _rebin_factor = request_spec.pop('rebin_factor', None)
+        with root_open(self._filename) as _tfile:
+            for tobj_path, request_spec in self._outstanding_requests.iteritems():
+                _rebin_factor = request_spec.pop('rebin_factor', None)
+                _profile_error_option = request_spec.pop('profile_error_option', None)
 
-            _tobj = _tfile.Get(tobj_path)
+                _tobj = _tfile.Get(tobj_path)
+                _tobj.SetDirectory(0)
+                print tobj_path, _tobj
 
-            # "cast" TProfile to TH1D
-            if type(_tobj) is ROOT.TProfile:
-                _tobj_name = tobj_path.split('/')[-1]
-                _tobj = _tobj.ProjectionX("{}_px_{}".format(_tobj_name, uuid.uuid4()))
+                # aply rebinning (if requested)
+                if _rebin_factor is not None:
+                    _tobj.Rebin(_rebin_factor)
 
-            # check if object exists and is of plottable type
-            if type(_tobj) is ROOT.TObject:
-                raise ValueError("Cannot get TH1D '{}': object does not exist!'".format(tobj_path))
-            if type(_tobj) is not ROOT.TH1D:
-                raise ValueError("Cannot get TH1D '{}': object exists but is of different type '{}'".format(tobj_path, type(_tobj)))
+                # set TProfile error option (if requested)
+                if _profile_error_option is not None:
+                    # TOOD: check if profile?
+                    _tobj.SetErrorOption(_profile_error_option)
 
-            # aply rebinning (if requested)
-            if _rebin_factor is not None:
-                _tobj.Rebin(_rebin_factor)
+                self._plot_data_cache[tobj_path] = _tobj
 
-            # handle TH1D
-            _nbins = _tobj.GetNbinsX()
-            _buf = _tobj.GetArray()
-            _y = np.frombuffer(_buf, 'd', _nbins, 8)
-            _xlo = np.array([_tobj.GetXaxis().GetBinLowEdge(i) for i in range(1, _nbins+1)])
-            _xup = np.array([_tobj.GetXaxis().GetBinUpEdge(i) for i in range(1, _nbins+1)])
-
-            _yerr_up = [_tobj.GetBinErrorUp(i) for i in range(1, _nbins+1)]
-            _yerr_dn = [_tobj.GetBinErrorLow(i) for i in range(1, _nbins+1)]
-            _yerr = np.array([_yerr_dn, _yerr_up])
-
-            _xcen = 0.5 * (_xup + _xlo)
-            _xerr = 0.5 * (_xup - _xlo)
-
-            self._plot_data_cache[tobj_path] = _PlotData.from_kwargs(
-                x=_xcen.astype(float),
-                y=_y.astype(float),
-                xerr=_xerr.astype(float),
-                yerr=_yerr.astype(float),
-                rebin_factor=_rebin_factor,
-            )
-
-        _tfile.Close()
         self._outstanding_requests = dict()
 
 
@@ -269,9 +227,22 @@ class InputROOTFile(object):
         """
         for request_spec in request_specs:
             _object_path = request_spec.pop('object_path')
-            self._outstanding_requests[_object_path] = request_spec
-            if _object_path in self._plot_data_cache:
-                del self._plot_data_cache[_object_path]
+            _force_rerequest = request_spec.pop('force_rerequest', True)
+
+            # override earlier request iff 'force_rerequest' is True
+            if (not (_object_path in self._outstanding_requests or _object_path in self._plot_data_cache)) or _force_rerequest:
+                self._outstanding_requests[_object_path] = request_spec
+
+                if _object_path in self._plot_data_cache:
+                    del self._plot_data_cache[_object_path]
+
+    def clear(self):
+        """
+        Remove all cached data and outstanding requests.
+        """
+        self._plot_data_cache = {}
+        self._outstanding_requests = {}
+
 
 
 class InputROOT(object):
@@ -303,9 +274,19 @@ class InputROOT(object):
         ast.USub: op.neg
     }
 
+    # functions which can be applied to ROOT objects
     functions = {
-        'nanguard_zero': lambda pd: _PlotData.from_kwargs(**{k : np.where(np.isnan(v), 0, v) for k, v in pd._dict.iteritems()}),
-        'yerr': lambda pd: pd._yerr_as_y(),
+        'yerr':             _ROOTObjectFunctions.yerr,
+        'bin_width':        _ROOTObjectFunctions.bin_width,
+        'project_x':        _ROOTObjectFunctions.project_x,
+        'h':                _ROOTObjectFunctions.project_x,  # alias
+        'hist':             _ROOTObjectFunctions.project_x,  # alias
+        'divide':           _ROOTObjectFunctions.histdivide,
+        'discard_errors':   _ROOTObjectFunctions.discard_errors,
+        'efficiency':       _ROOTObjectFunctions.efficiency,
+        'atleast':          _ROOTObjectFunctions.atleast,
+        'max':              _ROOTObjectFunctions.max,
+        'mask_if_less':     _ROOTObjectFunctions.mask_if_less,
     }
 
     def __init__(self, files_spec=None):
@@ -319,8 +300,8 @@ class InputROOT(object):
         self._input_controllers = {}
         self._file_nick_to_realpath = {}
         if files_spec is not None:
-            for _nickname, _filepath in files_spec.iteritems():
-                self.add_file(_filepath, nickname=_nickname)
+            for _nickname, _file_path in files_spec.iteritems():
+                self.add_file(_file_path, nickname=_nickname)
 
     def _get_input_controller_for_file(self, file_spec):
         '''get input controller for file specification. handle nickname resolution'''
@@ -341,7 +322,7 @@ class InputROOT(object):
 
         Parameters
         ----------
-            file_path : string, path to ROOT file
+            file_path : string (path to ROOT file)
         """
 
         # determine real (absolute) path for file
@@ -395,9 +376,9 @@ class InputROOT(object):
         """
         _delegations = {}
         for request_spec in request_specs:
-            _file_nickname = request_spec.get('file_nickname', None)
-            _object_path_in_file = request_spec.get('object_path', None)
-            _object_spec = request_spec.get('object_spec', None)
+            _file_nickname = request_spec.pop('file_nickname', None)
+            _object_path_in_file = request_spec.pop('object_path', None)
+            _object_spec = request_spec.pop('object_spec', None)
 
             if not ((_object_spec is not None) == ((_file_nickname is None) and (_object_path_in_file is None))):
                 raise ValueError("Invalid request: must either contain both 'file_nickname' and 'object_path' keys or an 'object_spec' key, but contains: {}".format(request_spec.keys()))
@@ -407,7 +388,7 @@ class InputROOT(object):
 
             if _file_nickname not in _delegations:
                 _delegations[_file_nickname] = []
-            _delegations[_file_nickname].append(dict(object_path=_object_path_in_file))
+            _delegations[_file_nickname].append(dict(object_path=_object_path_in_file, **request_spec))
 
         for _file_nickname, _requests in _delegations.iteritems():
             _ic = self._get_input_controller_for_file(_file_nickname)
@@ -422,7 +403,7 @@ class InputROOT(object):
         self._request_all_objects_in_expression(expr)
         return self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions)
 
-    def _request_all_objects_in_expression(self, expr):
+    def _request_all_objects_in_expression(self, expr, **other_request_params):
         """Walk through the expression AST and request an object for each string or identifier"""
         _ast = ast.parse(expr, mode='eval')
         _reqs = []
@@ -435,7 +416,7 @@ class InputROOT(object):
                 continue
 
             if ':' in _obj_spec:
-                _reqs.append(dict(object_spec=_obj_spec))
+                _reqs.append(dict(object_spec=_obj_spec, force_rerequest=False, **other_request_params))
         self.request(_reqs)
 
     def _eval(self, node, operators, functions):

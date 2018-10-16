@@ -16,11 +16,19 @@ import numpy as np
 from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import LogFormatter
 
-from ._input import InputROOT
+from rootpy import asrootpy
+from rootpy.io import root_open
+from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
+from rootpy.plotting.hist import _Hist, _Hist2D
+from rootpy.plotting.profile import _ProfileBase
 
+from ._input import InputROOT
+from ._colormaps import viridis
 
 __all__ = ['DijetLogFormatterSciNotation', 'Plotter', 'ContextValue', 'LiteralString']
 
+
+plt.register_cmap(name='viridis', cmap=viridis)
 
 def _mplrc():
     mpl.rc('mathtext', fontset='stixsans', fallback_to_cm=False, rm='sans')
@@ -244,6 +252,7 @@ class Plotter(object):
             files_spec=self._config['input_files']
         )
         self._figures = {}
+        self._global_request_params = self._config.get("global_request_params", {})
 
     def _close_plot(self, ax, plot_config):
         ax.text(.05, .9,
@@ -274,6 +283,14 @@ class Plotter(object):
                 transform=ax.transAxes
             )
 
+        # handle horizontal and vertical lines
+        _axhlines = plot_config.pop('axhlines', [])
+        for _y in _axhlines:
+            ax.axhline(_y, linestyle='--', color='gray')
+        _axvlines = plot_config.pop('axvlines', [])
+        for _x in _axvlines:
+            ax.axvline(_x, linestyle='--', color='gray')
+
         # handle plot legend
         _legend_kwargs = self._DEFAULT_LEGEND_KWARGS.copy()
         _legend_kwargs.update(plot_config.pop('legend_kwargs', {}))
@@ -287,13 +304,13 @@ class Plotter(object):
 
             ax.xaxis.set_minor_formatter(_formatter)
 
-        # handle log y-axis formatting
-        if plot_config.get('y_scale', None) == 'log':
-            _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-            _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-            _formatter.set_locs(locs=_log_decade_ticklabels)
-
-            ax.yaxis.set_minor_formatter(_formatter)
+        ## handle log y-axis formatting
+        #if plot_config.get('y_scale', None) == 'log':
+        #    _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
+        #    _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+        #    _formatter.set_locs(locs=_log_decade_ticklabels)
+        #
+        #    ax.yaxis.set_minor_formatter(_formatter)
 
     def _get_figure(self, figure_name):
         if figure_name not in self._figures:
@@ -319,12 +336,14 @@ class Plotter(object):
 
             self._plot_figure(_fig_cfg)
 
-    def _request_all_expressions_with_context(self, context):
+    def _request_all_expressions_with_context(self, context, **request_params):
         _reqs = []
         for _fig_cfg in self._config['figures']:
+            # override global request parameters, if requested
+            request_params.update(_fig_cfg.get('request_params', {}))
             for _subplot_dict in _fig_cfg['subplots']:
                  #_reqs.append(dict(object_spec=_subplot_dict['expression'].format(**context)))
-                self._input_controller._request_all_objects_in_expression(_subplot_dict['expression'].format(**context))
+                self._input_controller._request_all_objects_in_expression(_subplot_dict['expression'].format(**context), **request_params)
 
         #self._input_controller.request(_reqs)
 
@@ -346,7 +365,37 @@ class Plotter(object):
 
             _expression = _kwargs.pop('expression')
             print("PLT {}".format(_expression))
-            _plot_data = self._input_controller.get_expr(_expression)
+            _plot_object = self._input_controller.get_expr(_expression)
+
+            # extract arrays for keys which could be masked by 'mask_zero_errors'
+            _plot_data = {
+                _property_name : np.array(list(getattr(_plot_object, _property_name)()))
+                for _property_name in ('x', 'xerr', 'y', 'yerr', 'xwidth', 'efficiencies', 'errors')
+                if hasattr(_plot_object, _property_name)
+            }
+
+            # map fields for TEfficiency objects
+            if isinstance(_plot_object, Efficiency):
+                _total_hist = _plot_object.total
+                _plot_data['x'] = np.array(list(_total_hist.x()))
+                _plot_data['xerr'] = np.array(list(_total_hist.xerr()))
+                _plot_data['y'] = _plot_data.pop('efficiencies', None)
+                _plot_data['yerr'] = _plot_data.pop('errors', None)
+
+            _mze = _kwargs.pop('mask_zero_errors', False)
+            if _mze:
+                _mask = np.all((_plot_data['yerr'] != 0), axis=1)
+                _plot_data = {
+                    _key : np.compress(_mask, _value, axis=0)
+                    for _key, _value in _plot_data.iteritems()
+                }
+
+            # extract arrays for keys which cannot be masked
+            _plot_data.update({
+                _property_name : np.array(list(getattr(_plot_object, _property_name)()))
+                for _property_name in ('xedges', 'yedges', 'z')
+                if hasattr(_plot_object, _property_name)
+            })
 
             # -- draw
 
@@ -383,30 +432,46 @@ class Plotter(object):
 
             # different methods handle information differently
             if _plot_method_name == 'bar':
-                _kwargs['width'] = 2 * _plot_data['xerr']
+                _kwargs['width'] = _plot_data['xwidth']
                 _kwargs.setdefault('align', 'center')
                 _kwargs.setdefault('edgecolor', '')
                 _kwargs['y'] = _plot_data['y']
                 _kwargs['bottom'] = _y_bottom
             else:
                 _kwargs['y'] = _plot_data['y'] + _y_bottom
-                _kwargs['xerr'] = _plot_data['xerr']
+                _kwargs['xerr'] = _plot_data['xerr'].T
 
             _show_yerr = _kwargs.pop('show_yerr', True)
             if _show_yerr:
-                _kwargs['yerr'] = _plot_data['yerr']
+                _kwargs['yerr'] = _plot_data['yerr'].T
 
             _y_data = _kwargs.pop('y')
             _normflag = _kwargs.pop('normalize_to_width', False)
             if _normflag:
-                _y_data /= 2 * _plot_data['xerr']
+                _y_data /= _plot_data['xwidth']
                 if 'yerr' in _kwargs and _kwargs['yerr'] is not None:
-                    _kwargs['yerr'] /= 2 * _plot_data['xerr']
+                    _kwargs['yerr'] /= _plot_data['xwidth']
+
+            # -- sort out positional arguments to plot method
+
+            if _plot_method_name == 'pcolormesh':
+                _args = [_plot_data['xedges'], _plot_data['yedges'], _plot_data['z']]
+                _kwargs.pop('color', None)
+                _kwargs.pop('xerr', None)
+                _kwargs.pop('yerr', None)
+                print 'xedges', _plot_data['xedges'].shape
+                print 'yedges', _plot_data['yedges'].shape
+                print 'z', _plot_data['z'].shape
+            else:
+                _args = [_plot_data['x'], _y_data]
+
+            # skip empty arguments
+            if len(_args[0]) == 0:
+                continue
 
             # run the plot method
             _plot_method(
-                _plot_data['x'],
-                _y_data,
+                *_args,
                 **_kwargs
             )
 
@@ -441,7 +506,7 @@ class Plotter(object):
 
         # first: request all objects
         for _expansion_context in list(product_dict(**self._config['expansions'])):
-            self._request_all_expressions_with_context(_expansion_context)
+            self._request_all_expressions_with_context(_expansion_context, **self._global_request_params)
 
         # second: actual plotting
         for _expansion_context in list(product_dict(**self._config['expansions'])):
