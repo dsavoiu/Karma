@@ -46,8 +46,8 @@ namespace dijet {
             queue_.pushAndWait(
                 [&]() {
                     edm::LogInfo("GlobalCacheWithOutputFile") << "Creating histogram '" << name << "' in output file...";
-                    this->outputFile_->cd();  // horrible, but probably the best way?
                     outputHistograms_[name] = std::make_shared<TH1D>(name.c_str(), title.c_str(), bins.size() - 1, &bins[0]);
+                    outputHistograms_[name]->SetDirectory(0);
                 }
             );
             return outputHistograms_[name];
@@ -69,7 +69,11 @@ namespace dijet {
 
         void writeAllAndCloseFile() {
             // writing of all histograms to file
+            outputFile_->cd();
             for (const auto& nameAndHist : outputHistograms_) {
+                edm::LogInfo("GlobalCacheWithOutputFile") << "Associating histogram '" << nameAndHist.first << "' with output file...";
+                nameAndHist.second->SetDirectory(&(*outputFile_));
+                edm::LogInfo("GlobalCacheWithOutputFile") << "Writing histogram '" << nameAndHist.first << "' to output file...";
                 nameAndHist.second->Write();
             }
             outputFile_->Close();
