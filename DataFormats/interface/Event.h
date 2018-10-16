@@ -45,6 +45,35 @@ namespace dijet {
     typedef std::vector<dijet::LV> LVCollection;
 
     /**
+     * Generator Particle class
+     */
+    class GenParticle : public dijet::LV {
+      public:
+        int pdgId = -999;
+
+        int nDaughters = -1;
+        int status = -999;
+
+        bool isPrompt = 0;
+        bool isDecayedLeptonHadron = 0;
+        bool isTauDecayProduct = 0;
+        bool isPromptTauDecayProduct = 0;
+        bool isDirectTauDecayProduct = 0;
+        bool isDirectPromptTauDecayProduct = 0;
+        bool isDirectHadronDecayProduct = 0;
+        bool isHardProcess = 0;
+        bool fromHardProcess = 0;
+        bool isHardProcessTauDecayProduct = 0;
+        bool isDirectHardProcessTauDecayProduct = 0;
+        bool isLastCopy = 0;
+
+        int index = -1;
+        std::vector<int> daughterIndices;
+
+    };
+    typedef std::vector<dijet::GenParticle> GenParticleCollection;
+
+    /**
      * Jet class
      */
     class Jet : public dijet::LV {
@@ -157,4 +186,7 @@ namespace dijet {
     // -- association maps
     typedef edm::AssociationMap<edm::OneToMany<dijet::JetCollection, dijet::TriggerObjectCollection>> JetTriggerObjectsMap;
     typedef std::vector<dijet::JetTriggerObjectsMap> JetTriggerObjectsMaps;
+
+    typedef edm::AssociationMap<edm::OneToOne<dijet::JetCollection, dijet::LVCollection>> JetGenJetMap;
+    typedef std::vector<dijet::JetGenJetMap> JetGenJetMaps;
 }

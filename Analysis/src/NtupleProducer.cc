@@ -28,6 +28,9 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
     dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
+    if (!m_isData) {
+        dijetJetGenJetMapToken = consumes<dijet::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetGenJetMapSrc"));
+    }
 
 }
 
@@ -83,6 +86,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     obtained &= event.getByToken(this->dijetMETCollectionToken, this->dijetMETCollectionHandle);
     // jet trigger objects map
     obtained &= event.getByToken(this->dijetJetTriggerObjectsMapToken, this->dijetJetTriggerObjectsMapHandle);
+    if (!m_isData) {
+        // jet genJet map
+        obtained &= event.getByToken(this->dijetJetGenJetMapToken, this->dijetJetGenJetMapHandle);
+    }
 
     assert(obtained);  // raise if one collection could not be obtained
     assert(this->dijetMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
@@ -127,6 +134,18 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->jet1eta = jet1->p4.eta();
         outputNtupleEntry->jet1y = jet1->p4.Rapidity();
 
+        // matched genJet (MC-only)
+        const dijet::LV* jet1MatchedGenJet = nullptr;
+        if (!m_isData) {
+            jet1MatchedGenJet = getMatchedGenJet(0);
+            if (jet1MatchedGenJet) {
+                outputNtupleEntry->jet1MatchedGenJetPt = jet1MatchedGenJet->p4.pt();
+                outputNtupleEntry->jet1MatchedGenJetPhi = jet1MatchedGenJet->p4.phi();
+                outputNtupleEntry->jet1MatchedGenJetEta = jet1MatchedGenJet->p4.eta();
+                outputNtupleEntry->jet1MatchedGenJetY = jet1MatchedGenJet->p4.Rapidity();
+            }
+        }
+
         // get assigned HLT path(s) for leading jet
         dijet::HLTAssignment jet1HLTAssignment = getHLTAssignment(0);
         outputNtupleEntry->jet1HLTNumMatchedTriggerObjects = jet1HLTAssignment.numUniqueMatchedTriggerObjects;
@@ -164,6 +183,18 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet2eta = jet2->p4.eta();
             outputNtupleEntry->jet2y = jet2->p4.Rapidity();
 
+            // matched genJet (MC-only)
+            const dijet::LV* jet2MatchedGenJet = nullptr;
+            if (!m_isData) {
+                jet2MatchedGenJet = getMatchedGenJet(1);
+                if (jet2MatchedGenJet) {
+                    outputNtupleEntry->jet2MatchedGenJetPt = jet2MatchedGenJet->p4.pt();
+                    outputNtupleEntry->jet2MatchedGenJetPhi = jet2MatchedGenJet->p4.phi();
+                    outputNtupleEntry->jet2MatchedGenJetEta = jet2MatchedGenJet->p4.eta();
+                    outputNtupleEntry->jet2MatchedGenJetY = jet2MatchedGenJet->p4.Rapidity();
+                }
+            }
+
             // get assigned HLT path(s) for second-leading jet
             dijet::HLTAssignment jet2HLTAssignment = getHLTAssignment(1);
             outputNtupleEntry->jet2HLTNumMatchedTriggerObjects = jet2HLTAssignment.numUniqueMatchedTriggerObjects;
@@ -180,6 +211,14 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet12ptave = 0.5 * (jet1->p4.pt() + jet2->p4.pt());
             outputNtupleEntry->jet12ystar = 0.5 * (jet1->p4.Rapidity() - jet2->p4.Rapidity());
             outputNtupleEntry->jet12yboost = 0.5 * (jet1->p4.Rapidity() + jet2->p4.Rapidity());
+
+            // matched genJet pair kinematics (MC-only)
+            if (jet1MatchedGenJet && jet2MatchedGenJet) {
+                outputNtupleEntry->jet12MatchedGenJetPairMass = (jet1MatchedGenJet->p4 + jet2MatchedGenJet->p4).M();
+                outputNtupleEntry->jet12MatchedGenJetPairPtAve = 0.5 * (jet1MatchedGenJet->p4.pt() + jet2MatchedGenJet->p4.pt());
+                outputNtupleEntry->jet12MatchedGenJetPairYStar = 0.5 * (jet1MatchedGenJet->p4.Rapidity() - jet2MatchedGenJet->p4.Rapidity());
+                outputNtupleEntry->jet12MatchedGenJetPairYBoost = 0.5 * (jet1MatchedGenJet->p4.Rapidity() + jet2MatchedGenJet->p4.Rapidity());
+            }
         }
     }
 
@@ -264,6 +303,26 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
 
     // if no matches, the default struct is returned
     return hltAssignment;
+}
+
+/**
+ * Helper function to determine which HLT path (if any) can be assigned
+ * to a reconstructed jet with a particular index.
+ */
+const dijet::LV* dijet::NtupleProducer::getMatchedGenJet(unsigned int jetIndex) {
+
+    // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
+    const auto& jetMatchedJenJet = this->dijetJetGenJetMapHandle->find(
+        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
+    );
+
+    // if there is a gen jet match, return it
+    if (jetMatchedJenJet != this->dijetJetGenJetMapHandle->end()) {
+        return &(*jetMatchedJenJet->val);
+    }
+
+    // if no match, a nullptr is returned
+    return nullptr;
 }
 
 

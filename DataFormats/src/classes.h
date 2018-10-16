@@ -39,6 +39,12 @@ namespace {
         dijet::LVCollection dict_dijetLVCollection;
         edm::Wrapper<dijet::LVCollection> dict_edmWrapperDijetLVCollection;
 
+        // lvs
+        dijet::GenParticle dict_dijetGenParticle;
+        edm::Wrapper<dijet::GenParticle> dict_edmWrapperDijetGenParticle;
+        dijet::GenParticleCollection dict_dijetGenParticleCollection;
+        edm::Wrapper<dijet::GenParticleCollection> dict_edmWrapperDijetGenParticleCollection;
+
         // jets
         dijet::Jet dict_dijetJet;
         edm::Wrapper<dijet::Jet> dict_edmWrapperDijetJet;
@@ -62,6 +68,12 @@ namespace {
         edm::Wrapper<dijet::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
         dijet::JetTriggerObjectsMaps dict_dijetJetTriggerObjectsMaps;
         edm::Wrapper<dijet::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
+
+        // jet-genJet association map
+        dijet::JetGenJetMap dict_dijetJetGenJetMap;
+        edm::Wrapper<dijet::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;
+        dijet::JetGenJetMaps dict_dijetJetGenJetMaps;
+        edm::Wrapper<dijet::JetGenJetMaps> dict_edmWrapperDijetJetGenJetMaps;
 
     };
 }

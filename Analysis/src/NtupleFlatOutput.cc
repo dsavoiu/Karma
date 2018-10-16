@@ -74,6 +74,22 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("jet2HLTAssignedPathPrescale",                  &m_productForFill->jet2HLTAssignedPathPrescale,                   "jet2HLTAssignedPathPrescale/I"                  );
     m_tree->Branch("jet2HLTAssignedPathEfficiency",                &m_productForFill->jet2HLTAssignedPathEfficiency,                 "jet2HLTAssignedPathEfficiency/D"                );
 
+    // MC
+    if (!m_isData) {
+        m_tree->Branch("jet1MatchedGenJetPt",                          &m_productForFill->jet1MatchedGenJetPt,                           "jet1MatchedGenJetPt/D"                          );
+        m_tree->Branch("jet1MatchedGenJetPhi",                         &m_productForFill->jet1MatchedGenJetPhi,                          "jet1MatchedGenJetPhi/D"                         );
+        m_tree->Branch("jet1MatchedGenJetEta",                         &m_productForFill->jet1MatchedGenJetEta,                          "jet1MatchedGenJetEta/D"                         );
+        m_tree->Branch("jet1MatchedGenJetY",                           &m_productForFill->jet1MatchedGenJetY,                            "jet1MatchedGenJetY/D"                           );
+        m_tree->Branch("jet2MatchedGenJetPt",                          &m_productForFill->jet2MatchedGenJetPt,                           "jet2MatchedGenJetPt/D"                          );
+        m_tree->Branch("jet2MatchedGenJetPhi",                         &m_productForFill->jet2MatchedGenJetPhi,                          "jet2MatchedGenJetPhi/D"                         );
+        m_tree->Branch("jet2MatchedGenJetEta",                         &m_productForFill->jet2MatchedGenJetEta,                          "jet2MatchedGenJetEta/D"                         );
+        m_tree->Branch("jet2MatchedGenJetY",                           &m_productForFill->jet2MatchedGenJetY,                            "jet2MatchedGenJetY/D"                           );
+        m_tree->Branch("jet12MatchedGenJetPairMass",                   &m_productForFill->jet12MatchedGenJetPairMass,                    "jet12MatchedGenJetPairMass/D"                   );
+        m_tree->Branch("jet12MatchedGenJetPairPtAve",                  &m_productForFill->jet12MatchedGenJetPairPtAve,                   "jet12MatchedGenJetPairPtAve/D"                  );
+        m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
+        m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
+    }
+
     std::cout << "Done wiring TTree branches" << std::endl;
 
     // -- check added branches for completeness

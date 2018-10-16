@@ -56,6 +56,24 @@ namespace dijet {
         int jet2HLTAssignedPathIndex = -1;
         int jet2HLTAssignedPathPrescale = -1;
         double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
+
+        // GenJets
+        double jet1MatchedGenJetPt = UNDEFINED_DOUBLE;
+        double jet1MatchedGenJetEta = UNDEFINED_DOUBLE;
+        double jet1MatchedGenJetY = UNDEFINED_DOUBLE;
+        double jet1MatchedGenJetPhi = UNDEFINED_DOUBLE;
+
+        double jet2MatchedGenJetPt = UNDEFINED_DOUBLE;
+        double jet2MatchedGenJetEta = UNDEFINED_DOUBLE;
+        double jet2MatchedGenJetY = UNDEFINED_DOUBLE;
+        double jet2MatchedGenJetPhi = UNDEFINED_DOUBLE;
+
+        // leading matched gen jet pair kinematics
+        double jet12MatchedGenJetPairMass = UNDEFINED_DOUBLE;
+        double jet12MatchedGenJetPairPtAve = UNDEFINED_DOUBLE;
+        double jet12MatchedGenJetPairYStar = UNDEFINED_DOUBLE;
+        double jet12MatchedGenJetPairYBoost = UNDEFINED_DOUBLE;
+
     };
     typedef std::vector<dijet::NtupleEntry> Ntuple;
 }

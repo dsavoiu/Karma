@@ -128,6 +128,7 @@ namespace dijet {
         // -- helper methods
 
         dijet::HLTAssignment getHLTAssignment(unsigned int jetIndex);
+        const dijet::LV* getMatchedGenJet(unsigned int jetIndex);
 
         // ----------member data ---------------------------
 
@@ -149,6 +150,9 @@ namespace dijet {
 
         typename edm::Handle<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapHandle;
         edm::EDGetTokenT<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapToken;
+
+        typename edm::Handle<dijet::JetGenJetMap> dijetJetGenJetMapHandle;
+        edm::EDGetTokenT<dijet::JetGenJetMap> dijetJetGenJetMapToken;
 
         typename edm::Handle<dijet::Run> dijetRunHandle;
         edm::EDGetTokenT<dijet::Run> dijetRunToken;

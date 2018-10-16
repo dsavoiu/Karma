@@ -24,6 +24,11 @@
     <class name="dijet::LVCollection"/>
     <class name="edm::Wrapper<dijet::LVCollection>"/>
 
+    <class name="dijet::GenParticle"/>
+    <class name="edm::Wrapper<dijet::GenParticle>"/>
+    <class name="dijet::GenParticleCollection"/>
+    <class name="edm::Wrapper<dijet::GenParticleCollection>"/>
+
     <class name="dijet::Jet"/>
     <class name="edm::Wrapper<dijet::Jet>"/>
     <class name="dijet::JetCollection"/>
@@ -45,5 +50,12 @@
     <class name="edm::Wrapper<dijet::JetTriggerObjectsMap>"/>
     <class name="dijet::JetTriggerObjectsMaps"/>
     <class name="edm::Wrapper<dijet::JetTriggerObjectsMaps>"/>
+
+    <class name="dijet::JetGenJetMap">
+        <field name="transientMap_" transient="true" />
+    </class>
+    <class name="edm::Wrapper<dijet::JetGenJetMap>"/>
+    <class name="dijet::JetGenJetMaps"/>
+    <class name="edm::Wrapper<dijet::JetGenJetMaps>"/>
 
 </lcgdict>
