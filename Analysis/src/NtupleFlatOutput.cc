@@ -55,6 +55,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("jet12ptave",                      &m_productForFill->jet12ptave,                       "jet12ptave/D"                      );
     m_tree->Branch("jet12ystar",                      &m_productForFill->jet12ystar,                       "jet12ystar/D"                      );
     m_tree->Branch("jet12yboost",                     &m_productForFill->jet12yboost,                      "jet12yboost/D"                     );
+    m_tree->Branch("met",                             &m_productForFill->met,                              "met/D"                             );
+    m_tree->Branch("sumEt",                           &m_productForFill->sumEt,                            "sumEt/D"                           );
     m_tree->Branch("hltNumBits",                      &m_productForFill->hltNumBits,                       "hltNumBits/i"                      );
     m_tree->Branch("hltAssignedBit",                  &m_productForFill->hltAssignedBit,                   "hltAssignedBit/I"                  );
     m_tree->Branch("hltAssignedPrescale",             &m_productForFill->hltAssignedPrescale,              "hltAssignedPrescale/I"             );

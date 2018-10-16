@@ -1,7 +1,7 @@
 #include "DijetAnalysis/Analysis/interface/LeadingJetPtFilter.h"
 
 // -- constructor
-dijet::LeadingJetPtFilter::LeadingJetPtFilter(const edm::ParameterSet& config) : 
+dijet::LeadingJetPtFilter::LeadingJetPtFilter(const edm::ParameterSet& config) :
     NtupleFilterBase(config),
     minJetPt_(config.getParameter<double>("minJetPt")) {
     // -- validate configuration

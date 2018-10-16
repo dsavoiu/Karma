@@ -9,8 +9,10 @@ from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyC
 options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))
 options.isData=1
 options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-options.edmOut="testFullSkim_out.root"
-options.maxEvents=-1 #10000
+options.edmOut="testFullSkim_out_1000.root"
+options.maxEvents=1000
+#options.edmOut="testFullSkim_out.root"
+#options.maxEvents=-1
 options.dumpPython=1
 
 
@@ -107,7 +109,7 @@ for _jet_collection_name in uncorrected_jet_collection_names:
     ])
     mainSequence *= getattr(process, _jet_collection_name)
 
-# create "dijet::MET" collections for PF and CHS Mets
+# create "dijet::MET" collections for (uncorrected) PF and CHS Mets
 process.dijetPFMETs = dijetPFMETCollectionProducer.clone()
 mainSequence *= process.dijetPFMETs
 _accumulated_output_commands.append("keep *_dijetPFMETs_*_DIJET")

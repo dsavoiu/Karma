@@ -26,6 +26,15 @@ dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
     }
     m_jetCorrector = std::unique_ptr<FactorizedJetCorrector>(new FactorizedJetCorrector(jecParameters));
 
+    // set up a separate L1 corrector (needed for type-I MET)
+    m_jetCorrector_L1 = std::unique_ptr<FactorizedJetCorrector>(
+        new FactorizedJetCorrector({
+            JetCorrectorParameters(
+                jec + "_L1FastJet_" + jecAlgoName + ".txt"
+            )
+        })
+    );
+
     // set up a JetCorrectionUncertainty (one per stream)
     m_jecUncertaintyShift = m_configPSet.getParameter<double>("jecUncertaintyShift");
     m_jetCorrectionUncertainty = std::unique_ptr<JetCorrectionUncertainty>(new JetCorrectionUncertainty(
@@ -70,13 +79,19 @@ void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
 
         // setup of FactorizedJetCorrector and JetCorrectionUncertainty
         setupFactorizedJetCorrector(*m_jetCorrector, *this->dijetEventHandle, inputJet);
+        setupFactorizedJetCorrector(*m_jetCorrector_L1, *this->dijetEventHandle, inputJet);
         setupFactorProvider(*m_jetCorrectionUncertainty, inputJet);
 
         // copy jet to output
         outputJetCollection->push_back(inputJet);
+
+        // write out L1-corrected p4 explicitly
+        outputJetCollection->back().p4CorrL1 = outputJetCollection->back().p4 * m_jetCorrector_L1->getCorrection();
+
         // apply correction and uncertainty shift to output jet
         outputJetCollection->back().p4 *= m_jetCorrector->getCorrection();
         outputJetCollection->back().p4 *= (1.0 + m_jecUncertaintyShift * m_jetCorrectionUncertainty->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
+
     }
 
     // re-sort jets by pT

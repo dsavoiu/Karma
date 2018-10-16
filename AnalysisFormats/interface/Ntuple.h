@@ -35,6 +35,10 @@ namespace dijet {
         double jet12ystar = UNDEFINED_DOUBLE;
         double jet12yboost = UNDEFINED_DOUBLE;
 
+        // MET
+        double met = UNDEFINED_DOUBLE;
+        double sumEt = UNDEFINED_DOUBLE;
+
         // trigger result and prescale factor
         unsigned int hltNumBits = 0;
         int hltAssignedBit = -1;

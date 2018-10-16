@@ -8,6 +8,7 @@ dijetNtupleProducer = cms.EDProducer(
         dijetEventSrc = cms.InputTag("dijetEvents"),
         dijetRunSrc = cms.InputTag("dijetEvents"),
         dijetJetCollectionSrc = cms.InputTag("dijetCorrectedJets"),
+        dijetMETCollectionSrc = cms.InputTag("dijetCorrectedMETs"),
         dijetJetTriggerObjectMapSrc = cms.InputTag("dijetJetTriggerObjectMaps"),
 
         # -- other configuration

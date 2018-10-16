@@ -65,6 +65,9 @@ namespace dijet {
         double hfHadronFraction = UNDEFINED_DOUBLE;
         double hfEMFraction = UNDEFINED_DOUBLE;
 
+        // pileup-corrected p4 (JEC L1), needed for Type-I MET correction
+        dijet::LorentzVector p4CorrL1;
+
     };
     typedef std::vector<dijet::Jet> JetCollection;
 

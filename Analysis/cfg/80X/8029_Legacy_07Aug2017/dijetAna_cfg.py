@@ -7,14 +7,14 @@ if not os.getenv("GC_VERSION"):
     options.inputFiles="file://{}".format(os.path.realpath("../../../../Skimming/test/FullSkim/testFullSkim_out.root"))
     options.isData=1
     options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-    options.edmOut="testSkim_out.root"
+    #options.edmOut="testSkim_out.root"
     options.maxEvents=1000
     options.dumpPython=1
 else:
     # -- running on grid node
     options.globalTag = "__GLOBALTAG__"
     options.isData = __IS_DATA__
-    options.edmOut = options.outputFile  # FIXME #.split('.')[:-1] + "_edmOut.root"
+    #options.edmOut = options.outputFile  # FIXME #.split('.')[:-1] + "_edmOut.root"
     options.dumpPython=False
     options.reportEvery = 100000 #int(max(1, 10**(round(math.log(__MAX_EVENTS__)/math.log(10))-1)))
 
@@ -29,12 +29,13 @@ process = createProcess("DIJETANA", num_threads=1)
 # -- configure CMSSW modules
 
 from DijetAnalysis.Analysis.JetTriggerObjectMatchingProducer_cfi import dijetJetTriggerObjectMatchingProducer
-from DijetAnalysis.Analysis.JECProducer_cfi import dijetJECProducer
+from DijetAnalysis.Analysis.CorrectedValidJetsProducer_cfi import dijetCorrectedValidJetsProducer
+from DijetAnalysis.Analysis.CorrectedMETsProducer_cfi import dijetCorrectedMETsProducer
 from DijetAnalysis.Analysis.NtupleProducer_cfi import dijetNtupleProducer
 from DijetAnalysis.Analysis.NtupleSplicer_cfi import dijetNtupleSplicer
 
-process.correctedJets = dijetJECProducer.clone(
-    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V12_DATA/Summer16_07Aug2017{RUN}_V12_DATA".format(
+process.correctedJets = dijetCorrectedValidJetsProducer.clone(
+    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
         os.getenv('CMSSW_BASE'),
         RUN="GH"
     )
@@ -46,14 +47,13 @@ process.correctedJetsDnShift = process.correctedJets.clone(
     jecUncertaintyShift = cms.double(-1.0),
 )
 
-#process.uncorrectedJets = dijetJECProducer.clone(
-#    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V12_DATA/Summer16_07Aug2017{RUN}_V12_DATA".format(
+#process.uncorrectedJets = dijetCorrectedValidJetsProducer.clone(
+#    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
 #        os.getenv('CMSSW_BASE'),
 #        RUN="GH"
 #    ),
 #    jecLevels = cms.vstring("L3Absolute"),
 #)
-
 
 process.jetTriggerObjectMap = dijetJetTriggerObjectMatchingProducer.clone(
     dijetEventSrc = cms.InputTag("dijetEvents"),
@@ -62,10 +62,21 @@ process.jetTriggerObjectMap = dijetJetTriggerObjectMatchingProducer.clone(
     dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
 )
 
+process.correctedMETs = dijetCorrectedMETsProducer.clone(
+    # -- input sources
+    dijetEventSrc = cms.InputTag("dijetEvents"),
+    dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
+    dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets"),
+)
+
 process.ntuple = dijetNtupleProducer.clone(
     dijetJetCollectionSrc = cms.InputTag("correctedJets"),
-    #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),
+    #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),  # no JEC
+
     dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap"),
+
+    dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
+    #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies.root".format(os.getenv("CMSSW_BASE"))
@@ -81,11 +92,11 @@ process.jetPairFilter = cms.EDFilter(
 )
 
 # filter ensuring that the leading jet is within eta
-process.leadingJetEtaFilter = cms.EDFilter(
-    "LeadingJetEtaFilter",
+process.leadingJetRapidityFilter = cms.EDFilter(
+    "LeadingJetRapidityFilter",
     cms.PSet(
         dijetNtupleSrc = cms.InputTag("ntuple"),
-        maxJetAbsEta = cms.double(2.5),
+        maxJetAbsRapidity = cms.double(3.0),
     )
 )
 
@@ -98,25 +109,37 @@ process.leadingJetPtFilter = cms.EDFilter(
     )
 )
 
-preSequence = cms.Sequence(
+# analyzer for writing out flat ntuple
+process.flatNtupleWriter = cms.EDAnalyzer(
+    "NtupleFlatOutput",
+    cms.PSet(
+        dijetNtupleSrc = cms.InputTag("ntuple"),
+        outputFileName = cms.string(options.outputFile),
+        treeName = cms.string("Events"),
+    )
+)
+
+_main_sequence = cms.Sequence(
     #process.uncorrectedJets *
     process.correctedJets *
-    process.correctedJetsDnShift *
-    process.correctedJetsUpShift *
+    #process.correctedJetsDnShift *
+    #process.correctedJetsUpShift *
     process.jetTriggerObjectMap *
-    process.ntuple * 
-    process.jetPairFilter * 
-    process.leadingJetEtaFilter * 
-    process.leadingJetPtFilter
-);
-
-process.path = cms.Path(preSequence)
+    process.correctedMETs *
+    process.ntuple *
+    process.jetPairFilter *
+    #process.leadingJetRapidityFilter *
+    process.leadingJetPtFilter *
+    process.flatNtupleWriter
+)
+process.path = cms.Path(_main_sequence)
 
 
 # -- must be called at the end
 finalizeAndRun(process, outputCommands=['keep *_*_*_DIJETANA', 'drop *_jetTriggerObjectMap_*_DIJETANA'])
 
-# selective writeout based on path decisions
-process.edmOut.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('path')
-)
+
+## selective writeout based on path decisions
+#process.edmOut.SelectEvents = cms.untracked.PSet(
+#    SelectEvents = cms.vstring('path')
+#)

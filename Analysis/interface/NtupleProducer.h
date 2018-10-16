@@ -143,6 +143,9 @@ namespace dijet {
         typename edm::Handle<dijet::JetCollection> dijetJetCollectionHandle;
         edm::EDGetTokenT<dijet::JetCollection> dijetJetCollectionToken;
 
+        typename edm::Handle<dijet::METCollection> dijetMETCollectionHandle;
+        edm::EDGetTokenT<dijet::METCollection> dijetMETCollectionToken;
+
         typename edm::Handle<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapHandle;
         edm::EDGetTokenT<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapToken;
 

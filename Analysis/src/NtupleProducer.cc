@@ -23,6 +23,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
     dijetRunToken = consumes<dijet::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("dijetRunSrc"));
     dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
+    dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
 
 }
@@ -75,10 +76,13 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
     // jet collection
     obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
-    // jet collection
+    // MET collection
+    obtained &= event.getByToken(this->dijetMETCollectionToken, this->dijetMETCollectionHandle);
+    // jet trigger objects map
     obtained &= event.getByToken(this->dijetJetTriggerObjectsMapToken, this->dijetJetTriggerObjectsMapHandle);
 
     assert(obtained);  // raise if one collection could not be obtained
+    assert(this->dijetMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
     // -- populate outputs
 
@@ -175,6 +179,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet12yboost = 0.5 * (jet1->p4.Rapidity() + jet2->p4.Rapidity());
         }
     }
+
+    outputNtupleEntry->met = this->dijetMETCollectionHandle->at(0).p4.Pt();
+    outputNtupleEntry->sumEt = this->dijetMETCollectionHandle->at(0).sumEt;
 
     // move outputs to event tree
     event.put(std::move(outputNtupleEntry));

@@ -102,6 +102,7 @@ namespace dijet {
         const edm::ParameterSet& m_configPSet;
 
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector;
+        std::unique_ptr<FactorizedJetCorrector> m_jetCorrector_L1;
         std::unique_ptr<JetCorrectionUncertainty> m_jetCorrectionUncertainty;
         double m_jecUncertaintyShift = 0.0;
 

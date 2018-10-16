@@ -61,6 +61,7 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 
 from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
 from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
+from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
@@ -89,8 +90,7 @@ process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
 )
 _accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
 
-
-preSequence = cms.Sequence(
+mainSequence = cms.Sequence(
     process.dijetEvents *
     process.dijetEventHLTFilter *
     process.dijetTriggerObjects
@@ -117,15 +117,23 @@ for _jet_collection_name in uncorrected_jet_collection_names:
     _accumulated_output_commands.extend([
         "keep *_{}_*_DIJET".format(_module_name),
     ])
-    preSequence *= getattr(process, _jet_collection_name)
+    mainSequence *= getattr(process, _jet_collection_name)
 
+# create "dijet::MET" collections for PF and CHS Mets
+process.dijetPFMETs = dijetPFMETCollectionProducer.clone()
+mainSequence *= process.dijetPFMETs
+_accumulated_output_commands.append("keep *_dijetPFMETs_*_DIJET")
 
-process.path = cms.Path(preSequence)
+process.dijetCHSMETs = dijetCHSMETCollectionProducer(process, isData=options.isData).clone()
+mainSequence *= process.dijetCHSMETs
+_accumulated_output_commands.append("keep *_dijetCHSMETs_*_DIJET")
 
+process.path = cms.Path(mainSequence)
+
+#_accumulated_output_commands.append("keep *_selectedPatTrigger_*_*")
 
 # -- must be called at the end
 finalizeAndRun(process, outputCommands=_accumulated_output_commands)
-
 
 # selective writeout based on path decisions
 process.edmOut.SelectEvents = cms.untracked.PSet(

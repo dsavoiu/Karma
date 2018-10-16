@@ -1,7 +1,7 @@
 #include "DijetAnalysis/Analysis/interface/LeadingJetEtaFilter.h"
 
 // -- constructor
-dijet::LeadingJetEtaFilter::LeadingJetEtaFilter(const edm::ParameterSet& config) : 
+dijet::LeadingJetEtaFilter::LeadingJetEtaFilter(const edm::ParameterSet& config) :
     NtupleFilterBase(config),
     maxJetAbsEta_(config.getParameter<double>("maxJetAbsEta")) {
     // -- validate configuration
