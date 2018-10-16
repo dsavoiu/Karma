@@ -66,6 +66,8 @@ process.ntuple = dijetNtupleProducer.clone(
     dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
     #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
+    isData = cms.bool(options.isData),
+
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies.root".format(os.getenv("CMSSW_BASE"))
     ),
@@ -101,9 +103,11 @@ process.leadingJetPtFilter = cms.EDFilter(
 process.flatNtupleWriter = cms.EDAnalyzer(
     "NtupleFlatOutput",
     cms.PSet(
+        isData = cms.bool(options.isData),
         dijetNtupleSrc = cms.InputTag("ntuple"),
         outputFileName = cms.string("output_flat.root"),
         treeName = cms.string("Events"),
+        checkForCompleteness = cms.bool(False),
     )
 )
 

@@ -19,6 +19,9 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
         std::cout << "    " << mapIter.first << " -> " << &(*mapIter.second) << std::endl;
     }
 
+    // set a flag if we are running on (real) data
+    m_isData = m_configPSet.getParameter<bool>("isData");
+
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
     dijetRunToken = consumes<dijet::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("dijetRunSrc"));

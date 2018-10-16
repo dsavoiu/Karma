@@ -132,6 +132,7 @@ namespace dijet {
         // ----------member data ---------------------------
 
         const edm::ParameterSet& m_configPSet;
+        bool m_isData;
 
         // TODO: move to global cache
         std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;

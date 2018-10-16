@@ -55,6 +55,7 @@ namespace dijet {
         // ----------member data ---------------------------
 
         const edm::ParameterSet& m_configPSet;
+        bool m_isData;
 
         std::unique_ptr<TFile> m_tFile;
         

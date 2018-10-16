@@ -8,5 +8,6 @@ dijetNtupleFlatOutput = cms.EDAnalyzer(
         dijetNtupleSrc = cms.InputTag("ntuple"),
         outputFileName = cms.string("output_flat.root"),
         treeName = cms.string("Events"),
+        checkForCompleteness = cms.bool(True),
     )
 )
