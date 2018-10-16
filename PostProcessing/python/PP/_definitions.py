@@ -38,6 +38,9 @@ QUANTITY_BINNINGS = {
     'jet1HLTAssignedPathEfficiency': np.linspace(0, 1, 25),
     'jet2HLTAssignedPathEfficiency': np.linspace(0, 1, 25),
 }
+QUANTITY_BINNINGS['jet1MatchedGenJetPt'] = QUANTITY_BINNINGS['jet1pt']
+QUANTITY_BINNINGS['jet12MatchedGenJetPairPtAve'] = QUANTITY_BINNINGS['jet12ptave']
+QUANTITY_BINNINGS['jet12MatchedGenJetPairMass'] = QUANTITY_BINNINGS['jet12mass']
 
 def basic_selection(data_frame):
     return (data_frame

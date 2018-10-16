@@ -287,6 +287,14 @@ class Plotter(object):
 
             ax.xaxis.set_minor_formatter(_formatter)
 
+        # handle log y-axis formatting
+        if plot_config.get('y_scale', None) == 'log':
+            _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
+            _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+            _formatter.set_locs(locs=_log_decade_ticklabels)
+
+            ax.yaxis.set_minor_formatter(_formatter)
+
     def _get_figure(self, figure_name):
         if figure_name not in self._figures:
             self._figures[figure_name] = plt.figure()
