@@ -1,5 +1,6 @@
 // system include files
 #include <iostream>
+#include <bitset>
 
 #include "DijetAnalysis/Analysis/interface/NtupleProducer.h"
 
@@ -56,13 +57,27 @@ dijet::NtupleProducer::~NtupleProducer() {
 
     // compute the unversioned HLT path names
     // (needed later to get the trigger efficiencies)
-    boost::smatch matched_substrings;
+
     runCache->triggerPathsUnversionedNames_.resize(runHandle->triggerPathInfos.size());
+    runCache->triggerPathsIndicesInConfig_.resize(runHandle->triggerPathInfos.size(), -1);
     for (size_t iPath = 0; iPath < runHandle->triggerPathInfos.size(); ++iPath) {
         const std::string& pathName = runHandle->triggerPathInfos[iPath].name_;
+        ///std::cout << "[Check iPath " << iPath << "] " << pathName << std::endl;
+
+        boost::smatch matched_substrings;
         if (boost::regex_match(pathName, matched_substrings, globalCache->hltVersionPattern_) && matched_substrings.size() > 1) {
             // need matched_substrings[1] because matched_substrings[0] is always the entire string
             runCache->triggerPathsUnversionedNames_[iPath] = matched_substrings[1];
+            ///std::cout << " -> unversioned name: " << matched_substrings[1] << std::endl;
+        }
+
+        for (size_t iRequestedPath = 0; iRequestedPath < globalCache->hltPaths_.size(); ++iRequestedPath) {
+            ///std::cout << "[Check iRequestedPath " << iRequestedPath << "] " << globalCache->hltPaths_[iRequestedPath] << std::endl;
+            if (runCache->triggerPathsUnversionedNames_[iPath] == globalCache->hltPaths_[iRequestedPath]) {
+                std::cout << " -> matched! " << iPath << " = " << iRequestedPath << std::endl;
+                runCache->triggerPathsIndicesInConfig_[iPath] = iRequestedPath;
+                break;
+            }
         }
     }
 
@@ -107,7 +122,22 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->npv     = this->dijetEventHandle->npv;
     outputNtupleEntry->npvGood = this->dijetEventHandle->npvGood;
 
-    // trigger result
+    // trigger results
+    std::bitset<8*sizeof(unsigned long)> helperBitset;
+    for (size_t iBit = 0; iBit < this->dijetEventHandle->hltBits.size(); ++iBit) {
+        ///std::cout << "[Check iBit " << iBit << "]" << std::endl;
+        if (this->dijetEventHandle->hltBits[iBit]) {
+            ///std::cout << " -> fired!" << std::endl;
+            // get the index
+            const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[iBit];
+            ///std::cout << " -> idxInConfig = " << idxInConfig << std::endl;
+            if (idxInConfig >= 0) {
+                helperBitset[idxInConfig] = true;
+            }
+        }
+    }
+    ///std::cout << " -> helperBitset - " << helperBitset << std::endl;
+    outputNtupleEntry->hltBits = helperBitset.to_ulong();
     outputNtupleEntry->hltNumBits = std::accumulate(this->dijetEventHandle->hltBits.begin(), this->dijetEventHandle->hltBits.end(), 0);
 
     // assign highest-threshold trigger path (assume ordered)

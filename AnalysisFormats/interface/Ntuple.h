@@ -44,6 +44,9 @@ namespace dijet {
         int hltAssignedBit = -1;
         int hltAssignedPrescale = -1;
 
+        // trigger results
+        unsigned long hltBits;
+
         // HLT objects
         double jet1HLTpt = UNDEFINED_DOUBLE;
         unsigned int jet1HLTNumMatchedTriggerObjects = 0;

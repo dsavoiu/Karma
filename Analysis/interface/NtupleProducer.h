@@ -65,6 +65,12 @@ namespace dijet {
             //     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
             // );
 
+            // create list of requested HLT path names
+            hltPaths_ = pSet_.getParameter<std::vector<std::string>>("hltPaths");
+
+            // throw if number of configured paths exceeds size of TTree branch used to store them
+            assert(hltPaths_.size() <= 8 * sizeof(unsigned long));
+
             // if JetID set to 'None', leave jetIDProvider_ as nullptr
             if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
                 jetIDProvider_ = std::unique_ptr<JetIDProvider>(
@@ -78,6 +84,7 @@ namespace dijet {
         };
 
         const boost::regex hltVersionPattern_;
+        std::vector<std::string> hltPaths_;
 
         std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
         std::unique_ptr<JetIDProvider> jetIDProvider_;
@@ -94,6 +101,7 @@ namespace dijet {
         NtupleProducerRunCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
 
         std::vector<std::string> triggerPathsUnversionedNames_;
+        std::vector<int> triggerPathsIndicesInConfig_;
 
     };
 
