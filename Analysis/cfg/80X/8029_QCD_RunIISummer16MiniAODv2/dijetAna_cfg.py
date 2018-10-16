@@ -4,10 +4,10 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles="file://{}".format(os.path.realpath("../../../../Skimming/test/FullSkim/testFullSkim_out.root"))
-    options.isData=1
-    options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-    #options.edmOut="testSkim_out.root"
+    options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullMCSkim/testFullMCSkim_out.root"))
+    options.isData=0
+    options.globalTag="80X_mcRun2_asymptotic_2016_TrancheIV_v6"
+    #options.edmOut="testFullAnalysis_out.root"
     options.maxEvents=1000
     options.dumpPython=1
 else:
@@ -29,6 +29,7 @@ process = createProcess("DIJETANA", num_threads=1)
 # -- configure CMSSW modules
 
 from DijetAnalysis.Analysis.JetTriggerObjectMatchingProducer_cfi import dijetJetTriggerObjectMatchingProducer
+from DijetAnalysis.Analysis.JetGenJetMatchingProducer_cfi import dijetJetGenJetMatchingProducer
 from DijetAnalysis.Analysis.CorrectedValidJetsProducer_cfi import dijetCorrectedValidJetsProducer
 from DijetAnalysis.Analysis.CorrectedMETsProducer_cfi import dijetCorrectedMETsProducer
 from DijetAnalysis.Analysis.NtupleProducer_cfi import dijetNtupleProducer
@@ -60,6 +61,11 @@ process.jetTriggerObjectMap = dijetJetTriggerObjectMatchingProducer.clone(
     dijetJetCollectionSrc = cms.InputTag("correctedJets"),
     dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
 )
+process.jetGenJetMap = dijetJetGenJetMatchingProducer.clone(
+    dijetEventSrc = cms.InputTag("dijetEvents"),
+    dijetJetCollectionSrc = cms.InputTag("correctedJets"),
+    dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets"),
+)
 
 process.correctedMETs = dijetCorrectedMETsProducer.clone(
     # -- input sources
@@ -73,11 +79,10 @@ process.ntuple = dijetNtupleProducer.clone(
     #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),  # no JEC
 
     dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap"),
+    dijetJetGenJetMapSrc = cms.InputTag("jetGenJetMap"),
 
     dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
     #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
-
-    isData = cms.bool(options.isData),
 
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies_bootstrapping_2018-09-24.root".format(os.getenv("CMSSW_BASE"))
@@ -114,11 +119,9 @@ process.leadingJetPtFilter = cms.EDFilter(
 process.flatNtupleWriter = cms.EDAnalyzer(
     "NtupleFlatOutput",
     cms.PSet(
-        isData = cms.bool(options.isData),
         dijetNtupleSrc = cms.InputTag("ntuple"),
         outputFileName = cms.string(options.outputFile),
         treeName = cms.string("Events"),
-        checkForCompleteness = cms.bool(False),
     )
 )
 
@@ -127,6 +130,7 @@ _main_sequence = cms.Sequence(
     process.correctedJets *
     #process.correctedJetsDnShift *
     #process.correctedJetsUpShift *
+    process.jetGenJetMap *
     process.jetTriggerObjectMap *
     process.correctedMETs *
     process.ntuple *
