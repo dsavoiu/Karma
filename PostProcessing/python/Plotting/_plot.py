@@ -370,6 +370,7 @@ class Plotter(object):
 
         # step 2: retrieve data and plot
 
+        _2d_plots = []  # keep track of 2D plots
         for _pc in plot_config['subplots']:
             _kwargs = deepcopy(_pc)
 
@@ -465,7 +466,9 @@ class Plotter(object):
             # -- sort out positional arguments to plot method
 
             if _plot_method_name == 'pcolormesh':
-                _args = [_plot_data['xedges'], _plot_data['yedges'], _plot_data['z']]
+                # mask zeros
+                _z_masked = np.ma.array(_plot_data['z'], mask=_plot_data['z']==0)
+                _args = [_plot_data['xedges'], _plot_data['yedges'], _z_masked]
                 _kwargs.pop('color', None)
                 _kwargs.pop('xerr', None)
                 _kwargs.pop('yerr', None)
@@ -480,10 +483,14 @@ class Plotter(object):
                 continue
 
             # run the plot method
-            _plot_method(
+            _plot_handle = _plot_method(
                 *_args,
                 **_kwargs
             )
+
+            # store 2D plots for displaying color bars
+            if _plot_method_name == 'pcolormesh':
+                _2d_plots.append(_plot_handle)
 
             if _text_file is not None:
                 _text_file.write("- {}(\n\t{},\n\t{}\n)\n".format(
@@ -507,6 +514,11 @@ class Plotter(object):
             _prop_val = plot_config.get(_prop_name, None)
             if _prop_val is not None:
                 getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
+
+        # draw colorbar if there was a 2D plot involved
+        if _2d_plots:
+            for _2d_plot in _2d_plots:
+                _fig.colorbar(_2d_plot, ax=_ax)
 
         # step 4: save figures
         self._close_plot(_ax, plot_config)
