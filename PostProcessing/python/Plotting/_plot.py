@@ -312,9 +312,9 @@ class Plotter(object):
         #
         #    ax.yaxis.set_minor_formatter(_formatter)
 
-    def _get_figure(self, figure_name):
+    def _get_figure(self, figure_name, figsize=None):
         if figure_name not in self._figures:
-            self._figures[figure_name] = plt.figure()
+            self._figures[figure_name] = plt.figure(figsize=figsize)
         return self._figures[figure_name]
 
     def _run_with_context(self, context):
@@ -353,7 +353,8 @@ class Plotter(object):
 
         _filename = os.path.join(self._output_folder, plot_config['filename'])
 
-        _fig = self._get_figure(_filename)
+        _figsize = plot_config.get('figsize', None)
+        _fig = self._get_figure(_filename, figsize=_figsize)
         _ax = _fig.gca()
 
         _stack_bottoms = {}
