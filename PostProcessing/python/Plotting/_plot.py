@@ -359,6 +359,15 @@ class Plotter(object):
 
         _stack_bottoms = {}
 
+        # enable text output, if requested
+        if plot_config.get("text_output", False):
+            _text_filename = '.'.join(_filename.split('.')[:-1]) + '.txt'
+            # need to create directory first
+            _make_directory(os.path.dirname(_text_filename))
+            _text_file = open(_text_filename, 'w')
+        else:
+            _text_file = None
+
         # step 2: retrieve data and plot
 
         for _pc in plot_config['subplots']:
@@ -476,9 +485,20 @@ class Plotter(object):
                 **_kwargs
             )
 
+            if _text_file is not None:
+                _text_file.write("- {}(\n\t{},\n\t{}\n)\n".format(
+                    _plot_method_name,
+                    ',\n\t'.join(["{}".format(repr(_arg)) for _arg in _args]),
+                    ',\n\t'.join(["{} = {}".format(_k, repr(_v)) for _k, _v in _kwargs.iteritems()]),
+                ))
+
             # update stack bottoms
             if _stack_name is not None:
                 _stack_bottoms[_stack_name] += _plot_data['y']
+
+        # close text output
+        if _text_file is not None:
+            _text_file.close()
 
         # step 3: figure adjustments
 
