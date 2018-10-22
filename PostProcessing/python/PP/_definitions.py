@@ -39,6 +39,7 @@ SPLITTINGS = {
 }
 
 QUANTITY_BINNINGS = {
+    'run': np.linspace(278820, 280385, 30),
     'metOverSumET' : np.linspace(0, 1, 101),
 
     # original (arbitrary) binning
@@ -56,16 +57,32 @@ QUANTITY_BINNINGS = {
     'jet12mass' : (200, 220, 242, 265, 290, 317, 345, 375, 407, 441, 477, 516, 557, 600, 645, 693, 744, 797, 853, 912, 973, 1036, 1102, 1171, 1243, 1318, 1397, 1480, 1567, 1657, 1750, 1849, 1952, 2060, 2173, 2292, 2418, 2551, 2692, 2842, 3000, 3168, 3346, 3533, 3730, 3933, 4147, 4373, 4612, 4861, 5105, 5355, 5617, 5890, 6174, 6470, 6801, 7141, 7506, 7900, 8396, 8930, 9551, 9951),
     'jet12ptave' : (100, 110, 120, 131, 142, 154, 166, 179, 193, 207, 222, 238, 255, 273, 291, 310, 330, 351, 373, 397, 422, 448, 475, 503, 532, 563, 595, 628, 663, 700, 738, 778, 820, 863, 908, 955, 1004, 1055, 1108, 1163, 1220, 1280, 1342, 1406, 1473, 1543, 1615, 1690, 1768, 1850, 1935, 2023, 2114, 2209, 2307, 2410, 2515, 2624, 2738, 2857, 2979, 3104, 3233, 3372, 3517, 3580, 3709, 3810, 3914, 3973),
 
-
+    # HLT
     'jet1HLTAssignedPathIndex': np.arange(-1, 12) - 0.5,
     'jet2HLTAssignedPathIndex': np.arange(-1, 12) - 0.5,
     'jet1HLTAssignedPathPrescale': np.array([-1, 0, 1, 2, 11, 21, 41, 71, 121]) - 0.5,
     'jet2HLTAssignedPathPrescale': np.array([-1, 0, 1, 2, 11, 21, 41, 71, 121]) - 0.5,
     'jet1HLTAssignedPathEfficiency': np.linspace(0, 1, 25),
     'jet2HLTAssignedPathEfficiency': np.linspace(0, 1, 25),
-    'jet1phi': (-3.2, 3.2),  # one big bin for counting experiments
-    'run': np.linspace(278820, 280385, 30),
+
+    # Other jet quantities
+    'jet1y': [-3.0, -2.853, -2.650, -2.500, -2.322, -2.172, -1.930, -1.653, -1.479, -1.305, -1.044, -0.783, -0.522, -0.261, 0.000, 0.261, 0.522, 0.783, 1.044, 1.305, 1.479, 1.653, 1.930, 2.172, 2.322, 2.500, 2.650, 2.853, 3.0],
+    'jet1phi': np.linspace(-np.pi, np.pi, 101),  #(-np.pi, np.pi),  # one big bin for counting experiments
+    'jet12ystar': np.arange(0, 3.0 + 0.1, 0.1),   # fine binning
+    'jet12yboost': np.arange(0, 3.0 + 0.1, 0.1),  # fine binning
 }
+QUANTITY_BINNINGS['absjet1y'] = QUANTITY_BINNINGS['jet12yboost']
+QUANTITY_BINNINGS['jet1eta'] = QUANTITY_BINNINGS['jet1y']
+QUANTITY_BINNINGS['absjet1eta'] = QUANTITY_BINNINGS['absjet1y']
+
+QUANTITY_BINNINGS['jet2pt'] = QUANTITY_BINNINGS['jet1pt']
+QUANTITY_BINNINGS['jet2phi'] = QUANTITY_BINNINGS['jet1phi']
+QUANTITY_BINNINGS['jet2y'] = QUANTITY_BINNINGS['jet1y']
+QUANTITY_BINNINGS['jet2eta'] = QUANTITY_BINNINGS['jet1eta']
+
+QUANTITY_BINNINGS['absjet2y'] = QUANTITY_BINNINGS['absjet1y']
+QUANTITY_BINNINGS['absjet2eta'] = QUANTITY_BINNINGS['absjet1eta']
+
 QUANTITY_BINNINGS['jet1MatchedGenJetPt'] = QUANTITY_BINNINGS['jet1pt']
 QUANTITY_BINNINGS['jet12MatchedGenJetPairPtAve'] = QUANTITY_BINNINGS['jet12ptave']
 QUANTITY_BINNINGS['jet12MatchedGenJetPairMass'] = QUANTITY_BINNINGS['jet12mass']
@@ -74,6 +91,10 @@ def basic_selection(data_frame):
     return (data_frame
         .Define("isValid", "(jet1HLTAssignedPathEfficiency>0.0&&jet1HLTAssignedPathIndex>=0)")
         .Define("metOverSumET", "met/sumEt")
+        .Define("absjet1y", "abs(jet1y)")
+        .Define("absjet2y", "abs(jet2y)")
+        .Define("absjet1eta", "abs(jet1eta)")
+        .Define("absjet2eta", "abs(jet2eta)")
         .Define("HLT_PFJet40",  "(hltBits&{})>0".format(2**0))
         .Define("HLT_PFJet60",  "(hltBits&{})>0".format(2**1))
         .Define("HLT_PFJet80",  "(hltBits&{})>0".format(2**2))
@@ -87,8 +108,8 @@ def basic_selection(data_frame):
         .Filter("isValid")
         .Filter("abs(jet1pt) > 60")
         .Filter("abs(jet2pt) > 60")
-        .Filter("abs(jet1y) < 3.0")
-        .Filter("abs(jet2y) < 3.0")
+        #.Filter("abs(jet1y) < 3.0")
+        #.Filter("abs(jet2y) < 3.0")
         #.Filter("metOverSumET < 0.3")
         .Define("totalWeight", "jet1HLTAssignedPathPrescale/jet1HLTAssignedPathEfficiency")
         .Define("triggerEfficiencyWeight", "1.0/jet1HLTAssignedPathEfficiency")
