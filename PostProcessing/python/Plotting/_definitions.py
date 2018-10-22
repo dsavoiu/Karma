@@ -6,8 +6,18 @@ EXPANSIONS = {
             "scale": "log",
             'range' : (60, 4827),
             'xs_range': (1e-10, 1e10),
-            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\mathrm{{GeV}}^{{-1}}$".format(r"{p_{\mathrm{T}}^{\mathrm{jet1}}}")
-
+            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{p_{\mathrm{T}}^{\mathrm{jet1}}}"),
+            'gen_name': "jet1MatchedGenJetPt",
+            'gen_label': r"${p_{\mathrm{T}}^{\mathrm{jet1,gen}}}$ /  GeV",
+            "stagger_factors": {
+                "inclusive": 1e0,
+                "YB01_YS01": 1e4,
+                "YB01_YS12": 1e3,
+                "YB01_YS23": 1e-1,
+                "YB12_YS01": 1e1,
+                "YB12_YS12": 1e0,
+                "YB23_YS01": 1e-3,
+            }
         },
         {
             "name": "metOverSumET",
@@ -16,6 +26,8 @@ EXPANSIONS = {
             'range' : (0, 1),
             'xs_range': None,
             'xs_label': "Diff. cross section / pb",
+            'gen_name': None,
+            'gen_label': None,
         },
         {
             "name": "jet12ptave",
@@ -23,7 +35,18 @@ EXPANSIONS = {
             "scale": "log",
             'range' : (100, 4045),
             'xs_range': (1e-10, 1e10),
-            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\mathrm{{GeV}}^{{-1}}$".format(r"{\langle p_{\mathrm{T}} \rangle}_{1,2}")
+            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{\langle p_{\mathrm{T}} \rangle}_{1,2}"),
+            'gen_name': "jet12MatchedGenJetPairPtAve",
+            'gen_label': r"${\langle p_{\mathrm{T}} \rangle}_{1,2}^{\mathrm{gen}}$ / GeV",
+            "stagger_factors": {
+                "inclusive": 1e0,
+                "YB01_YS01": 1e4,
+                "YB01_YS12": 1e3,
+                "YB01_YS23": 1e-1,
+                "YB12_YS01": 1e1,
+                "YB12_YS12": 1e0,
+                "YB23_YS01": 1e-3,
+            }
         },
         {
             "name": "jet12mass",
@@ -31,7 +54,18 @@ EXPANSIONS = {
             "scale": "log",
             'range' : (200, 9607),
             'xs_range': (1e-9, 1e10),
-            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\mathrm{{GeV}}^{{-1}}$".format(r"{m_{\mathrm{jj}}}")
+            'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{m_{\mathrm{jj}}}"),
+            'gen_name': "jet12MatchedGenJetPairMass",
+            'gen_label': r"${m_{\mathrm{jj}}^{\mathrm{gen}}}$ / GeV",
+            "stagger_factors": {
+                "inclusive": 1e0,
+                "YB01_YS01": 1e-2,
+                "YB01_YS12": 1e2,
+                "YB01_YS23": 1e4,
+                "YB12_YS01": 1e-3,
+                "YB12_YS12": 1e1,
+                "YB23_YS01": 1e-3,
+            }
         },
         {
             "name": "jet1phi",
@@ -40,6 +74,8 @@ EXPANSIONS = {
             'range' : (-3.2, 3.2),
             'xs_range': None,
             'xs_label': "Cross section / pb",
+            'gen_name': None,
+            'gen_label': None,
         },
     ],
     'ybys' : [
@@ -49,7 +85,6 @@ EXPANSIONS = {
             "color": "royalblue",
             "marker": "D",
             "marker_style": "full",
-            "stagger_factor": 1e4,
         },
         {
             "name": "YB01_YS12",
@@ -57,7 +92,6 @@ EXPANSIONS = {
             "color": "forestgreen",
             "marker": "v",
             "marker_style": "full",
-            "stagger_factor": 1e3,
         },
         {
             "name": "YB01_YS23",
@@ -65,7 +99,6 @@ EXPANSIONS = {
             "color": "darkred",
             "marker": "^",
             "marker_style": "full",
-            "stagger_factor": 1e-1,
         },
         {
             "name": "YB12_YS01",
@@ -73,7 +106,6 @@ EXPANSIONS = {
             "color": "darkorchid",
             "marker": "s",
             "marker_style": "full",
-            "stagger_factor": 1e1,
         },
         {
             "name": "YB12_YS12",
@@ -81,7 +113,6 @@ EXPANSIONS = {
             "color": "orange",
             "marker": ">",
             "marker_style": "full",
-            "stagger_factor": 1e0,
         },
         {
             "name": "YB23_YS01",
@@ -89,7 +120,6 @@ EXPANSIONS = {
             "color": "darkturquoise",
             "marker": "o",
             "marker_style": "full",
-            "stagger_factor": 1e-3,
         },
         {
             "name": "inclusive",
@@ -97,7 +127,6 @@ EXPANSIONS = {
             "color": "k",
             "marker": "o",
             "marker_style": "empty",
-            "stagger_factor": 1e0,
         },
     ],
     'trigger' : [

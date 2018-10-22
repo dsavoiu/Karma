@@ -76,7 +76,7 @@ class _ROOTObjectFunctions(object):
 
     @staticmethod
     def atleast(tobject, min_value):
-        """mask all values below thrashold"""
+        """mask all values below threshold"""
 
         # project preserving errors
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
