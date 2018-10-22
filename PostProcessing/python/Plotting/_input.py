@@ -88,6 +88,21 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
+    def threshold(tobject, min_value):
+        """returns a histogram like tobject with bins set to zero if the fall below the miminum value and to one if not. Errors are always set to zero"""
+
+        # project preserving errors
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+
+        for _bin_proxy in _new_tobject:
+            if _bin_proxy.value < min_value:
+                _bin_proxy.value, _bin_proxy.error = 0, 0
+            else:
+                _bin_proxy.value, _bin_proxy.error = 1, 0
+
+        return _new_tobject
+
+    @staticmethod
     def discard_errors(tobject):
         """set all bin errors to zero"""
 
@@ -140,6 +155,24 @@ class _ROOTObjectFunctions(object):
         for _bin_proxy, _bin_proxy_ref in zip(_new_tobject, _new_tobject_ref):
             if _bin_proxy.value < _bin_proxy_ref.value:
                 _bin_proxy.value, _bin_proxy.error = 0, 0
+
+        # cleanup
+        _new_tobject_ref.Delete()
+
+        return _new_tobject
+
+    @staticmethod
+    def threshold_by_ref(tobject, tobject_ref):
+        """set `tobject` bins to zero if their content is less than the value in `tobject_ref`, and to 1 otherwise. Result bin errors are always set to zero."""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+        _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref)
+
+        for _bin_proxy, _bin_proxy_ref in zip(_new_tobject, _new_tobject_ref):
+            if _bin_proxy.value < _bin_proxy_ref.value:
+                _bin_proxy.value, _bin_proxy.error = 0, 0
+            else:
+                _bin_proxy.value, _bin_proxy.error = 1, 0
 
         # cleanup
         _new_tobject_ref.Delete()
@@ -276,17 +309,19 @@ class InputROOT(object):
 
     # functions which can be applied to ROOT objects
     functions = {
-        'yerr':             _ROOTObjectFunctions.yerr,
-        'bin_width':        _ROOTObjectFunctions.bin_width,
-        'project_x':        _ROOTObjectFunctions.project_x,
-        'h':                _ROOTObjectFunctions.project_x,  # alias
-        'hist':             _ROOTObjectFunctions.project_x,  # alias
-        'divide':           _ROOTObjectFunctions.histdivide,
-        'discard_errors':   _ROOTObjectFunctions.discard_errors,
-        'efficiency':       _ROOTObjectFunctions.efficiency,
-        'atleast':          _ROOTObjectFunctions.atleast,
-        'max':              _ROOTObjectFunctions.max,
-        'mask_if_less':     _ROOTObjectFunctions.mask_if_less,
+        'yerr':                     _ROOTObjectFunctions.yerr,
+        'bin_width':                _ROOTObjectFunctions.bin_width,
+        'project_x':                _ROOTObjectFunctions.project_x,
+        'h':                        _ROOTObjectFunctions.project_x,  # alias
+        'hist':                     _ROOTObjectFunctions.project_x,  # alias
+        'divide':                   _ROOTObjectFunctions.histdivide,
+        'discard_errors':           _ROOTObjectFunctions.discard_errors,
+        'efficiency':               _ROOTObjectFunctions.efficiency,
+        'atleast':                  _ROOTObjectFunctions.atleast,
+        'max':                      _ROOTObjectFunctions.max,
+        'mask_if_less':             _ROOTObjectFunctions.mask_if_less,
+        'threshold':                _ROOTObjectFunctions.threshold,
+        'threshold_by_ref':         _ROOTObjectFunctions.threshold_by_ref,
     }
 
     def __init__(self, files_spec=None):
