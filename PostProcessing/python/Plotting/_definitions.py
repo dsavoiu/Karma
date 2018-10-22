@@ -229,5 +229,33 @@ EXPANSIONS = {
             'l1_factor': 1.0,
             'lumi_ub': 7544015569.439,  # Run2016G
         },
+    ],
+    'occupancy': [
+        {
+            "name": "absjet2y_vs_absjet1y",
+            #
+            "x_quantity": "absjet1y",
+            "x_label": r"$|{y^{\mathrm{jet1}}}|$",
+            "x_range": (0, 3),
+            "x_scale": "linear",
+            #
+            "y_quantity": "absjet2y",
+            "y_label": r"$|{y^{\mathrm{jet2}}}|$",
+            "y_range": (0, 3),
+            "y_scale": "linear",
+        },
+        {
+            "name": "jet12ystar_vs_jet12yboost",
+            #
+            "x_quantity": "jet12yboost",
+            "x_label": r"$y_{\mathrm{b}}$",
+            "x_range": (0, 3),
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet12ystar",
+            "y_label": r"$y^{*}$",
+            "y_range": (0, 3),
+            "y_scale": "linear",
+        },
     ]
 }
