@@ -55,7 +55,7 @@ namespace dijet {
         ~JetID2016() {};
 
         virtual bool getJetID(const dijet::Jet& jet) override {
-            const double absEta = jet.p4.eta();
+            const double absEta = std::abs(jet.p4.eta());
             if (absEta <= 2.7) {
                 return (
                     (jet.neutralHadronFraction < (workingPoint_ == WorkingPoint::Loose ? 0.99 : 0.90)) &&
