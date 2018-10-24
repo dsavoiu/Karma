@@ -1,4 +1,12 @@
+import numpy as np
+
+from copy import deepcopy
+
+from DijetAnalysis.PostProcessing.PP import QUANTITIES
+
+
 EXPANSIONS = {
+    # quantities
     'quantity' : [
         {
             "name": "jet1pt",
@@ -18,16 +26,6 @@ EXPANSIONS = {
                 "YB12_YS12": 1e0,
                 "YB23_YS01": 1e-3,
             }
-        },
-        {
-            "name": "metOverSumET",
-            "label": r"${E_{\mathrm{T}}^{\mathrm{miss}}}/\sum{|E_{\mathrm{T}}^{\mathrm{miss}}|}$",
-            "scale": "linear",
-            'range' : (0, 1),
-            'xs_range': None,
-            'xs_label': "Diff. cross section / pb",
-            'gen_name': None,
-            'gen_label': None,
         },
         {
             "name": "jet12ptave",
@@ -68,6 +66,16 @@ EXPANSIONS = {
             }
         },
         {
+            "name": "metOverSumET",
+            "label": r"${E_{\mathrm{T}}^{\mathrm{miss}}}/\sum{|E_{\mathrm{T}}^{\mathrm{miss}}|}$",
+            "scale": "linear",
+            'range' : (0, 1),
+            'xs_range': None,
+            'xs_label': "Diff. cross section / pb",
+            'gen_name': None,
+            'gen_label': None,
+        },
+        {
             "name": "jet1phi",
             "label": r"${\phi^{\mathrm{jet1}}}$",
             "scale": "linear",
@@ -78,6 +86,7 @@ EXPANSIONS = {
             'gen_label': None,
         },
     ],
+    # phase space regions (in y_boost, y_star)
     'ybys' : [
         {
             "name": "YB01_YS01",
@@ -129,6 +138,7 @@ EXPANSIONS = {
             "marker_style": "empty",
         },
     ],
+    # trigger paths
     'trigger' : [
         {
             "name": "HLT_PFJet40",
@@ -230,32 +240,121 @@ EXPANSIONS = {
             'lumi_ub': 7544015569.439,  # Run2016G
         },
     ],
+    # event yields (2D binnings)
     'occupancy': [
         {
             "name": "absjet2y_vs_absjet1y",
             #
             "x_quantity": "absjet1y",
             "x_label": r"$|{y^{\mathrm{jet1}}}|$",
-            "x_range": (0, 3),
             "x_scale": "linear",
             #
             "y_quantity": "absjet2y",
             "y_label": r"$|{y^{\mathrm{jet2}}}|$",
-            "y_range": (0, 3),
             "y_scale": "linear",
         },
         {
-            "name": "jet12ystar_vs_jet12yboost",
+            "name": "ystar_vs_yboost",
             #
-            "x_quantity": "jet12yboost",
+            "x_quantity": "yboost",
             "x_label": r"$y_{\mathrm{b}}$",
-            "x_range": (0, 3),
             "x_scale": "linear",
             #
-            "y_quantity": "jet12ystar",
+            "y_quantity": "ystar",
             "y_label": r"$y^{*}$",
-            "y_range": (0, 3),
             "y_scale": "linear",
         },
-    ]
+        {
+            "name": "jet1phi_vs_jet1eta",
+            #
+            "x_quantity": "jet1eta",
+            "x_label": r"$\eta^{\mathrm{jet1}}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet1phi",
+            "y_label": r"$\phi^{\mathrm{jet1}}$",
+            "y_scale": "linear",
+        },
+        {
+            "name": "jet1pt_narrow_vs_jet1eta",
+            #
+            "x_quantity": "jet1eta",
+            "x_label": r"$\eta^{\mathrm{jet1}}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet1pt_narrow",
+            "y_label": r"$p_{\mathrm{T}}^{\mathrm{jet1}}$",
+            "y_scale": "log",
+        },
+        {
+            "name": "jet12ptave_narrow_vs_ystar",
+            #
+            "x_quantity": "ystar",
+            "x_label": r"$y^{*}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet12ptave_narrow",
+            "y_label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
+            "y_scale": "log",
+        },
+        {
+            "name": "jet12ptave_narrow_vs_yboost",
+            #
+            "x_quantity": "yboost",
+            "x_label": r"$y^{\mathrm{b}}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet12ptave_narrow",
+            "y_label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
+            "y_scale": "log",
+        },
+        {
+            "name": "jet1pt_wide_vs_jet1eta",
+            #
+            "x_quantity": "jet1eta",
+            "x_label": r"$\eta^{\mathrm{jet1}}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet1pt_wide",
+            "y_label": r"$p_{\mathrm{T}}^{\mathrm{jet1}}$",
+            "y_scale": "log",
+        },
+        {
+            "name": "jet12ptave_wide_vs_ystar",
+            #
+            "x_quantity": "ystar",
+            "x_label": r"$y^{*}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet12ptave_wide",
+            "y_label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
+            "y_scale": "log",
+        },
+        {
+            "name": "jet12ptave_wide_vs_yboost",
+            #
+            "x_quantity": "yboost",
+            "x_label": r"$y^{\mathrm{b}}$",
+            "x_scale": "linear",
+            #
+            "y_quantity": "jet12ptave_wide",
+            "y_label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
+            "y_scale": "log",
+        },
+    ],
 }
+
+
+# expand 'quantity' expansions with bifferent binnings (e.g. 'wide', 'narrow', ...)
+for _expansion in EXPANSIONS['quantity']:
+    if _expansion["name"] in ('jet1pt', 'jet12ptave', 'jet12mass'):
+        for _bin_suffix in ('narrow', 'wide'):
+            _suffixed_expansion = deepcopy(_expansion)
+            _suffixed_expansion['name'] = "{}_{}".format(_suffixed_expansion['name'], _bin_suffix)
+            _suffixed_expansion['gen_name'] = "{}_{}".format(_suffixed_expansion['gen_name'], _bin_suffix)
+            EXPANSIONS['quantity'].append(_suffixed_expansion)
+
+# programatically fill in the defined quantity ranges for 'occupancy' axes
+for _expansion in EXPANSIONS['occupancy']:
+    _expansion['x_range'] = QUANTITIES[_expansion['x_quantity']].range
+    _expansion['y_range'] = QUANTITIES[_expansion['y_quantity']].range

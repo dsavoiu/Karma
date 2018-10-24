@@ -5,8 +5,8 @@ import numpy as np
 import os
 import ROOT
 
-from DijetAnalysis.PostProcessing.PP import SPLITTINGS, QUANTITY_BINNINGS
-from DijetAnalysis.PostProcessing.PP import parse_args, basic_selection, PostProcessor
+from DijetAnalysis.PostProcessing.PP import QUANTITIES, GLOBAL_DEFINES, BASIC_SELECTION, SPLITTINGS
+from DijetAnalysis.PostProcessing.PP import parse_args, apply_defines, apply_filters, define_quantities, PostProcessor
 
 try:
     RDataFrame = ROOT.ROOT.RDataFrame
@@ -58,10 +58,13 @@ if __name__ == "__main__":
     if args.jobs > 1:
         ROOT.ROOT.EnableImplicitMT(int(args.jobs))
 
-    _df_bare = RDataFrame(args.tree, args.FILE)
+    _df = RDataFrame(args.tree, args.FILE)
 
     # -- apply basic analysis selection
-    _df = basic_selection(_df_bare)
+    _df = apply_defines(_df, GLOBAL_DEFINES)
+    _df = define_quantities(_df, QUANTITIES)
+    _df = apply_filters(_df, BASIC_SELECTION)
+
 
     # -- limit the number of processed events
     if args.num_events >= 0:
@@ -70,7 +73,7 @@ if __name__ == "__main__":
     _pp = PostProcessor(
         data_frame=_df,
         splitting_spec=_combined_splittings,
-        quantity_binnings=QUANTITY_BINNINGS
+        quantities=QUANTITIES
     )
 
     if _hs is not None:

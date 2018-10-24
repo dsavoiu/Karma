@@ -17,10 +17,10 @@ class PostProcessor(object):
         histogram = 1
         profile = 2
 
-    def __init__(self, data_frame, splitting_spec, quantity_binnings):
+    def __init__(self, data_frame, splitting_spec, quantities):
         self._df_bare = data_frame
         self._splitting_spec = splitting_spec
-        self._quantity_binnings = quantity_binnings
+        self._qs = quantities
 
         self._specs = []
 
@@ -46,11 +46,11 @@ class PostProcessor(object):
                 _name_suffix = '_'.join([_s for _s in (_var_x, _weight) if _s is not None])
                 _title = '_'.join([_s for _s in (_var_x, _var_y, _weight, _split_name) if _s is not None])
 
-                _x_binning = self._quantity_binnings[_var_x]  # TODO: raise if no binning for `_var_x`?
+                _x_binning = self._qs[_var_x].binning  # TODO: raise if no quantity `_var_x`?
                 _y_binning = None
                 if _var_y is not None:
                     self._root_objects[_split_name].setdefault(_var_y, {})  # ensure '_var_y' subdict exists
-                    _y_binning = self._quantity_binnings[_var_y]  # TODO: raise if no binning for `_var_y`?
+                    _y_binning = self._qs[_var_y].binning  # TODO: raise if no quantity `_var_y`?
 
                 if _obj_type == self.__class__.ObjectType.histogram:
                     if _var_y is None:
