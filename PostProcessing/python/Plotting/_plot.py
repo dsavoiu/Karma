@@ -15,6 +15,7 @@ import numpy as np
 
 from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import LogFormatter
+from matplotlib.colors import LogNorm, Normalize
 
 from rootpy import asrootpy
 from rootpy.io import root_open
@@ -353,14 +354,19 @@ class Plotter(object):
 
         _filename = os.path.join(self._output_folder, plot_config['filename'])
 
-        _figsize = plot_config.get('figsize', None)
+        _figsize = plot_config.pop('figsize', None)
         _fig = self._get_figure(_filename, figsize=_figsize)
         _ax = _fig.gca()
+
+        _z_range = plot_config.pop('z_range', None)
+        _z_scale = plot_config.pop('z_scale', "linear")
+        _z_label = plot_config.pop('z_label', None)
+        _z_labelpad = plot_config.pop('z_labelpad', None)
 
         _stack_bottoms = {}
 
         # enable text output, if requested
-        if plot_config.get("text_output", False):
+        if plot_config.pop("text_output", False):
             _text_filename = '.'.join(_filename.split('.')[:-1]) + '.txt'
             # need to create directory first
             _make_directory(os.path.dirname(_text_filename))
@@ -468,13 +474,30 @@ class Plotter(object):
             if _plot_method_name == 'pcolormesh':
                 # mask zeros
                 _z_masked = np.ma.array(_plot_data['z'], mask=_plot_data['z']==0)
-                _args = [_plot_data['xedges'], _plot_data['yedges'], _z_masked]
+
+                # determine data range in z
+                if _z_range is not None:
+                    # use specified values as range
+                    _z_min, _z_max = _z_range
+                else:
+                    # use data values
+                    _z_min, _z_max = _z_masked.min(), _z_masked.max()
+
+                # determine colormap normalization (if not explicitly given)
+                if 'norm' not in _kwargs:
+                    if _z_scale == 'linear':
+                        _norm = Normalize(vmin=_z_min, vmax=_z_max)
+                    elif _z_scale == 'log':
+                        _norm = LogNorm(vmin=_z_min, vmax=_z_max)
+                    else:
+                        raise ValueError("Unknown value '{}' for keyword 'z_scale': known are {{'linear', 'log'}}".format(_z_scale))
+                    _kwargs['norm'] = _norm
+
+                # Z array needs to be transposed because 'X' refers to columns and 'Y' to rows...
+                _args = [_plot_data['xedges'], _plot_data['yedges'], _z_masked.T]
                 _kwargs.pop('color', None)
                 _kwargs.pop('xerr', None)
                 _kwargs.pop('yerr', None)
-                print 'xedges', _plot_data['xedges'].shape
-                print 'yedges', _plot_data['yedges'].shape
-                print 'z', _plot_data['z'].shape
             else:
                 _args = [_plot_data['x'], _y_data]
 
@@ -518,7 +541,9 @@ class Plotter(object):
         # draw colorbar if there was a 2D plot involved
         if _2d_plots:
             for _2d_plot in _2d_plots:
-                _fig.colorbar(_2d_plot, ax=_ax)
+                _cbar = _fig.colorbar(_2d_plot, ax=_ax)
+                if _z_label is not None:
+                    _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
         # step 4: save figures
         self._close_plot(_ax, plot_config)
