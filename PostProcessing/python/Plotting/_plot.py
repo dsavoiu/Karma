@@ -516,11 +516,13 @@ class Plotter(object):
                 _2d_plots.append(_plot_handle)
 
             if _text_file is not None:
+                np.set_printoptions(threshold=np.inf)
                 _text_file.write("- {}(\n\t{},\n\t{}\n)\n".format(
                     _plot_method_name,
                     ',\n\t'.join(["{}".format(repr(_arg)) for _arg in _args]),
                     ',\n\t'.join(["{} = {}".format(_k, repr(_v)) for _k, _v in _kwargs.iteritems()]),
                 ))
+                np.set_printoptions(threshold=1000)
 
             # update stack bottoms
             if _stack_name is not None:
