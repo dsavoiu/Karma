@@ -179,6 +179,38 @@ class _ROOTObjectFunctions(object):
 
         return _new_tobject
 
+    @staticmethod
+    def normalize_x(tobject):
+        """Normalize bin contents of each x slice of a TH2D by dividing by the y integral over each x slice."""
+
+        if not isinstance(tobject, _Hist2D):
+            raise ValueError("Cannot apply function `normalize_x` to object of type '{}': must be Hist2D [TH2D]!".format(type(tobject)))
+
+        _new_tobject = asrootpy(tobject.Clone())
+        #_projection = asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex(), 1, len(list(tobject.y()))-1))
+        _projection = asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex()))
+
+        # divide 2D bin contents by integral over x slice (= result of ProjectionX())
+        for _bin_proxy in _new_tobject:
+            if _projection[_bin_proxy.xyz[0]].value:
+                _bin_proxy.value /= _projection[_bin_proxy.xyz[0]].value
+                _bin_proxy.error /= _projection[_bin_proxy.xyz[0]].value
+            else:
+                _bin_proxy.value, _bin_proxy.error = 0, 0
+
+        _projection.Delete()  # cleanup
+
+        return _new_tobject
+
+    @staticmethod
+    def normalize_to_ref(tobject, tobject_ref):
+        """Normalize `tobject` to the integral over `tobject_ref`."""
+
+        _new_tobject = asrootpy(tobject.Clone())
+        _factor = float(tobject_ref.integral()) / float(tobject.integral())
+
+        return _new_tobject * _factor
+
 
 class InputROOTFile(object):
     """An input module for accessing objects from a single ROOT file.
@@ -322,6 +354,8 @@ class InputROOT(object):
         'mask_if_less':             _ROOTObjectFunctions.mask_if_less,
         'threshold':                _ROOTObjectFunctions.threshold,
         'threshold_by_ref':         _ROOTObjectFunctions.threshold_by_ref,
+        'normalize_x':              _ROOTObjectFunctions.normalize_x,
+        'normalize_to_ref':         _ROOTObjectFunctions.normalize_to_ref,
     }
 
     def __init__(self, files_spec=None):
