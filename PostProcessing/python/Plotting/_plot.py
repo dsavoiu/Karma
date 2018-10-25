@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from matplotlib.font_manager import FontProperties
+from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatter
 from matplotlib.colors import LogNorm, Normalize
 
@@ -239,6 +240,12 @@ class Plotter(object):
         y_scale = dict(
             method='set_yscale',
         ),
+        x_ticklabels = dict(
+            method='set_xticklabels',
+        ),
+        y_ticklabels = dict(
+            method='set_yticklabels',
+        ),
     )
 
     _DEFAULT_LEGEND_KWARGS = dict(
@@ -255,64 +262,6 @@ class Plotter(object):
         self._figures = {}
         self._global_request_params = self._config.get("global_request_params", {})
 
-    def _close_plot(self, ax, plot_config):
-        ax.text(.05, .9,
-            r"CMS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=Plotter.FONT_PROPS['big_bold']
-        )
-        ax.text(.03, .03,
-            r"AK4PFCHS",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=Plotter.FONT_PROPS['small_bold']
-        )
-        ax.text(.17, .9,
-            r"Private Work",
-            ha='left',
-            transform=ax.transAxes,
-            fontproperties=Plotter.FONT_PROPS['italic']
-        )
-
-        # handle figure label ("upper_label")
-        _upper_label = plot_config.pop('upper_label', None)
-        if _upper_label is not None:
-            ax.text(1.0, 1.015,
-                _upper_label,
-                ha='right',
-                transform=ax.transAxes
-            )
-
-        # handle horizontal and vertical lines
-        _axhlines = plot_config.pop('axhlines', [])
-        for _y in _axhlines:
-            ax.axhline(_y, linestyle='--', color='gray')
-        _axvlines = plot_config.pop('axvlines', [])
-        for _x in _axvlines:
-            ax.axvline(_x, linestyle='--', color='gray')
-
-        # handle plot legend
-        _legend_kwargs = self._DEFAULT_LEGEND_KWARGS.copy()
-        _legend_kwargs.update(plot_config.pop('legend_kwargs', {}))
-        ax.legend(**_legend_kwargs)
-
-        # handle log x-axis formatting
-        if plot_config.get('x_scale', None) == 'log':
-            _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-            _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-            _formatter.set_locs(locs=_log_decade_ticklabels)
-
-            ax.xaxis.set_minor_formatter(_formatter)
-
-        ## handle log y-axis formatting
-        #if plot_config.get('y_scale', None) == 'log':
-        #    _log_decade_ticklabels = plot_config.pop('log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-        #    _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-        #    _formatter.set_locs(locs=_log_decade_ticklabels)
-        #
-        #    ax.yaxis.set_minor_formatter(_formatter)
-
     def _get_figure(self, figure_name, figsize=None):
         if figure_name not in self._figures:
             self._figures[figure_name] = plt.figure(figsize=figsize)
@@ -328,12 +277,13 @@ class Plotter(object):
                 elif isinstance(_v, ConfigurationEntry):
                     _fig_cfg[_k] = _v.get(context)
 
-            for _subplot_dict in _fig_cfg['subplots']:
-                for _k, _v in _subplot_dict.iteritems():
-                    if isinstance(_v, str):
-                        _subplot_dict[_k] = _v.format(**context)
-                    elif isinstance(_v, ConfigurationEntry):
-                        _subplot_dict[_k] = _v.get(context)
+            for _subkey_for_context_replacing in ('pads', 'subplots'):
+                for _dict_for_subkey in _fig_cfg[_subkey_for_context_replacing]:
+                    for _k, _v in _dict_for_subkey.iteritems():
+                        if isinstance(_v, str):
+                            _dict_for_subkey[_k] = _v.format(**context)
+                        elif isinstance(_v, ConfigurationEntry):
+                            _dict_for_subkey[_k] = _v.get(context)
 
             self._plot_figure(_fig_cfg)
 
@@ -356,14 +306,24 @@ class Plotter(object):
 
         _figsize = plot_config.pop('figsize', None)
         _fig = self._get_figure(_filename, figsize=_figsize)
-        _ax = _fig.gca()
 
-        _z_range = plot_config.pop('z_range', None)
-        _z_scale = plot_config.pop('z_scale', "linear")
-        _z_label = plot_config.pop('z_label', None)
-        _z_labelpad = plot_config.pop('z_labelpad', None)
+        # obtain configuration of pads
+        _pad_configs = plot_config.get('pads', None)
+        if _pad_configs is None:
+            # default pad configuration
+            _pad_configs = [dict()]
 
-        _stack_bottoms = {}
+        # get share
+        _height_ratios = [_pc.get('height_share', 1) for _pc in _pad_configs]
+
+        # construct GridSpec from `pad_spec` or make default
+        _gridspec_kwargs = plot_config.get('pad_spec', dict())
+        _gridspec_kwargs.pop('height_ratios', None)   # ignore explicit user-provided `height_ratios`
+        _gs = GridSpec(nrows=len(_pad_configs), ncols=1, height_ratios=_height_ratios, **_gridspec_kwargs)
+
+        # store `Axes` objects in pad configuration
+        for _i_pad, _pad_config in enumerate(_pad_configs):
+            _pad_config['axes'] = _fig.add_subplot(_gs[_i_pad])
 
         # enable text output, if requested
         if plot_config.pop("text_output", False):
@@ -376,9 +336,18 @@ class Plotter(object):
 
         # step 2: retrieve data and plot
 
-        _2d_plots = []  # keep track of 2D plots
         for _pc in plot_config['subplots']:
             _kwargs = deepcopy(_pc)
+
+            # obtain and validate pad ID
+            _pad_id = _kwargs.pop('pad', 0)
+            if _pad_id >= len(_pad_configs):
+                raise ValueError("Cannot plot to pad {}: only pads up to {} have been configured!".format(_pad_id, len(_pad_configs)-1))
+
+            # select pad axes and configuration
+            _pad_config = _pad_configs[_pad_id]
+            _ax = _pad_config['axes']
+            _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
 
             _expression = _kwargs.pop('expression')
             print("PLT {}".format(_expression))
@@ -399,6 +368,7 @@ class Plotter(object):
                 _plot_data['y'] = _plot_data.pop('efficiencies', None)
                 _plot_data['yerr'] = _plot_data.pop('errors', None)
 
+            # mask all points with erorrs set to zero
             _mze = _kwargs.pop('mask_zero_errors', False)
             if _mze:
                 _mask = np.all((_plot_data['yerr'] != 0), axis=1)
@@ -476,6 +446,7 @@ class Plotter(object):
                 _z_masked = np.ma.array(_plot_data['z'], mask=_plot_data['z']==0)
 
                 # determine data range in z
+                _z_range = _pad_config.get('z_range', None)
                 if _z_range is not None:
                     # use specified values as range
                     _z_min, _z_max = _z_range
@@ -485,6 +456,7 @@ class Plotter(object):
 
                 # determine colormap normalization (if not explicitly given)
                 if 'norm' not in _kwargs:
+                    _z_scale = _pad_config.get('z_scale', "linear")
                     if _z_scale == 'linear':
                         _norm = Normalize(vmin=_z_min, vmax=_z_max)
                     elif _z_scale == 'log':
@@ -513,7 +485,7 @@ class Plotter(object):
 
             # store 2D plots for displaying color bars
             if _plot_method_name == 'pcolormesh':
-                _2d_plots.append(_plot_handle)
+                _pad_config.setdefault('2d_plots', []).append(_plot_handle)
 
             if _text_file is not None:
                 np.set_printoptions(threshold=np.inf)
@@ -532,23 +504,90 @@ class Plotter(object):
         if _text_file is not None:
             _text_file.close()
 
-        # step 3: figure adjustments
+        # step 3: pad adjustments
 
-        # simple axes adjustments
-        for _prop_name, _meth_dict in self._PC_KEYS_MPL_AXES_METHODS.iteritems():
-            _prop_val = plot_config.get(_prop_name, None)
-            if _prop_val is not None:
-                getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
+        for _pad_config in _pad_configs:
+            _ax = _pad_config['axes']
 
-        # draw colorbar if there was a 2D plot involved
-        if _2d_plots:
-            for _2d_plot in _2d_plots:
-                _cbar = _fig.colorbar(_2d_plot, ax=_ax)
-                if _z_label is not None:
-                    _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
+            # simple axes adjustments
+            for _prop_name, _meth_dict in self._PC_KEYS_MPL_AXES_METHODS.iteritems():
+                _prop_val = _pad_config.get(_prop_name, None)
+                if _prop_val is not None:
+                    #print _prop_name, _prop_val
+                    getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
 
-        # step 4: save figures
-        self._close_plot(_ax, plot_config)
+            # draw colorbar if there was a 2D plot involved
+            if _pad_config.get('2d_plots', None):
+                for _2d_plot in _pad_config['2d_plots']:
+                    _cbar = _fig.colorbar(_2d_plot, ax=_ax)
+                    _z_label = _pad_config.get('z_label', None)
+                    _z_labelpad = _pad_config.get('z_labelpad', None)
+                    if _z_label is not None:
+                        _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
+
+            # draw text/annotations
+            #_ax.text(.05, .9,
+            #    r"CMS",
+            #    ha='left',
+            #    transform=ax.transAxes,
+            #    fontproperties=Plotter.FONT_PROPS['big_bold']
+            #)
+            #_ax.text(.03, .03,
+            #    r"AK4PFCHS",
+            #    ha='left',
+            #    transform=ax.transAxes,
+            #    fontproperties=Plotter.FONT_PROPS['small_bold']
+            #)
+            #_ax.text(.17, .9,
+            #    r"Private Work",
+            #    ha='left',
+            #    transform=ax.transAxes,
+            #    fontproperties=Plotter.FONT_PROPS['italic']
+            #)
+
+            # handle horizontal and vertical lines
+            _axhlines = _pad_config.pop('axhlines', [])
+            for _y in _axhlines:
+                _ax.axhline(_y, linestyle='--', color='gray')
+            _axvlines = _pad_config.pop('axvlines', [])
+            for _x in _axvlines:
+                _ax.axvline(_x, linestyle='--', color='gray')
+
+            # handle plot legend
+            _legend_kwargs = self._DEFAULT_LEGEND_KWARGS.copy()
+            _legend_kwargs.update(_pad_config.pop('legend_kwargs', {}))
+            _ax.legend(**_legend_kwargs)
+
+            # handle log x-axis formatting (only if 'x_ticklabels' is not given as [])
+            if _pad_config.get('x_scale', None) == 'log' and _pad_config.get('x_ticklabels', True):
+                _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
+                _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+                _formatter.set_locs(locs=_log_decade_ticklabels)
+
+                _ax.xaxis.set_minor_formatter(_formatter)
+
+            ## handle log y-axis formatting (only if 'y_ticklabels' is not given as [])
+            #if _pad_config.get('y_scale', None) == 'log' and _pad_config.get('y_ticklabels', True):
+            #    _log_decade_ticklabels = _pad_config.get('y_log_decade_ticklabels', {1.0, 5.0})
+            #    _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+            #    _formatter.set_locs(locs=_log_decade_ticklabels)
+            #
+            #    _ax.yaxis.set_minor_formatter(_formatter)
+
+        # step 4: figure adjustments
+
+        # handle figure label ("upper_label")
+        _upper_label = plot_config.pop('upper_label', None)
+        if _upper_label is not None:
+            # place above topmost `Axes`
+            _ax_top = _pad_configs[0]['axes']
+            _ax_top.text(1.0, 1.015,
+                _upper_label,
+                ha='right',
+                transform=_ax_top.transAxes
+            )
+
+        # step 5: save figures
         _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
 

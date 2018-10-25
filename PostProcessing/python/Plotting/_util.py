@@ -116,13 +116,17 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] != "inclusive")
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
-        'y_range' : ContextValue('quantity[xs_range]'),
-        'y_scale' : 'log',
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
+                'y_range' : ContextValue('quantity[xs_range]'),
+                'y_scale' : 'log',
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
 
     # cross section in data and MC, colored by HLT path
@@ -156,13 +160,17 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] != "inclusive")
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
-        'y_range' : ContextValue('quantity[xs_range]'),
-        'y_scale' : 'log',
-        'legend_kwargs': dict(loc='upper right', ncol=2),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
+                'y_range' : ContextValue('quantity[xs_range]'),
+                'y_scale' : 'log',
+                'legend_kwargs': dict(loc='upper right', ncol=2),
+            },
+        ],
     },
     'CrossSectionRatio': {
         'filename' : "CrossSectionRatio/{quantity[name]}/{ybys[name]}.png",
@@ -181,14 +189,18 @@ FIGURE_TEMPLATES = {
             for _tp in EXPANSIONS['trigger']
             if (_tp['name'] != "all")
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Data/MC',
-        'y_range' : (0.1, 1.9),
-        'y_scale' : 'linear',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper left'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Data/MC',
+                'y_range' : (0.1, 1.9),
+                'y_scale' : 'linear',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper left'),
+            },
+        ],
     },
     'CrossSectionRatio_HLTColor': {
         'filename' : "CrossSectionRatio_HLTColor/{quantity[name]}/{ybys[name]}.png",
@@ -207,14 +219,18 @@ FIGURE_TEMPLATES = {
             for _tp in EXPANSIONS['trigger']
             if (_tp['name'] != "all")
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Data/MC',
-        'y_range' : (0.1, 1.9),
-        'y_scale' : 'linear',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper left'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Data/MC',
+                'y_range' : (0.1, 1.9),
+                'y_scale' : 'linear',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper left'),
+            },
+        ],
     },
 
     'OccupancyRatio': {
@@ -226,15 +242,19 @@ FIGURE_TEMPLATES = {
                  vmin=0.1, vmax=1.9,
              ),
         ],
-        'x_label' : '{occupancy[x_label]}',
-        'x_range' : ContextValue('occupancy[x_range]'),
-        'x_scale' : '{occupancy[x_scale]}',
-        'y_label' : '{occupancy[y_label]}',
-        'y_range' : ContextValue('occupancy[y_range]'),
-        'y_scale' : '{occupancy[x_scale]}',
-        'z_scale' : 'linear',
-        'z_label' : 'Data/MC',
-        'z_labelpad' : 21.0,
+        'pads' : [
+            {
+                'x_label' : '{occupancy[x_label]}',
+                'x_range' : ContextValue('occupancy[x_range]'),
+                'x_scale' : '{occupancy[x_scale]}',
+                'y_label' : '{occupancy[y_label]}',
+                'y_range' : ContextValue('occupancy[y_range]'),
+                'y_scale' : '{occupancy[x_scale]}',
+                'z_scale' : 'linear',
+                'z_label' : 'Data/MC',
+                'z_labelpad' : 21.0,
+            },
+        ],
         'text_output': True,
     },
 
@@ -254,14 +274,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Mean trigger efficiency',
-        'y_range' : (0.97, 1.01),
-        'y_scale' : 'linear',
-        'axhlines' : [0.99, 1.0],
-        'legend_kwargs': dict(loc='lower right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Mean trigger efficiency',
+                'y_range' : (0.97, 1.01),
+                'y_scale' : 'linear',
+                'axhlines' : [0.99, 1.0],
+                'legend_kwargs': dict(loc='lower right'),
+            },
+        ],
     },
     'TriggerEfficienciesMax': {
         'filename' : "TriggerEfficienciesMax/{quantity[name]}/{ybys[name]}.png",
@@ -277,14 +301,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Mean trigger efficiency',
-        'y_range' : (0.97, 1.01),
-        'y_scale' : 'linear',
-        'axhlines' : [0.99, 1.0],
-        'legend_kwargs': dict(loc='lower left'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Mean trigger efficiency',
+                'y_range' : (0.97, 1.01),
+                'y_scale' : 'linear',
+                'axhlines' : [0.99, 1.0],
+                'legend_kwargs': dict(loc='lower left'),
+            },
+        ],
     },
     'TriggerEfficienciesMaxMonochrome': {
         'filename' : "TriggerEfficienciesMaxMonochrome/{quantity[name]}/{ybys[name]}.png",
@@ -299,14 +327,18 @@ FIGURE_TEMPLATES = {
                 #'mask_zero_errors': True,
             }
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Mean trigger efficiency',
-        'y_range' : (0.97, 1.01),
-        'y_scale' : 'linear',
-        'axhlines' : [0.99, 1.0],
-        'legend_kwargs': dict(loc='lower right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Mean trigger efficiency',
+                'y_range' : (0.97, 1.01),
+                'y_scale' : 'linear',
+                'axhlines' : [0.99, 1.0],
+                'legend_kwargs': dict(loc='lower right'),
+            },
+        ],
     },
     'EventYield': {
         'filename' : "EventYield/{quantity[name]}/{ybys[name]}.png",
@@ -322,14 +354,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
     'EventYieldMaxTE': {
         'filename' : "EventYieldMaxTE/{quantity[name]}/{ybys[name]}.png",
@@ -345,14 +381,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
     'EventYieldTEOver99': {
         'filename' : "EventYieldTEOver99/{quantity[name]}/{ybys[name]}.png",
@@ -368,14 +408,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
     'EventYieldTEOver99_MaxYield': {
         'filename' : "EventYieldTEOver99_MaxYield/{quantity[name]}/{ybys[name]}.png",
@@ -391,14 +435,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
     'EventYieldTEOver99_MaxTE': {
         'filename' : "EventYieldTEOver99_MaxTE/{quantity[name]}/{ybys[name]}.png",
@@ -414,14 +462,18 @@ FIGURE_TEMPLATES = {
             }
             for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
     'EventYield_allTriggers': {
         'filename' : "EventYield_allTriggers/{quantity[name]}/{ybys[name]}.png",
@@ -436,14 +488,18 @@ FIGURE_TEMPLATES = {
                 #'mask_zero_errors': True,
             }
         ],
-        'x_label' : '{quantity[label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : 'Events',
-        'y_range' : (0.1, 1e9),
-        'y_scale' : 'log',
-        'axhlines' : [1.0],
-        'legend_kwargs': dict(loc='upper right'),
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
     },
 
     'Occupancy': {
@@ -451,15 +507,19 @@ FIGURE_TEMPLATES = {
         'subplots' : [
             dict(expression='"oc:{ybys[name]}/all/{occupancy[y_quantity]}/h2d_{occupancy[x_quantity]}"', label=r'inclusive', plot_method='pcolormesh', cmap='viridis'),
         ],
-        'x_label' : '{occupancy[x_label]}',
-        'x_range' : ContextValue('occupancy[x_range]'),
-        'x_scale' : '{occupancy[x_scale]}',
-        'y_label' : '{occupancy[y_label]}',
-        'y_range' : ContextValue('occupancy[y_range]'),
-        'y_scale' : '{occupancy[x_scale]}',
-        'z_scale' : 'log',
-        'z_label' : 'Events',
-        'z_labelpad' : 21.0,
+        'pads' : [
+            {
+                'x_label' : '{occupancy[x_label]}',
+                'x_range' : ContextValue('occupancy[x_range]'),
+                'x_scale' : '{occupancy[x_scale]}',
+                'y_label' : '{occupancy[y_label]}',
+                'y_range' : ContextValue('occupancy[y_range]'),
+                'y_scale' : '{occupancy[x_scale]}',
+                'z_scale' : 'log',
+                'z_label' : 'Events',
+                'z_labelpad' : 21.0,
+            },
+        ],
     },
 
     # -- MC
@@ -469,15 +529,19 @@ FIGURE_TEMPLATES = {
         'subplots' : [
             dict(expression='"ocmc:{ybys[name]}/{occupancy[y_quantity]}/h2d_{occupancy[x_quantity]}"', label=r'inclusive', plot_method='pcolormesh', cmap='viridis'),
         ],
-        'x_label' : '{occupancy[x_label]}',
-        'x_range' : ContextValue('occupancy[x_range]'),
-        'x_scale' : '{occupancy[x_scale]}',
-        'y_label' : '{occupancy[y_label]}',
-        'y_range' : ContextValue('occupancy[y_range]'),
-        'y_scale' : '{occupancy[x_scale]}',
-        'z_scale' : 'log',
-        'z_label' : 'Events',
-        'z_labelpad' : 21.0,
+        'pads' : [
+            {
+                'x_label' : '{occupancy[x_label]}',
+                'x_range' : ContextValue('occupancy[x_range]'),
+                'x_scale' : '{occupancy[x_scale]}',
+                'y_label' : '{occupancy[y_label]}',
+                'y_range' : ContextValue('occupancy[y_range]'),
+                'y_scale' : '{occupancy[x_scale]}',
+                'z_scale' : 'log',
+                'z_label' : 'Events',
+                'z_labelpad' : 21.0,
+            },
+        ],
     },
 
     # Reco/Gen response matrix
@@ -486,16 +550,24 @@ FIGURE_TEMPLATES = {
         'subplots' : [
             dict(expression='normalize_x("jr:{ybys[name]}/{quantity[name]}/h2d_{quantity[gen_name]}")', label=r'inclusive', plot_method='pcolormesh', cmap='viridis'),
         ],
-        'x_label' : '{quantity[gen_label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : '{quantity[label]}',
-        'y_range' : ContextValue('quantity[range]'),
-        'y_scale' : '{quantity[scale]}',
-        'z_range' : (0, 1),
-        'z_scale' : 'linear',
-        'z_label' : 'Event fraction',
-        'z_labelpad' : 21.0,
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : '{quantity[label]}',
+                'y_range' : ContextValue('quantity[range]'),
+                'y_scale' : '{quantity[scale]}',
+                'z_range' : (0, 1),
+                'z_scale' : 'linear',
+                'z_label' : 'Event fraction',
+                'z_labelpad' : 21.0,
+            },
+        ],
     },
 
     # RMS of jet quantity distribution (one subplot per YBYS splitting)
@@ -513,12 +585,16 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] != "inclusive")
         ],
-        'x_label' : '{quantity[gen_label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : r'RMS({quantity[label]})',
-        'y_range' : (1, 1e5),
-        'y_scale' : 'log',
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]})',
+                'y_range' : (1, 1e5),
+                'y_scale' : 'log',
+            },
+        ],
         'request_params': {
             'profile_error_option': "S",  # take standard deviation instead of error on mean
         },
@@ -539,13 +615,17 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] != "inclusive")
         ],
-        'x_label' : '{quantity[gen_label]}',
-        #'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : r'RMS({quantity[label]}) / Bin width',
-        'y_range' : (0.0, 2.0),
-        'y_scale' : 'linear',
-        'axhlines' : [1.0],
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                #'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]}) / Bin width',
+                'y_range' : (0.0, 2.0),
+                'y_scale' : 'linear',
+                'axhlines' : [1.0],
+            },
+        ],
         'request_params': {
             'profile_error_option': "S",  # take standard deviation instead of error on mean
         },
@@ -566,12 +646,16 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] == "inclusive")
         ],
-        'x_label' : '{quantity[gen_label]}',
-        'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : r'RMS({quantity[label]})',
-        'y_range' : (1, 1e5),
-        'y_scale' : 'log',
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]})',
+                'y_range' : (1, 1e5),
+                'y_scale' : 'log',
+            },
+        ],
         'request_params': {
             'profile_error_option': "S",  # take standard deviation instead of error on mean
         },
@@ -592,15 +676,109 @@ FIGURE_TEMPLATES = {
             for _ybys in EXPANSIONS['ybys']
             if (_ybys['name'] == "inclusive")
         ],
-        'x_label' : '{quantity[gen_label]}',
-        #'x_range' : ContextValue('quantity[range]'),
-        'x_scale' : '{quantity[scale]}',
-        'y_label' : r'RMS({quantity[label]}) / Bin width',
-        'y_range' : (0.0, 2.0),
-        'y_scale' : 'linear',
-        'axhlines' : [1.0],
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                #'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]}) / Bin width',
+                'y_range' : (0.0, 2.0),
+                'y_scale' : 'linear',
+                'axhlines' : [1.0],
+            },
+        ],
         'request_params': {
             'profile_error_option': "S",  # take standard deviation instead of error on mean
         },
+    },
+
+    # Comparison of generator and reconstruction level
+    'GenRecoCompare_EventYield': {
+        'filename' : "GenRecoCompare_EventYield/{ybys[name]}/{quantity[name]}.png",
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+            'top': 0.925,
+            'hspace': 0.075,
+        },
+        'pads': [
+            # top pad
+            {
+                'height_share' : 3,
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'x_ticklabels' : [],
+                'y_scale' : 'log',
+                'legend_kwargs': dict(loc='lower left'),
+            },
+            # ratio pad
+            {
+                'height_share' : 1,
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Reco/Gen',
+                'y_range' : (0.4, 1.6),
+                'axhlines' : [1.0],
+                'y_scale' : 'linear',
+                'legend_kwargs': dict(loc='lower left'),
+            },
+        ],
+        'subplots' : [
+            # Reco
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[name]}"',
+                 label=r'reco.', plot_method='errorbar', color="royalblue", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=0),
+            # Gen
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[gen_name]}"',
+                 label=r'gen.',  plot_method='errorbar', color="red", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=0),
+            # Ratio Reco/Gen
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[name]}" / discard_errors("eymc:{ybys[name]}/h_{quantity[gen_name]}")',
+                 label=None, plot_method='errorbar', color="k", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=1),
+        ],
+    },
+    'GenRecoCompare_EventYield_StitchingWeighted': {
+        'filename' : "GenRecoCompare_EventYield_StitchingWeighted/{ybys[name]}/{quantity[name]}.png",
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+            'top': 0.925,
+            'hspace': 0.075,
+        },
+        'pads': [
+            # top pad
+            {
+                'height_share' : 3,
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'x_ticklabels' : [],
+                'y_scale' : 'log',
+                'legend_kwargs': dict(loc='lower left'),
+            },
+            # ratio pad
+            {
+                'height_share' : 1,
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Reco/Gen',
+                'y_range' : (0.4, 1.6),
+                'axhlines' : [1.0],
+                'y_scale' : 'linear',
+                'legend_kwargs': dict(loc='lower left'),
+            },
+        ],
+        'subplots' : [
+            # Reco
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[name]}_weightForStitching"',
+                 label=r'reco.', plot_method='errorbar', color="royalblue", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=0),
+            # Gen
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[gen_name]}_weightForStitching"',
+                 label=r'gen.',  plot_method='errorbar', color="red", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=0),
+            # Ratio Reco/Gen
+            dict(expression='"eymc:{ybys[name]}/h_{quantity[name]}_weightForStitching" / discard_errors("eymc:{ybys[name]}/h_{quantity[gen_name]}_weightForStitching")',
+                 label=None, plot_method='errorbar', color="k", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=1),
+        ],
     },
 }
