@@ -20,7 +20,7 @@ if __name__ == "__main__":
         files_per_job=10,
     )
 
-    _deployer.add_input_files("/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-09-20/*.root")
+    _deployer.add_input_files("JetHT_Run2016G", "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-09-20/*.root")
     _deployer.replace_file_prefix('/storage/gridka-nrg/', 'root://cmsxrootd-1.gridka.de:1094//store/user/')
 
     _deployer.add_constant("GLOBALTAG", "80X_dataRun2_2016LegacyRepro_v4")

@@ -4,7 +4,7 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullMCSkim/testFullMCSkim_out.root"))
+    options.inputFiles="file://{}".format(os.path.realpath("../../../../../../Skimming/test/FullMCSkim/testFullMCSkim_out.root"))
     options.isData=0
     options.globalTag="80X_mcRun2_asymptotic_2016_TrancheIV_v6"
     #options.edmOut="testFullAnalysis_out.root"
@@ -38,10 +38,9 @@ from DijetAnalysis.Analysis.NtupleProducer_cfi import dijetNtupleProducer
 from DijetAnalysis.Analysis.NtupleSplicer_cfi import dijetNtupleSplicer
 
 process.correctedJets = dijetCorrectedValidJetsProducer.clone(
-    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
+    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017_V11_MC/Summer16_07Aug2017_V11_MC".format(
         os.getenv('CMSSW_BASE'),
-        RUN="GH"
-    )
+    ),
 )
 process.correctedJetsUpShift = process.correctedJets.clone(
     jecUncertaintyShift = cms.double(1.0),
