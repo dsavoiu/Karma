@@ -21,6 +21,15 @@ def product_dict(**kwargs):
         yield dict(zip(_keys, instance))
 
 
+def _report(splitting_specs):
+    """Print a summary of the configured task."""
+
+    print "    - splitting RDataFrame by keys: {}".format(
+        ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in splitting_specs.iteritems()])
+    )
+    print "        -> total number of subdivisions: {}\n".format(np.prod([len(_splitting) for _splitting in splitting_specs.values()]))
+
+
 if __name__ == "__main__":
 
     args = parse_args()
@@ -80,6 +89,8 @@ if __name__ == "__main__":
         _pp.add_histograms(_hs)
     if _ps is not None:
         _pp.add_profiles(_ps)
+
+    _report(splitting_specs=_splitting_specs)
 
     _pp.run(output_file_path=args.output_file)
 
