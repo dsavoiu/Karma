@@ -57,6 +57,10 @@ register_option('configureOnly',
                 default=False,
                 type_=bool,
                 description=('(for testing only) configure, but do not run.'))
+register_option('weightForStitching',
+                default=1.0,
+                type_=float,
+                description=('weight to use when stitching together MC samples'))
 
 
 # parse the command-line arguments

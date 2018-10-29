@@ -142,6 +142,7 @@ namespace dijet {
 
         const edm::ParameterSet& m_configPSet;
         bool m_isData;
+        double m_weightForStitching;
 
         // TODO: move to global cache
         std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;

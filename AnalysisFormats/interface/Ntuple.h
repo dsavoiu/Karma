@@ -60,6 +60,11 @@ namespace dijet {
         int jet2HLTAssignedPathPrescale = -1;
         double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
 
+        // -- MC-specific
+
+        // weights
+        double weightForStitching = 1.0;
+
         // GenJets
         double jet1MatchedGenJetPt = UNDEFINED_DOUBLE;
         double jet1MatchedGenJetEta = UNDEFINED_DOUBLE;

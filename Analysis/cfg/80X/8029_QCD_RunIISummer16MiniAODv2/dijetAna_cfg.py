@@ -10,6 +10,7 @@ if not os.getenv("GC_VERSION"):
     #options.edmOut="testFullAnalysis_out.root"
     options.maxEvents=1000
     options.dumpPython=1
+    options.weightForStitching = 1.0
 else:
     # -- running on grid node
     options.globalTag = "__GLOBALTAG__"
@@ -20,6 +21,7 @@ else:
 
     # temporary; gc later sets process.source.fileNames directly!
     options.inputFiles = [__FILE_NAMES__]
+    options.weightForStitching = float(__CROSS_SECTION__) / float(__NUMBER_OF_EVENTS__)
 
 
 # -- must be called at the beginning
@@ -84,6 +86,9 @@ process.ntuple = dijetNtupleProducer.clone(
     dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
     #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
+    isData = cms.bool(options.isData),
+    weightForStitching = cms.double(options.weightForStitching),
+
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies_bootstrapping_2018-09-24.root".format(os.getenv("CMSSW_BASE"))
     ),
@@ -119,9 +124,11 @@ process.leadingJetPtFilter = cms.EDFilter(
 process.flatNtupleWriter = cms.EDAnalyzer(
     "NtupleFlatOutput",
     cms.PSet(
+        isData = cms.bool(options.isData),
         dijetNtupleSrc = cms.InputTag("ntuple"),
         outputFileName = cms.string(options.outputFile),
         treeName = cms.string("Events"),
+        checkForCompleteness = cms.bool(False),
     )
 )
 

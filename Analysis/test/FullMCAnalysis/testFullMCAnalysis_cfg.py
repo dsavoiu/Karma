@@ -71,6 +71,8 @@ process.ntuple = dijetNtupleProducer.clone(
     dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
     #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
+    isData = cms.bool(options.isData),
+
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies_bootstrapping_2018-09-24.root".format(os.getenv("CMSSW_BASE"))
     ),

@@ -89,6 +89,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_tree->Branch("jet12MatchedGenJetPairPtAve",                  &m_productForFill->jet12MatchedGenJetPairPtAve,                   "jet12MatchedGenJetPairPtAve/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
+        // weights
+        m_tree->Branch("weightForStitching",                           &m_productForFill->weightForStitching,                            "weightForStitching/D"                           );
     }
 
     std::cout << "Done wiring TTree branches" << std::endl;

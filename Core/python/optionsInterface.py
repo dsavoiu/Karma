@@ -34,6 +34,7 @@ options = VarParsing('python')
 _VPTypes = {
     str  : VarParsing.varType.string,
     int  : VarParsing.varType.int,
+    float : VarParsing.varType.float,
     bool : VarParsing.varType.bool
 }
 

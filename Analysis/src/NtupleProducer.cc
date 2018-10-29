@@ -22,6 +22,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
 
     // set a flag if we are running on (real) data
     m_isData = m_configPSet.getParameter<bool>("isData");
+    m_weightForStitching = m_configPSet.getParameter<double>("weightForStitching");
 
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
@@ -121,6 +122,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->rho     = this->dijetEventHandle->rho;
     outputNtupleEntry->npv     = this->dijetEventHandle->npv;
     outputNtupleEntry->npvGood = this->dijetEventHandle->npvGood;
+
+    // weights
+    outputNtupleEntry->weightForStitching = m_weightForStitching;  // TODO: less wasteful way?
 
     // trigger results
     std::bitset<8*sizeof(unsigned long)> helperBitset;

@@ -10,6 +10,7 @@ if not os.getenv("GC_VERSION"):
     #options.edmOut="testSkim_out.root"
     options.maxEvents=1000
     options.dumpPython=1
+    options.weightForStitching = 1.0
 else:
     # -- running on grid node
     options.globalTag = "__GLOBALTAG__"
@@ -20,6 +21,7 @@ else:
 
     # temporary; gc later sets process.source.fileNames directly!
     options.inputFiles = [__FILE_NAMES__]
+    options.weightForStitching = 1.0
 
 
 # -- must be called at the beginning

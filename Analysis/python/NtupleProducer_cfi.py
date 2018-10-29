@@ -14,6 +14,7 @@ dijetNtupleProducer = cms.EDProducer(
         # -- other configuration
 
         triggerEfficienciesFile = cms.string("trigger_efficiencies.root"),
+        weightForStitching = cms.double(1.0),
 
         hltPaths = cms.vstring(
             "HLT_PFJet40",
