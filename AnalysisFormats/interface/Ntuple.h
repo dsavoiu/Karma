@@ -35,6 +35,23 @@ namespace dijet {
         double jet12ystar = UNDEFINED_DOUBLE;
         double jet12yboost = UNDEFINED_DOUBLE;
 
+        // jet PF energy fractions
+        double jet1NeutralHadronFraction = UNDEFINED_DOUBLE;
+        double jet1ChargedHadronFraction = UNDEFINED_DOUBLE;
+        double jet1MuonFraction = UNDEFINED_DOUBLE;
+        double jet1PhotonFraction = UNDEFINED_DOUBLE;
+        double jet1ElectronFraction = UNDEFINED_DOUBLE;
+        double jet1HFHadronFraction = UNDEFINED_DOUBLE;
+        double jet1HFEMFraction = UNDEFINED_DOUBLE;
+
+        double jet2NeutralHadronFraction = UNDEFINED_DOUBLE;
+        double jet2ChargedHadronFraction = UNDEFINED_DOUBLE;
+        double jet2MuonFraction = UNDEFINED_DOUBLE;
+        double jet2PhotonFraction = UNDEFINED_DOUBLE;
+        double jet2ElectronFraction = UNDEFINED_DOUBLE;
+        double jet2HFHadronFraction = UNDEFINED_DOUBLE;
+        double jet2HFEMFraction = UNDEFINED_DOUBLE;
+
         // MET
         double met = UNDEFINED_DOUBLE;
         double sumEt = UNDEFINED_DOUBLE;
@@ -54,6 +71,12 @@ namespace dijet {
         double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
 
         // -- MC-specific
+
+        // jet flavor
+        int jet1PartonFlavor = -999;
+        int jet2PartonFlavor = -999;
+        int jet1HadronFlavor = -999;
+        int jet2HadronFlavor = -999;
 
         // weights
         double weightForStitching = 1.0;

@@ -156,6 +156,15 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->jet1eta = jet1->p4.eta();
         outputNtupleEntry->jet1y = jet1->p4.Rapidity();
 
+        // PF energy fractions (jet 1)
+        outputNtupleEntry->jet1NeutralHadronFraction = jet1->neutralHadronFraction;
+        outputNtupleEntry->jet1ChargedHadronFraction = jet1->chargedHadronFraction;
+        outputNtupleEntry->jet1MuonFraction = jet1->muonFraction;
+        outputNtupleEntry->jet1PhotonFraction = jet1->photonFraction;
+        outputNtupleEntry->jet1ElectronFraction = jet1->electronFraction;
+        outputNtupleEntry->jet1HFHadronFraction = jet1->hfHadronFraction;
+        outputNtupleEntry->jet1HFEMFraction = jet1->hfEMFraction;
+
         // matched genJet (MC-only)
         const dijet::LV* jet1MatchedGenJet = nullptr;
         if (!m_isData) {
@@ -166,6 +175,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->jet1MatchedGenJetEta = jet1MatchedGenJet->p4.eta();
                 outputNtupleEntry->jet1MatchedGenJetY = jet1MatchedGenJet->p4.Rapidity();
             }
+            // flavor information (jet 1)
+            outputNtupleEntry->jet1PartonFlavor = jet1->partonFlavor;
+            outputNtupleEntry->jet1HadronFlavor = jet1->hadronFlavor;
         }
 
         // get assigned HLT path(s) for leading jet
@@ -200,6 +212,15 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet2eta = jet2->p4.eta();
             outputNtupleEntry->jet2y = jet2->p4.Rapidity();
 
+            // PF energy fractions (jet 2)
+            outputNtupleEntry->jet2NeutralHadronFraction = jet2->neutralHadronFraction;
+            outputNtupleEntry->jet2ChargedHadronFraction = jet2->chargedHadronFraction;
+            outputNtupleEntry->jet2MuonFraction = jet2->muonFraction;
+            outputNtupleEntry->jet2PhotonFraction = jet2->photonFraction;
+            outputNtupleEntry->jet2ElectronFraction = jet2->electronFraction;
+            outputNtupleEntry->jet2HFHadronFraction = jet2->hfHadronFraction;
+            outputNtupleEntry->jet2HFEMFraction = jet2->hfEMFraction;
+
             // matched genJet (MC-only)
             const dijet::LV* jet2MatchedGenJet = nullptr;
             if (!m_isData) {
@@ -210,6 +231,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->jet2MatchedGenJetEta = jet2MatchedGenJet->p4.eta();
                     outputNtupleEntry->jet2MatchedGenJetY = jet2MatchedGenJet->p4.Rapidity();
                 }
+                // flavor information (jet 2)
+                outputNtupleEntry->jet2PartonFlavor = jet2->partonFlavor;
+                outputNtupleEntry->jet2HadronFlavor = jet2->hadronFlavor;
             }
 
             // get assigned HLT path(s) for second-leading jet

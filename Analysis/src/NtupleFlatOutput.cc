@@ -69,6 +69,21 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("jet2HLTNumMatchedTriggerObjects",              &m_productForFill->jet2HLTNumMatchedTriggerObjects,               "jet2HLTNumMatchedTriggerObjects/i"              );
     m_tree->Branch("jet2HLTAssignedPathIndex",                     &m_productForFill->jet2HLTAssignedPathIndex,                      "jet2HLTAssignedPathIndex/I"                     );
     m_tree->Branch("jet2HLTAssignedPathEfficiency",                &m_productForFill->jet2HLTAssignedPathEfficiency,                 "jet2HLTAssignedPathEfficiency/D"                );
+    // PF energy fractions
+    m_tree->Branch("jet1NeutralHadronFraction",                    &m_productForFill->jet1NeutralHadronFraction,                     "jet1NeutralHadronFraction/D"                    );
+    m_tree->Branch("jet1ChargedHadronFraction",                    &m_productForFill->jet1ChargedHadronFraction,                     "jet1ChargedHadronFraction/D"                    );
+    m_tree->Branch("jet1MuonFraction",                             &m_productForFill->jet1MuonFraction,                              "jet1MuonFraction/D"                             );
+    m_tree->Branch("jet1PhotonFraction",                           &m_productForFill->jet1PhotonFraction,                            "jet1PhotonFraction/D"                           );
+    m_tree->Branch("jet1ElectronFraction",                         &m_productForFill->jet1ElectronFraction,                          "jet1ElectronFraction/D"                         );
+    m_tree->Branch("jet1HFHadronFraction",                         &m_productForFill->jet1HFHadronFraction,                          "jet1HFHadronFraction/D"                         );
+    m_tree->Branch("jet1HFEMFraction",                             &m_productForFill->jet1HFEMFraction,                              "jet1HFEMFraction/D"                             );
+    m_tree->Branch("jet2NeutralHadronFraction",                    &m_productForFill->jet2NeutralHadronFraction,                     "jet2NeutralHadronFraction/D"                    );
+    m_tree->Branch("jet2ChargedHadronFraction",                    &m_productForFill->jet2ChargedHadronFraction,                     "jet2ChargedHadronFraction/D"                    );
+    m_tree->Branch("jet2MuonFraction",                             &m_productForFill->jet2MuonFraction,                              "jet2MuonFraction/D"                             );
+    m_tree->Branch("jet2PhotonFraction",                           &m_productForFill->jet2PhotonFraction,                            "jet2PhotonFraction/D"                           );
+    m_tree->Branch("jet2ElectronFraction",                         &m_productForFill->jet2ElectronFraction,                          "jet2ElectronFraction/D"                         );
+    m_tree->Branch("jet2HFHadronFraction",                         &m_productForFill->jet2HFHadronFraction,                          "jet2HFHadronFraction/D"                         );
+    m_tree->Branch("jet2HFEMFraction",                             &m_productForFill->jet2HFEMFraction,                              "jet2HFEMFraction/D"                             );
 
     // MC
     if (!m_isData) {
@@ -84,6 +99,11 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_tree->Branch("jet12MatchedGenJetPairPtAve",                  &m_productForFill->jet12MatchedGenJetPairPtAve,                   "jet12MatchedGenJetPairPtAve/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
+        // flavor
+        m_tree->Branch("jet1PartonFlavor",                             &m_productForFill->jet1PartonFlavor,                              "jet1PartonFlavor/I"                             );
+        m_tree->Branch("jet2PartonFlavor",                             &m_productForFill->jet2PartonFlavor,                              "jet2PartonFlavor/I"                             );
+        m_tree->Branch("jet1HadronFlavor",                             &m_productForFill->jet1HadronFlavor,                              "jet1HadronFlavor/I"                             );
+        m_tree->Branch("jet2HadronFlavor",                             &m_productForFill->jet2HadronFlavor,                              "jet2HadronFlavor/I"                             );
         // weights
         m_tree->Branch("weightForStitching",                           &m_productForFill->weightForStitching,                            "weightForStitching/D"                           );
     }
