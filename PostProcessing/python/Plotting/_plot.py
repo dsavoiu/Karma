@@ -298,6 +298,25 @@ class Plotter(object):
 
         #self._input_controller.request(_reqs)
 
+    @staticmethod
+    def _merge_legend_handles_labels(handles, labels):
+        '''merge handles for identical labels'''
+        _seen_labels = []
+        _seen_label_handles = []
+        _new_label_indices = []
+        for _ihl, (_h, _l) in enumerate(zip(handles, labels)):
+            if _l not in _seen_labels:
+                _seen_labels.append(_l)
+                _seen_label_handles.append([_h])
+            else:
+                _idx = _seen_labels.index(_l)
+                _seen_label_handles[_idx].append(_h)
+
+        for _i, (_sh, _sl) in enumerate(zip(_seen_label_handles, _seen_labels)):
+            _seen_label_handles[_i] = tuple(_seen_label_handles[_i])
+
+        return _seen_label_handles, _seen_labels
+
     def _plot_figure(self, plot_config):
 
         _mplrc()
@@ -422,6 +441,10 @@ class Plotter(object):
                 _kwargs['width'] = _plot_data['xwidth']
                 _kwargs.setdefault('align', 'center')
                 _kwargs.setdefault('edgecolor', '')
+                _kwargs.setdefault('linewidth', 0)
+                if 'color' in _kwargs:
+                    # make error bar color match fill color
+                    _kwargs.setdefault('ecolor', _kwargs['color'])
                 _kwargs['y'] = _plot_data['y']
                 _kwargs['bottom'] = _y_bottom
             else:
@@ -553,10 +576,18 @@ class Plotter(object):
             for _x in _axvlines:
                 _ax.axvline(_x, linestyle='--', color='gray')
 
-            # handle plot legend
+            # -- handle plot legend
+
+            # obtain legend handles and labels
+            _hs, _ls = _ax.get_legend_handles_labels()
+
+            # merge legend entries with identical labels
+            _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)
+
+            # draw legend with user-specified kwargs
             _legend_kwargs = self._DEFAULT_LEGEND_KWARGS.copy()
             _legend_kwargs.update(_pad_config.pop('legend_kwargs', {}))
-            _ax.legend(**_legend_kwargs)
+            _ax.legend(_hs, _ls, **_legend_kwargs)
 
             # handle log x-axis formatting (only if 'x_ticklabels' is not given as [])
             if _pad_config.get('x_scale', None) == 'log' and _pad_config.get('x_ticklabels', True):
