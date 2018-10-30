@@ -65,11 +65,6 @@ QUANTITIES = {
         expression='jet1HLTAssignedPathIndex',
         binning=np.arange(-1, 12) - 0.5
     ),
-    'jet1HLTAssignedPathPrescale': Quantity(
-        name='jet1HLTAssignedPathPrescale',
-        expression='jet1HLTAssignedPathPrescale',
-        binning=np.array([-1, 0, 1, 2, 11, 21, 41, 71, 121]) - 0.5
-    ),
     'jet1HLTAssignedPathEfficiency': Quantity(
         name='jet1HLTAssignedPathEfficiency',
         expression='jet1HLTAssignedPathEfficiency',
@@ -90,7 +85,7 @@ QUANTITIES = {
     'jet1phi': Quantity(
         name='jet1phi',
         expression='jet1phi',
-        binning=np.linspace(-np.pi, np.pi, 101),  #(-np.pi, np.pi)
+        binning=np.linspace(-np.pi, np.pi, 101),
     ),
 
     # fine binning in y*/yb
@@ -129,8 +124,17 @@ QUANTITIES.update({
 
     'jet2HLTAssignedPathIndex':         Quantity(name='jet2HLTAssignedPathIndex',       expression='jet2HLTAssignedPathIndex',      binning=QUANTITIES['jet1HLTAssignedPathIndex'].binning),
     'jet2HLTAssignedPathEfficiency':    Quantity(name='jet2HLTAssignedPathEfficiency',  expression='jet2HLTAssignedPathEfficiency', binning=QUANTITIES['jet1HLTAssignedPathEfficiency'].binning),
-    'jet2HLTAssignedPathPrescale':      Quantity(name='jet2HLTAssignedPathPrescale',    expression='jet2HLTAssignedPathPrescale',   binning=QUANTITIES['jet1HLTAssignedPathPrescale'].binning),
 })
+
+# PF energy fractions
+for _pf_energy_fraction in ['NeutralHadron', 'ChargedHadron', 'Muon', 'Photon', 'Electron', 'HFHadron', 'HFEM']:
+    for _ijet in (1, 2):
+        _qname ='jet{}{}Fraction'.format(_ijet, _pf_energy_fraction)
+        QUANTITIES[_qname] = Quantity(
+            name=_qname,
+            expression=_qname,
+            binning=np.linspace(0, 1, 100),
+        )
 
 
 # specification of defines to be applied to data frame
@@ -147,9 +151,20 @@ GLOBAL_DEFINES = {
     "HLT_PFJet450": "(hltBits&{})>0".format(2**8),
     "HLT_PFJet500": "(hltBits&{})>0".format(2**9),
     # event weights
-    "totalWeight": "jet1HLTAssignedPathPrescale/jet1HLTAssignedPathEfficiency",
     "triggerEfficiencyWeight": "1.0/jet1HLTAssignedPathEfficiency",
-    "triggerPrescaleWeight": "jet1HLTAssignedPathPrescale",
+    # jet flavor categories
+
+    "Flavor_QQ":  "(abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)",
+    "Flavor_QG":  "((abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(jet2PartonFlavor==21))||((abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)&&(jet1PartonFlavor==21))",
+    "Flavor_GG":  "(jet1PartonFlavor==21)&&(jet2PartonFlavor==21)",
+    "Flavor_XX":  "(jet1PartonFlavor==0)||(jet2PartonFlavor==0)",
+
+    "Flavor_aa":  "(jet1PartonFlavor<0)&&(jet2PartonFlavor<0)",
+    "Flavor_pp":  "(jet1PartonFlavor>0)&&(jet2PartonFlavor>0)",
+    "Flavor_ap":  "((jet1PartonFlavor>0)&&(jet2PartonFlavor<0))||((jet1PartonFlavor<0)&&(jet2PartonFlavor>0))",
+
+    "Flavor_IsDiagonal":  "abs(jet1PartonFlavor)==abs(jet2PartonFlavor)",
+
 }
 
 
@@ -159,10 +174,10 @@ BASIC_SELECTION = [
     "(jet1HLTAssignedPathEfficiency>0.0&&jet1HLTAssignedPathIndex>=0)",
 
     # kinematics of leading jets
-    "abs(jet1pt) > 60",
-    "abs(jet2pt) > 60",
-    #"abs(jet1y) < 4.0",
-    #"abs(jet2y) < 4.0",
+    "jet1pt > 60",
+    "jet2pt > 60",
+    "abs(jet1y) < 3.0",
+    "abs(jet2y) < 3.0",
 
     ##MET/sumEt filter
     #"metOverSumET < 0.3"
@@ -208,5 +223,19 @@ SPLITTINGS = {
         'HLT_PFJet400' : dict(jet1HLTAssignedPathIndex=7),
         'HLT_PFJet450' : dict(jet1HLTAssignedPathIndex=8),
         'HLT_PFJet500' : dict(jet1HLTAssignedPathIndex=9),
-    }
+    },
+    # by flavor category
+    'flavors' : {
+        "Flavor_AllDefined":  dict(Flavor_XX=0),  # any flavor pairing, but need to be defined for both jets
+        "Flavor_XX":   dict(Flavor_XX=1),  # undefined
+        "Flavor_GG":   dict(Flavor_GG=1),  # gluon-gluon
+        "Flavor_QG":   dict(Flavor_QG=1),  # quark-gluon (and gluon-quark)
+        # quark-quark subcategories
+        "Flavor_QQ_aa_ii":   dict(Flavor_QQ=1, Flavor_aa=1, Flavor_IsDiagonal=1),
+        "Flavor_QQ_aa_ij":   dict(Flavor_QQ=1, Flavor_aa=1, Flavor_IsDiagonal=0),
+        "Flavor_QQ_ap_ii":   dict(Flavor_QQ=1, Flavor_ap=1, Flavor_IsDiagonal=1),
+        "Flavor_QQ_ap_ij":   dict(Flavor_QQ=1, Flavor_ap=1, Flavor_IsDiagonal=0),
+        "Flavor_QQ_pp_ii":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=1),
+        "Flavor_QQ_pp_ij":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=0),
+    },
 }

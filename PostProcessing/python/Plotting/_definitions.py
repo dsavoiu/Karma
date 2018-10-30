@@ -342,6 +342,117 @@ EXPANSIONS = {
             "y_scale": "log",
         },
     ],
+    # Particle Flow (PF) energy fractions
+    'pf_fraction': [
+        {
+            "name": "ChargedHadronFraction",
+            "label": r"PF charged hadron fraction",
+            "scale": "log",
+            "color": "red",
+            "marker": "o",
+            "marker_style": "full",
+        },
+        {
+            "name": "PhotonFraction",
+            "label": r"PF photon fraction",
+            "scale": "log",
+            "color": "royalblue",
+            "marker": "s",
+            "marker_style": "full",
+        },
+        {
+            "name": "NeutralHadronFraction",
+            "label": r"PF neutral hadron fraction",
+            "scale": "log",
+            "color": "green",
+            "marker": "D",
+            "marker_style": "full",
+        },
+        {
+            "name": "MuonFraction",
+            "label": r"PF muon fraction",
+            "scale": "log",
+            "color": "teal",
+            "marker": "v",
+            "marker_style": "full",
+        },
+        {
+            "name": "ElectronFraction",
+            "label": r"PF electron fraction",
+            "scale": "log",
+            "color": "orange",
+            "marker": "^",
+            "marker_style": "full",
+        },
+        # HF fractions
+        {
+            "name": "HFHadronFraction",
+            "label": r"PF HF hadron fraction",
+            "scale": "log",
+            "color": "mediumorchid",
+            "marker": "s",
+            "marker_style": "empty",
+        },
+        {
+            "name": "HFEMFraction",
+            "label": r"PF HF electromagnetic fraction",
+            "scale": "log",
+            "color": "darkgoldenrod",
+            "marker": "o",
+            "marker_style": "empty",
+        },
+    ],
+    # Particle Flow (PF) energy fractions
+    'flavor_fraction': [
+        {
+            "name": "Flavor_GG",
+            "label": r"$\mathrm{g}\mathrm{g}$",
+            "scale": "log",
+            "color": "orange",
+        },
+        {
+            "name": "Flavor_QG",
+            "label": r"$\mathrm{q}\mathrm{g}$, $\mathrm{g}\mathrm{q}$",
+            "scale": "log",
+            "color": "#328DCA",
+        },
+        {
+            "name": "Flavor_QQ_pp_ii",
+            "label": r"$\mathrm{q}_\mathrm{i} \mathrm{q}_\mathrm{i}$",
+            "scale": "log",
+            "color": "lightgreen",
+        },
+        {
+            "name": "Flavor_QQ_pp_ij",
+            "label": r"$\mathrm{q}_\mathrm{i} \mathrm{q}_\mathrm{j}$",
+            "scale": "log",
+            "color": "forestgreen",
+        },
+        {
+            "name": "Flavor_QQ_ap_ii",
+            "label": r"$\mathrm{q}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{i}$",
+            "scale": "log",
+            "color": "salmon",
+        },
+        {
+            "name": "Flavor_QQ_ap_ij",
+            "label": r"$\mathrm{q}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{j}$",
+            "scale": "log",
+            "color": "firebrick",
+        },
+        {
+            "name": "Flavor_QQ_aa_ii",
+            "label": r"$\overline{\mathrm{q}}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{i}$",
+            "scale": "log",
+            "color": "plum",
+        },
+        {
+            "name": "Flavor_QQ_aa_ij",
+            "label": r"$\overline{\mathrm{q}}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{j}$",
+            "scale": "log",
+            "color": "mediumorchid",
+        },
+    ],
 }
 
 

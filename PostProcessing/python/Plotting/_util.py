@@ -258,6 +258,66 @@ FIGURE_TEMPLATES = {
         'text_output': True,
     },
 
+
+    'PFEnergyFractions': {
+        'filename' : "PFEnergyFractions/{ybys[name]}/{quantity[name]}.png",
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+            'top': 0.925,
+            'hspace': 0.075,
+        },
+        'subplots' : [
+            dict(expression='discard_errors("pfefmc:{ybys[name]}/jet1'+_pf['name']+'/p_{quantity[name]}")',
+                 label=_pf['label'], plot_method='bar', color=_pf['color'],
+                 stack='mc', show_yerr=False,
+                 #mask_zero_errors=True  #TODO: fix bug
+            )
+            for _pf in EXPANSIONS['pf_fraction']
+            if _pf['name'] not in ("HFEMFraction", "HFHadronFraction")
+        ] + [
+            dict(expression='"pfef:{ybys[name]}/jet1'+_pf['name']+'/p_{quantity[name]}"',
+                 label=_pf['label'], plot_method='errorbar', marker=_pf['marker'], marker_style=_pf['marker_style'], color='k',
+                 stack='data',
+                 #mask_zero_errors=True  #TODO: fix bug
+            )
+            for _pf in EXPANSIONS['pf_fraction']
+            if _pf['name'] not in ("HFEMFraction", "HFHadronFraction")
+        ] + [
+            dict(expression='100.0 * (h("pfef:{ybys[name]}/jet1'+_pf['name']+'/p_{quantity[name]}") - h("pfefmc:{ybys[name]}/jet1'+_pf['name']+'/p_{quantity[name]}"))',
+                 label=None, plot_method='errorbar', marker=_pf['marker'], marker_style=_pf['marker_style'], color=_pf['color'],
+                 stack=None,
+                 #mask_zero_errors=True  #TODO: fix bug
+                 pad=1
+            )
+            for _pf in EXPANSIONS['pf_fraction']
+            if _pf['name'] not in ("HFEMFraction", "HFHadronFraction")
+        ],
+        'pads' : [
+            {
+                'height_share' : 3,
+                'x_label' : None,
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'PF Energy Fraction',
+                'y_range' : (0, 1.5),
+                'y_scale' : 'linear',
+                'x_ticklabels' : [],
+                'legend_kwargs': dict(loc='upper right', ncol=2),
+            },
+            {
+                'height_share' : 1,
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Data-MC (%)',
+                'y_range' : (-5, 5),
+                'y_scale' : 'linear',
+                'legend_kwargs': dict(loc='lower left', ncol=2),
+            },
+        ],
+    },
+
     # -- Data
 
     'TriggerEfficiencies': {
@@ -781,4 +841,40 @@ FIGURE_TEMPLATES = {
                  label=None, plot_method='errorbar', color="k", marker="{ybys[marker]}", marker_style="{ybys[marker_style]}", pad=1),
         ],
     },
+
+    'FlavorFractions' : {
+        'filename' : "FlavorFractions/{ybys[name]}/{quantity[name]}.png",
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+            'top': 0.925,
+            'hspace': 0.075,
+        },
+        'subplots' : [
+            dict(expression='discard_errors("fl:{ybys[name]}/'+_pf['name']+'/h_{quantity[name]}" / "fl:{ybys[name]}/Flavor_AllDefined/h_{quantity[name]}")',
+                 label=LiteralString(_pf['label']), plot_method='bar', color=_pf['color'], show_yerr=False,
+                 stack='all',
+            )
+            for _pf in EXPANSIONS['flavor_fraction']
+            if not _pf['name'].startswith("Flavor_QQ_aa")
+        ] + [
+            dict(expression='discard_errors(("fl:{ybys[name]}/Flavor_QQ_aa_ii/h_{quantity[name]}" + "fl:{ybys[name]}/Flavor_QQ_aa_ij/h_{quantity[name]}") / "fl:{ybys[name]}/Flavor_AllDefined/h_{quantity[name]}")',
+                 label=LiteralString(r"$\overline{{\mathrm{{q}}}}\overline{{\mathrm{{q}}}}$"), plot_method='bar', color=_pf['color'], show_yerr=False,
+                 stack='all',
+            )
+            for _pf in EXPANSIONS['flavor_fraction']
+            if _pf['name'].startswith("Flavor_QQ_aa_ii")
+        ],
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Event Fraction',
+                'y_range' : (0, 1.2),
+                'y_scale' : 'linear',
+                'legend_kwargs': dict(loc='upper right', ncol=4),
+            },
+        ],
+    }
 }
