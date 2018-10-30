@@ -108,9 +108,11 @@ process.leadingJetPtFilter = cms.EDFilter(
 process.flatNtupleWriter = cms.EDAnalyzer(
     "NtupleFlatOutput",
     cms.PSet(
+        isData = cms.bool(options.isData),
         dijetNtupleSrc = cms.InputTag("ntuple"),
         outputFileName = cms.string("output_flat.root"),
         treeName = cms.string("Events"),
+        checkForCompleteness = cms.bool(False),
     )
 )
 

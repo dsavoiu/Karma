@@ -61,18 +61,13 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("met",                                          &m_productForFill->met,                                           "met/D"                                          );
     m_tree->Branch("sumEt",                                        &m_productForFill->sumEt,                                         "sumEt/D"                                        );
     m_tree->Branch("hltBits",                                      &m_productForFill->hltBits,                                       "hltBits/L"                                      );
-    m_tree->Branch("hltNumBits",                                   &m_productForFill->hltNumBits,                                    "hltNumBits/i"                                   );
-    m_tree->Branch("hltAssignedBit",                               &m_productForFill->hltAssignedBit,                                "hltAssignedBit/I"                               );
-    m_tree->Branch("hltAssignedPrescale",                          &m_productForFill->hltAssignedPrescale,                           "hltAssignedPrescale/I"                          );
     m_tree->Branch("jet1HLTpt",                                    &m_productForFill->jet1HLTpt,                                     "jet1HLTpt/D"                                    );
     m_tree->Branch("jet1HLTNumMatchedTriggerObjects",              &m_productForFill->jet1HLTNumMatchedTriggerObjects,               "jet1HLTNumMatchedTriggerObjects/i"              );
     m_tree->Branch("jet1HLTAssignedPathIndex",                     &m_productForFill->jet1HLTAssignedPathIndex,                      "jet1HLTAssignedPathIndex/I"                     );
-    m_tree->Branch("jet1HLTAssignedPathPrescale",                  &m_productForFill->jet1HLTAssignedPathPrescale,                   "jet1HLTAssignedPathPrescale/I"                  );
     m_tree->Branch("jet1HLTAssignedPathEfficiency",                &m_productForFill->jet1HLTAssignedPathEfficiency,                 "jet1HLTAssignedPathEfficiency/D"                );
     m_tree->Branch("jet2HLTpt",                                    &m_productForFill->jet2HLTpt,                                     "jet2HLTpt/D"                                    );
     m_tree->Branch("jet2HLTNumMatchedTriggerObjects",              &m_productForFill->jet2HLTNumMatchedTriggerObjects,               "jet2HLTNumMatchedTriggerObjects/i"              );
     m_tree->Branch("jet2HLTAssignedPathIndex",                     &m_productForFill->jet2HLTAssignedPathIndex,                      "jet2HLTAssignedPathIndex/I"                     );
-    m_tree->Branch("jet2HLTAssignedPathPrescale",                  &m_productForFill->jet2HLTAssignedPathPrescale,                   "jet2HLTAssignedPathPrescale/I"                  );
     m_tree->Branch("jet2HLTAssignedPathEfficiency",                &m_productForFill->jet2HLTAssignedPathEfficiency,                 "jet2HLTAssignedPathEfficiency/D"                );
 
     // MC

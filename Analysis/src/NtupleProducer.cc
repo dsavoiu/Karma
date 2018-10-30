@@ -142,18 +142,6 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     }
     ///std::cout << " -> helperBitset - " << helperBitset << std::endl;
     outputNtupleEntry->hltBits = helperBitset.to_ulong();
-    outputNtupleEntry->hltNumBits = std::accumulate(this->dijetEventHandle->hltBits.begin(), this->dijetEventHandle->hltBits.end(), 0);
-
-    // assign highest-threshold trigger path (assume ordered)
-    if (outputNtupleEntry->hltNumBits) {
-        // higher paths take precedence -> iterate in reverse order
-        for (int iBit = this->dijetEventHandle->hltBits.size() - 1; iBit >= 0; --iBit) {
-            if (this->dijetEventHandle->hltBits[iBit]) {
-                outputNtupleEntry->hltAssignedBit = iBit;
-                break;
-            }
-        }
-    }
 
     const auto& jets = this->dijetJetCollectionHandle;  // convenience
     // leading jet kinematics
@@ -184,11 +172,6 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         dijet::HLTAssignment jet1HLTAssignment = getHLTAssignment(0);
         outputNtupleEntry->jet1HLTNumMatchedTriggerObjects = jet1HLTAssignment.numUniqueMatchedTriggerObjects;
         outputNtupleEntry->jet1HLTAssignedPathIndex = jet1HLTAssignment.assignedPathIndex;
-        if (outputNtupleEntry->jet1HLTAssignedPathIndex >= 0) {
-            outputNtupleEntry->jet1HLTAssignedPathPrescale = this->dijetEventHandle->triggerPathHLTPrescales[
-                outputNtupleEntry->jet1HLTAssignedPathIndex
-            ];
-        }
 
         // retrieve the efficiency
         if (outputNtupleEntry->jet1HLTAssignedPathIndex >= 0) {
@@ -233,11 +216,6 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             dijet::HLTAssignment jet2HLTAssignment = getHLTAssignment(1);
             outputNtupleEntry->jet2HLTNumMatchedTriggerObjects = jet2HLTAssignment.numUniqueMatchedTriggerObjects;
             outputNtupleEntry->jet2HLTAssignedPathIndex = jet2HLTAssignment.assignedPathIndex;
-            if (outputNtupleEntry->jet2HLTAssignedPathIndex >= 0) {
-                outputNtupleEntry->jet2HLTAssignedPathPrescale = this->dijetEventHandle->triggerPathHLTPrescales[
-                    outputNtupleEntry->jet2HLTAssignedPathIndex
-                ];
-            }
             outputNtupleEntry->jet2HLTpt = jet2HLTAssignment.assignedObjectPt;
 
             // leading jet pair kinematics

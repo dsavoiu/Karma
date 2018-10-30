@@ -39,11 +39,6 @@ namespace dijet {
         double met = UNDEFINED_DOUBLE;
         double sumEt = UNDEFINED_DOUBLE;
 
-        // trigger result and prescale factor
-        unsigned int hltNumBits = 0;
-        int hltAssignedBit = -1;
-        int hltAssignedPrescale = -1;
-
         // trigger results
         unsigned long hltBits;
 
@@ -51,13 +46,11 @@ namespace dijet {
         double jet1HLTpt = UNDEFINED_DOUBLE;
         unsigned int jet1HLTNumMatchedTriggerObjects = 0;
         int jet1HLTAssignedPathIndex = -1;
-        int jet1HLTAssignedPathPrescale = -1;
         double jet1HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
 
         double jet2HLTpt = UNDEFINED_DOUBLE;
         unsigned int jet2HLTNumMatchedTriggerObjects = 0;
         int jet2HLTAssignedPathIndex = -1;
-        int jet2HLTAssignedPathPrescale = -1;
         double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
 
         // -- MC-specific
