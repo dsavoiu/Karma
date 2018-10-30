@@ -18,13 +18,28 @@ EXPANSIONS = {
             'gen_name': "jet1MatchedGenJetPt",
             'gen_label': r"${p_{\mathrm{T}}^{\mathrm{jet1,gen}}}$ /  GeV",
             "stagger_factors": {
-                "inclusive": 1e0,
-                "YB01_YS01": 1e4,
-                "YB01_YS12": 1e3,
-                "YB01_YS23": 1e-1,
-                "YB12_YS01": 1e1,
-                "YB12_YS12": 1e0,
-                "YB23_YS01": 1e-3,
+                "inclusive": 0,
+                "YB01_YS01": 4,
+                "YB01_YS12": 3,
+                "YB01_YS23": -1,
+                "YB12_YS01": 1,
+                "YB12_YS12": 0,
+                "YB23_YS01": -3,
+                "YB_00_05_YS_00_05": 0,
+                "YB_00_05_YS_05_10": 0,
+                "YB_00_05_YS_10_15": 0,
+                "YB_00_05_YS_15_20": 0,
+                "YB_00_05_YS_20_25": 0,
+                "YB_05_10_YS_00_05": 0,
+                "YB_05_10_YS_05_10": 0,
+                "YB_05_10_YS_10_15": 0,
+                "YB_05_10_YS_15_20": 0,
+                "YB_10_15_YS_00_05": 0,
+                "YB_10_15_YS_05_10": 0,
+                "YB_10_15_YS_10_15": 0,
+                "YB_15_20_YS_00_05": 0,
+                "YB_15_20_YS_05_10": 0,
+                "YB_20_25_YS_00_05": 0,
             }
         },
         {
@@ -32,18 +47,33 @@ EXPANSIONS = {
             "label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
             "scale": "log",
             'range' : (100, 4045),
-            'xs_range': (1e-10, 1e10),
+            'xs_range': (1e-10, 1e20),
             'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{\langle p_{\mathrm{T}} \rangle}_{1,2}"),
             'gen_name': "jet12MatchedGenJetPairPtAve",
             'gen_label': r"${\langle p_{\mathrm{T}} \rangle}_{1,2}^{\mathrm{gen}}$ / GeV",
             "stagger_factors": {
-                "inclusive": 1e0,
-                "YB01_YS01": 1e4,
-                "YB01_YS12": 1e3,
-                "YB01_YS23": 1e-1,
-                "YB12_YS01": 1e1,
-                "YB12_YS12": 1e0,
-                "YB23_YS01": 1e-3,
+                "inclusive": 0,
+                "YB01_YS01": 4,
+                "YB01_YS12": 3,
+                "YB01_YS23": -1,
+                "YB12_YS01": 1,
+                "YB12_YS12": 0,
+                "YB23_YS01": -3,
+                "YB_00_05_YS_00_05": 4+3+3+3,    # D
+                "YB_00_05_YS_05_10": 4+3+3+2,    # D
+                "YB_00_05_YS_10_15": 3+3+3,      # v
+                "YB_00_05_YS_15_20": 3+3+1,      # v
+                "YB_00_05_YS_20_25": -1,         # ^
+                "YB_05_10_YS_00_05": 4+3+3+1,    # D
+                "YB_05_10_YS_05_10": 4+3+3+0,    # D
+                "YB_05_10_YS_10_15": 3+3+2,      # v
+                "YB_05_10_YS_15_20": 3+3+0,      # v
+                "YB_10_15_YS_00_05": 1+3,        # s
+                "YB_10_15_YS_05_10": 1+2,        # s
+                "YB_10_15_YS_10_15": 0,          # >
+                "YB_15_20_YS_00_05": 1+1,        # s
+                "YB_15_20_YS_05_10": 1+0,        # s
+                "YB_20_25_YS_00_05": -3,         # o
             }
         },
         {
@@ -56,13 +86,28 @@ EXPANSIONS = {
             'gen_name': "jet12MatchedGenJetPairMass",
             'gen_label': r"${m_{\mathrm{jj}}^{\mathrm{gen}}}$ / GeV",
             "stagger_factors": {
-                "inclusive": 1e0,
-                "YB01_YS01": 1e-2,
-                "YB01_YS12": 1e2,
-                "YB01_YS23": 1e4,
-                "YB12_YS01": 1e-3,
-                "YB12_YS12": 1e1,
-                "YB23_YS01": 1e-3,
+                "inclusive": 0,
+                "YB01_YS01": -2,
+                "YB01_YS12": 2,
+                "YB01_YS23": 4,
+                "YB12_YS01": -3,
+                "YB12_YS12": 1,
+                "YB23_YS01": -3,
+                "YB_00_05_YS_00_05": 0,
+                "YB_00_05_YS_05_10": 0,
+                "YB_00_05_YS_10_15": 0,
+                "YB_00_05_YS_15_20": 0,
+                "YB_00_05_YS_20_25": 0,
+                "YB_05_10_YS_00_05": 0,
+                "YB_05_10_YS_05_10": 0,
+                "YB_05_10_YS_10_15": 0,
+                "YB_05_10_YS_15_20": 0,
+                "YB_10_15_YS_00_05": 0,
+                "YB_10_15_YS_05_10": 0,
+                "YB_10_15_YS_10_15": 0,
+                "YB_15_20_YS_00_05": 0,
+                "YB_15_20_YS_05_10": 0,
+                "YB_20_25_YS_00_05": 0,
             }
         },
         {
@@ -130,6 +175,31 @@ EXPANSIONS = {
             "marker": "o",
             "marker_style": "full",
         },
+        {
+            "name": "inclusive",
+            "label": r"inclusive",
+            "color": "k",
+            "marker": "o",
+            "marker_style": "empty",
+        },
+    ],
+    # phase space regions (in y_boost, y_star)
+    'ybys_narrow' : [
+        {"name": "YB_00_05_YS_00_05", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0   \leq y^{*} < 0.5$", "color": "#5c15b6", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_00_05_YS_05_10", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0.5 \leq y^{*} <   1$", "color": "#2659a2", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_00_05_YS_10_15", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1   \leq y^{*} < 1.5$", "color": "#139913", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_00_05_YS_15_20", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1.5 \leq y^{*} <   2$", "color": "#c55200", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_00_05_YS_20_25", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $2   \leq y^{*} < 2.5$", "color": "#a11313", "marker": "^", "marker_style": "full"},   # YB01_YS23
+        {"name": "YB_05_10_YS_00_05", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0   \leq y^{*} < 0.5$", "color": "#7959c4", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_05_10_YS_05_10", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0.5 \leq y^{*} <   1$", "color": "#3e98b2", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_05_10_YS_10_15", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1   \leq y^{*} < 1.5$", "color": "#51c230", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_05_10_YS_15_20", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1.5 \leq y^{*} <   2$", "color": "#ffa500", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_10_15_YS_00_05", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0   \leq y^{*} < 0.5$", "color": "#9983cf", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_10_15_YS_05_10", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0.5 \leq y^{*} <   1$", "color": "#67b4cb", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_10_15_YS_10_15", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $1   \leq y^{*} < 1.5$", "color": "#8def56", "marker": ">", "marker_style": "full"},   # YB12_YS12
+        {"name": "YB_15_20_YS_00_05", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0   \leq y^{*} < 0.5$", "color": "#c6b2e2", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_15_20_YS_05_10", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0.5 \leq y^{*} <   1$", "color": "#a0eaff", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_20_25_YS_00_05", "label": r"$2   \leq y_{\mathrm{b}} < 2.5$, $0   \leq y^{*} < 0.5$", "color": "#fab0ff", "marker": "o", "marker_style": "full"},   # YB23_YS01
         {
             "name": "inclusive",
             "label": r"inclusive",

@@ -90,8 +90,8 @@ FIGURE_TEMPLATES = {
         'filename' : "CrossSection/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': '{quantity[stagger_factors]['+_ybys['name']+']} * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
-                'label': LiteralString(r"{} ($\times$10$^{{?}}$)".format(_ybys['label'])) if _tp['name'] == "HLT_PFJet500" else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
+                'label': _ybys['label'] + r' ($\times$10$^{{{quantity[stagger_factors]['+_ybys['name']+']}}}$)' if _tp['name'] == "HLT_PFJet500" else None,
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
                 'marker_style': _ybys['marker_style'],
@@ -100,12 +100,12 @@ FIGURE_TEMPLATES = {
                 'normalize_to_width': True,
             }
             for _tp in EXPANSIONS['trigger']
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
             {
-                'expression': '{quantity[stagger_factors]['+_ybys['name']+']} * ' + xs_expression_mc("eymc", _ybys),
-                'label': LiteralString("MC") if _ybys['name'] == "YB01_YS01" else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys),
+                'label': LiteralString("MC") if _ybys['name'] == EXPANSIONS['ybys_narrow'][1] else None,
                 'color': 'k',
                 'marker': ',',
                 'marker_style': 'empty',
@@ -113,7 +113,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': True,
             }
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_ybys['name'] != "inclusive")
         ],
         'pads' : [
@@ -134,8 +134,8 @@ FIGURE_TEMPLATES = {
         'filename' : "CrossSection_HLTColor/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': '{quantity[stagger_factors]['+_ybys['name']+']} * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
-                'label': LiteralString(r"{}".format(_tp['label'])) if _ybys['name'] == "YB01_YS01" else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
+                'label': _ybys['label'] + r' ($\times$10$^{{{quantity[stagger_factors]['+_ybys['name']+']}}}$)' if _tp['name'] == "HLT_PFJet500" else None,
                 'color': _tp['color'],
                 'marker': _tp['marker'],
                 'marker_style': _tp['marker_style'],
@@ -144,12 +144,12 @@ FIGURE_TEMPLATES = {
                 'normalize_to_width': True,
             }
             for _tp in EXPANSIONS['trigger']
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
             {
-                'expression': '{quantity[stagger_factors]['+_ybys['name']+']} * ' + xs_expression_mc("eymc", _ybys),
-                'label': LiteralString("MC") if _tp['name'] == "YB01_YS01" else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys),
+                'label': LiteralString("MC") if _tp['name'] == EXPANSIONS['ybys_narrow'] else None,
                 'color': 'k',
                 'marker': ',',
                 'marker_style': 'empty',
@@ -157,7 +157,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': True,
             }
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_ybys['name'] != "inclusive")
         ],
         'pads' : [
@@ -171,6 +171,10 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right', ncol=2),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
     },
     'CrossSectionRatio': {
         'filename' : "CrossSectionRatio/{quantity[name]}/{ybys[name]}.png",
@@ -231,6 +235,10 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper left'),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
     },
 
     'OccupancyRatio': {
@@ -635,7 +643,7 @@ FIGURE_TEMPLATES = {
         'filename' : "JetResolution_YBYS/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': 'yerr("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
                 'label': _ybys['label'],
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
@@ -665,7 +673,7 @@ FIGURE_TEMPLATES = {
         'filename' : "JetResolutionOverBinWidth_YBYS/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': 'yerr("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}") / bin_width("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}") / bin_width("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
                 'label': _ybys['label'],
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
@@ -691,19 +699,82 @@ FIGURE_TEMPLATES = {
         },
     },
 
-    # RMS of jet quantity distribution (only one subplot showing inclusive sample)
-    'JetResolution': {
-        'filename' : "JetResolution/{quantity[name]}.png",
+    # RMS of jet quantity distribution (one subplot per YBYS splitting)
+    'JetResolution_YBYS_Narrow': {
+        'filename' : "JetResolution_YBYS_Narrow/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': 'yerr("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
                 'label': _ybys['label'],
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
                 'marker_style': _ybys['marker_style'],
                 'plot_method': 'errorbar',
             }
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
+            if (_ybys['name'] != "inclusive")
+        ],
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]})',
+                'y_range' : (1, 1e5),
+                'y_scale' : 'log',
+                'legend_kwargs': dict(ncol=2),
+            },
+        ],
+        'request_params': {
+            'profile_error_option': "S",  # take standard deviation instead of error on mean
+        },
+    },
+
+    # RMS of jet quantity distribution, divided by bin width (one subplot per YBYS splitting)
+    'JetResolutionOverBinWidth_YBYS_Narrow': {
+        'filename' : "JetResolutionOverBinWidth_YBYS_Narrow/{quantity[name]}.png",
+        'subplots' : [
+            {
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}") / bin_width("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'label': _ybys['label'],
+                'color': _ybys['color'],
+                'marker': _ybys['marker'],
+                'marker_style': _ybys['marker_style'],
+                'plot_method': 'errorbar',
+            }
+            for _ybys in EXPANSIONS['ybys_narrow']
+            if (_ybys['name'] != "inclusive")
+        ],
+        'pads' : [
+            {
+                'x_label' : '{quantity[gen_label]}',
+                #'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : r'RMS({quantity[label]}) / Bin width',
+                'y_range' : (0.0, 2.0),
+                'y_scale' : 'linear',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(ncol=2),
+            },
+        ],
+        'request_params': {
+            'profile_error_option': "S",  # take standard deviation instead of error on mean
+        },
+    },
+
+    # RMS of jet quantity distribution (only one subplot showing inclusive sample)
+    'JetResolution': {
+        'filename' : "JetResolution/{quantity[name]}.png",
+        'subplots' : [
+            {
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'label': _ybys['label'],
+                'color': _ybys['color'],
+                'marker': _ybys['marker'],
+                'marker_style': _ybys['marker_style'],
+                'plot_method': 'errorbar',
+            }
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_ybys['name'] == "inclusive")
         ],
         'pads' : [
@@ -726,14 +797,14 @@ FIGURE_TEMPLATES = {
         'filename' : "JetResolutionOverBinWidth/{quantity[name]}.png",
         'subplots' : [
             {
-                'expression': 'yerr("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}") / bin_width("jr_wide:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
+                'expression': 'yerr("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}") / bin_width("jr:' + _ybys['name'] + '/{quantity[name]}/p_{quantity[gen_name]}")',
                 'label': _ybys['label'],
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
                 'marker_style': _ybys['marker_style'],
                 'plot_method': 'errorbar',
             }
-            for _ybys in EXPANSIONS['ybys']
+            for _ybys in EXPANSIONS['ybys_narrow']
             if (_ybys['name'] == "inclusive")
         ],
         'pads' : [

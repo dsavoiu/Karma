@@ -196,6 +196,25 @@ SPLITTINGS = {
         'YB12_YS12' : dict(yboost=(1, 2), ystar=(1, 2)),
         'YB23_YS01' : dict(yboost=(2, 3), ystar=(0, 1)),
     },
+    # in (y_boost, y_star) bins
+    'ybys_narrow' : {
+        'inclusive' : dict(),
+        'YB_00_05_YS_00_05' : dict(yboost=(0.0, 0.5), ystar=(0.0, 0.5)),
+        'YB_00_05_YS_05_10' : dict(yboost=(0.0, 0.5), ystar=(0.5, 1.0)),
+        'YB_00_05_YS_10_15' : dict(yboost=(0.0, 0.5), ystar=(1.0, 1.5)),
+        'YB_00_05_YS_15_20' : dict(yboost=(0.0, 0.5), ystar=(1.5, 2.0)),
+        'YB_00_05_YS_20_25' : dict(yboost=(0.0, 0.5), ystar=(2.0, 2.5)),
+        'YB_05_10_YS_00_05' : dict(yboost=(0.5, 1.0), ystar=(0.0, 0.5)),
+        'YB_05_10_YS_05_10' : dict(yboost=(0.5, 1.0), ystar=(0.5, 1.0)),
+        'YB_05_10_YS_10_15' : dict(yboost=(0.5, 1.0), ystar=(1.0, 1.5)),
+        'YB_05_10_YS_15_20' : dict(yboost=(0.5, 1.0), ystar=(1.5, 2.0)),
+        'YB_10_15_YS_00_05' : dict(yboost=(1.0, 1.5), ystar=(0.0, 0.5)),
+        'YB_10_15_YS_05_10' : dict(yboost=(1.0, 1.5), ystar=(0.5, 1.0)),
+        'YB_10_15_YS_10_15' : dict(yboost=(1.0, 1.5), ystar=(1.0, 1.5)),
+        'YB_15_20_YS_00_05' : dict(yboost=(1.5, 2.0), ystar=(0.0, 0.5)),
+        'YB_15_20_YS_05_10' : dict(yboost=(1.5, 2.0), ystar=(0.5, 1.0)),
+        'YB_20_25_YS_00_05' : dict(yboost=(2.0, 2.5), ystar=(0.0, 0.5)),
+    },
     # by trigger path (with overlap)
     'triggers' : {
         'all' : dict(),
