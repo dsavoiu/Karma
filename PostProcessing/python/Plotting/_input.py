@@ -203,6 +203,40 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
+    def unfold(tobject_reco, th2d_response):
+        """Use TUnfold to unfold a reconstructed spectrum."""
+
+        #_normalized_response = _ROOTObjectFunctions.normalize_x(th2d_response)
+        _th2d_response_clone = asrootpy(th2d_response.Clone())
+        _tobject_reco_clone = asrootpy(tobject_reco.Clone())
+
+        # get rid of gen-level underflow/overflow:
+        for _bin_proxy in _th2d_response_clone:
+            if _bin_proxy.xyz[0] == 0:
+                _bin_proxy.value = 0
+                _bin_proxy.error = 0
+
+        _tunfold = ROOT.TUnfold(
+            _th2d_response_clone,
+            ROOT.TUnfold.kHistMapOutputHoriz,   # gen-level on x axis
+            ROOT.TUnfold.kRegModeNone,          # no regularization
+            ROOT.TUnfold.kEConstraintNone,      # no constraints
+        )
+        _tunfold.SetInput(
+            _tobject_reco_clone
+        )
+        _tunfold.DoUnfold(0)
+
+        _toutput = th2d_response.ProjectionX(uuid.uuid4().get_hex()) #tobject_reco.Clone()
+        _tunfold.GetOutput(_toutput)
+
+        _th2d_response_clone.Delete()
+        _tobject_reco_clone.Delete()
+        _tunfold.Delete()
+
+        return asrootpy(_toutput)
+
+    @staticmethod
     def normalize_to_ref(tobject, tobject_ref):
         """Normalize `tobject` to the integral over `tobject_ref`."""
 
@@ -355,6 +389,7 @@ class InputROOT(object):
         'threshold':                _ROOTObjectFunctions.threshold,
         'threshold_by_ref':         _ROOTObjectFunctions.threshold_by_ref,
         'normalize_x':              _ROOTObjectFunctions.normalize_x,
+        'unfold':                   _ROOTObjectFunctions.unfold,
         'normalize_to_ref':         _ROOTObjectFunctions.normalize_to_ref,
     }
 
