@@ -277,7 +277,7 @@ class Plotter(object):
                 elif isinstance(_v, ConfigurationEntry):
                     _fig_cfg[_k] = _v.get(context)
 
-            for _subkey_for_context_replacing in ('pads', 'subplots'):
+            for _subkey_for_context_replacing in ('pads', 'subplots', 'texts'):
                 for _dict_for_subkey in _fig_cfg[_subkey_for_context_replacing]:
                     for _k, _v in _dict_for_subkey.iteritems():
                         if isinstance(_v, str):
@@ -323,6 +323,8 @@ class Plotter(object):
 
         _filename = os.path.join(self._output_folder, plot_config['filename'])
 
+        # step 1: create figure and pads
+
         _figsize = plot_config.pop('figsize', None)
         _fig = self._get_figure(_filename, figsize=_figsize)
 
@@ -352,6 +354,7 @@ class Plotter(object):
             _text_file = open(_text_filename, 'w')
         else:
             _text_file = None
+
 
         # step 2: retrieve data and plot
 
@@ -548,7 +551,6 @@ class Plotter(object):
                     if _z_label is not None:
                         _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
-            # draw text/annotations
             #_ax.text(.05, .9,
             #    r"CMS",
             #    ha='left',
@@ -605,7 +607,37 @@ class Plotter(object):
             #
             #    _ax.yaxis.set_minor_formatter(_formatter)
 
-        # step 4: figure adjustments
+        # step 4: text and annotations
+
+        # draw text/annotations
+        _text_configs = plot_config.pop('texts', [])
+        for _text_config in _text_configs:
+            # retrieve target pad
+            _pad_id = _text_config.pop('pad', 0)
+            _ax = _pad_configs[_pad_id]['axes']
+
+            # retrieve coordinates and text
+            _x, _y = _text_config.pop('xy')
+            _s = _text_config.pop('text')
+
+            # lookup transform by string
+            _transform = _text_config.pop('transform', None)
+            if _transform is None or _transform == 'axes':
+                _transform = _ax.transAxes
+            elif _transform == 'data':
+                _transform = _ax.transData
+            else:
+                raise ValueError("Unknown coordinate transform specification '{}': expected e.g. 'axes' or 'data'".format(_transform))
+
+            # draw text
+            _text_config.setdefault('ha', 'left')
+            _ax.text(_x, _y, _s,
+                transform=_transform,
+                **_text_config
+            )
+
+
+        # step 5: figure adjustments
 
         # handle figure label ("upper_label")
         _upper_label = plot_config.pop('upper_label', None)
@@ -618,7 +650,8 @@ class Plotter(object):
                 transform=_ax_top.transAxes
             )
 
-        # step 5: save figures
+
+        # step 6: save figures
         _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
 

@@ -185,24 +185,26 @@ EXPANSIONS = {
     ],
     # phase space regions (in y_boost, y_star)
     'ybys_narrow' : [
-        {"name": "YB_00_05_YS_00_05", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0   \leq y^{*} < 0.5$", "color": "#5c15b6", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_00_05_YS_05_10", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0.5 \leq y^{*} <   1$", "color": "#2659a2", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_00_05_YS_10_15", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1   \leq y^{*} < 1.5$", "color": "#139913", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_00_05_YS_15_20", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1.5 \leq y^{*} <   2$", "color": "#c55200", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_00_05_YS_20_25", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $2   \leq y^{*} < 2.5$", "color": "#a11313", "marker": "^", "marker_style": "full"},   # YB01_YS23
-        {"name": "YB_05_10_YS_00_05", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0   \leq y^{*} < 0.5$", "color": "#7959c4", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_05_10_YS_05_10", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0.5 \leq y^{*} <   1$", "color": "#3e98b2", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_05_10_YS_10_15", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1   \leq y^{*} < 1.5$", "color": "#51c230", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_05_10_YS_15_20", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1.5 \leq y^{*} <   2$", "color": "#ffa500", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_10_15_YS_00_05", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0   \leq y^{*} < 0.5$", "color": "#9983cf", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_10_15_YS_05_10", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0.5 \leq y^{*} <   1$", "color": "#67b4cb", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_10_15_YS_10_15", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $1   \leq y^{*} < 1.5$", "color": "#8def56", "marker": ">", "marker_style": "full"},   # YB12_YS12
-        {"name": "YB_15_20_YS_00_05", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0   \leq y^{*} < 0.5$", "color": "#c6b2e2", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_15_20_YS_05_10", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0.5 \leq y^{*} <   1$", "color": "#a0eaff", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_20_25_YS_00_05", "label": r"$2   \leq y_{\mathrm{b}} < 2.5$, $0   \leq y^{*} < 0.5$", "color": "#fab0ff", "marker": "o", "marker_style": "full"},   # YB23_YS01
+        {"name": "YB_00_05_YS_00_05", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0   \leq y{*} < 0.5$", "yb_label": r"$0   \leq y_{\mathrm{b}} < 0.5$", "ys_label": r"$0   \leq y{*} < 0.5$", "color": "#5c15b6", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_00_05_YS_05_10", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $0.5 \leq y{*} <   1$", "yb_label": r"$0   \leq y_{\mathrm{b}} < 0.5$", "ys_label": r"$0.5 \leq y{*} <   1$", "color": "#2659a2", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_00_05_YS_10_15", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1   \leq y{*} < 1.5$", "yb_label": r"$0   \leq y_{\mathrm{b}} < 0.5$", "ys_label": r"$1   \leq y{*} < 1.5$", "color": "#139913", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_00_05_YS_15_20", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $1.5 \leq y{*} <   2$", "yb_label": r"$0   \leq y_{\mathrm{b}} < 0.5$", "ys_label": r"$1.5 \leq y{*} <   2$", "color": "#c55200", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_00_05_YS_20_25", "label": r"$0   \leq y_{\mathrm{b}} < 0.5$, $2   \leq y{*} < 2.5$", "yb_label": r"$0   \leq y_{\mathrm{b}} < 0.5$", "ys_label": r"$2   \leq y{*} < 2.5$", "color": "#a11313", "marker": "^", "marker_style": "full"},   # YB01_YS23
+        {"name": "YB_05_10_YS_00_05", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0   \leq y{*} < 0.5$", "yb_label": r"$0.5 \leq y_{\mathrm{b}} <   1$", "ys_label": r"$0   \leq y{*} < 0.5$", "color": "#7959c4", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_05_10_YS_05_10", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $0.5 \leq y{*} <   1$", "yb_label": r"$0.5 \leq y_{\mathrm{b}} <   1$", "ys_label": r"$0.5 \leq y{*} <   1$", "color": "#3e98b2", "marker": "D", "marker_style": "full"},   # YB01_YS01
+        {"name": "YB_05_10_YS_10_15", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1   \leq y{*} < 1.5$", "yb_label": r"$0.5 \leq y_{\mathrm{b}} <   1$", "ys_label": r"$1   \leq y{*} < 1.5$", "color": "#51c230", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_05_10_YS_15_20", "label": r"$0.5 \leq y_{\mathrm{b}} <   1$, $1.5 \leq y{*} <   2$", "yb_label": r"$0.5 \leq y_{\mathrm{b}} <   1$", "ys_label": r"$1.5 \leq y{*} <   2$", "color": "#ffa500", "marker": "v", "marker_style": "full"},   # YB01_YS12
+        {"name": "YB_10_15_YS_00_05", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0   \leq y{*} < 0.5$", "yb_label": r"$1   \leq y_{\mathrm{b}} < 1.5$", "ys_label": r"$0   \leq y{*} < 0.5$", "color": "#9983cf", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_10_15_YS_05_10", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $0.5 \leq y{*} <   1$", "yb_label": r"$1   \leq y_{\mathrm{b}} < 1.5$", "ys_label": r"$0.5 \leq y{*} <   1$", "color": "#67b4cb", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_10_15_YS_10_15", "label": r"$1   \leq y_{\mathrm{b}} < 1.5$, $1   \leq y{*} < 1.5$", "yb_label": r"$1   \leq y_{\mathrm{b}} < 1.5$", "ys_label": r"$1   \leq y{*} < 1.5$", "color": "#8def56", "marker": ">", "marker_style": "full"},   # YB12_YS12
+        {"name": "YB_15_20_YS_00_05", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0   \leq y{*} < 0.5$", "yb_label": r"$1.5 \leq y_{\mathrm{b}} <   2$", "ys_label": r"$0   \leq y{*} < 0.5$", "color": "#c6b2e2", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_15_20_YS_05_10", "label": r"$1.5 \leq y_{\mathrm{b}} <   2$, $0.5 \leq y{*} <   1$", "yb_label": r"$1.5 \leq y_{\mathrm{b}} <   2$", "ys_label": r"$0.5 \leq y{*} <   1$", "color": "#a0eaff", "marker": "s", "marker_style": "full"},   # YB12_YS01
+        {"name": "YB_20_25_YS_00_05", "label": r"$2   \leq y_{\mathrm{b}} < 2.5$, $0   \leq y{*} < 0.5$", "yb_label": r"$2   \leq y_{\mathrm{b}} < 2.5$", "ys_label": r"$0   \leq y{*} < 0.5$", "color": "#fab0ff", "marker": "o", "marker_style": "full"},   # YB23_YS01
         {
             "name": "inclusive",
             "label": r"inclusive",
+            "yb_label": r"$y_{\mathrm{b}}$-inclusive",
+            "ys_label": r"$y{*}$-inclusive",
             "color": "k",
             "marker": "o",
             "marker_style": "empty",

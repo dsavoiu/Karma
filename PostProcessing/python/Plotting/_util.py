@@ -324,6 +324,10 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='lower left', ncol=2),
             },
         ],
+        'texts' : [
+            dict(xy=(.04, .075), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, .125), text="{ybys[ys_label]}", transform='axes'),
+        ]
     },
 
     # -- Data
