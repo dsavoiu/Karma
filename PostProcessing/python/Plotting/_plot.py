@@ -551,25 +551,6 @@ class Plotter(object):
                     if _z_label is not None:
                         _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
-            #_ax.text(.05, .9,
-            #    r"CMS",
-            #    ha='left',
-            #    transform=ax.transAxes,
-            #    fontproperties=Plotter.FONT_PROPS['big_bold']
-            #)
-            #_ax.text(.03, .03,
-            #    r"AK4PFCHS",
-            #    ha='left',
-            #    transform=ax.transAxes,
-            #    fontproperties=Plotter.FONT_PROPS['small_bold']
-            #)
-            #_ax.text(.17, .9,
-            #    r"Private Work",
-            #    ha='left',
-            #    transform=ax.transAxes,
-            #    fontproperties=Plotter.FONT_PROPS['italic']
-            #)
-
             # handle horizontal and vertical lines
             _axhlines = _pad_config.pop('axhlines', [])
             for _y in _axhlines:
