@@ -47,6 +47,7 @@ def apply_defines(data_frame, defines):
     """Applies all 'Defines' specified in a dictionary to an data frame."""
     _df = data_frame
     for _k, _v in defines.iteritems():
+        print "[apply_defines] Defining quantity '{}': {}".format(_k, _v)
         try:
             _df = _df.Define(_k, _v)
         except Exception as _e:

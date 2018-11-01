@@ -2,13 +2,49 @@ import argparse
 import numpy as np
 import os
 import ROOT
+import time
 
 from array import array
 from enum import Enum
 
 
-__all__ = ["PostProcessor", "parse_args"]
+__all__ = ["PostProcessor", "Timer"]
 
+
+class Timer:
+    def __init__(self, name):
+        self._name = name
+        self._start = None
+        self._end = None
+        self._duration = None
+
+    def __enter__(self):
+        self._start = time.time()
+        return self
+
+    def __exit__(self, *args):
+        self._end = time.time()
+        self._duration = self._end - self._start
+
+    def get_duration_string(self):
+        if self._duration is None:
+            return "<not run>"
+        else:
+            _remaining_duration = self._duration
+            _s = []
+            for (_unit_name, _unit_length_in_seconds) in zip(['hours', 'minutes'], [3600, 60]):
+                _duration_in_units = int(_remaining_duration)/int(_unit_length_in_seconds)
+                _s.append("{} {}".format(_duration_in_units, _unit_name))
+                _remaining_duration -= _duration_in_units * _unit_length_in_seconds
+            _s.append("{} seconds".format(int(_remaining_duration)))
+            _s = ", ".join(_s)
+            return _s
+
+    def report(self):
+        if self._duration is None:
+            print "[INFO] Task '{}' has not yet been run..."
+        else:
+            print "[INFO] Task '{}' took {} ({} seconds)".format(self._name, self.get_duration_string(), round(self._duration, 3))
 
 
 class PostProcessor(object):
@@ -135,22 +171,4 @@ class PostProcessor(object):
 
         _outfile.Close()
 
-
-def parse_args():
-    p = argparse.ArgumentParser()
-
-    p.add_argument('FILE', help="File containing flat ntuple")
-    p.add_argument('SPLITTING_KEY', help="Key which identifies the set of cuts used for separating the sample into subsamples.", nargs='+')
-
-    p.add_argument('-t', '--tree', help="Name of the TTree containng the ntuple (default: 'Events')", default='Events')
-    p.add_argument('-j', '--jobs', help="Number of jobs (threads) to use with EnableImplicitMT (default: 1)", default=1)
-    p.add_argument('-n', '--num-events', help="Number of events to process. Incompatible with multithreading. Use 0 or negative for all (default)", default=-1)
-    p.add_argument('-o', '--output-file', help="Name of file to write output to")
-
-    p.add_argument('--histograms', help="List of histogram specifications.", nargs="+")
-    p.add_argument('--profiles', help="List of profile specifications", nargs="+")
-
-    p.add_argument('--overwrite', help="Overwrite output file, if it exists.", action='store_true')
-
-    return p.parse_args()
 
