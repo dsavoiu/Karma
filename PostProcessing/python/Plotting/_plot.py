@@ -27,7 +27,7 @@ from rootpy.plotting.profile import _ProfileBase
 from ._input import InputROOT
 from ._colormaps import viridis
 
-__all__ = ['DijetLogFormatterSciNotation', 'Plotter', 'ContextValue', 'LiteralString']
+__all__ = ['DijetLogFormatterSciNotation', 'ContextValue', 'LiteralString', 'PlotProcessor']
 
 
 plt.register_cmap(name='viridis', cmap=viridis)
@@ -199,25 +199,60 @@ class LiteralString(ConfigurationEntry):
         return self.s
 
 
-class Plotter(object):
+class _ProcessorBase(object):
+    """Abstract base class from which all processors inherit."""
+    __metaclass__ = abc.ABCMeta
 
-    FONT_PROPS = dict(
-        big_bold=FontProperties(
-            weight='bold',
-            family='Nimbus Sans',
-            size=20,
-        ),
-        small_bold=FontProperties(
-            weight='bold',
-            family='Nimbus Sans',
-            size=12,
-        ),
-        italic=FontProperties(
-            style='italic',
-            family='Nimbus Sans',
-            size=14,
-        ),
-    )
+    SUBKEYS_FOR_CONTEXT_REPLACING = None
+    CONFIG_KEY_FOR_TEMPLATES = None  # 'figures'
+    CONFIG_KEY_FOR_CONTEXTS = None # 'expansions'
+
+    _ACTIONS = []
+
+    def __init__(self, config, output_folder):
+        self._config = config
+        self._output_folder = output_folder
+
+    def _run_with_context(self, action_method, context):
+        for _template in self._config[self.CONFIG_KEY_FOR_TEMPLATES]:
+            _config = deepcopy(_template)
+
+            for _k, _v in _config.iteritems():
+                if isinstance(_v, str):
+                    _config[_k] = _v.format(**context)
+                elif isinstance(_v, ConfigurationEntry):
+                    _config[_k] = _v.get(context)
+
+            for _subkey_for_context_replacing in self.SUBKEYS_FOR_CONTEXT_REPLACING:
+                if _subkey_for_context_replacing not in _config:
+                    continue
+                for _dict_for_subkey in _config[_subkey_for_context_replacing]:
+                    for _k, _v in _dict_for_subkey.iteritems():
+                        if isinstance(_v, str):
+                            _dict_for_subkey[_k] = _v.format(**context)
+                        elif isinstance(_v, ConfigurationEntry):
+                            _dict_for_subkey[_k] = _v.get(context)
+
+            action_method(self, _config)
+
+    # -- public API
+
+    def run(self):
+        # -- run over cross product of expansion
+
+        # go through each configured action
+        for _action_method in self._ACTIONS:
+            # run the action once for each expansion context
+            for _expansion_context in list(product_dict(**self._config[self.CONFIG_KEY_FOR_CONTEXTS])):
+                self._run_with_context(_action_method, _expansion_context)
+
+
+class PlotProcessor(_ProcessorBase):
+    """Processor for plotting objects from ROOT files"""
+
+    CONFIG_KEY_FOR_TEMPLATES = "figures"
+    SUBKEYS_FOR_CONTEXT_REPLACING = ["subplots", "pads", "texts"]
+    CONFIG_KEY_FOR_CONTEXTS = "expansions"
 
     _PC_KEYS_MPL_AXES_METHODS = dict(
         x_label = dict(
@@ -254,49 +289,21 @@ class Plotter(object):
     )
 
     def __init__(self, config, output_folder):
-        self._config = config
-        self._output_folder = output_folder
+        super(PlotProcessor, self).__init__(config, output_folder)
+
         self._input_controller = InputROOT(
             files_spec=self._config['input_files']
         )
         self._figures = {}
         self._global_request_params = self._config.get("global_request_params", {})
 
+
+    # -- helper methods
+
     def _get_figure(self, figure_name, figsize=None):
         if figure_name not in self._figures:
             self._figures[figure_name] = plt.figure(figsize=figsize)
         return self._figures[figure_name]
-
-    def _run_with_context(self, context):
-        # TODO: make more general
-        for _fig_cfg in self._config['figures']:
-            _fig_cfg = deepcopy(_fig_cfg)
-            for _k, _v in _fig_cfg.iteritems():
-                if isinstance(_v, str):
-                    _fig_cfg[_k] = _v.format(**context)
-                elif isinstance(_v, ConfigurationEntry):
-                    _fig_cfg[_k] = _v.get(context)
-
-            for _subkey_for_context_replacing in ('pads', 'subplots', 'texts'):
-                for _dict_for_subkey in _fig_cfg[_subkey_for_context_replacing]:
-                    for _k, _v in _dict_for_subkey.iteritems():
-                        if isinstance(_v, str):
-                            _dict_for_subkey[_k] = _v.format(**context)
-                        elif isinstance(_v, ConfigurationEntry):
-                            _dict_for_subkey[_k] = _v.get(context)
-
-            self._plot_figure(_fig_cfg)
-
-    def _request_all_expressions_with_context(self, context, **request_params):
-        _reqs = []
-        for _fig_cfg in self._config['figures']:
-            # override global request parameters, if requested
-            request_params.update(_fig_cfg.get('request_params', {}))
-            for _subplot_dict in _fig_cfg['subplots']:
-                 #_reqs.append(dict(object_spec=_subplot_dict['expression'].format(**context)))
-                self._input_controller._request_all_objects_in_expression(_subplot_dict['expression'].format(**context), **request_params)
-
-        #self._input_controller.request(_reqs)
 
     @staticmethod
     def _merge_legend_handles_labels(handles, labels):
@@ -317,19 +324,29 @@ class Plotter(object):
 
         return _seen_label_handles, _seen_labels
 
-    def _plot_figure(self, plot_config):
 
+    # -- actions
+
+    def _request(self, config):
+        '''request all objects encountered in all subplot expressions'''
+        for _subplot_cfg in config['subplots']:
+            request_params = dict(self._global_request_params, **_subplot_cfg.get('request_params', {}))
+            self._input_controller._request_all_objects_in_expression(_subplot_cfg['expression'], **request_params)
+            print 'REQ', _subplot_cfg['expression']
+
+    def _plot(self, config):
+        '''plot all figures'''
         _mplrc()
 
-        _filename = os.path.join(self._output_folder, plot_config['filename'])
+        _filename = os.path.join(self._output_folder, config['filename'])
 
         # step 1: create figure and pads
 
-        _figsize = plot_config.pop('figsize', None)
+        _figsize = config.pop('figsize', None)
         _fig = self._get_figure(_filename, figsize=_figsize)
 
         # obtain configuration of pads
-        _pad_configs = plot_config.get('pads', None)
+        _pad_configs = config.get('pads', None)
         if _pad_configs is None:
             # default pad configuration
             _pad_configs = [dict()]
@@ -338,7 +355,7 @@ class Plotter(object):
         _height_ratios = [_pc.get('height_share', 1) for _pc in _pad_configs]
 
         # construct GridSpec from `pad_spec` or make default
-        _gridspec_kwargs = plot_config.get('pad_spec', dict())
+        _gridspec_kwargs = config.get('pad_spec', dict())
         _gridspec_kwargs.pop('height_ratios', None)   # ignore explicit user-provided `height_ratios`
         _gs = GridSpec(nrows=len(_pad_configs), ncols=1, height_ratios=_height_ratios, **_gridspec_kwargs)
 
@@ -347,7 +364,7 @@ class Plotter(object):
             _pad_config['axes'] = _fig.add_subplot(_gs[_i_pad])
 
         # enable text output, if requested
-        if plot_config.pop("text_output", False):
+        if config.pop("text_output", False):
             _text_filename = '.'.join(_filename.split('.')[:-1]) + '.txt'
             # need to create directory first
             _make_directory(os.path.dirname(_text_filename))
@@ -358,7 +375,7 @@ class Plotter(object):
 
         # step 2: retrieve data and plot
 
-        for _pc in plot_config['subplots']:
+        for _pc in config['subplots']:
             _kwargs = deepcopy(_pc)
 
             # obtain and validate pad ID
@@ -591,7 +608,7 @@ class Plotter(object):
         # step 4: text and annotations
 
         # draw text/annotations
-        _text_configs = plot_config.pop('texts', [])
+        _text_configs = config.pop('texts', [])
         for _text_config in _text_configs:
             # retrieve target pad
             _pad_id = _text_config.pop('pad', 0)
@@ -621,7 +638,7 @@ class Plotter(object):
         # step 5: figure adjustments
 
         # handle figure label ("upper_label")
-        _upper_label = plot_config.pop('upper_label', None)
+        _upper_label = config.pop('upper_label', None)
         if _upper_label is not None:
             # place above topmost `Axes`
             _ax_top = _pad_configs[0]['axes']
@@ -635,23 +652,15 @@ class Plotter(object):
         # step 6: save figures
         _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
+        #plt.close(_fig)  # close figure to save memory
 
 
-    # -- public API
+    # -- register action slots
+    _ACTIONS = [_request, _plot]
+
+    # -- additional public API
 
     def clear_figures(self):
         for _fign, _fig in self._figures.iteritems():
             plt.close(_fig)
         self._figures = {}
-
-    def run(self):
-
-        # -- run over cross product of expansion
-
-        # first: request all objects
-        for _expansion_context in list(product_dict(**self._config['expansions'])):
-            self._request_all_expressions_with_context(_expansion_context, **self._global_request_params)
-
-        # second: actual plotting
-        for _expansion_context in list(product_dict(**self._config['expansions'])):
-            self._run_with_context(_expansion_context)
