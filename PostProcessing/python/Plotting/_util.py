@@ -5,6 +5,7 @@ module fragment containing some useful functions
 from ._definitions import EXPANSIONS
 from ._plot import ContextValue, LiteralString
 
+from matplotlib.font_manager import FontProperties
 from matplotlib.colors import SymLogNorm
 
 
@@ -101,9 +102,9 @@ FONTPROPERTIES = dict(
 )
 
 TEXTS = {
-    "CMS" : dict(xy=(.05, .9), text=r"CMS", transform='axes', fontproperties=FONTPROPERTIES['big_bold'])
-    "PrivateWork" : dict(xy=(.17, .9), text=r"Private Work", transform='axes', fontproperties=FONTPROPERTIES['italic'])
-    "AK4PFCHS" : dict(xy=(.03, .03), text=r"AK4PFCHS", transform='axes', fontproperties=FONTPROPERTIES['small_bold'])
+    "CMS" : dict(xy=(.05, .9), text=r"CMS", transform='axes', fontproperties=FONTPROPERTIES['big_bold']),
+    "PrivateWork" : dict(xy=(.17, .9), text=r"Private Work", transform='axes', fontproperties=FONTPROPERTIES['italic']),
+    "AK4PFCHS" : dict(xy=(.03, .03), text=r"AK4PFCHS", transform='axes', fontproperties=FONTPROPERTIES['small_bold']),
 }
 
 FIGURE_TEMPLATES = {
