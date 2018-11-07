@@ -3,7 +3,7 @@ module fragment containing some useful functions
 """
 
 from ._definitions import EXPANSIONS
-from ._plot import ContextValue, LiteralString
+from .Processors import ContextValue, LiteralString
 
 from matplotlib.font_manager import FontProperties
 from matplotlib.colors import SymLogNorm
