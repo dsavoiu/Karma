@@ -8,6 +8,7 @@ source /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc62-opt/setup.sh
 pp.py -i "$INFILE_MC" \
       --type mc \
       -j10 \
+      --log --progress \
       $@ \
       task JetResponse EventYieldMC Flavors OccupancyMC PFEnergyFractionsMC \
       --output-file-suffix "$OUTPUT_FILE_SUFFIX"
@@ -15,6 +16,7 @@ pp.py -i "$INFILE_MC" \
 pp.py -i "$INFILE_DATA" \
       --type data \
       -j10 \
+      --log --progress \
       $@ \
       task EventYield Occupancy TriggerEfficiencies PFEnergyFractions \
       --output-file-suffix "$OUTPUT_FILE_SUFFIX"

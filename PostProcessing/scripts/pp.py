@@ -3,7 +3,11 @@ import datetime
 import time
 import numpy as np
 import os
+import sys
 import ROOT
+
+from contextlib import contextmanager
+from tqdm import tqdm
 
 
 def product_dict(**kwargs):
@@ -12,6 +16,36 @@ def product_dict(**kwargs):
     _keys = kwargs.keys()
     for instance in itertools.product(*kwargs.values()):
         yield dict(zip(_keys, instance))
+
+
+
+class StreamDup:
+    def __init__(self, streams):
+        self._streams = streams
+
+    def write(self, *args, **kwargs):
+        for _s in self._streams:
+            _s.write(*args, **kwargs)
+
+    def flush(self):
+        for _s in self._streams:
+            _s.flush()
+
+    def close(self):
+        for _s in self._streams:
+            _s.close()
+
+@contextmanager
+def log_stdout_to_file(filename):
+    if filename is None:
+        yield
+    else:
+        _old_stdout = sys.stdout
+        with open(filename, 'w') as _log:
+            sys.stdout = StreamDup([sys.stdout, _log])
+            yield
+            sys.stdout.flush()
+        sys.stdout = _old_stdout
 
 
 class PostProcessingCLI(object):
@@ -24,8 +58,8 @@ class PostProcessingCLI(object):
         except AttributeError:
             self._df_class = ROOT.ROOT.Experimental.TDataFrame
 
+        self._log = None
         self._parse_args()
-
 
     def _parse_args(self):
         import argparse
@@ -40,6 +74,8 @@ class PostProcessingCLI(object):
         self._top_parser.add_argument('-n', '--num-events', help="Number of events to process. Incompatible with multithreading. Use 0 or negative for all (default)", default=-1)
         self._top_parser.add_argument('--dry-run', help="Set up post-processing tasks, but do not execute", action='store_true')
         self._top_parser.add_argument('--overwrite', help="Overwrite output file, if it exists.", action='store_true')
+        self._top_parser.add_argument('--log', help="Whether to output a log file.", action="store_true")
+        self._top_parser.add_argument('--progress', help="Whether to show a progress bar.", action="store_true")
 
         self._subparsers = self._top_parser.add_subparsers(help='Operation to perform', dest='subparser_name')
         self._subparsers.required = True
@@ -49,7 +85,7 @@ class PostProcessingCLI(object):
         # subcommand 'task' for executing pre-defined tasks
         self._parsers['task'] = self._subparsers.add_parser('task', help='Perform a pre-defined task')
         self._parsers['task'].add_argument('TASK_NAME', type=str, help='Name of task(s) to perform', nargs='+', choices=TASKS.keys())
-        self._parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filenames. If none is privided, the current date is used instead.", default=None)
+        self._parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filename(s). If none is provided, the current date is used instead.", default=None)
 
         # subcommand 'freestyle' for manually specifying histograms and profiles
         self._parsers['freestyle'] = self._subparsers.add_parser('freestyle', help='Specify desired objects by hand')
@@ -86,10 +122,39 @@ class PostProcessingCLI(object):
         if not isinstance(_tree, ROOT.TTree):
             print("[ERROR] Input file does not contain TTree '{}'".format(self._args.input_file))
             exit(1)
+        self._df_size = _tree.GetEntries()
         _f.Close()
 
         print "[INFO] Sample type: {}".format(self._args.type)
         self._df = self._df_class(self._args.tree, self._args.input_file)
+        self._df_count = self._df.Count()
+
+        if self._args.progress:
+            self._progress = tqdm(
+                unit=" events",
+                unit_scale=False,
+                dynamic_ncols=True,
+                desc="Event loop progress",
+                total=self._df_size,
+            )
+            def _progress_callback(count):
+                self._progress.update(100000)
+
+            # black magic to obtain pointer to Python function in ROOT's interpreter
+            ROOT.gInterpreter.ProcessLine("#include <Python.h>")
+            ROOT.gInterpreter.ProcessLine("long long my_callback_py_f_addr = " + hex(id(_progress_callback)) + ";")
+            ROOT.gInterpreter.ProcessLine("PyObject* my_callback_py_f = reinterpret_cast<PyObject*>(my_callback_py_f_addr);")
+            ROOT.gInterpreter.ProcessLine("Py_INCREF(my_callback_py_f);")  # prevent garbage collection
+
+            # define a thread-safe std::function for the progress callback and register it
+            ROOT.gInterpreter.ProcessLine("std::mutex partialResultMutex;")
+            ROOT.gInterpreter.ProcessLine(
+                "std::function<void(unsigned int, ULong64_t&)> my_callback_f_slot = [](unsigned int /*slot*/, ULong64_t& count) { "
+                    "std::lock_guard<std::mutex> lock(partialResultMutex); "
+                    "PyEval_CallObject(my_callback_py_f, Py_BuildValue(\"(i)\", count)); "
+                "};"
+            )
+            self._df_count.OnPartialResultSlot(100000, ROOT.my_callback_f_slot)
 
         # -- apply basic analysis selection
         print "[INFO] Defining quantities..."
@@ -103,7 +168,6 @@ class PostProcessingCLI(object):
         print "[INFO] Applying global selection..."
         self._df = apply_filters(self._df, BASIC_SELECTION)
 
-
     def _run_tasks(self, task_configs):
 
         from DijetAnalysis.PostProcessing.PP import SPLITTINGS
@@ -111,74 +175,77 @@ class PostProcessingCLI(object):
 
         # -- run all queued tasks
         for _task_name, _task_spec in task_configs:
-            print "[INFO] Running task '{}'...".format(_task_name)
+            with log_stdout_to_file(_task_spec['_log_filename']):
+                print "[INFO] Running task '{}'...".format(_task_name)
 
-            _splittings_keys = _task_spec.get('splittings')
-            # retrieve splittings for task
-            try:
-                _splitting_specs = {_key : SPLITTINGS[_key] for _key in _splittings_keys}
-            except KeyError as e:
-                raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(e))
+                _splittings_keys = _task_spec.get('splittings')
+                # retrieve splittings for task
+                try:
+                    _splitting_specs = {_key : SPLITTINGS[_key] for _key in _splittings_keys}
+                except KeyError as e:
+                    raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(e))
 
-            # create combined splitting specification out of the cross product
-            # of specified keys
-            _combined_splittings = {}
-            for _splitting_combination in product_dict(**_splitting_specs):
-                _splitting_dict = {}
-                for _key in _splittings_keys:
-                    _splitting_dict.update(SPLITTINGS[_key][_splitting_combination[_key]])
-                _splitting_name = "/".join([_splitting_combination[_key] for _key in _splittings_keys])
+                # create combined splitting specification out of the cross product
+                # of specified keys
+                _combined_splittings = {}
+                for _splitting_combination in product_dict(**_splitting_specs):
+                    _splitting_dict = {}
+                    for _key in _splittings_keys:
+                        _splitting_dict.update(SPLITTINGS[_key][_splitting_combination[_key]])
+                    _splitting_name = "/".join([_key + ':' + _splitting_combination[_key] for _key in _splittings_keys])
 
-                _combined_splittings[_splitting_name] = _splitting_dict
+                    _combined_splittings[_splitting_name] = _splitting_dict
 
-            _hs = _task_spec.get('histograms', None)
-            _ps = _task_spec.get('profiles', None)
+                _hs = _task_spec.get('histograms', None)
+                _ps = _task_spec.get('profiles', None)
 
-            if _hs is None and _ps is None:
-                print "[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name)
-                continue
+                if _hs is None and _ps is None:
+                    print "[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name)
+                    continue
 
-            # -- limit the number of processed events
-            if self._args.num_events >= 0:
-                print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
-                _df = _df.Range(0, self._args.num_events)
+                # -- limit the number of processed events
+                if self._args.num_events >= 0:
+                    print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
+                    self._df = self._df.Range(0, int(self._args.num_events))
 
-            print "[INFO] Setting up PostProcessor..."
-            _pp = PostProcessor(
-                data_frame=self._df,
-                splitting_spec=_combined_splittings,
-                quantities=_task_spec['_quantities'],
-            )
+                print "[INFO] Setting up PostProcessor..."
+                _pp = PostProcessor(
+                    data_frame=self._df,
+                    splitting_spec=_combined_splittings,
+                    quantities=_task_spec['_quantities'],
+                )
 
-            _n_obj = 0
-            if _hs is not None:
-                _pp.add_histograms(_hs)
-                _n_obj += len(_hs)
-            if _ps is not None:
-                _pp.add_profiles(_ps)
-                _n_obj += len(_ps)
+                _n_obj = 0
+                if _hs is not None:
+                    _pp.add_histograms(_hs)
+                    _n_obj += len(_hs)
+                if _ps is not None:
+                    _pp.add_profiles(_ps)
+                    _n_obj += len(_ps)
 
-            _n_subdiv = np.prod([len(_splitting) for _splitting in _splitting_specs.values()])
+                _n_subdiv = np.prod([len(_splitting) for _splitting in _splitting_specs.values()])
 
-            print "[INFO] Running Task '{}':".format(_task_name)
-            print "    - splitting RDataFrame by keys: {}".format(
-                ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in _splitting_specs.iteritems()])
-            )
-            print "        -> total number of subdivisions: {}\n".format(_n_subdiv)
-            print "    - requested number of objects per subdivision: {}\n".format(_n_obj)
-            print "    -> total number of objects: {}\n".format(_n_obj * _n_subdiv)
-            print "    - output file: {}".format(_task_spec['_filename'])
+                print "[INFO] Running Task '{}':".format(_task_name)
+                print "    - splitting RDataFrame by keys: {}".format(
+                    ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in _splitting_specs.iteritems()])
+                )
+                print "        -> total number of subdivisions: {}\n".format(_n_subdiv)
+                print "    - requested number of objects per subdivision: {}\n".format(_n_obj)
+                print "    -> total number of objects: {}\n".format(_n_obj * _n_subdiv)
+                print "    - output file: {}".format(_task_spec['_filename'])
 
-            # run PostProcessor and time execution
-            with Timer(_task_name) as _t:
-                if self._args.dry_run:
-                    print "[INFO] `--dry-run` has been specified: not running task '{}'".format(_task_name)
-                    time.sleep(0.1)
-                else:
-                    _pp.run(output_file_path=_task_spec['_filename'])
+                # run PostProcessor and time execution
+                with Timer(_task_name) as _t:
+                    if self._args.dry_run:
+                        print "[INFO] `--dry-run` has been specified: not running task '{}'".format(_task_name)
+                        time.sleep(0.1)
+                    else:
+                        _pp.run(output_file_path=_task_spec['_filename'])
 
-            # print time report
-            _t.report()
+                # print report
+                if not self._args.dry_run:
+                    print "[INFO] Processed a total of {} events.".format(self._df_count.GetValue())
+                _t.report()
 
 
     # -- subcommand methods
@@ -195,11 +262,10 @@ class PostProcessingCLI(object):
             print("[INFO] Output file exists: '{}' and `--overwrite` not set. Exiting...".format(self._args.output_file))
             exit(1)
 
-        print dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
-
         # configure single 'Freestyle' task
         _task_spec = dict(
             _filename = self._args.output_file,
+            _log_filename = "{}.log".format(self._args.output_file.split('.', 1)[0]) if self._args.log else None,
             _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {})),
             splittings = self._args.SPLITTING_KEY,
             histograms = self._args.histograms,
@@ -220,7 +286,6 @@ class PostProcessingCLI(object):
         if _suffix is None:
             _suffix = "{}".format(datetime.datetime.now().strftime("%Y-%m-%d"))
 
-
         # -- configure and queue task(s)
         _tasks = []
         for _task_name in self._args.TASK_NAME:
@@ -231,11 +296,14 @@ class PostProcessingCLI(object):
             # skip task if output filename exists
             _output_filename = "{}_{}.root".format(_task_name, _suffix)
             if os.path.exists(_output_filename) and not self._args.overwrite:
-                print("[INFO] Task '{}' output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_name, _output_filename))
+                print("[INFO] Task '{}' output file exists: '{}' and `--overwrite` not set. Skipping task...".format(_task_name, _output_filename))
                 continue
+
+            _log_filename = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
 
             # add task to queue
             _task_spec['_filename'] = _output_filename
+            _task_spec['_log_filename'] = _log_filename
             _task_spec['_quantities'] =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
             _tasks.append((_task_name, _task_spec))
 
