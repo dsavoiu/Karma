@@ -9,7 +9,7 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.colors import SymLogNorm
 
 
-__all__ = ['xs_expression', 'xs_expression_mc', 'FIGURE_TEMPLATES', 'FONTPROPERTIES', 'TEXTS']
+__all__ = ['xs_expression', 'xs_expression_mc', 'FIGURE_TEMPLATES', 'FONTPROPERTIES', 'TEXTS', 'ANALYZE_TASK_TEMPLATES']
 
 
 _max_te = 'max(' + ', '.join([
@@ -1068,4 +1068,38 @@ FIGURE_TEMPLATES = {
             },
         ],
     }
+}
+
+ANALYZE_TASK_TEMPLATES = {
+
+    "CrossSections" : {
+        'filename' : "CrossSections.root",
+        'subtasks' : [
+            {
+                'expression': (
+                    # event yield
+                    '"ey:{ybys[name]}/{trigger[name]}/h_{quantity[name]}"'
+                    # but only if the corresponding trigger efficiency is >95%
+                    '* threshold('
+                        '"te:{ybys[name]}/{trigger[name]}/jet1HLTAssignedPathEfficiency/p_{quantity[name]}", '
+                        '0.95'
+                    ')' +
+                    # divide by the trigger efficiency
+                    ' / "te:{ybys[name]}/{trigger[name]}/jet1HLTAssignedPathEfficiency/p_{quantity[name]}"'
+                    # divide by the luminosity
+                    ' / {trigger[lumi_ub]} * 1e6'
+                ),
+                'output_path' : "{ybys[name]}/{trigger[name]}/h_xs_{quantity[name]}",
+            },
+            {
+                'expression': '"te:{ybys[name]}/{trigger[name]}/jet1HLTAssignedPathEfficiency/p_{quantity[name]}"',
+                'output_path' : "{ybys[name]}/{trigger[name]}/p_te_{quantity[name]}",
+            },
+            {
+                'expression': '"ey:{ybys[name]}/{trigger[name]}/h_{quantity[name]}"',
+                'output_path' : "{ybys[name]}/{trigger[name]}/h_ey_{quantity[name]}",
+            },
+        ]
+    },
+
 }
