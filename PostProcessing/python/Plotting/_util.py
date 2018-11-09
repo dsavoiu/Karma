@@ -31,7 +31,7 @@ _max_te_99 = 'max(' + ', '.join([
 ]) + ')'
 
 
-def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions):
+def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions, te_threshold=0.95):
     """Return expression for cross section with phase space partitioning choosing trigger path with maximal event yield."""
     # let outer expansion determine ybys slice
     if ybys_dict is None:
@@ -42,8 +42,8 @@ def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions):
         ', '.join([
             (
                 '"{ey}:'+ybys_dict['name']+'/'+_tpi['name']+'/h_{{quantity[name]}}" * threshold('
-                    '"{tep}:'+ybys_dict['name']+'/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{{quantity[name]}}", '
-                    '0.99'
+                    '"{tep}:'+ybys_dict['name']+'/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{{quantity[name]}}", ' +
+                    str(te_threshold) +
                 ')'
             )
             for _tpi in trigger_expansions
@@ -58,8 +58,8 @@ def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions):
             '"{ey}:{ybys[name]}/{tp[name]}/h_{{quantity[name]}}"'
             # but only if the corresponding trigger efficiency is >99%
             '* threshold('
-                '"{tep}:{ybys[name]}/{tp[name]}/jet1HLTAssignedPathEfficiency/p_{{quantity[name]}}", '
-                '0.99'
+                '"{tep}:{ybys[name]}/{tp[name]}/jet1HLTAssignedPathEfficiency/p_{{quantity[name]}}", ' +
+                str(te_threshold) +
             '),' +
             # reference is the maximum of all clipped event yields
             _max_yield_string +
@@ -71,16 +71,18 @@ def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions):
     ).format(ey=ey_nick, tep=tep_nick, ybys=ybys_dict, tp=tp_dict)
 
 
-def xs_expression_mc(ey_nick, ybys_dict):
+def xs_expression_mc(ey_nick, ybys_dict, mc_subsample_expansions, event_number_threshold=20):
     """Return expression for MC cross section."""
 
     # let outer expansion determine ybys slice
     if ybys_dict is None:
         ybys_dict = dict(name='{ybys[name]}')
 
-    return (
-        '"{ey}:{ybys[name]}/h_{{quantity[name]}}_weightForStitching"'
-    ).format(ey=ey_nick, ybys=ybys_dict)
+    return '(' + '+'.join([
+        '((1.0*{mc_subsample[xs]}) / {mc_subsample[n_events]} * '
+        'atleast("{ey}:{ybys[name]}/{mc_subsample[name]}/h_{{quantity[name]}}", {en_thres}))'.format(ey=ey_nick, ybys=ybys_dict, mc_subsample=_ms_dict, en_thres=event_number_threshold)
+        for _ms_dict in mc_subsample_expansions
+    ]) + ')'
 
 
 FONTPROPERTIES = dict(
@@ -113,6 +115,7 @@ FIGURE_TEMPLATES = {
     # cross section in data and MC, colored by YBYS splitting
     'CrossSection': {
         'filename' : "CrossSection/{quantity[name]}.png",
+        'figsize' : (12, 8),
         'subplots' : [
             {
                 'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
@@ -129,8 +132,8 @@ FIGURE_TEMPLATES = {
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
             {
-                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys),
-                'label': LiteralString("MC") if _ybys['name'] == EXPANSIONS['ybys_narrow'][1] else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys, mc_subsample_expansions=EXPANSIONS['mc_subsample']),
+                'label': LiteralString("MC") if _ybys['name'] == EXPANSIONS['ybys_narrow'][1]['name'] else None,
                 'color': 'k',
                 'marker': ',',
                 'marker_style': 'empty',
@@ -144,7 +147,7 @@ FIGURE_TEMPLATES = {
         'pads' : [
             {
                 'x_label' : '{quantity[label]}',
-                'x_range' : ContextValue('quantity[range]'),
+                'x_range' : (100, 25000), #ContextValue('quantity[range]'),
                 'x_scale' : '{quantity[scale]}',
                 'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
                 'y_range' : ContextValue('quantity[xs_range]'),
@@ -152,15 +155,20 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right'),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
     },
 
     # cross section in data and MC, colored by HLT path
     'CrossSection_HLTColor' : {
         'filename' : "CrossSection_HLTColor/{quantity[name]}.png",
+        'figsize' : (12, 8),
         'subplots' : [
             {
                 'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
-                'label': _ybys['label'] + r' ($\times$10$^{{{quantity[stagger_factors]['+_ybys['name']+']}}}$)' if _tp['name'] == "HLT_PFJet500" else None,
+                'label': _tp['label'] if _ybys['name'] == EXPANSIONS['ybys_narrow'][1]['name'] else None,
                 'color': _tp['color'],
                 'marker': _tp['marker'],
                 'marker_style': _tp['marker_style'],
@@ -173,8 +181,8 @@ FIGURE_TEMPLATES = {
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
             {
-                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys),
-                'label': LiteralString("MC") if _tp['name'] == EXPANSIONS['ybys_narrow'] else None,
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression_mc("eymc", _ybys, mc_subsample_expansions=EXPANSIONS['mc_subsample']),
+                'label': LiteralString("MC") if _ybys['name'] == EXPANSIONS['ybys_narrow'][1]['name'] else None,
                 'color': 'k',
                 'marker': ',',
                 'marker_style': 'empty',
@@ -188,12 +196,12 @@ FIGURE_TEMPLATES = {
         'pads' : [
             {
                 'x_label' : '{quantity[label]}',
-                'x_range' : ContextValue('quantity[range]'),
+                'x_range' : (100, 25000), #ContextValue('quantity[range]'),
                 'x_scale' : '{quantity[scale]}',
                 'y_label' : '{quantity[xs_label]}', #LiteralString('Diff. cross section / pb GeV$^{-1}$'),
                 'y_range' : ContextValue('quantity[xs_range]'),
                 'y_scale' : 'log',
-                'legend_kwargs': dict(loc='upper right', ncol=2),
+                'legend_kwargs': dict(loc='upper right'),
             },
         ],
         'pad_spec' : {
@@ -206,7 +214,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (8, 2.5),
         'subplots' : [
             {
-                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None) + ')',
+                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
                 'label': "{ybys[label]}" if _tp['name'] == "HLT_PFJet200" else None,
                 'color': "{ybys[color]}",
                 'marker': "{ybys[marker]}",
@@ -236,7 +244,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (8, 2.5),
         'subplots' : [
             {
-                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None) + ')',
+                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
                 'label': "{ybys[label]}" if _tp['name'] == "HLT_PFJet200" else None,
                 'color': _tp['color'],
                 'marker': _tp['marker'],
@@ -463,6 +471,14 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right'),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
+        ],
     },
     'EventYieldMaxTE': {
         'filename' : "EventYieldMaxTE/{quantity[name]}/{ybys[name]}.png",
@@ -489,6 +505,14 @@ FIGURE_TEMPLATES = {
                 'axhlines' : [1.0],
                 'legend_kwargs': dict(loc='upper right'),
             },
+        ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
         ],
     },
     'EventYieldTEOver99': {
@@ -517,6 +541,14 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right'),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
+        ],
     },
     'EventYieldTEOver99_MaxYield': {
         'filename' : "EventYieldTEOver99_MaxYield/{quantity[name]}/{ybys[name]}.png",
@@ -543,6 +575,49 @@ FIGURE_TEMPLATES = {
                 'axhlines' : [1.0],
                 'legend_kwargs': dict(loc='upper right'),
             },
+        ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
+        ],
+    },
+    'EventYieldTEOver95_MaxYield': {
+        'filename' : "EventYieldTEOver95_MaxYield/{quantity[name]}/{ybys[name]}.png",
+        'subplots' : [
+            {
+                'expression': 'mask_if_less("ey:{ybys[name]}/'+_tp['name']+'/h_{quantity[name]}" * threshold("te:{ybys[name]}/'+_tp['name']+'/jet1HLTAssignedPathEfficiency/p_{quantity[name]}", 0.95), ' + _max_yield_99 + ')',
+                'label': _tp['label'],
+                'color': _tp['color'],
+                'marker': _tp['marker'],
+                'marker_style': _tp['marker_style'],
+                'plot_method': 'errorbar',
+                #'mask_zero_errors': True,
+            }
+            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+        ],
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Events',
+                'y_range' : (0.1, 1e9),
+                'y_scale' : 'log',
+                'axhlines' : [1.0],
+                'legend_kwargs': dict(loc='upper right'),
+            },
+        ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
         ],
     },
     'EventYieldTEOver99_MaxTE': {
@@ -571,6 +646,14 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right'),
             },
         ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
+        ],
     },
     'EventYield_allTriggers': {
         'filename' : "EventYield_allTriggers/{quantity[name]}/{ybys[name]}.png",
@@ -596,6 +679,14 @@ FIGURE_TEMPLATES = {
                 'axhlines' : [1.0],
                 'legend_kwargs': dict(loc='upper right'),
             },
+        ],
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+        },
+        'texts' : [
+            dict(xy=(.04, 1.0 - .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, 1.0 - .075), text="{ybys[ys_label]}", transform='axes'),
         ],
     },
 

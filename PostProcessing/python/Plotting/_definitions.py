@@ -47,7 +47,7 @@ EXPANSIONS = {
             "label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
             "scale": "log",
             'range' : (100, 4045),
-            'xs_range': (1e-10, 1e20),
+            'xs_range': (5*1e-7, 1e30),
             'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{\langle p_{\mathrm{T}} \rangle}_{1,2}"),
             'gen_name': "jet12MatchedGenJetPairPtAve",
             'gen_label': r"${\langle p_{\mathrm{T}} \rangle}_{1,2}^{\mathrm{gen}}$ / GeV",
@@ -59,21 +59,21 @@ EXPANSIONS = {
                 "YB12_YS01": 1,
                 "YB12_YS12": 0,
                 "YB23_YS01": -3,
-                "YB_00_05_YS_00_05": 4+3+3+3,    # D
-                "YB_00_05_YS_05_10": 4+3+3+2,    # D
-                "YB_00_05_YS_10_15": 3+3+3,      # v
-                "YB_00_05_YS_15_20": 3+3+1,      # v
-                "YB_00_05_YS_20_25": -1,         # ^
-                "YB_05_10_YS_00_05": 4+3+3+1,    # D
-                "YB_05_10_YS_05_10": 4+3+3+0,    # D
-                "YB_05_10_YS_10_15": 3+3+2,      # v
-                "YB_05_10_YS_15_20": 3+3+0,      # v
-                "YB_10_15_YS_00_05": 1+3,        # s
-                "YB_10_15_YS_05_10": 1+2,        # s
-                "YB_10_15_YS_10_15": 0,          # >
-                "YB_15_20_YS_00_05": 1+1,        # s
-                "YB_15_20_YS_05_10": 1+0,        # s
-                "YB_20_25_YS_00_05": -3,         # o
+                "YB_00_05_YS_00_05": 1*(4-0) + 5*(4-0) - 0,  #4+3+3+3,    # D
+                "YB_00_05_YS_05_10": 1*(4-1) + 5*(4-0) - 0,  #4+3+3+2,    # D
+                "YB_00_05_YS_10_15": 1*(4-2) + 5*(4-0) - 0,  #3+3+3,      # v
+                "YB_00_05_YS_15_20": 1*(4-3) + 5*(4-0) - 0,  #3+3+1,      # v
+                "YB_00_05_YS_20_25": 1*(4-4) + 5*(4-0) - 0,  #-1,         # ^
+                "YB_05_10_YS_00_05": 1*(4-0) + 5*(4-1) - 4,  #4+3+3+1,    # D
+                "YB_05_10_YS_05_10": 1*(4-1) + 5*(4-1) - 4,  #4+3+3+0,    # D
+                "YB_05_10_YS_10_15": 1*(4-2) + 5*(4-1) - 4,  #3+3+2,      # v
+                "YB_05_10_YS_15_20": 1*(4-3) + 5*(4-1) - 4,  #3+3+0,      # v
+                "YB_10_15_YS_00_05": 1*(4-0) + 5*(4-2) - 6,  #1+3,        # s
+                "YB_10_15_YS_05_10": 1*(4-1) + 5*(4-2) - 6,  #1+2,        # s
+                "YB_10_15_YS_10_15": 1*(4-2) + 5*(4-2) - 6,  #0,          # >
+                "YB_15_20_YS_00_05": 1*(4-0) + 5*(4-3) - 6,  #1+1,        # s
+                "YB_15_20_YS_05_10": 1*(4-1) + 5*(4-3) - 6,  #1+0,        # s
+                "YB_20_25_YS_00_05": 1*(4-0) + 5*(4-4) - 4,  #-3,         # o
             }
         },
         {
@@ -474,7 +474,7 @@ EXPANSIONS = {
             "marker_style": "empty",
         },
     ],
-    # Particle Flow (PF) energy fractions
+    # leading jet pair flavor fractions
     'flavor_fraction': [
         {
             "name": "Flavor_GG",
@@ -524,6 +524,23 @@ EXPANSIONS = {
             "scale": "log",
             "color": "mediumorchid",
         },
+    ],
+    # QCD subsamples
+    'mc_subsample': [
+        {"name": "QCD_Pt_15to30"     , "xs": 1820000000 , "n_events": 39898460 },
+        {"name": "QCD_Pt_30to50"     , "xs": 138900000  , "n_events": 9980050  },
+        {"name": "QCD_Pt_50to80"     , "xs": 19100000   , "n_events": 9954370  },
+        {"name": "QCD_Pt_80to120"    , "xs": 2735000    , "n_events": 6986740  },
+        {"name": "QCD_Pt_120to170"   , "xs": 467500     , "n_events": 6708572  },
+        {"name": "QCD_Pt_170to300"   , "xs": 117400     , "n_events": 6958708  },
+        {"name": "QCD_Pt_300to470"   , "xs": 7753       , "n_events": 4150588  },
+        {"name": "QCD_Pt_470to600"   , "xs": 642.1      , "n_events": 3959986  },
+        {"name": "QCD_Pt_600to800"   , "xs": 185.9      , "n_events": 3896412  },
+        {"name": "QCD_Pt_800to1000"  , "xs": 32.05      , "n_events": 3992112  },
+        {"name": "QCD_Pt_1000to1400" , "xs": 9.365      , "n_events": 2999069  },
+        {"name": "QCD_Pt_1400to1800" , "xs": 0.8398     , "n_events": 396409   },
+        {"name": "QCD_Pt_1800to2400" , "xs": 0.1124     , "n_events": 397660   },
+        {"name": "QCD_Pt_2400to3200" , "xs": 0.006752   , "n_events": 399226   },
     ],
 }
 
