@@ -4,6 +4,7 @@ import itertools
 import os
 
 from copy import deepcopy
+from tqdm import tqdm
 
 import numpy as np
 
@@ -131,6 +132,6 @@ class _ProcessorBase(object):
         # go through each configured action
         for _action_method in self._ACTIONS:
             # run the action once for each expansion context
-            for _expansion_context in list(product_dict(**self._config[self.CONFIG_KEY_FOR_CONTEXTS])):
+            for _expansion_context in tqdm(list(product_dict(**self._config[self.CONFIG_KEY_FOR_CONTEXTS]))):
                 self._run_with_context(_action_method, _expansion_context)
 
