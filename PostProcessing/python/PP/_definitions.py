@@ -273,4 +273,22 @@ SPLITTINGS = {
         "Flavor_QQ_pp_ii":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=1),
         "Flavor_QQ_pp_ij":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=0),
     },
+    # by MC subsample
+    'mc_subsamples' : {
+        "QCD_Pt_2400to3200" : dict(weightForStitching=( 8E-09 , 7E-08 )),
+        "QCD_Pt_1800to2400" : dict(weightForStitching=( 7E-08 , 8E-07 )),
+        "QCD_Pt_1400to1800" : dict(weightForStitching=( 8E-07 , 3E-06 )),
+        "QCD_Pt_1000to1400" : dict(weightForStitching=( 3E-06 , 5E-06 )),
+        "QCD_Pt_800to1000"  : dict(weightForStitching=( 5E-06 , 2E-05 )),
+        "QCD_Pt_600to800"   : dict(weightForStitching=( 2E-05 , 9E-05 )),
+        "QCD_Pt_470to600"   : dict(weightForStitching=( 9E-05 , 0.0006)),
+        "QCD_Pt_300to470"   : dict(weightForStitching=( 0.0006, 0.006 )),
+        "QCD_Pt_170to300"   : dict(weightForStitching=( 0.006 , 0.03  )),
+        "QCD_Pt_120to170"   : dict(weightForStitching=( 0.03  , 0.2   )),
+        "QCD_Pt_80to120"    : dict(weightForStitching=( 0.2   , 0.9   )),
+        "QCD_Pt_50to80"     : dict(weightForStitching=( 0.9   , 5     )),
+        "QCD_Pt_30to50"     : dict(weightForStitching=( 5     , 30    )),
+        "QCD_Pt_15to30"     : dict(weightForStitching=( 30    , 60    )),
+        "stitched"          : dict(),
+    }
 }

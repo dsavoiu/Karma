@@ -72,7 +72,7 @@ TASKS = {
     # -- MC --
 
     "EventYieldMC" : {
-        "splittings": ["ybys_narrow"],
+        "splittings": ["ybys_narrow", "mc_subsamples"],
         "histograms" : (
             [
                 "{}_{}{}".format(_qbasename, _qbinning, _qweight)
