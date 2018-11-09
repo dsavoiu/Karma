@@ -2,7 +2,7 @@ import numpy as np
 
 from copy import deepcopy
 
-from DijetAnalysis.PostProcessing.PP import QUANTITIES
+from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES
 
 
 EXPANSIONS = {
