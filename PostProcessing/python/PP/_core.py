@@ -7,11 +7,12 @@ class Quantity(object):
 
     __slots__ = ('_dict',)
 
-    def __init__(self, name, expression, binning):
+    def __init__(self, name, expression, binning, named_binnings=None):
         self._dict = dict(
             name=name,
             expression=expression,
             binning=binning,
+            named_binnings=named_binnings,
         )
 
     def __repr__(self):
@@ -26,6 +27,7 @@ class Quantity(object):
 
     @property
     def binning(self):
+        """The default binning for this quantity. Always defined, even if no special "named binnings" are not."""
         return self._dict['binning']
 
     @property
@@ -41,6 +43,25 @@ class Quantity(object):
         _self_dict_copy = deepcopy(self._dict)
         _self_dict_copy.update(kwargs)
         return Quantity(**_self_dict_copy)
+
+    @property
+    def named_binning_keys(self):
+        """Splitting keys for which named binnings have been defined for this quantity."""
+        _nb = self._dict.get('named_binnings', None)
+        if _nb is None:
+            return None
+        return _nb.keys()
+
+    def get_named_binning(self, key, value):
+        """Retrieve a binning (if defined) for the case where the splitting key `key` has value `value`. If none defined, return `None`."""
+        _nb = self._dict.get('named_binnings', None)
+        if _nb is None:
+            return None
+        _nb = _nb.get(key, None)
+        if _nb is None:
+            return None
+        _nb = _nb.get(value, None)
+        return _nb
 
 
 def apply_defines(data_frame, defines):

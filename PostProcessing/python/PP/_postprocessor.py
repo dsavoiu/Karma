@@ -60,6 +60,14 @@ class PostProcessor(object):
 
         self._specs = []
 
+    @staticmethod
+    def _get_directory_from_split_name(split_name):
+        '''split name "key1:value1/key2:value2/key3:value3" -> path "value1/value2/value3"'''
+        _path_elements = split_name.split('/')
+        # remove splitting keys from path
+        _path_elements = [_pe.split(':', 1)[-1] for _pe in _path_elements]
+        return '/'.join(_path_elements)
+
     def _split_df(self):
         # -- create splits
         self._split_dfs = {}
@@ -73,20 +81,60 @@ class PostProcessor(object):
 
     def _create_objects(self):
         # -- create quantity shape histograms for each split
-        self._root_objects = {}
+        self._root_objects = {}  # keys are paths of the form 'splitting_key1:splitting_value1/.../splitting_keyN:splitting_valueN'
 
         for _split_name, _split_df in self._split_dfs.iteritems():
             self._root_objects[_split_name] = {}
+
+            _split_dict = dict([_path_element.split(':', 1) for _path_element in _split_name.split('/')])
 
             for _obj_type, _var_x, _var_y, _weight in self._specs:
                 _name_suffix = '_'.join([_s for _s in (_var_x, _weight) if _s is not None])
                 _title = '_'.join([_s for _s in (_var_x, _var_y, _weight, _split_name) if _s is not None])
 
-                _x_binning = self._qs[_var_x].binning  # TODO: raise if no quantity `_var_x`?
+                # check if a (unique) custom binning has been defined for this quantity for this splitting
+                _x_binning = None
+                if self._qs[_var_x].named_binning_keys:
+                    _keys_with_named_binnings = set(self._qs[_var_x].named_binning_keys).intersection(_split_dict.keys())
+                    if _keys_with_named_binnings:
+                        if len(_keys_with_named_binnings) > 1:
+                            raise ValueError("Quantity '{}' returned more than one match for named binning keys: {}".format(_var_x, _keys_with_named_binnings))
+                        _named_binning_key = list(_keys_with_named_binnings)[0]
+                        _x_binning = self._qs[_var_x].get_named_binning(_named_binning_key, _split_dict[_named_binning_key])
+                        if _x_binning is None:
+                            print(
+                                "[WARNING] Splitting-dependent binning for quantity '{}' and splitting key "
+                                "'{}' is defined, but not for splitting value '{}'! "
+                                "Will use default binning.".format(_var_x, _named_binning_key, _split_dict[_named_binning_key])
+                            )
+
+                # if no named binning was found, use default binning
+                if _x_binning is None:
+                    _x_binning = self._qs[_var_x].binning
+
                 _y_binning = None
                 if _var_y is not None:
                     self._root_objects[_split_name].setdefault(_var_y, {})  # ensure '_var_y' subdict exists
-                    _y_binning = self._qs[_var_y].binning  # TODO: raise if no quantity `_var_y`?
+
+                    # check if a (unique) custom binning has been defined for this quantity for this splitting
+                    _y_binning = None
+                    if self._qs[_var_y].named_binning_keys:
+                        _keys_with_named_binnings = set(self._qs[_var_y].named_binning_keys).intersection(_split_dict.keys())
+                        if _keys_with_named_binnings:
+                            if len(_keys_with_named_binnings) > 1:
+                                raise ValueError("Quantity '{}' returned more than one match for named binning keys: {}".format(_var_y, _keys_with_named_binnings))
+                            _named_binning_key = list(_keys_with_named_binnings)[0]
+                            _y_binning = self._qs[_var_y].get_named_binning(_named_binning_key, _split_dict[_named_binning_key])
+                            if _y_binning is None:
+                                print(
+                                    "[WARNING] Splitting-dependent binning for quantity '{}' and splitting key "
+                                    "'{}' is defined, but not for splitting value '{}'! "
+                                    "Will use default binning.".format(_var_y, _named_binning_key, _split_dict[_named_binning_key])
+                                )
+
+                    # if no named binning was found, use default binning
+                    if _y_binning is None:
+                        _y_binning = self._qs[_var_y].binning
 
                 if _obj_type == self.__class__.ObjectType.histogram:
                     if _var_y is None:
@@ -112,6 +160,7 @@ class PostProcessor(object):
                         self._root_objects[_split_name][_var_y][_obj_name] = _split_df.Profile1D(_obj_model, _var_x, _var_y)
                     else:
                         self._root_objects[_split_name][_var_y][_obj_name] = _split_df.Profile1D(_obj_model, _var_x, _var_y, _weight)
+
 
     def add_histograms(self, histogram_specs):
         for _hspec in histogram_specs:
@@ -154,21 +203,22 @@ class PostProcessor(object):
         _split_names = set(self._root_objects.keys())
 
         for _split_name in sorted(_split_names):
+            _directory_path = self._get_directory_from_split_name(_split_name)
+
             _outfile.cd()
-            _outfile.mkdir(_split_name)
+            _outfile.mkdir(_directory_path)
 
             _coda_for_split = self._root_objects.get(_split_name, {})
             for _key1, _obj_handle_or_inner_dict in sorted(_coda_for_split.iteritems()):
                 if isinstance(_obj_handle_or_inner_dict, dict):
-                    _dir = "{}/{}".format(_split_name, _key1)
+                    _dir = "{}/{}".format(_directory_path, _key1)
                     _outfile.mkdir(_dir)
                     _outfile.cd(_dir)
                     for _key2, _obj_handle in sorted(_obj_handle_or_inner_dict.iteritems()):
                         _obj_handle.Write()
                 else:
-                    _outfile.cd(_split_name)
+                    _outfile.cd(_directory_path)
                     _obj_handle_or_inner_dict.Write()
 
         _outfile.Close()
-
 
