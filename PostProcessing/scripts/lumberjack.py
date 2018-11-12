@@ -64,7 +64,7 @@ class PostProcessingCLI(object):
     def _parse_args(self):
         import argparse
 
-        from DijetAnalysis.PostProcessing.PP import TASKS, SPLITTINGS
+        from DijetAnalysis.PostProcessing.Lumberjack import TASKS, SPLITTINGS
 
         self._top_parser = argparse.ArgumentParser(description='Split an input TTree into subsamples and produce ROOT files containing TH1D, TH2D or TProfile objects for each subdivision.')
         self._top_parser.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
@@ -99,8 +99,8 @@ class PostProcessingCLI(object):
 
     def _prepare_data_frame(self):
 
-        from DijetAnalysis.PostProcessing.PP import QUANTITIES, DEFINES, BASIC_SELECTION
-        from DijetAnalysis.PostProcessing.PP import apply_defines, apply_filters, define_quantities
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTION
+        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
 
         # -- enable multithreading
         if self._args.jobs > 1:
@@ -170,8 +170,8 @@ class PostProcessingCLI(object):
 
     def _run_tasks(self, task_configs):
 
-        from DijetAnalysis.PostProcessing.PP import SPLITTINGS
-        from DijetAnalysis.PostProcessing.PP import PostProcessor, Timer
+        from DijetAnalysis.PostProcessing.Lumberjack import SPLITTINGS
+        from DijetAnalysis.PostProcessing.Lumberjack import PostProcessor, Timer
 
         # -- run all queued tasks
         for _task_name, _task_spec in task_configs:
@@ -252,8 +252,8 @@ class PostProcessingCLI(object):
 
     def _subcommand_freestyle(self):
 
-        from DijetAnalysis.PostProcessing.PP import QUANTITIES, DEFINES, BASIC_SELECTION, SPLITTINGS
-        from DijetAnalysis.PostProcessing.PP import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTION, SPLITTINGS
+        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
 
         # -- configure and queue freestyle task
 
@@ -279,7 +279,7 @@ class PostProcessingCLI(object):
 
     def _subcommand_task(self):
 
-        from DijetAnalysis.PostProcessing.PP import QUANTITIES, TASKS
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, TASKS
 
         # -- determine output filename suffix
         _suffix = self._args.output_file_suffix

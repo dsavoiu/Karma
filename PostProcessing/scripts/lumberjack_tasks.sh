@@ -10,7 +10,7 @@ lumberjack.py -i "$INFILE_MC" \
       -j10 \
       --log --progress \
       $@ \
-      task JetResponse EventYieldMC Flavors OccupancyMC PFEnergyFractionsMC \
+      task EventYieldMC JetResponse OccupancyMC PFEnergyFractionsMC Flavors \
       --output-file-suffix "$OUTPUT_FILE_SUFFIX"
 
 lumberjack.py -i "$INFILE_DATA" \
@@ -18,5 +18,5 @@ lumberjack.py -i "$INFILE_DATA" \
       -j10 \
       --log --progress \
       $@ \
-      task EventYield Occupancy TriggerEfficiencies PFEnergyFractions \
+      task EventYield TriggerEfficiencies Occupancy PFEnergyFractions \
       --output-file-suffix "$OUTPUT_FILE_SUFFIX"
