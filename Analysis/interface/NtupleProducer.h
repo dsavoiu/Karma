@@ -163,6 +163,9 @@ namespace dijet {
         typename edm::Handle<dijet::JetGenJetMap> dijetJetGenJetMapHandle;
         edm::EDGetTokenT<dijet::JetGenJetMap> dijetJetGenJetMapToken;
 
+        typename edm::Handle<dijet::GenParticleCollection> dijetGenParticleCollectionHandle;
+        edm::EDGetTokenT<dijet::GenParticleCollection> dijetGenParticleCollectionToken;
+
         typename edm::Handle<dijet::Run> dijetRunHandle;
         edm::EDGetTokenT<dijet::Run> dijetRunToken;
 

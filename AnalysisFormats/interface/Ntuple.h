@@ -72,6 +72,10 @@ namespace dijet {
 
         // -- MC-specific
 
+        // qcd subprocess
+        int incomingParton1Flavor = -999;
+        int incomingParton2Flavor = -999;
+
         // jet flavor
         int jet1PartonFlavor = -999;
         int jet2PartonFlavor = -999;

@@ -32,6 +32,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
     if (!m_isData) {
         dijetJetGenJetMapToken = consumes<dijet::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetGenJetMapSrc"));
+        dijetGenParticleCollectionToken = consumes<dijet::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenParticleCollectionSrc"));
     }
 
 }
@@ -103,6 +104,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // jet trigger objects map
     obtained &= event.getByToken(this->dijetJetTriggerObjectsMapToken, this->dijetJetTriggerObjectsMapHandle);
     if (!m_isData) {
+        // genParticle collection
+        obtained &= event.getByToken(this->dijetGenParticleCollectionToken, this->dijetGenParticleCollectionHandle);
         // jet genJet map
         obtained &= event.getByToken(this->dijetJetGenJetMapToken, this->dijetJetGenJetMapHandle);
     }
@@ -142,6 +145,21 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     }
     ///std::cout << " -> helperBitset - " << helperBitset << std::endl;
     outputNtupleEntry->hltBits = helperBitset.to_ulong();
+
+    // QCD subprocess (incoming partons) information
+    short nIncomingPartonsFound = 0;
+    for (const auto& genParticle : *this->dijetGenParticleCollectionHandle) {
+        if (genParticle.status == 21) {  // Pythia8 status on incoming particles
+            ++nIncomingPartonsFound;
+            if (nIncomingPartonsFound == 1) {
+                outputNtupleEntry->incomingParton1Flavor = genParticle.pdgId;
+            }
+            else if (nIncomingPartonsFound == 2) {
+                outputNtupleEntry->incomingParton2Flavor = genParticle.pdgId;
+                break;
+            }
+        }
+    }
 
     const auto& jets = this->dijetJetCollectionHandle;  // convenience
     // leading jet kinematics

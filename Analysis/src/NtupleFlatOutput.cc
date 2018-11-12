@@ -100,6 +100,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
         // flavor
+        m_tree->Branch("incomingParton1Flavor",                        &m_productForFill->incomingParton1Flavor,                         "incomingParton1Flavor/I"                        );
+        m_tree->Branch("incomingParton2Flavor",                        &m_productForFill->incomingParton2Flavor,                         "incomingParton2Flavor/I"                        );
         m_tree->Branch("jet1PartonFlavor",                             &m_productForFill->jet1PartonFlavor,                              "jet1PartonFlavor/I"                             );
         m_tree->Branch("jet2PartonFlavor",                             &m_productForFill->jet2PartonFlavor,                              "jet2PartonFlavor/I"                             );
         m_tree->Branch("jet1HadronFlavor",                             &m_productForFill->jet1HadronFlavor,                              "jet1HadronFlavor/I"                             );
