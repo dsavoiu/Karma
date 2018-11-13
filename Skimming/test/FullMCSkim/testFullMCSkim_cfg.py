@@ -50,11 +50,12 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 #                        do_pu_jet_id=False)
 
 from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
-from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
+from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
 from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
+from DijetAnalysis.Skimming.GeneratorQCDInfoProducer_cfi import dijetGeneratorQCDInfoProducer
 
-from DijetAnalysis.Skimming.GenJetCollectionProducer_cfi import dijetGenJetCollectionProducer
+from DijetAnalysis.Skimming.GenJetCollectionProducer_cfi import dijetGenJetsAK4, dijetGenJetsAK8
 from DijetAnalysis.Skimming.GenParticleCollectionProducer_cfi import dijetGenParticleCollectionProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
@@ -78,6 +79,11 @@ process.dijetEventHLTFilter = cms.EDFilter("EventHLTFilter",
 )
 _accumulated_output_commands.append("drop *_dijetEventHLTFilter_*_DIJET")
 
+process.dijetGeneratorQCDInfos = dijetGeneratorQCDInfoProducer.clone(
+    genEventInfoProductSrc = cms.InputTag("generator"),
+)
+_accumulated_output_commands.append("keep *_dijetGeneratorQCDInfos_*_DIJET")
+
 process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
     dijetRunSrc = cms.InputTag("dijetEvents"),
 )
@@ -86,14 +92,14 @@ _accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
 mainSequence = cms.Sequence(
     process.dijetEvents *
     process.dijetEventHLTFilter *
+    process.dijetGeneratorQCDInfos *
     process.dijetTriggerObjects
 );
-
 
 # uncorrect pat::Jets for JEC
 uncorrected_jet_collection_names = undoJetEnergyCorrections(
     process,
-    jet_algorithm_specs=('ak4',),
+    jet_algorithm_specs=('ak4', 'ak8'),
     pu_subtraction_methods=('CHS',)
 )
 
@@ -103,7 +109,7 @@ for _jet_collection_name in uncorrected_jet_collection_names:
     setattr(
         process,
         _module_name,
-        dijetJetCollectionProducer.clone(
+        dijetJets.clone(
             inputCollection = cms.InputTag(_jet_collection_name),
         )
     )
@@ -134,13 +140,18 @@ process.dijetGenParticles = dijetGenParticleCollectionProducer.clone(
 mainSequence *= process.dijetGenParticles
 _accumulated_output_commands.append("keep *_dijetGenParticles_*_DIJET")
 
-# create GetJet collection
-process.dijetGenJets = dijetGenJetCollectionProducer.clone(
-    # take default PAT::MET from PAT (==PFMet)
+# create GetJet collections
+process.dijetGenJetsAK4 = dijetGenJetsAK4.clone(
     inputCollection = cms.InputTag("slimmedGenJets"),
 )
-mainSequence *= process.dijetGenJets
-_accumulated_output_commands.append("keep *_dijetGenJets_*_DIJET")
+mainSequence *= process.dijetGenJetsAK4
+_accumulated_output_commands.append("keep *_dijetGenJetsAK4_*_DIJET")
+
+process.dijetGenJetsAK8 = dijetGenJetsAK4.clone(
+    inputCollection = cms.InputTag("slimmedGenJetsAK8"),
+)
+mainSequence *= process.dijetGenJetsAK8
+_accumulated_output_commands.append("keep *_dijetGenJetsAK8_*_DIJET")
 
 process.path = cms.Path(mainSequence)
 

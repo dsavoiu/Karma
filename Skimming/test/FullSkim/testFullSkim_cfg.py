@@ -10,9 +10,9 @@ options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT201
 options.isData=1
 options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
 options.edmOut="testFullSkim_out_1000.root"
-options.maxEvents=1000
-#options.edmOut="testFullSkim_out.root"
-#options.maxEvents=-1
+#options.maxEvents=1000
+options.edmOut="testFullSkim_out.root"
+options.maxEvents=-1
 options.dumpPython=1
 
 
@@ -25,10 +25,10 @@ _accumulated_output_commands = ['drop *']
 
 
 # -- only process certified runs and lumisections
-process.source.lumisToProcess = LumiList.LumiList(
-    filename = os.path.realpath("{}/src/DijetAnalysis/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
-).getVLuminosityBlockRange()
-
+if options.isData:
+    process.source.lumisToProcess = LumiList.LumiList(
+        filename = os.path.realpath("{}/src/DijetAnalysis/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
+    ).getVLuminosityBlockRange()
 
 ## enable verbose log file output
 #enableVerboseLogging(process)
@@ -50,7 +50,7 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 #                        do_pu_jet_id=False)
 
 from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
-from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
+from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
 from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
 
@@ -86,11 +86,10 @@ mainSequence = cms.Sequence(
     process.dijetTriggerObjects
 );
 
-
 # uncorrect pat::Jets for JEC
 uncorrected_jet_collection_names = undoJetEnergyCorrections(
     process,
-    jet_algorithm_specs=('ak4',),
+    jet_algorithm_specs=('ak4', 'ak8'),
     pu_subtraction_methods=('CHS',)
 )
 
@@ -100,7 +99,7 @@ for _jet_collection_name in uncorrected_jet_collection_names:
     setattr(
         process,
         _module_name,
-        dijetJetCollectionProducer.clone(
+        dijetJets.clone(
             inputCollection = cms.InputTag(_jet_collection_name),
         )
     )

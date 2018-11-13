@@ -13,6 +13,12 @@ namespace {
         dijet::EventCollection dict_dijetEventCollection;
         edm::Wrapper<dijet::EventCollection> dict_edmWrapperDijetEventCollection;
 
+        // generator information
+        dijet::Event dict_dijetGeneratorQCDInfo;
+        edm::Wrapper<dijet::GeneratorQCDInfo> dict_edmWrapperDijetGeneratorQCDInfo;
+        dijet::GeneratorQCDInfoCollection dict_dijetGeneratorQCDInfoCollection;
+        edm::Wrapper<dijet::GeneratorQCDInfoCollection> dict_edmWrapperDijetGeneratorQCDInfoCollection;
+
         // luminosity block
         dijet::Lumi dict_dijetLumi;
         edm::Wrapper<dijet::Lumi> dict_edmWrapperDijetLumi;

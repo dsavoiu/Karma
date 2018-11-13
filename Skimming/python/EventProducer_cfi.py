@@ -23,7 +23,7 @@ dijetEventProducer = cms.EDProducer(
             l1GtTriggerMenuLiteInputTag =  cms.InputTag("l1GtTriggerMenuLite"),
         ),
 
-        # interesting trigger paths must match this regex:
-        hltRegexes = cms.vstring("HLT_PFJet[0-9]+_v[0-9]+"),
+        # interesting trigger paths must match one of these regexes:
+        hltRegexes = cms.vstring("HLT_(AK8)?PFJet[0-9]+_v[0-9]+", "HLT_DiPFJetAve[0-9]+_v[0-9]+"),
     )
 )

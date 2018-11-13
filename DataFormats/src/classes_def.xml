@@ -4,6 +4,11 @@
     <class name="dijet::EventCollection"/>
     <class name="edm::Wrapper<dijet::EventCollection>"/>
 
+    <class name="dijet::GeneratorQCDInfo"/>
+    <class name="edm::Wrapper<dijet::GeneratorQCDInfo>"/>
+    <class name="dijet::GeneratorQCDInfoCollection"/>
+    <class name="edm::Wrapper<dijet::GeneratorQCDInfoCollection>"/>
+
     <class name="dijet::Lumi"/>
     <class name="edm::Wrapper<dijet::Lumi>"/>
     <class name="dijet::LumiCollection"/>

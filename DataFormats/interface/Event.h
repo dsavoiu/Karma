@@ -28,6 +28,24 @@ namespace dijet {
     };
     typedef std::vector<dijet::Event> EventCollection;
 
+    class GeneratorQCDInfo {
+      public:
+        // -- QCD subprocess information
+        int parton1PdgId = -999;
+        int parton2PdgId = -999;
+
+        double parton1x = UNDEFINED_DOUBLE;
+        double parton2x = UNDEFINED_DOUBLE;
+
+        double parton1xPDF = UNDEFINED_DOUBLE;
+        double parton2xPDF = UNDEFINED_DOUBLE;
+
+        double scalePDF = UNDEFINED_DOUBLE;
+        double alphaQCD = UNDEFINED_DOUBLE;
+
+    };
+    typedef std::vector<dijet::GeneratorQCDInfo> GeneratorQCDInfoCollection;
+
     /**
      * Simple lorentz vector class
      */
