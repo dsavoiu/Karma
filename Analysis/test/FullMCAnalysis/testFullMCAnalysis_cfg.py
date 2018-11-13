@@ -22,56 +22,95 @@ from DijetAnalysis.Analysis.CorrectedMETsProducer_cfi import dijetCorrectedMETsP
 from DijetAnalysis.Analysis.NtupleProducer_cfi import dijetNtupleProducer
 from DijetAnalysis.Analysis.NtupleSplicer_cfi import dijetNtupleSplicer
 
-process.correctedJets = dijetCorrectedValidJetsProducer.clone(
-    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
-        os.getenv('CMSSW_BASE'),
-        RUN="GH"
+
+for _jet_radius in (4, 8):
+    _jet_algo_name = "AK{}PFchs".format(_jet_radius)
+    setattr(
+        process,
+        "correctedJets{}".format(_jet_algo_name),
+        dijetCorrectedValidJetsProducer.clone(
+            # -- input sources
+            dijetEventSrc = cms.InputTag("dijetEvents"),
+            dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJets{}".format(_jet_algo_name)),
+
+            # -- other configuration
+            jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017_V11_MC/Summer16_07Aug2017_V11_MC".format(
+                os.getenv('CMSSW_BASE'),
+            ),
+            jecAlgoName = cms.string(_jet_algo_name),
+            jecLevels = cms.vstring(
+                "L1FastJet",
+                "L2Relative",
+            ),
+            jecUncertaintyShift = cms.double(0.0),
+
+            jetIDSpec = cms.string("2016"),   # use "None" for no object-based JetID
+            jetIDWorkingPoint = cms.string("TightLepVeto"),
+        )
     )
-)
-process.correctedJetsUpShift = process.correctedJets.clone(
-    jecUncertaintyShift = cms.double(1.0),
-)
-process.correctedJetsDnShift = process.correctedJets.clone(
-    jecUncertaintyShift = cms.double(-1.0),
-)
 
-#process.uncorrectedJets = dijetCorrectedValidJetsProducer.clone(
-#    jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
-#        os.getenv('CMSSW_BASE'),
-#        RUN="GH"
-#    ),
-#    jecLevels = cms.vstring("L3Absolute"),
-#)
+    #setattr(
+    #    process,
+    #    "correctedJets{}JEUUp".format(_jet_algo_name),
+    #    getattr(process, "correctedJets{}".format(_jet_algo_name)).clone(
+    #        jecUncertaintyShift = cms.double(1.0),
+    #    )
+    #)
 
-process.jetTriggerObjectMap = dijetJetTriggerObjectMatchingProducer.clone(
-    dijetEventSrc = cms.InputTag("dijetEvents"),
-    dijetJetCollectionSrc = cms.InputTag("correctedJets"),
-    dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
-)
-process.jetGenJetMap = dijetJetGenJetMatchingProducer.clone(
-    dijetEventSrc = cms.InputTag("dijetEvents"),
-    dijetJetCollectionSrc = cms.InputTag("correctedJets"),
-    dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets"),
-)
+    #setattr(
+    #    process,
+    #    "correctedJets{}JEUDn".format(_jet_algo_name),
+    #    getattr(process, "correctedJets{}".format(_jet_algo_name)).clone(
+    #        jecUncertaintyShift = cms.double(-1.0),
+    #    )
+    #)
 
-process.correctedMETs = dijetCorrectedMETsProducer.clone(
-    # -- input sources
-    dijetEventSrc = cms.InputTag("dijetEvents"),
-    dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
-    dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets"),
-)
+    setattr(
+        process,
+        "jetTriggerObjectMap{}".format(_jet_algo_name),
+        dijetJetTriggerObjectMatchingProducer.clone(
+            dijetEventSrc = cms.InputTag("dijetEvents"),
+            dijetJetCollectionSrc = cms.InputTag("correctedJets{}".format(_jet_algo_name)),
+            dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
+        )
+    )
+
+    setattr(
+        process,
+        "jetGenJetMap{}".format(_jet_algo_name),
+        dijetJetGenJetMatchingProducer.clone(
+            dijetEventSrc = cms.InputTag("dijetEvents"),
+            dijetJetCollectionSrc = cms.InputTag("correctedJets{}".format(_jet_algo_name)),
+            dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets{}".format(_jet_algo_name[:3])),
+        )
+    )
+
+    setattr(
+        process,
+        "correctedMETs{}".format(_jet_algo_name),
+        dijetCorrectedMETsProducer.clone(
+            # -- input sources
+            dijetEventSrc = cms.InputTag("dijetEvents"),
+            dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
+            dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets{}".format(_jet_algo_name)),
+        )
+    )
+
+
+_jet_algo_name = 'AK4PFchs'
 
 process.ntuple = dijetNtupleProducer.clone(
-    dijetJetCollectionSrc = cms.InputTag("correctedJets"),
+    dijetJetCollectionSrc = cms.InputTag("correctedJets{}".format(_jet_algo_name)),
     #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),  # no JEC
 
-    dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap"),
-    dijetJetGenJetMapSrc = cms.InputTag("jetGenJetMap"),
+    dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}".format(_jet_algo_name)),
+    dijetJetGenJetMapSrc = cms.InputTag("jetGenJetMap{}".format(_jet_algo_name)),
 
-    dijetMETCollectionSrc = cms.InputTag("correctedMETs"),
+    dijetMETCollectionSrc = cms.InputTag("correctedMETs{}".format(_jet_algo_name)),
     #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
     isData = cms.bool(options.isData),
+    weightForStitching = cms.double(options.weightForStitching),
 
     triggerEfficienciesFile = cms.string(
         "{}/src/DijetAnalysis/Analysis/data/trigger_efficiencies/2016/trigger_efficiencies_bootstrapping_2018-09-24.root".format(os.getenv("CMSSW_BASE"))
@@ -117,13 +156,10 @@ process.flatNtupleWriter = cms.EDAnalyzer(
 )
 
 _main_sequence = cms.Sequence(
-    #process.uncorrectedJets *
-    process.correctedJets *
-    #process.correctedJetsDnShift *
-    #process.correctedJetsUpShift *
-    process.jetGenJetMap *
-    process.jetTriggerObjectMap *
-    process.correctedMETs *
+    getattr(process, 'correctedJets{}'.format(_jet_algo_name)) *
+    getattr(process, 'jetGenJetMap{}'.format(_jet_algo_name)) *
+    getattr(process, 'jetTriggerObjectMap{}'.format(_jet_algo_name)) *
+    getattr(process, 'correctedMETs{}'.format(_jet_algo_name)) *
     process.ntuple *
     process.jetPairFilter *
     #process.leadingJetRapidityFilter *
@@ -141,37 +177,3 @@ finalizeAndRun(process, outputCommands=['keep *_*_*_DIJETANA', 'drop *_jetTrigge
 #process.edmOut.SelectEvents = cms.untracked.PSet(
 #    SelectEvents = cms.vstring('path')
 #)
-
-### # create ystar-yboost splices
-### for splice_name, splice_filter_expr in SPLICES.iteritems():
-###     setattr(
-###         process,
-###         "ntuple{}".format(splice_name),
-###         dijetNtupleSplicer.clone(
-###             dijetNtupleSrc = cms.InputTag("ntuple"),
-###             spliceName = cms.string(splice_name),
-###             spliceFilterExpression = cms.string(splice_filter_expr),
-###         )
-###     )
-###     setattr(
-###         process,
-###         "path{}".format(splice_name),
-###         cms.Path(
-###             preSequence *
-###             getattr(process, "ntuple{}".format(splice_name))
-###         )
-###     )
-###     _file_basename = _output_filename = process.edmOut.fileName.value()
-###     if _file_basename.endswith(".root"):
-###         _file_basename = _file_basename[:-5]
-###     setattr(
-###         process,
-###         "edmOut{}".format(splice_name),
-###         process.edmOut.clone(
-###             fileName = cms.untracked.string("{}_splice_{}.root".format(_file_basename, splice_name)),
-###             SelectEvents = cms.untracked.PSet(
-###                 SelectEvents = cms.vstring("path{}".format(splice_name))
-###             )
-###         )
-###     )
-###     process.endpath *= getattr(process, "edmOut{}".format(splice_name))

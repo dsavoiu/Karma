@@ -31,6 +31,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
     if (!m_isData) {
+        dijetGeneratorQCDInfoToken = consumes<dijet::GeneratorQCDInfo>(m_configPSet.getParameter<edm::InputTag>("dijetGeneratorQCDInfoSrc"));
         dijetJetGenJetMapToken = consumes<dijet::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetGenJetMapSrc"));
         dijetGenParticleCollectionToken = consumes<dijet::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenParticleCollectionSrc"));
     }
@@ -104,6 +105,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // jet trigger objects map
     obtained &= event.getByToken(this->dijetJetTriggerObjectsMapToken, this->dijetJetTriggerObjectsMapHandle);
     if (!m_isData) {
+        // QCD generator information
+        obtained &= event.getByToken(this->dijetGeneratorQCDInfoToken, this->dijetGeneratorQCDInfoHandle);
         // genParticle collection
         obtained &= event.getByToken(this->dijetGenParticleCollectionToken, this->dijetGenParticleCollectionHandle);
         // jet genJet map
@@ -146,19 +149,13 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     ///std::cout << " -> helperBitset - " << helperBitset << std::endl;
     outputNtupleEntry->hltBits = helperBitset.to_ulong();
 
-    // QCD subprocess (incoming partons) information
-    short nIncomingPartonsFound = 0;
-    for (const auto& genParticle : *this->dijetGenParticleCollectionHandle) {
-        if (genParticle.status == 21) {  // Pythia8 status on incoming particles
-            ++nIncomingPartonsFound;
-            if (nIncomingPartonsFound == 1) {
-                outputNtupleEntry->incomingParton1Flavor = genParticle.pdgId;
-            }
-            else if (nIncomingPartonsFound == 2) {
-                outputNtupleEntry->incomingParton2Flavor = genParticle.pdgId;
-                break;
-            }
-        }
+    if (!m_isData) {
+        outputNtupleEntry->incomingParton1Flavor = this->dijetGeneratorQCDInfoHandle->parton1PdgId;
+        outputNtupleEntry->incomingParton2Flavor = this->dijetGeneratorQCDInfoHandle->parton2PdgId;
+        outputNtupleEntry->incomingParton1x = this->dijetGeneratorQCDInfoHandle->parton1x;
+        outputNtupleEntry->incomingParton2x = this->dijetGeneratorQCDInfoHandle->parton2x;
+        outputNtupleEntry->scalePDF = this->dijetGeneratorQCDInfoHandle->scalePDF;
+        outputNtupleEntry->alphaQCD = this->dijetGeneratorQCDInfoHandle->alphaQCD;
     }
 
     const auto& jets = this->dijetJetCollectionHandle;  // convenience

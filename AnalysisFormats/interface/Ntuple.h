@@ -75,6 +75,10 @@ namespace dijet {
         // qcd subprocess
         int incomingParton1Flavor = -999;
         int incomingParton2Flavor = -999;
+        double incomingParton1x = UNDEFINED_DOUBLE;
+        double incomingParton2x = UNDEFINED_DOUBLE;
+        double scalePDF = UNDEFINED_DOUBLE;
+        double alphaQCD = UNDEFINED_DOUBLE;
 
         // jet flavor
         int jet1PartonFlavor = -999;

@@ -13,14 +13,14 @@ if __name__ == "__main__":
     #args = parser.parse_args()
 
     _deployer = DijetAnalysisDeployerGC(
-        nick="DijetAna_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-10-14",
+        nick="DijetAna_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-11-13",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/DijetAnalysis/Analysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="_tmpwork",
-        files_per_job=10,
+        files_per_job=15,
     )
 
-    _deployer.add_input_files("JetHT_Run2016G", "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-09-20/*.root")
+    _deployer.add_input_files("JetHT_Run2016G", "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-11-12/*.root")
     _deployer.replace_file_prefix('/storage/gridka-nrg/', 'root://cmsxrootd-1.gridka.de:1094//store/user/')
 
     _deployer.add_constant("GLOBALTAG", "80X_dataRun2_2016LegacyRepro_v4")

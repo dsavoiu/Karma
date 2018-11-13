@@ -99,9 +99,14 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_tree->Branch("jet12MatchedGenJetPairPtAve",                  &m_productForFill->jet12MatchedGenJetPairPtAve,                   "jet12MatchedGenJetPairPtAve/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
         m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
-        // flavor
+        // QCD subprocess info
         m_tree->Branch("incomingParton1Flavor",                        &m_productForFill->incomingParton1Flavor,                         "incomingParton1Flavor/I"                        );
         m_tree->Branch("incomingParton2Flavor",                        &m_productForFill->incomingParton2Flavor,                         "incomingParton2Flavor/I"                        );
+        m_tree->Branch("incomingParton1x",                             &m_productForFill->incomingParton1x,                              "incomingParton1x/D"                             );
+        m_tree->Branch("incomingParton2x",                             &m_productForFill->incomingParton2x,                              "incomingParton2x/D"                             );
+        m_tree->Branch("alphaQCD",                                     &m_productForFill->alphaQCD,                                      "alphaQCD/D"                                     );
+        m_tree->Branch("scalePDF",                                     &m_productForFill->scalePDF,                                      "scalePDF/D"                                     );
+        // flavor
         m_tree->Branch("jet1PartonFlavor",                             &m_productForFill->jet1PartonFlavor,                              "jet1PartonFlavor/I"                             );
         m_tree->Branch("jet2PartonFlavor",                             &m_productForFill->jet2PartonFlavor,                              "jet2PartonFlavor/I"                             );
         m_tree->Branch("jet1HadronFlavor",                             &m_productForFill->jet1HadronFlavor,                              "jet1HadronFlavor/I"                             );
