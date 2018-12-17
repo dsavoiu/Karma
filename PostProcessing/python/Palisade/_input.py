@@ -245,6 +245,18 @@ class _ROOTObjectFunctions(object):
 
         return _new_tobject * _factor
 
+    @staticmethod
+    def cumulate(tobject):
+        """Make value of n-th bin equal to the sum of all bins up to and including n (but excluding underflow bins)."""
+        #                                     forward  suffix
+        return asrootpy(tobject.GetCumulative(True,    uuid.uuid4().get_hex()))
+
+    @staticmethod
+    def cumulate_reverse(tobject):
+        """Make value of n-th bin equal to the sum of all bins from n up to and inclufing the last bin (but excluding overflow bins)."""
+        #                                     forward  suffix
+        return asrootpy(tobject.GetCumulative(False,   uuid.uuid4().get_hex()))
+
 
 class InputROOTFile(object):
     """An input module for accessing objects from a single ROOT file.
@@ -391,6 +403,8 @@ class InputROOT(object):
         'normalize_x':              _ROOTObjectFunctions.normalize_x,
         'unfold':                   _ROOTObjectFunctions.unfold,
         'normalize_to_ref':         _ROOTObjectFunctions.normalize_to_ref,
+        'cumulate':                 _ROOTObjectFunctions.cumulate,
+        'cumulate_reverse':         _ROOTObjectFunctions.cumulate_reverse,
     }
 
     def __init__(self, files_spec=None):
