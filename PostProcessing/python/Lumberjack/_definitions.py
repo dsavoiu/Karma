@@ -454,6 +454,21 @@ SPLITTINGS = {
         "Flavor_QQ_pp_ii":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=1),
         "Flavor_QQ_pp_ij":   dict(Flavor_QQ=1, Flavor_pp=1, Flavor_IsDiagonal=0),
     },
+    # by QCD subprocess
+    'qcd_subprocesses' : {
+        "QCDSubprocess_AllDefined":  dict(QCDSubprocess_XX=0),  # any flavor pairing, but need to be defined for both incoming partons
+        "QCDSubprocess_GG":   dict(QCDSubprocess_GG=1),  # gluon-gluon
+        "QCDSubprocess_QG":   dict(QCDSubprocess_QG=1),  # quark-gluon (and gluon-quark)
+        "QCDSubprocess_QG_xg_gt_xq":   dict(QCDSubprocess_QG=1, QCDSubprocess_xg_gt_xq=1),  # quark-gluon (and gluon-quark)
+        "QCDSubprocess_QG_xq_gt_xg":   dict(QCDSubprocess_QG=1, QCDSubprocess_xg_gt_xq=0),  # quark-gluon (and gluon-quark)
+        # quark-quark subcategories
+        "QCDSubprocess_QQ_aa_ii":   dict(QCDSubprocess_QQ=1, QCDSubprocess_aa=1, QCDSubprocess_IsDiagonal=1),
+        "QCDSubprocess_QQ_aa_ij":   dict(QCDSubprocess_QQ=1, QCDSubprocess_aa=1, QCDSubprocess_IsDiagonal=0),
+        "QCDSubprocess_QQ_ap_ii":   dict(QCDSubprocess_QQ=1, QCDSubprocess_ap=1, QCDSubprocess_IsDiagonal=1),
+        "QCDSubprocess_QQ_ap_ij":   dict(QCDSubprocess_QQ=1, QCDSubprocess_ap=1, QCDSubprocess_IsDiagonal=0),
+        "QCDSubprocess_QQ_pp_ii":   dict(QCDSubprocess_QQ=1, QCDSubprocess_pp=1, QCDSubprocess_IsDiagonal=1),
+        "QCDSubprocess_QQ_pp_ij":   dict(QCDSubprocess_QQ=1, QCDSubprocess_pp=1, QCDSubprocess_IsDiagonal=0),
+    },
     # by MC subsample
     'mc_subsamples' : {
         "QCD_Pt_2400to3200" : dict(weightForStitching=( 8E-09 , 7E-08 )),

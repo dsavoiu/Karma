@@ -618,6 +618,70 @@ EXPANSIONS = {
             "color": "mediumorchid",
         },
     ],
+    # QCD subprocess fractions
+    'qcd_subprocess_fraction': [
+        {
+            "name": "QCDSubprocess_GG",
+            "label": r"$\mathrm{g}\mathrm{g}$",
+            "scale": "log",
+            #"color": "orange",
+            "color": "#2079B4",
+        },
+        {
+            "name": "QCDSubprocess_QG_xq_gt_xg",
+            "label": r"$\mathrm{g}\mathrm{q}$ ($x_{\mathrm{g}} \leq x_{\mathrm{q}}$)",
+            "scale": "log",
+            #"color": "#7EB5DA",
+            "color": "#B0DD8B",
+        },
+        {
+            "name": "QCDSubprocess_QG_xg_gt_xq",
+            "label": r"$\mathrm{g}\mathrm{q}$ ($x_{\mathrm{g}} > x_{\mathrm{q}}$)",
+            "scale": "log",
+            #"color": "#328DCA",
+            "color": "#36A12E",
+        },
+        {
+            "name": "QCDSubprocess_QQ_pp_ii",
+            "label": r"$\mathrm{q}_\mathrm{i} \mathrm{q}_\mathrm{i}$",
+            "scale": "log",
+            #"color": "lightgreen",
+            "color": "#C8AFD5",
+        },
+        {
+            "name": "QCDSubprocess_QQ_pp_ij",
+            "label": r"$\mathrm{q}_\mathrm{i} \mathrm{q}_\mathrm{j}$",
+            "scale": "log",
+            #"color": "forestgreen",
+            "color": "#6C409A",
+        },
+        {
+            "name": "QCDSubprocess_QQ_ap_ii",
+            "label": r"$\mathrm{q}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{i}$",
+            "scale": "log",
+            #"color": "salmon",
+            "color": "#FB9898",
+        },
+        {
+            "name": "QCDSubprocess_QQ_ap_ij",
+            "label": r"$\mathrm{q}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{j}$",
+            "scale": "log",
+            #"color": "firebrick",
+            "color": "#E31B1C",
+        },
+        #{
+        #    "name": "QCDSubprocess_QQ_aa_ii",
+        #    "label": r"$\overline{\mathrm{q}}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{i}$",
+        #    "scale": "log",
+        #    "color": "plum",
+        #},
+        #{
+        #    "name": "QCDSubprocess_QQ_aa_ij",
+        #    "label": r"$\overline{\mathrm{q}}_\mathrm{i} \overline{\mathrm{q}}_\mathrm{j}$",
+        #    "scale": "log",
+        #    "color": "mediumorchid",
+        #},
+    ],
     # QCD subsamples
     'mc_subsample': [
         {"name": "QCD_Pt_15to30"     , "xs": 1820000000 , "n_events": 39898460 },
@@ -646,6 +710,16 @@ for _expansion in EXPANSIONS['quantity']:
             _suffixed_expansion['name'] = "{}_{}".format(_suffixed_expansion['name'], _bin_suffix)
             _suffixed_expansion['gen_name'] = "{}_{}".format(_suffixed_expansion['gen_name'], _bin_suffix)
             EXPANSIONS['quantity'].append(_suffixed_expansion)
+
+# generate 'gen_quantity' expansions from 'quantity'
+EXPANSIONS['gen_quantity'] = []
+for _expansion in EXPANSIONS['quantity']:
+    if 'gen_name' in _expansion:
+        EXPANSIONS['gen_quantity'].append(
+            dict(_expansion, name=_expansion['gen_name'], label=_expansion['gen_label'], reco_name=_expansion['name'], reco_label=_expansion['label'])
+        )
+        del EXPANSIONS['gen_quantity'][-1]['gen_name']
+        del EXPANSIONS['gen_quantity'][-1]['gen_label']
 
 # programatically fill in the defined quantity ranges for 'occupancy' axes
 for _expansion in EXPANSIONS['occupancy']:

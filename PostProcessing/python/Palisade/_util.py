@@ -1067,7 +1067,47 @@ FIGURE_TEMPLATES = {
                 'legend_kwargs': dict(loc='upper right', ncol=4),
             },
         ],
-    }
+    },
+
+    'QCDSubprocessFractions' : {
+        'filename' : "QCDSubprocessFractions/{ybys[name]}/{quantity[name]}.png",
+        'pad_spec' : {
+            'right': 0.95,
+            'bottom': 0.15,
+            'top': 0.925,
+            'hspace': 0.075,
+        },
+        'subplots' : [
+            dict(expression='discard_errors("qcd:{ybys[name]}/'+_qsf['name']+'/h_{quantity[name]}_weightForStitching" / "qcd:{ybys[name]}/QCDSubprocess_AllDefined/h_{quantity[name]}_weightForStitching")',
+                 label=LiteralString(_qsf['label']), plot_method='bar', color=_qsf['color'], show_yerr=False,
+                 stack='all',
+            )
+            for _qsf in EXPANSIONS['qcd_subprocess_fraction']
+            if not _qsf['name'].startswith("QCDSubprocess_QQ_aa")
+        #] + [
+        #    dict(expression='discard_errors(("qcd:{ybys[name]}/QCDSubprocess_QQ_aa_ii/h_{quantity[name]}" + "qcd:{ybys[name]}/QCDSubprocess_QQ_aa_ij/h_{quantity[name]}") / "qcd:{ybys[name]}/QCDSubprocess_AllDefined/h_{quantity[name]}")',
+        #         label=LiteralString(r"$\overline{{\mathrm{{q}}}}\overline{{\mathrm{{q}}}}$"), plot_method='bar', color=_qsf['color'], show_yerr=False,
+        #         stack='all',
+        #    )
+        #    for _qsf in EXPANSIONS['qcd_subprocess_fraction']
+        #    if _qsf['name'].startswith("QCDSubprocess_QQ_aa_ii")
+        ],
+        'pads' : [
+            {
+                'x_label' : '{quantity[label]}',
+                'x_range' : ContextValue('quantity[range]'),
+                'x_scale' : '{quantity[scale]}',
+                'y_label' : 'Event Fraction',
+                'y_range' : (0, 1.2),
+                'y_scale' : 'linear',
+                'legend_kwargs': dict(loc='upper right', ncol=4),
+            },
+        ],
+        'texts' : [
+            dict(xy=(.04, .125), text="{ybys[yb_label]}", transform='axes'),
+            dict(xy=(.04, .075), text="{ybys[ys_label]}", transform='axes'),
+        ],
+    },
 }
 
 ANALYZE_TASK_TEMPLATES = {

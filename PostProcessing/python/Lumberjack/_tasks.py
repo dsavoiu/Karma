@@ -137,6 +137,32 @@ TASKS = {
             )
         ]),
     },
+
+    "QCDSubprocesses" : {
+        "splittings": ["ybys_narrow@4", "mc_subsamples", "qcd_subprocesses"],
+        "histograms" : ([
+            "{}_{}".format(_qbasename, _qbinning)
+            for (_qbasename, _qbinning) in itertools.product(
+                #['jet12ptave'],
+                #['narrow'],
+                ['jet1pt', 'jet12ptave', 'jet12mass',
+                 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
+                ['wide', 'narrow'],
+            )
+        ]),
+    },
+
+    "QCDSubprocesses_Weighted" : {
+        "splittings": ["ybys_narrow", "qcd_subprocesses"],
+        "histograms" : ([
+            "{}_{}@weightForStitching".format(_qbasename, _qbinning)
+            for (_qbasename, _qbinning) in itertools.product(
+                ['jet1pt', 'jet12ptave', 'jet12mass',
+                 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
+                ['wide', 'narrow'],
+            )
+        ]),
+    },
 }
 
 TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
