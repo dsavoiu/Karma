@@ -277,8 +277,29 @@ DEFINES = {
         "HLT_PFJet400": "(hltBits&{})>0".format(2**7),
         "HLT_PFJet450": "(hltBits&{})>0".format(2**8),
         "HLT_PFJet500": "(hltBits&{})>0".format(2**9),
-        # event weights
-        "triggerEfficiencyWeight": "1.0/jet1HLTAssignedPathEfficiency",
+
+        "HLT_AK8PFJet40":  "(hltBits&{})>0".format(2**10),
+        "HLT_AK8PFJet60":  "(hltBits&{})>0".format(2**11),
+        "HLT_AK8PFJet80":  "(hltBits&{})>0".format(2**12),
+        "HLT_AK8PFJet140": "(hltBits&{})>0".format(2**13),
+        "HLT_AK8PFJet200": "(hltBits&{})>0".format(2**14),
+        "HLT_AK8PFJet260": "(hltBits&{})>0".format(2**15),
+        "HLT_AK8PFJet320": "(hltBits&{})>0".format(2**16),
+        "HLT_AK8PFJet400": "(hltBits&{})>0".format(2**17),
+        "HLT_AK8PFJet450": "(hltBits&{})>0".format(2**18),
+        "HLT_AK8PFJet500": "(hltBits&{})>0".format(2**19),
+
+        "HLT_DiPFJetAve40":  "(hltBits&{})>0".format(2**20),
+        "HLT_DiPFJetAve60":  "(hltBits&{})>0".format(2**21),
+        "HLT_DiPFJetAve80":  "(hltBits&{})>0".format(2**22),
+        "HLT_DiPFJetAve140": "(hltBits&{})>0".format(2**23),
+        "HLT_DiPFJetAve200": "(hltBits&{})>0".format(2**24),
+        "HLT_DiPFJetAve260": "(hltBits&{})>0".format(2**25),
+        "HLT_DiPFJetAve320": "(hltBits&{})>0".format(2**26),
+        "HLT_DiPFJetAve400": "(hltBits&{})>0".format(2**27),
+        "HLT_DiPFJetAve500": "(hltBits&{})>0".format(2**28),
+
+        "HLT_IsoMu24":  "(hltBits&{})>0".format(2**29),
     },
     # defines to be applied for MC samples only
     'mc': {
@@ -364,8 +385,8 @@ SPLITTINGS = {
         'YB_15_20_YS_05_10' : dict(yboost=(1.5, 2.0), ystar=(0.5, 1.0)),
         'YB_20_25_YS_00_05' : dict(yboost=(2.0, 2.5), ystar=(0.0, 0.5)),
     },
-    # by trigger path (with overlap)
-    'triggers' : {
+    # by AK4 single-jet trigger path (with overlap)
+    'triggers_ak4' : {
         'all' : dict(),
         'HLT_PFJet40'  : dict(HLT_PFJet40=1),
         'HLT_PFJet60'  : dict(HLT_PFJet60=1),
@@ -377,6 +398,33 @@ SPLITTINGS = {
         'HLT_PFJet400' : dict(HLT_PFJet400=1),
         'HLT_PFJet450' : dict(HLT_PFJet450=1),
         'HLT_PFJet500' : dict(HLT_PFJet500=1),
+    },
+    # by AK8 single-jet trigger path (with overlap)
+    'triggers_ak8' : {
+        'all' : dict(),
+        'HLT_AK8PFJet40'  : dict(HLT_AK8PFJet40=1),
+        'HLT_AK8PFJet60'  : dict(HLT_AK8PFJet60=1),
+        'HLT_AK8PFJet80'  : dict(HLT_AK8PFJet80=1),
+        'HLT_AK8PFJet140' : dict(HLT_AK8PFJet140=1),
+        'HLT_AK8PFJet200' : dict(HLT_AK8PFJet200=1),
+        'HLT_AK8PFJet260' : dict(HLT_AK8PFJet260=1),
+        'HLT_AK8PFJet320' : dict(HLT_AK8PFJet320=1),
+        'HLT_AK8PFJet400' : dict(HLT_AK8PFJet400=1),
+        'HLT_AK8PFJet450' : dict(HLT_AK8PFJet450=1),
+        'HLT_AK8PFJet500' : dict(HLT_AK8PFJet500=1),
+    },
+    # by dijet trigger path (with overlap)
+    'triggers_dijet' : {
+        'all' : dict(),
+        'HLT_DiPFJetAve40'  : dict(HLT_AK8PFJet40=1),
+        'HLT_DiPFJetAve60'  : dict(HLT_AK8PFJet60=1),
+        'HLT_DiPFJetAve80'  : dict(HLT_AK8PFJet80=1),
+        'HLT_DiPFJetAve140' : dict(HLT_AK8PFJet140=1),
+        'HLT_DiPFJetAve200' : dict(HLT_AK8PFJet200=1),
+        'HLT_DiPFJetAve260' : dict(HLT_AK8PFJet260=1),
+        'HLT_DiPFJetAve320' : dict(HLT_AK8PFJet320=1),
+        'HLT_DiPFJetAve400' : dict(HLT_AK8PFJet400=1),
+        'HLT_DiPFJetAve500' : dict(HLT_AK8PFJet500=1),
     },
     # by trigger path (mutually exclusive)
     'triggers_exclusive' : {

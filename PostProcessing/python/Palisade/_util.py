@@ -457,7 +457,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_dijet'] if _tp['name'] != "all"
         ],
         'pads' : [
             {

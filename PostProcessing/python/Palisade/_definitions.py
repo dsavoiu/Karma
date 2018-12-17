@@ -312,6 +312,99 @@ EXPANSIONS = {
             'lumi_ub': 7544015569.439,  # Run2016G
         },
     ],
+    # trigger paths
+    'trigger_dijet' : [
+        {
+            "name": "HLT_DiPFJetAve40",
+            "label": r"DiPFJetAve40",
+            "color": "#1b09aa",
+            "marker": "o",
+            'marker_style': 'full',
+            'l1_factor': 10000.0,
+            'lumi_ub': 48714.091,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve60",
+            "label": r"DiPFJetAve60",
+            "color": "#094aaa",
+            "marker": "D",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 123328.102,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve80",
+            "label": r"DiPFJetAve80",
+            "color": "#0bd1d1",
+            "marker": "v",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 369296.644,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve140",
+            "label": r"DiPFJetAve140",
+            "color": "#0ce41f",
+            "marker": "^",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 3618461.972,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve200",
+            "label": r"DiPFJetAve200",
+            "color": "#dee40c",
+            "marker": "s",
+            'marker_style': 'full',
+            'l1_factor': 100.0,
+            'lumi_ub': 11962959.393,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve260",
+            "label": r"DiPFJetAve260",
+            "color": "#e4ac0c",
+            "marker": ">",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 102345547.894,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve320",
+            "label": r"DiPFJetAve320",
+            "color": "#ed690c",
+            "marker": "o",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 310001081.812,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve400",
+            "label": r"DiPFJetAve400",
+            "color": "#ed360c",
+            "marker": "x",
+            'marker_style': 'empty',
+            'l1_factor': 1.0,
+            'lumi_ub': 918960478.743,  # Run2016G
+        },
+        {
+            "name": "HLT_DiPFJetAve500",
+            "label": r"DiPFJetAve500",
+            "color": "#a52509",
+            "marker": "s",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 7544015569.439,  # Run2016G
+        },
+        {
+            "name": "all",
+            "label": r"all triggers",
+            "color": "k",
+            "marker": "o",
+            'marker_style': 'empty',
+            'l1_factor': 1.0,
+            'lumi_ub': 7544015569.439,  # Run2016G
+        },
+    ],
     # event yields (2D binnings)
     'occupancy': [
         {

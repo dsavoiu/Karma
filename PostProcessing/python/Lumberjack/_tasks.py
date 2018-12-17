@@ -6,23 +6,24 @@ TASKS = {
     # -- DATA --
 
     "EventYield" : {
-        "splittings": ["ybys_narrow", "triggers"],
+        "splittings": ["ybys_narrow"],
         "histograms" : (
             ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
             + ["metOverSumET", "jet1phi", "count"]
         ),
     },
 
-    "TriggerEfficiencies" : {
-        "splittings": ["ybys_narrow", "triggers_exclusive"],
-        "profiles" : (
-            ["{}_{}:jet1HLTAssignedPathEfficiency".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-            + ["metOverSumET:jet1HLTAssignedPathEfficiency"]
-        ),
-    },
+    # TODO: differentiate between AK4, AK8 and dijet triggers...
+    #"TriggerEfficiencies" : {
+    #    "splittings": ["ybys_narrow", "triggers_exclusive"],
+    #    "profiles" : (
+    #        ["{}_{}:jet1HLTAssignedPathEfficiency".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+    #        + ["metOverSumET:jet1HLTAssignedPathEfficiency"]
+    #    ),
+    #},
 
     "Occupancy" : {
-        "splittings": ["ybys_narrow", "triggers"],
+        "splittings": ["ybys_narrow"],
         "histograms" : ([
             "{}:{}_{}".format(_q2, _qbasename, _qbinning)
             for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
@@ -127,7 +128,7 @@ TASKS = {
     },
 
     "Flavors" : {
-        "splittings": ["ybys_narrow", "flavors"],
+        "splittings": ["ybys_narrow", "mc_subsamples", "flavors"],
         "histograms" : ([
             "{}_{}".format(_qbasename, _qbinning)
             for (_qbasename, _qbinning) in itertools.product(
@@ -140,5 +141,11 @@ TASKS = {
 
 TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
 TASKS['PFEnergyFractionsMC'] = dict(TASKS['PFEnergyFractions'], splittings=["ybys_narrow"])
+
+TASKS['Occupancy_PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['Occupancy_DiPFJetAveTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_dijet"])
+
+TASKS['EventYield_PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['EventYield_DiPFJetAveTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_dijet"])
 
 
