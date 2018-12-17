@@ -260,6 +260,8 @@ class PlotProcessor(_ProcessorBase):
             _pad_config = _pad_configs[_pad_id]
             _ax = _pad_config['axes']
             _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
+            _bin_labels = _pad_config.setdefault('bin_labels', {})
+            _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
 
             _expression = _kwargs.pop('expression')
             print("PLT {}".format(_expression))
@@ -271,6 +273,12 @@ class PlotProcessor(_ProcessorBase):
                 for _property_name in ('x', 'xerr', 'y', 'yerr', 'xwidth', 'efficiencies', 'errors')
                 if hasattr(_plot_object, _property_name)
             }
+
+            # extract individual bin labels (if they exist)
+            for _i_axis, _axis in enumerate("xyz"):
+                if bool(_plot_object.axis(_i_axis).GetLabels()):
+                    _axis_nbins_method = getattr(_plot_object, "GetNbins{}".format(_axis.upper()))
+                    _plot_data['{}binlabels'.format(_axis)] = [_plot_object.axis(_i_axis).GetBinLabel(_i_bin) for _i_bin in range(1, _axis_nbins_method() + 1)]
 
             # map fields for TEfficiency objects
             if isinstance(_plot_object, Efficiency):
@@ -416,6 +424,14 @@ class PlotProcessor(_ProcessorBase):
             if _stack_name is not None:
                 _stack_bottoms[_stack_name] += _plot_data['y']
 
+            # keep track of the bin labels of each object in a pad
+            for _i_axis, _axis in enumerate("xyz"):
+                _bl_key = '{}binlabels'.format(_axis)
+                _bl = _plot_data.get(_bl_key, None)
+                if _bl is not None:
+                    _bin_labels.setdefault(_axis, []).append(_bl)
+                    _bin_label_anchors.setdefault(_axis, []).append(_plot_data.get(_axis, None))
+
         # close text output
         if _text_file is not None:
             _text_file.close()
@@ -477,6 +493,37 @@ class PlotProcessor(_ProcessorBase):
             #    _formatter.set_locs(locs=_log_decade_ticklabels)
             #
             #    _ax.yaxis.set_minor_formatter(_formatter)
+
+            # draw bin labels instead of numeric labels at ticks
+            for _axis in "xyz":
+                _bl_sets = _pad_config["bin_labels"].get(_axis, None)
+                _ba_sets = _pad_config["bin_label_anchors"].get(_axis, None)
+
+                # skip for axes without bin labels
+                if not _bl_sets:
+                    continue
+
+                # check if bin labels are identical for all objects in the pad
+                if len(_bl_sets) > 1:
+                    if False in [_bl_sets[_i_set] == _bl_sets[0] for _i_set in range(1, len(_bl_sets))]:
+                        raise ValueError("Bin labels for axis '{}' differ across objects for the same pad! Got the following sets: {}".format(_axis, _bl_sets))
+                    elif False in [np.all(_ba_sets[_i_set] == _ba_sets[0]) for _i_set in range(1, len(_ba_sets))]:
+                        raise ValueError("Bin label anchors for axis '{}' differ across objects for the same pad! Got the following sets: {}".format(_axis, _ba_sets))
+
+                # draw bin labels
+                if _axis == 'x':
+                    for _bl, _ba in zip(_bl_sets[0], _ba_sets[0]):
+                        _ax.annotate(_bl, xy=(_ba, 0), xycoords=('data', 'axes fraction'), xytext=(0, -6), textcoords='offset points', va='top', ha='right', rotation=30)
+                    _ax.xaxis.set_ticks(_ba_sets[0]) # reset tick marks
+                    _ax.xaxis.set_ticklabels([])     # hide numeric tick labels
+                elif _axis == 'y':
+                    for _bl, _ba in zip(_bl_sets[0], _ba_sets[0]):
+                        _ax.annotate(_bl, xy=(0, _ba), xycoords=('axes fraction', 'data'), xytext=(-6, 0), textcoords='offset points', va='center', ha='right')
+                    _ax.yaxis.set_ticks(_ba_sets[0]) # reset tick marks
+                    _ax.yaxis.set_ticklabels([])     # hide numeric tick labels
+                else:
+                    print("WARNING: Bin labels found for axis '{}', but this is not supported. Ignoring...".format(_axis))
+
 
         # step 4: text and annotations
 
