@@ -525,8 +525,9 @@ class InputROOT(object):
 
     def _eval(self, node, operators, functions):
         """Evaluate an AST node"""
-        if isinstance(node, ast.Name): # <string> : array column
-            #print 'Encountered node of type ast.Name: %s' % (node.id,)
+        if node is None:
+            return None
+        elif isinstance(node, ast.Name): # <string> : array column
             return self.get(node.id)
         elif isinstance(node, ast.Str): # <string> : array column
             return self.get(node.s)
@@ -538,5 +539,14 @@ class InputROOT(object):
             return operators[type(node.op)](self._eval(node.left, operators, functions), self._eval(node.right, operators, functions))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
             return operators[type(node.op)](self._eval(node.operand, operators, functions))
+        elif isinstance(node, ast.Subscript): # <operator> <operand> e.g., -1
+            if isinstance(node.slice, ast.Index): # support subscripting via simple index
+                return self._eval(node.value, operators, functions)[self._eval(node.slice.value, operators, functions)]
+            elif isinstance(node.slice, ast.Slice): # support subscripting via slice
+                return self._eval(node.value, operators, functions)[self._eval(node.slice.lower, operators, functions):self._eval(node.slice.upper, operators, functions):self._eval(node.slice.step, operators, functions)]
+            else:
+                raise TypeError(node)
+        elif isinstance(node, ast.Attribute): # <value>.<attr>
+            return getattr(self._eval(node.value, operators, functions), node.attr)
         else:
             raise TypeError(node)
