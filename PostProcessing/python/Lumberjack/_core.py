@@ -31,6 +31,11 @@ class Quantity(object):
         return self._dict['binning']
 
     @property
+    def named_binnings(self):
+        """Named binnings defined for this quantity."""
+        return self._dict['named_binnings']
+
+    @property
     def expression(self):
         return self._dict['expression']
 
