@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import datetime
+import hashlib
 import time
 import numpy as np
 import os
+import re
 import sys
 import ROOT
 
@@ -17,6 +19,12 @@ def product_dict(**kwargs):
     for instance in itertools.product(*kwargs.values()):
         yield dict(zip(_keys, instance))
 
+def group_by(iterable, n):
+    '''Return list of iterables of elements of `iterable`, grouped in batches of at most `n`'''
+    _l = len(iterable)
+    _n_groups = _l//n + (_l%n>0)
+    _grouped_iterable = [iterable[_i*n:min(_l,(_i+1)*n)] for _i in range(_n_groups)]
+    return _grouped_iterable
 
 
 class StreamDup:
@@ -49,6 +57,8 @@ def log_stdout_to_file(filename):
 
 
 class PostProcessingCLI(object):
+
+    RE_SPLITTING_KEY_SPEC = re.compile(r"([^[]]*)(\[(.*)\])?")
 
     def __init__(self):
 
@@ -97,13 +107,10 @@ class PostProcessingCLI(object):
         self._args = self._top_parser.parse_args()
 
 
-    def _prepare_data_frame(self):
-
-        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTION
-        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
+    def _prepare_bare_data_frame(self):
 
         # -- enable multithreading
-        if self._args.jobs > 1:
+        if int(self._args.jobs) > 1:
             print "[INFO] Enabling multithreading with {} threads...".format(self._args.jobs)
             ROOT.ROOT.EnableImplicitMT(int(self._args.jobs))
 
@@ -126,8 +133,23 @@ class PostProcessingCLI(object):
         _f.Close()
 
         print "[INFO] Sample type: {}".format(self._args.type)
-        self._df = self._df_class(self._args.tree, self._args.input_file)
-        self._df_count = self._df.Count()
+        self._df_bare = self._df_class(self._args.tree, self._args.input_file)
+
+    def _prepare_data_frame(self):
+
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTIONS
+        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
+
+        # -- limit the number of processed events
+        if self._args.num_events >= 0:
+            print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
+            self._df_bare = self._df_bare.Range(0, int(self._args.num_events))
+            self._df_size = min(self._df_size, int(self._args.num_events))
+            self._df_count_increment = max(self._df_size//100, 10)
+
+        # -- set up event counter (for progress reporting)
+        self._df_count = self._df_bare.Count()
+        self._df_count_increment = 100000
 
         if self._args.progress:
             self._progress = tqdm(
@@ -138,27 +160,32 @@ class PostProcessingCLI(object):
                 total=self._df_size,
             )
             def _progress_callback(count):
-                self._progress.update(100000)
+                self._progress.update(self._df_count_increment)
+
+            _func_basename = "my_callback_py_f"
+            _func_idstring = hashlib.md5(hex(id(_progress_callback))).hexdigest()  # unique ID
+            _func_fullname = _func_basename + '_' + _func_idstring
+            _func_slotcallback_fullname = _func_basename + '_slot_' + _func_idstring
 
             # black magic to obtain pointer to Python function in ROOT's interpreter
             ROOT.gInterpreter.ProcessLine("#include <Python.h>")
-            ROOT.gInterpreter.ProcessLine("long long my_callback_py_f_addr = " + hex(id(_progress_callback)) + ";")
-            ROOT.gInterpreter.ProcessLine("PyObject* my_callback_py_f = reinterpret_cast<PyObject*>(my_callback_py_f_addr);")
-            ROOT.gInterpreter.ProcessLine("Py_INCREF(my_callback_py_f);")  # prevent garbage collection
+            ROOT.gInterpreter.ProcessLine("long long "+_func_fullname+"_addr = " + hex(id(_progress_callback)) + ";")
+            ROOT.gInterpreter.ProcessLine("PyObject* "+_func_fullname+" = reinterpret_cast<PyObject*>("+_func_fullname+"_addr);")
+            ROOT.gInterpreter.ProcessLine("Py_INCREF("+_func_fullname+");")  # prevent garbage collection
 
             # define a thread-safe std::function for the progress callback and register it
-            ROOT.gInterpreter.ProcessLine("std::mutex partialResultMutex;")
+            ROOT.gInterpreter.ProcessLine("std::mutex partialResultMutex_"+_func_idstring+";")
             ROOT.gInterpreter.ProcessLine(
-                "std::function<void(unsigned int, ULong64_t&)> my_callback_f_slot = [](unsigned int /*slot*/, ULong64_t& count) { "
-                    "std::lock_guard<std::mutex> lock(partialResultMutex); "
-                    "PyEval_CallObject(my_callback_py_f, Py_BuildValue(\"(i)\", count)); "
+                "std::function<void(unsigned int, ULong64_t&)> "+_func_slotcallback_fullname+" = [](unsigned int /*slot*/, ULong64_t& count) { "
+                    "std::lock_guard<std::mutex> lock(partialResultMutex_"+_func_idstring+"); "
+                    "PyEval_CallObject("+_func_fullname+", Py_BuildValue(\"(i)\", count)); "
                 "};"
             )
-            self._df_count.OnPartialResultSlot(100000, ROOT.my_callback_f_slot)
+            self._df_count.OnPartialResultSlot(self._df_count_increment, getattr(ROOT, _func_slotcallback_fullname))
 
         # -- apply basic analysis selection
         print "[INFO] Defining quantities..."
-        self._df = apply_defines(self._df, DEFINES['global'])
+        self._df = apply_defines(self._df_bare, DEFINES['global'])
         if self._args.type in DEFINES:
             self._df = apply_defines(self._df, DEFINES[self._args.type])
 
@@ -166,24 +193,117 @@ class PostProcessingCLI(object):
         self._df = define_quantities(self._df, _quantities)
 
         print "[INFO] Applying global selection..."
-        self._df = apply_filters(self._df, BASIC_SELECTION)
+        self._df = apply_filters(self._df, BASIC_SELECTIONS['global'])
+
+    def _cleanup_data_frame(self):
+        pass  # what to do here?
+
+    @staticmethod
+    def _expand_subtasks(task_configs):
+        '''replace single task with subtasks, if slicing a particular splitting is enabled'''
+        from DijetAnalysis.PostProcessing.Lumberjack import SPLITTINGS
+
+        _expansions_left = True
+        while _expansions_left:
+            _expansions_left = False
+            _tasks_with_subtasks = []
+            for _task_name, _task_spec in task_configs:
+                for _i_splitting_key, _splitting_key in enumerate(_task_spec['splittings']):
+                    if '@' in _splitting_key:
+                        _splitting_key, _n_splittings_per_subtask = _splitting_key.split('@', 1)
+                        _n_splittings_per_subtask = int(_n_splittings_per_subtask)
+
+                        # retrieve splittings for task
+                        if _splitting_key not in SPLITTINGS:
+                            raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(_splitting_key))
+                        _splitting_subkeys = SPLITTINGS[_splitting_key].keys()
+
+                        # split into subtasks
+                        _expansions_left = True  # flag need for another iteration
+                        _splitting_subkey_groups = group_by(_splitting_subkeys, _n_splittings_per_subtask)
+                        break
+
+                if _expansions_left:
+                    for _i_subtask, _splitting_subkey_group in enumerate(_splitting_subkey_groups):
+                        _subtask_splitting_string = "{}[{}]".format(_splitting_key, ",".join(_splitting_subkey_group))
+                        _new_splittings = _task_spec['splittings'][:]
+                        # replace '@' syntax with '[]' syntax specifying subkeys explicitly
+                        _new_splittings[_i_splitting_key] = _subtask_splitting_string
+
+                        _subtask_filename = _task_spec['_filename'].split('.')
+                        _subtask_filename[-2] += '_' + str(_i_subtask)
+                        _subtask_filename = '.'.join(_subtask_filename)
+
+                        _subtask_log_filename = _task_spec.get('_log_filename', None)
+                        if _subtask_log_filename is not None:
+                            _subtask_log_filename = _subtask_log_filename.split('.')
+                            _subtask_log_filename[-2] += '_' + str(_i_subtask)
+                            _subtask_log_filename = '.'.join(_subtask_log_filename)
+
+                        _tasks_with_subtasks.append((
+                            "{}_{}".format(_task_name, _i_subtask),
+                            dict(_task_spec,
+                                splittings=_new_splittings,
+                                _filename=_subtask_filename,
+                                _log_filename=_subtask_log_filename,
+                            ),
+                        ))
+                else:
+                    _tasks_with_subtasks.append((_task_name, _task_spec))
+
+            task_configs = _tasks_with_subtasks
+
+        return task_configs
+
 
     def _run_tasks(self, task_configs):
 
         from DijetAnalysis.PostProcessing.Lumberjack import SPLITTINGS
         from DijetAnalysis.PostProcessing.Lumberjack import PostProcessor, Timer
 
+        task_configs = self._expand_subtasks(task_configs)
+
         # -- run all queued tasks
         for _task_name, _task_spec in task_configs:
+
+            # skip task if output file exists
+            if os.path.exists(_task_spec['_filename']) and not self._args.overwrite:
+                print("[INFO] Task output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_spec['_filename']))
+                continue
+
             with log_stdout_to_file(_task_spec['_log_filename']):
                 print "[INFO] Running task '{}'...".format(_task_name)
 
-                _splittings_keys = _task_spec.get('splittings')
-                # retrieve splittings for task
-                try:
-                    _splitting_specs = {_key : SPLITTINGS[_key] for _key in _splittings_keys}
-                except KeyError as e:
-                    raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(e))
+                # apply defines, basic selection, etc.
+                self._prepare_data_frame()
+
+                _splittings_key_specs = _task_spec.get('splittings')
+
+                _splitting_specs = {}
+                _splittings_keys = []
+                for _key_spec in _splittings_key_specs:
+                    # support for slicing of individual splittings
+                    # key can be '<name>' (no slicing) or '<name>[<splitting_value_1>,<splitting_value_2>,...]'
+                    _key_spec_groups = re.match(self.RE_SPLITTING_KEY_SPEC, _key_spec).groups()
+                    if _key_spec_groups[2] is None:
+                        _key = _key_spec
+                        # no slicing -> direct lookup
+                        if _key not in SPLITTINGS:
+                            raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(_key))
+                        _splitting_specs[_key] = SPLITTINGS[_key]
+                    else:
+                        # slicing -> lookup and slice
+                        _key = _key_spec_groups[0]
+                        if _key not in SPLITTINGS:
+                            raise KeyError("[ERROR] Cannot find splitting for key '{}'".format(_key))
+
+                        _subkeys = [_subkey.strip() for _subkey in _key_spec_groups[2].split(',')]
+                        try:
+                            _splitting_specs[_key] = {_subkey: SPLITTINGS[_key][_subkey] for _subkey in _subkeys}
+                        except KeyError as e:
+                            raise KeyError("[ERROR] Cannot find splitting for subkey '{}[{}]'".format(_key, e))
+
+                    _splittings_keys.append(_key)  # store key w/o slicing syntax
 
                 # create combined splitting specification out of the cross product
                 # of specified keys
@@ -202,11 +322,6 @@ class PostProcessingCLI(object):
                 if _hs is None and _ps is None:
                     print "[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name)
                     continue
-
-                # -- limit the number of processed events
-                if self._args.num_events >= 0:
-                    print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
-                    self._df = self._df.Range(0, int(self._args.num_events))
 
                 print "[INFO] Setting up PostProcessor..."
                 _pp = PostProcessor(
@@ -247,12 +362,15 @@ class PostProcessingCLI(object):
                     print "[INFO] Processed a total of {} events.".format(self._df_count.GetValue())
                 _t.report()
 
+                print "[INFO] Cleaning up after task '{}'...".format(_task_name)
+                self._cleanup_data_frame()
+
 
     # -- subcommand methods
 
     def _subcommand_freestyle(self):
 
-        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTION, SPLITTINGS
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES
         from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
 
         # -- configure and queue freestyle task
@@ -273,7 +391,7 @@ class PostProcessingCLI(object):
         )
         _tasks = [("Freestyle", _task_spec)]
 
-        self._prepare_data_frame()
+        self._prepare_bare_data_frame()
         self._run_tasks(_tasks)
 
 
@@ -293,26 +411,18 @@ class PostProcessingCLI(object):
             if _task_spec is None:
                 raise ValueError("[ERROR] Unknown task '{}': expected one of {}".format(_task, set(TASKS.keys())))
 
-            # skip task if output filename exists
-            _output_filename = "{}_{}.root".format(_task_name, _suffix)
-            if os.path.exists(_output_filename) and not self._args.overwrite:
-                print("[INFO] Task '{}' output file exists: '{}' and `--overwrite` not set. Skipping task...".format(_task_name, _output_filename))
-                continue
-
-            _log_filename = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
 
             # add task to queue
-            _task_spec['_filename'] = _output_filename
-            _task_spec['_log_filename'] = _log_filename
-            _task_spec['_quantities'] =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
+            _task_spec['_filename'] = "{}_{}.root".format(_task_name, _suffix)
+            _task_spec['_log_filename'] = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
+            _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
             _tasks.append((_task_name, _task_spec))
 
         if not _tasks:
             print "[INFO] No tasks in queue. Exiting..."
             exit(1)
 
-
-        self._prepare_data_frame()
+        self._prepare_bare_data_frame()
         self._run_tasks(_tasks)
 
 

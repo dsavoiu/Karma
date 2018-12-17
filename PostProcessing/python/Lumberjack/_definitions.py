@@ -295,24 +295,42 @@ DEFINES = {
         "Flavor_ap":  "((jet1PartonFlavor>0)&&(jet2PartonFlavor<0))||((jet1PartonFlavor<0)&&(jet2PartonFlavor>0))",
 
         "Flavor_IsDiagonal":  "abs(jet1PartonFlavor)==abs(jet2PartonFlavor)",
+
+        # qcd subprocess categories
+
+        "QCDSubprocess_XX":  "(incomingParton1Flavor==0)||(incomingParton2Flavor==0)",
+        "QCDSubprocess_QQ":  "(abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)",
+        "QCDSubprocess_GG":  "(incomingParton1Flavor==21)&&(incomingParton2Flavor==21)",
+        "QCDSubprocess_QG":  "((abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(incomingParton2Flavor==21))||((abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)&&(incomingParton1Flavor==21))",
+
+        "QCDSubprocess_xg_gt_xq": "((incomingParton1Flavor==21)&&(incomingParton1x>incomingParton2x))||((incomingParton2Flavor==21)&&(incomingParton2x>incomingParton1x))",
+
+        "QCDSubprocess_aa":  "(incomingParton1Flavor<0)&&(incomingParton2Flavor<0)",
+        "QCDSubprocess_pp":  "(incomingParton1Flavor>0)&&(incomingParton2Flavor>0)",
+        "QCDSubprocess_ap":  "((incomingParton1Flavor>0)&&(incomingParton2Flavor<0))||((incomingParton1Flavor<0)&&(incomingParton2Flavor>0))",
+
+        "QCDSubprocess_IsDiagonal":  "abs(incomingParton1Flavor)==abs(incomingParton2Flavor)",
     }
 }
 
 
 # specification of filters to be applied to data frame
-BASIC_SELECTION = [
-    # leading jet has matched trigger object
-    "(jet1HLTAssignedPathEfficiency>0.0&&jet1HLTAssignedPathIndex>=0)",
+BASIC_SELECTIONS = {
+    'global' : [
+        # leading jet has matched trigger object
+        #"(jet1HLTAssignedPathEfficiency>0.0&&jet1HLTAssignedPathIndex>=0)",
+        "jet1HLTpt > 0.0",
 
-    # kinematics of leading jets
-    "jet1pt > 60",
-    "jet2pt > 60",
-    "abs(jet1y) < 3.0",
-    "abs(jet2y) < 3.0",
+        # kinematics of leading jets
+        "jet1pt > 60",
+        "jet2pt > 60",
+        "abs(jet1y) < 3.0",
+        "abs(jet2y) < 3.0",
 
-    ##MET/sumEt filter
-    #"metOverSumET < 0.3"
-]
+        ##MET/sumEt filter
+        #"metOverSumET < 0.3"
+    ],
+}
 
 
 # specification of ways to split sample into subsamples
