@@ -35,7 +35,7 @@ void dijet::JetTriggerObjectMatchingProducer::produce(edm::Event& event, const e
     obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
     // jet collection
     obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
-    // jet collection
+    // trigger object collection
     obtained &= event.getByToken(this->dijetTriggerObjectCollectionToken, this->dijetTriggerObjectCollectionHandle);
 
     assert(obtained);  // raise if one collection could not be obtained

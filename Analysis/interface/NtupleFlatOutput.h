@@ -12,6 +12,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Utilities/interface/TypeWithDict.h"
@@ -57,8 +60,6 @@ namespace dijet {
         const edm::ParameterSet& m_configPSet;
         bool m_isData;
 
-        std::unique_ptr<TFile> m_tFile;
-        
         // bare pointers (ROOT will manage this memory)
         TTree* m_tree;  // will be owened and destroyed by ROOT
         dijet::NtupleEntry* m_productForFill;  // will clean up in destructor

@@ -21,15 +21,15 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_configPSet.template getParameter<edm::InputTag>("dijetNtupleSrc")
     );
 
-    // declare use of a shared resource -> all calls to analyze() will be serialized
-    usesResource();
+    // declare use of shared resources -> all calls to analyze() will be serialized
+    usesResource("TFileService");
 
-    // create new file object
-    m_tFile = std::unique_ptr<TFile>(new TFile(m_configPSet.getParameter<std::string>("outputFileName").c_str(), "RECREATE"));
+    // access output ROOT file through TFileService
+    edm::Service<TFileService> fileService;
 
     // create a TTree
-    m_tree = new TTree(m_configPSet.getParameter<std::string>("treeName").c_str(),
-                       m_configPSet.getParameter<std::string>("treeName").c_str());
+    m_tree = fileService->make<TTree>(m_configPSet.getParameter<std::string>("treeName").c_str(),
+                                      m_configPSet.getParameter<std::string>("treeName").c_str());
 
     // create a proxy product instance to use when filling
     m_productForFill = new dijet::NtupleEntry();
@@ -201,9 +201,7 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
 
 
 void dijet::NtupleFlatOutput::endJob() {
-    m_tFile->cd();
-    m_tree->Write();
-    m_tFile->Close();  // destructs the TTree!
+    /* nothing to do: output written when TFile service closes output file */
 }
 
 // -- destructor
