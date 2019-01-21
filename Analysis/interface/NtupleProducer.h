@@ -48,6 +48,17 @@ namespace dijet {
         double assignedObjectPt = UNDEFINED_DOUBLE;
     };
 
+    /**
+     * Set of bit masks to encode existence of HLT/L1 matches for jets and
+     * whether these matches pass the configured thresholds.
+     */
+    struct TriggerBitsets {
+        std::bitset<8*sizeof(unsigned long)> hltMatches;
+        std::bitset<8*sizeof(unsigned long)> hltPassThresholds;
+        std::bitset<8*sizeof(unsigned long)> l1Matches;
+        std::bitset<8*sizeof(unsigned long)> l1PassThresholds;
+    };
+
     // -- caches
 
     /** Cache containing resources which do not change
@@ -60,13 +71,18 @@ namespace dijet {
             dijet::CacheBase(pSet),
             hltVersionPattern_(boost::regex("(HLT_.*)_v[0-9]+", boost::regex::extended)) {
 
-            // // create the global trigger efficiencies provider instance
-            // triggerEfficienciesProvider_ = std::unique_ptr<TriggerEfficienciesProvider>(
-            //     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
-            // );
+            /// // create the global trigger efficiencies provider instance
+            /// triggerEfficienciesProvider_ = std::unique_ptr<TriggerEfficienciesProvider>(
+            ///     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
+            /// );
 
             // create list of requested HLT path names
-            hltPaths_ = pSet_.getParameter<std::vector<std::string>>("hltPaths");
+            const auto& hltPathsCfg = pSet_.getParameter<std::vector<edm::ParameterSet>>("hltPaths");
+            for (const auto& hltPathCfg : hltPathsCfg) {
+                hltPaths_.push_back(hltPathCfg.getParameter<std::string>("name"));
+                l1Thresholds_.push_back(hltPathCfg.getParameter<double>("l1Threshold"));
+                hltThresholds_.push_back(hltPathCfg.getParameter<double>("hltThreshold"));
+            }
 
             // throw if number of configured paths exceeds size of TTree branch used to store them
             assert(hltPaths_.size() <= 8 * sizeof(unsigned long));
@@ -85,6 +101,8 @@ namespace dijet {
 
         const boost::regex hltVersionPattern_;
         std::vector<std::string> hltPaths_;
+        std::vector<double> hltThresholds_;
+        std::vector<double> l1Thresholds_;
 
         std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
         std::unique_ptr<JetIDProvider> jetIDProvider_;
@@ -137,6 +155,7 @@ namespace dijet {
 
         dijet::HLTAssignment getHLTAssignment(unsigned int jetIndex);
         const dijet::LV* getMatchedGenJet(unsigned int jetIndex);
+        dijet::TriggerBitsets getTriggerBitsetsForJet(unsigned int jetIndex);
 
         // ----------member data ---------------------------
 
@@ -144,8 +163,7 @@ namespace dijet {
         bool m_isData;
         double m_weightForStitching;
 
-        // TODO: move to global cache
-        std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
+        /// std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
 
         // -- handles and tokens
         typename edm::Handle<dijet::Event> dijetEventHandle;

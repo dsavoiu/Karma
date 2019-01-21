@@ -58,17 +58,17 @@ namespace dijet {
 
         // trigger results
         unsigned long hltBits;
+        unsigned long hltJet1Match;
+        unsigned long hltJet2Match;
+        unsigned long hltJet1PtPassThresholds;
+        unsigned long hltJet2PtPassThresholds;
+        unsigned long hltJet12PtAvePassThresholds;
 
-        // HLT objects
-        double jet1HLTpt = UNDEFINED_DOUBLE;
-        unsigned int jet1HLTNumMatchedTriggerObjects = 0;
-        int jet1HLTAssignedPathIndex = -1;
-        double jet1HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
-
-        double jet2HLTpt = UNDEFINED_DOUBLE;
-        unsigned int jet2HLTNumMatchedTriggerObjects = 0;
-        int jet2HLTAssignedPathIndex = -1;
-        double jet2HLTAssignedPathEfficiency = UNDEFINED_DOUBLE;
+        /// // HLT objects
+        /// double jet1HLTpt = UNDEFINED_DOUBLE;
+        /// unsigned int jet1HLTNumMatchedTriggerObjects = 0;
+        /// double jet2HLTpt = UNDEFINED_DOUBLE;
+        /// unsigned int jet2HLTNumMatchedTriggerObjects = 0;
 
         // -- MC-specific
 

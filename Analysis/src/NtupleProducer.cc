@@ -10,15 +10,15 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     // -- register products
     produces<dijet::NtupleEntry>();
 
-    // -- process configuration
-    m_triggerEfficienciesProvider = std::unique_ptr<TriggerEfficienciesProvider>(
-        new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
-    );
+    /// // -- process configuration
+    /// m_triggerEfficienciesProvider = std::unique_ptr<TriggerEfficienciesProvider>(
+    ///     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
+    /// );
 
-    std::cout << "Read trigger efficiencies for paths:" << std::endl;
-    for (const auto& mapIter : m_triggerEfficienciesProvider->triggerEfficiencies()) {
-        std::cout << "    " << mapIter.first << " -> " << &(*mapIter.second) << std::endl;
-    }
+    /// std::cout << "Read trigger efficiencies for paths:" << std::endl;
+    /// for (const auto& mapIter : m_triggerEfficienciesProvider->triggerEfficiencies()) {
+    ///     std::cout << "    " << mapIter.first << " -> " << &(*mapIter.second) << std::endl;
+    /// }
 
     // set a flag if we are running on (real) data
     m_isData = m_configPSet.getParameter<bool>("isData");
@@ -132,23 +132,27 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // weights
     outputNtupleEntry->weightForStitching = m_weightForStitching;  // TODO: less wasteful way?
 
-    // trigger results
-    std::bitset<8*sizeof(unsigned long)> helperBitset;
+    // -- trigger results
+
+    std::bitset<8*sizeof(unsigned long)> bitsetHLTBits;
+    // go through all triggers in skim
     for (size_t iBit = 0; iBit < this->dijetEventHandle->hltBits.size(); ++iBit) {
-        ///std::cout << "[Check iBit " << iBit << "]" << std::endl;
+        // if trigger fired
         if (this->dijetEventHandle->hltBits[iBit]) {
-            ///std::cout << " -> fired!" << std::endl;
-            // get the index
+            // get the index of trigger in analysis config
             const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[iBit];
-            ///std::cout << " -> idxInConfig = " << idxInConfig << std::endl;
+            // if trigger present in config
             if (idxInConfig >= 0) {
-                helperBitset[idxInConfig] = true;
+                // set bit
+                bitsetHLTBits[idxInConfig] = true;
             }
         }
     }
-    ///std::cout << " -> helperBitset - " << helperBitset << std::endl;
-    outputNtupleEntry->hltBits = helperBitset.to_ulong();
 
+    // encode bitsets as 'unsigned long'
+    outputNtupleEntry->hltBits = bitsetHLTBits.to_ulong();
+
+    // -- generator data (MC-only)
     if (!m_isData) {
         outputNtupleEntry->incomingParton1Flavor = this->dijetGeneratorQCDInfoHandle->parton1PdgId;
         outputNtupleEntry->incomingParton2Flavor = this->dijetGeneratorQCDInfoHandle->parton2PdgId;
@@ -195,25 +199,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet1HadronFlavor = jet1->hadronFlavor;
         }
 
-        // get assigned HLT path(s) for leading jet
-        dijet::HLTAssignment jet1HLTAssignment = getHLTAssignment(0);
-        outputNtupleEntry->jet1HLTNumMatchedTriggerObjects = jet1HLTAssignment.numUniqueMatchedTriggerObjects;
-        outputNtupleEntry->jet1HLTAssignedPathIndex = jet1HLTAssignment.assignedPathIndex;
-
-        // retrieve the efficiency
-        if (outputNtupleEntry->jet1HLTAssignedPathIndex >= 0) {
-            const std::string unversionedPathName = runCache()->triggerPathsUnversionedNames_[
-                outputNtupleEntry->jet1HLTAssignedPathIndex
-            ];
-
-            const TEfficiency* jet1HLTAssignedPathEfficiencyHisto = m_triggerEfficienciesProvider->getEfficiency(unversionedPathName);
-            if (jet1HLTAssignedPathEfficiencyHisto) {
-                int iBin = jet1HLTAssignedPathEfficiencyHisto->FindFixBin(outputNtupleEntry->jet1pt);
-                outputNtupleEntry->jet1HLTAssignedPathEfficiency = jet1HLTAssignedPathEfficiencyHisto->GetEfficiency(iBin);
-            }
-        }
-
-        outputNtupleEntry->jet1HLTpt = jet1HLTAssignment.assignedObjectPt;
+        // trigger bitsets
+        dijet::TriggerBitsets jet1TriggerBitsets = getTriggerBitsetsForJet(0);
+        outputNtupleEntry->hltJet1Match = (jet1TriggerBitsets.hltMatches & jet1TriggerBitsets.l1Matches).to_ulong();
+        outputNtupleEntry->hltJet1PtPassThresholds = (jet1TriggerBitsets.hltPassThresholds & jet1TriggerBitsets.l1PassThresholds).to_ulong();
 
         // second-leading jet kinematics
         if (jets->size() > 1) {
@@ -251,11 +240,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->jet2HadronFlavor = jet2->hadronFlavor;
             }
 
-            // get assigned HLT path(s) for second-leading jet
-            dijet::HLTAssignment jet2HLTAssignment = getHLTAssignment(1);
-            outputNtupleEntry->jet2HLTNumMatchedTriggerObjects = jet2HLTAssignment.numUniqueMatchedTriggerObjects;
-            outputNtupleEntry->jet2HLTAssignedPathIndex = jet2HLTAssignment.assignedPathIndex;
-            outputNtupleEntry->jet2HLTpt = jet2HLTAssignment.assignedObjectPt;
+            // trigger bitsets
+            dijet::TriggerBitsets jet2TriggerBitsets = getTriggerBitsetsForJet(1);
+            outputNtupleEntry->hltJet2Match = (jet2TriggerBitsets.hltMatches & jet2TriggerBitsets.l1Matches).to_ulong();
+            outputNtupleEntry->hltJet2PtPassThresholds = (jet2TriggerBitsets.hltPassThresholds & jet2TriggerBitsets.l1PassThresholds).to_ulong();
 
             // leading jet pair kinematics
             outputNtupleEntry->jet12mass = (jet1->p4 + jet2->p4).M();
@@ -302,7 +290,7 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
         edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
     );
 
-    // if there is at least one trigger object match for the leading jet
+    // if there is at least one trigger object match for the jet
     if (jetMatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) {
 
         std::set<int> seenPathIndices;
@@ -310,7 +298,7 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
         unsigned int numValidMatchedTriggerObjects = 0;
         unsigned int numUniqueMatchedTriggerObjects = 0;
 
-        // loop over all trigger objects matched to the leading jet
+        // loop over all trigger objects matched to the jet
         for (const auto& jetMatchedTriggerObject : jetMatchedTriggerObjects->val) {
 
             // ignore L1 objects
@@ -374,6 +362,57 @@ const dijet::LV* dijet::NtupleProducer::getMatchedGenJet(unsigned int jetIndex) 
 
     // if no match, a nullptr is returned
     return nullptr;
+}
+
+/**
+ * Helper function to determine if a jet has L1 and/or HLT matches, and to check if those matches pass the configured thresholds.
+ * This is typically needed for measuring the trigger efficiency.
+ */
+dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForJet(unsigned int jetIndex) {
+
+    dijet::TriggerBitsets triggerBitsets;
+
+    // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
+    const auto& jetMatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
+        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
+    );
+
+    // if there is at least one trigger object match for the jet
+    if (jetMatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) {
+
+        // loop over all trigger objects matched to the jet
+        for (const auto& jetMatchedTriggerObject : jetMatchedTriggerObjects->val) {
+
+            // set L1 and HLT matching trigger bits if jet is assigned the corresponding HLT path
+            for (const auto& assignedPathIdx : jetMatchedTriggerObject->assignedPathIndices) {
+                // get the index of trigger in analysis config
+                const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[assignedPathIdx];
+
+                // skip unrequested trigger paths
+                if (idxInConfig < 0)
+                    continue;
+
+                if (jetMatchedTriggerObject->isHLT()) {
+                    // HLT trigger object
+                    triggerBitsets.hltMatches[idxInConfig] = true;
+                }
+                else {
+                    // L1 trigger object
+                    triggerBitsets.l1Matches[idxInConfig] = true;
+                }
+            }
+
+            // set L1 and HLT emulation trigger bits if jet passes preset thresholds
+            for (size_t idxInConfig = 0; idxInConfig < globalCache()->hltPaths_.size(); ++idxInConfig) {
+                if (jetMatchedTriggerObject->isHLT() && (this->dijetJetCollectionHandle->at(jetIndex).p4.Pt() >= globalCache()->hltThresholds_[idxInConfig]))
+                    triggerBitsets.hltPassThresholds[idxInConfig] = true;
+                else if (!jetMatchedTriggerObject->isHLT() && (this->dijetJetCollectionHandle->at(jetIndex).p4.Pt() >= globalCache()->l1Thresholds_[idxInConfig]))
+                    triggerBitsets.l1PassThresholds[idxInConfig] = true;
+            }
+        }
+    }
+
+    return triggerBitsets;
 }
 
 
