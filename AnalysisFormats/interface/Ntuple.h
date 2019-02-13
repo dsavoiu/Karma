@@ -61,9 +61,12 @@ namespace dijet {
         unsigned long hltJet1Match;
         unsigned long hltJet2Match;
         unsigned long hltJet12Match;
-        unsigned long hltJet1PtPassThresholds;
-        unsigned long hltJet2PtPassThresholds;
-        unsigned long hltJet12PtAvePassThresholds;
+        unsigned long hltJet1PtPassThresholdsL1;
+        unsigned long hltJet1PtPassThresholdsHLT;
+        unsigned long hltJet2PtPassThresholdsL1;
+        unsigned long hltJet2PtPassThresholdsHLT;
+        unsigned long hltJet12PtAvePassThresholdsL1;
+        unsigned long hltJet12PtAvePassThresholdsHLT;
 
         /// // HLT objects
         /// double jet1HLTpt = UNDEFINED_DOUBLE;

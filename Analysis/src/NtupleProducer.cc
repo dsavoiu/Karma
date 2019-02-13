@@ -226,7 +226,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         // trigger bitsets
         dijet::TriggerBitsets jet1TriggerBitsets = getTriggerBitsetsForJet(0);
         outputNtupleEntry->hltJet1Match = ((jet1TriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet1TriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
-        outputNtupleEntry->hltJet1PtPassThresholds = ((jet1TriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet1TriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+        outputNtupleEntry->hltJet1PtPassThresholdsL1 = jet1TriggerBitsets.l1PassThresholds.to_ulong();
+        outputNtupleEntry->hltJet1PtPassThresholdsHLT = jet1TriggerBitsets.hltPassThresholds.to_ulong();
 
         // second-leading jet kinematics
         if (jets->size() > 1) {
@@ -267,7 +268,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             // trigger bitsets
             dijet::TriggerBitsets jet2TriggerBitsets = getTriggerBitsetsForJet(1);
             outputNtupleEntry->hltJet2Match = ((jet2TriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet2TriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
-            outputNtupleEntry->hltJet2PtPassThresholds = ((jet2TriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet2TriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+            outputNtupleEntry->hltJet2PtPassThresholdsL1 = jet2TriggerBitsets.l1PassThresholds.to_ulong();
+            outputNtupleEntry->hltJet2PtPassThresholdsHLT = jet2TriggerBitsets.hltPassThresholds.to_ulong();
 
             // leading jet pair kinematics
             outputNtupleEntry->jet12mass = (jet1->p4 + jet2->p4).M();
@@ -278,7 +280,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             // leading jet pair bitsets
             dijet::TriggerBitsets jet12PairTriggerBitsets = getTriggerBitsetsForLeadingJetPair();
             outputNtupleEntry->hltJet12Match = ((jet12PairTriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet12PairTriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
-            outputNtupleEntry->hltJet12PtAvePassThresholds = ((jet12PairTriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet12PairTriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+            outputNtupleEntry->hltJet12PtAvePassThresholdsL1 = jet12PairTriggerBitsets.l1PassThresholds.to_ulong();
+            outputNtupleEntry->hltJet12PtAvePassThresholdsHLT = jet12PairTriggerBitsets.hltPassThresholds.to_ulong();
 
             // matched genJet pair kinematics (MC-only)
             if (jet1MatchedGenJet && jet2MatchedGenJet) {
