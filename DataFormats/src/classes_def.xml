@@ -49,6 +49,11 @@
     <class name="dijet::TriggerObjectCollection"/>
     <class name="edm::Wrapper<dijet::TriggerObjectCollection>"/>
 
+    <class name="dijet::Vertex"/>
+    <class name="edm::Wrapper<dijet::Vertex>"/>
+    <class name="dijet::VertexCollection"/>
+    <class name="edm::Wrapper<dijet::VertexCollection>"/>
+
     <class name="dijet::JetTriggerObjectsMap">
         <field name="transientMap_" transient="true" />
     </class>

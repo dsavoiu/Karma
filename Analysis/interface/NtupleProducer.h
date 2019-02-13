@@ -169,6 +169,9 @@ namespace dijet {
         typename edm::Handle<dijet::Event> dijetEventHandle;
         edm::EDGetTokenT<dijet::Event> dijetEventToken;
 
+        typename edm::Handle<dijet::VertexCollection> dijetVertexCollectionHandle;
+        edm::EDGetTokenT<dijet::VertexCollection> dijetVertexCollectionToken;
+
         typename edm::Handle<dijet::JetCollection> dijetJetCollectionHandle;
         edm::EDGetTokenT<dijet::JetCollection> dijetJetCollectionToken;
 

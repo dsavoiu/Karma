@@ -6,6 +6,7 @@ dijetNtupleProducer = cms.EDProducer(
     cms.PSet(
         # -- input sources
         dijetEventSrc = cms.InputTag("dijetEvents"),
+        dijetVertexCollectionSrc = cms.InputTag("dijetVertices"),
         dijetGeneratorQCDInfoSrc = cms.InputTag("dijetGeneratorQCDInfos"),
         dijetRunSrc = cms.InputTag("dijetEvents"),
         dijetJetCollectionSrc = cms.InputTag("dijetCorrectedJets"),

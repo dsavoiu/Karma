@@ -53,6 +53,7 @@ from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTrig
 from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
 from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
+from DijetAnalysis.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
@@ -80,10 +81,14 @@ process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
 )
 _accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
 
+process.dijetVertices = dijetVertexCollectionProducer.clone()
+_accumulated_output_commands.append("keep *_dijetVertices_*_DIJET")
+
 mainSequence = cms.Sequence(
     process.dijetEvents *
     process.dijetEventHLTFilter *
-    process.dijetTriggerObjects
+    process.dijetTriggerObjects *
+    process.dijetVertices
 );
 
 # uncorrect pat::Jets for JEC

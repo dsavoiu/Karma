@@ -27,6 +27,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
     dijetRunToken = consumes<dijet::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("dijetRunSrc"));
+    dijetVertexCollectionToken = consumes<dijet::VertexCollection>(m_configPSet.getParameter<edm::InputTag>("dijetVertexCollectionSrc"));
     dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
     dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
@@ -126,8 +127,26 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // -- copy event content to ntuple
     outputNtupleEntry->rho     = this->dijetEventHandle->rho;
-    outputNtupleEntry->npv     = this->dijetEventHandle->npv;
-    outputNtupleEntry->npvGood = this->dijetEventHandle->npvGood;
+
+    // write information related to primary vertices
+
+    // TEMPORARY: make PV collection will be standard in newer skims
+    // obtain primary vertex collection (if available)
+    bool hasPVCollection = event.getByToken(this->dijetVertexCollectionToken, this->dijetVertexCollectionHandle);
+    if (hasPVCollection) {
+        // fill from PV collection
+        outputNtupleEntry->npv     = this->dijetVertexCollectionHandle->size();
+        outputNtupleEntry->npvGood = std::count_if(
+            this->dijetVertexCollectionHandle->begin(),
+            this->dijetVertexCollectionHandle->end(),
+            [](const dijet::Vertex& vtx) {return vtx.isGoodOfflineVertex();}
+        );
+    }
+    else {
+        // fill from dijet::Event
+        outputNtupleEntry->npv     = this->dijetEventHandle->npv;
+        outputNtupleEntry->npvGood = this->dijetEventHandle->npvGood;
+    }
 
     // weights
     outputNtupleEntry->weightForStitching = m_weightForStitching;  // TODO: less wasteful way?

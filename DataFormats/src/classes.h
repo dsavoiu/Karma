@@ -69,6 +69,12 @@ namespace {
         dijet::TriggerObjectCollection dict_dijetTriggerObjectCollection;
         edm::Wrapper<dijet::TriggerObjectCollection> dict_edmWrapperDijetTriggerObjectCollection;
 
+        // primary vertices
+        dijet::Vertex dict_dijetVertex;
+        edm::Wrapper<dijet::Vertex> dict_edmWrapperDijetVertex;
+        dijet::VertexCollection dict_dijetVertexCollection;
+        edm::Wrapper<dijet::VertexCollection> dict_edmWrapperDijetVertexCollection;
+
         // jet-trigger association map
         dijet::JetTriggerObjectsMap dict_dijetJetTriggerObjectsMap;
         edm::Wrapper<dijet::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;

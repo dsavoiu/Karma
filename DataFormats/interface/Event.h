@@ -201,6 +201,31 @@ namespace dijet {
     };
     typedef std::vector<dijet::TriggerObject> TriggerObjectCollection;
 
+    /**
+     * reconstruted vertex class
+     */
+    class Vertex {
+      public:
+        dijet::PositionVector3D position;
+        double time = UNDEFINED_DOUBLE;
+
+        double chi2 = 0;
+        double ndof = 0;
+        size_t nTracks = 0;
+
+        bool validity = false;
+
+        bool isFake() const {
+            return (chi2==0 && ndof==0 && nTracks==0);
+        }
+
+        bool isGoodOfflineVertex() const {
+            return (!isFake() && ndof >= 4.0 && std::abs(position.Z()) <= 24.0 && std::abs(position.Rho()) <= 2.0);
+        }
+
+    };
+    typedef std::vector<dijet::Vertex> VertexCollection;
+
     // -- association maps
     typedef edm::AssociationMap<edm::OneToMany<dijet::JetCollection, dijet::TriggerObjectCollection>> JetTriggerObjectsMap;
     typedef std::vector<dijet::JetTriggerObjectsMap> JetTriggerObjectsMaps;

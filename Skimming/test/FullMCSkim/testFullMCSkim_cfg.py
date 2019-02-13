@@ -54,6 +54,7 @@ from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
 from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
 from DijetAnalysis.Skimming.GeneratorQCDInfoProducer_cfi import dijetGeneratorQCDInfoProducer
+from DijetAnalysis.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
 
 from DijetAnalysis.Skimming.GenJetCollectionProducer_cfi import dijetGenJetsAK4, dijetGenJetsAK8
 from DijetAnalysis.Skimming.GenParticleCollectionProducer_cfi import dijetGenParticleCollectionProducer
@@ -89,11 +90,15 @@ process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
 )
 _accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
 
+process.dijetVertices = dijetVertexCollectionProducer.clone()
+_accumulated_output_commands.append("keep *_dijetVertices_*_DIJET")
+
 mainSequence = cms.Sequence(
     process.dijetEvents *
     process.dijetEventHLTFilter *
     process.dijetGeneratorQCDInfos *
-    process.dijetTriggerObjects
+    process.dijetTriggerObjects *
+    process.dijetVertices
 );
 
 # uncorrect pat::Jets for JEC
