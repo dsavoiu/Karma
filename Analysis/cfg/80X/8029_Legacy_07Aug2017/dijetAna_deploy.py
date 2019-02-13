@@ -13,7 +13,7 @@ if __name__ == "__main__":
     #args = parser.parse_args()
 
     _deployer = DijetAnalysisDeployerGC(
-        nick="DijetAna_JetHT_Run2016G-Legacy-07Aug2017-v1_2018-11-13",
+        nick="DijetAna_JetHT_Run2016G-Legacy-07Aug2017-v1_2019-02-04",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/DijetAnalysis/Analysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="_tmpwork",

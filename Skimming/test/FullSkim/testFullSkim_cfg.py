@@ -6,7 +6,8 @@ from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyC
 
 
 # -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))
+#options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))
+options.inputFiles="file://{}".format("/ceph/storage/c/dsavoiu/miniaod-test/data/test_JetHT2016G.root")
 options.isData=1
 options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
 options.edmOut="testFullSkim_out_1000.root"
