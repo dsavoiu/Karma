@@ -149,11 +149,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     }
 
     // weights
-    outputNtupleEntry->weightForStitching = m_weightForStitching;  // TODO: less wasteful way?
+    outputNtupleEntry->weightForStitching = m_weightForStitching;
 
     // -- trigger results
-
-    std::bitset<8*sizeof(unsigned long)> bitsetHLTBits;
+    dijet::TriggerBits bitsetHLTBits;
     // go through all triggers in skim
     for (size_t iBit = 0; iBit < this->dijetEventHandle->hltBits.size(); ++iBit) {
         // if trigger fired
@@ -226,8 +225,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
         // trigger bitsets
         dijet::TriggerBitsets jet1TriggerBitsets = getTriggerBitsetsForJet(0);
-        outputNtupleEntry->hltJet1Match = (jet1TriggerBitsets.hltMatches & jet1TriggerBitsets.l1Matches).to_ulong();
-        outputNtupleEntry->hltJet1PtPassThresholds = (jet1TriggerBitsets.hltPassThresholds & jet1TriggerBitsets.l1PassThresholds).to_ulong();
+        outputNtupleEntry->hltJet1Match = ((jet1TriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet1TriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+        outputNtupleEntry->hltJet1PtPassThresholds = ((jet1TriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet1TriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
 
         // second-leading jet kinematics
         if (jets->size() > 1) {
@@ -267,14 +266,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
             // trigger bitsets
             dijet::TriggerBitsets jet2TriggerBitsets = getTriggerBitsetsForJet(1);
-            outputNtupleEntry->hltJet2Match = (jet2TriggerBitsets.hltMatches & jet2TriggerBitsets.l1Matches).to_ulong();
-            outputNtupleEntry->hltJet2PtPassThresholds = (jet2TriggerBitsets.hltPassThresholds & jet2TriggerBitsets.l1PassThresholds).to_ulong();
+            outputNtupleEntry->hltJet2Match = ((jet2TriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet2TriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+            outputNtupleEntry->hltJet2PtPassThresholds = ((jet2TriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet2TriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
 
             // leading jet pair kinematics
             outputNtupleEntry->jet12mass = (jet1->p4 + jet2->p4).M();
             outputNtupleEntry->jet12ptave = 0.5 * (jet1->p4.pt() + jet2->p4.pt());
             outputNtupleEntry->jet12ystar = 0.5 * (jet1->p4.Rapidity() - jet2->p4.Rapidity());
             outputNtupleEntry->jet12yboost = 0.5 * (jet1->p4.Rapidity() + jet2->p4.Rapidity());
+
+            // leading jet pair bitsets
+            dijet::TriggerBitsets jet12PairTriggerBitsets = getTriggerBitsetsForLeadingJetPair();
+            outputNtupleEntry->hltJet12Match = ((jet12PairTriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet12PairTriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
+            outputNtupleEntry->hltJet12PtAvePassThresholds = ((jet12PairTriggerBitsets.hltPassThresholds | globalCache()->hltZeroThresholdMask_) & (jet12PairTriggerBitsets.l1PassThresholds | globalCache()->l1ZeroThresholdMask_)).to_ulong();
 
             // matched genJet pair kinematics (MC-only)
             if (jet1MatchedGenJet && jet2MatchedGenJet) {
@@ -396,6 +400,14 @@ const dijet::LV* dijet::NtupleProducer::getMatchedGenJet(unsigned int jetIndex) 
 dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForJet(unsigned int jetIndex) {
 
     dijet::TriggerBitsets triggerBitsets;
+    /* explanation of the bitsets in `triggerBitsets`:
+     * Bit                                              will be true iff
+     * ---                                              -----------------
+     * triggerBitsets.hltMatches[hltPathIndex]          jet with index `jetIndex` has a matched HLT object assigned to the HLT path with index `hltPathIndex`
+     * triggerBitsets.l1Matches[hltPathIndex]           jet with index `jetIndex` has a matched L1  object assigned to the HLT path with index `hltPathIndex`
+     * triggerBitsets.hltPassThresholds[hltPathIndex]   there exists an HLT object matched to the jet with index `jetIndex` whose pT is above the HLT threshold configured for the HLT path with index `hltPathIndex`
+     * triggerBitsets.l1PassThresholds[hltPathIndex]    there exists an L1  object matched to the jet with index `jetIndex` whose pT is above the L1  threshold configured for the HLT path with index `hltPathIndex`
+     * */
 
     // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
     const auto& jetMatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
@@ -429,13 +441,122 @@ dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForJet(unsigned in
 
             // set L1 and HLT emulation trigger bits if jet passes preset thresholds
             for (size_t idxInConfig = 0; idxInConfig < globalCache()->hltPaths_.size(); ++idxInConfig) {
-                if (jetMatchedTriggerObject->isHLT() && (this->dijetJetCollectionHandle->at(jetIndex).p4.Pt() >= globalCache()->hltThresholds_[idxInConfig]))
+                if (jetMatchedTriggerObject->isHLT() && (jetMatchedTriggerObject->p4.Pt() >= globalCache()->hltThresholds_[idxInConfig])) {
                     triggerBitsets.hltPassThresholds[idxInConfig] = true;
-                else if (!jetMatchedTriggerObject->isHLT() && (this->dijetJetCollectionHandle->at(jetIndex).p4.Pt() >= globalCache()->l1Thresholds_[idxInConfig]))
+                }
+                else if (!jetMatchedTriggerObject->isHLT() && (jetMatchedTriggerObject->p4.Pt() >= globalCache()->l1Thresholds_[idxInConfig])) {
                     triggerBitsets.l1PassThresholds[idxInConfig] = true;
+                }
             }
         }
     }
+    else {
+        ///std::cout << "Event has NO matches for jet " << jetIndex << std::endl;
+    }
+
+    return triggerBitsets;
+}
+
+
+/**
+ * Helper function to determine if both leading jets have been matched to an HLT trigger path,
+ * and to check if those matches pass the configured thresholds. This is typically needed for
+ * measuring the trigger efficiency of dijet triggers.
+ */
+dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForLeadingJetPair() {
+
+    dijet::TriggerBitsets triggerBitsets;
+    /* explanation of the bitsets in `triggerBitsets`:
+     * Bit                                              will be true iff
+     * ---                                              -----------------
+     * triggerBitsets.hltMatches[hltPathIndex]          jet with indices 0 and 1 each have a matched HLT object assigned to the HLT path with index `hltPathIndex`
+     * triggerBitsets.l1Matches[hltPathIndex]           jet with indices 0 and 1 each have a matched L1  object assigned to the HLT path with index `hltPathIndex`
+     * triggerBitsets.hltPassThresholds[hltPathIndex]   there exists a pair of HLT objects matched to the leading jet pair whose average pT is above the HLT threshold configured for the HLT path with index `hltPathIndex`
+     * triggerBitsets.l1PassThresholds[hltPathIndex]    there exists a pair of L1  objects matched to the leading jet pair whose **individual** pTs are both above the L1 threshold configured for the HLT path with index `hltPathIndex`
+     *
+     * Note the difference between 'hltPassThresholds' and 'l1PassThresholds'!
+     * */
+
+    // return immediately if event has less than 2 jets
+    if (this->dijetJetCollectionHandle->size() < 2)
+        return triggerBitsets;
+
+    // -- obtain the collection of trigger objects matched to leading jet
+    const auto& jet1MatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
+        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, 0)
+    );
+    // -- obtain the collection of trigger objects matched to subleading jet
+    const auto& jet2MatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
+        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, 1)
+    );
+
+    // if there is at least one trigger object match for each jet
+    if ((jet1MatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) && (jet2MatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end())) {
+
+        // loop over all pairs trigger objects matched to the leading jet pair
+        for (const auto& jet1MatchedTriggerObject : jet1MatchedTriggerObjects->val) {
+            for (const auto& jet2MatchedTriggerObject : jet2MatchedTriggerObjects->val) {
+
+                // skip pairs of trigger objects of "mixed" type
+                if (jet1MatchedTriggerObject->isHLT() != jet2MatchedTriggerObject->isHLT())
+                    continue;
+
+                // set L1 and HLT matching trigger bits if jet pair is assigned the corresponding HLT path
+                for (const auto& jet1AssignedPathIdx : jet1MatchedTriggerObject->assignedPathIndices) {
+                    // get the index of trigger in analysis config
+                    const int jet1AssignedPathIdxInConfig = runCache()->triggerPathsIndicesInConfig_[jet1AssignedPathIdx];
+
+                    // skip unrequested trigger paths
+                    if (jet1AssignedPathIdxInConfig < 0)
+                        continue;
+
+                    for (const auto& jet2AssignedPathIdx : jet2MatchedTriggerObject->assignedPathIndices) {
+                        // get the index of trigger in analysis config
+                        const int jet2AssignedPathIdxInConfig = runCache()->triggerPathsIndicesInConfig_[jet2AssignedPathIdx];
+
+                        // skip unrequested trigger paths
+                        if (jet2AssignedPathIdxInConfig < 0)
+                            continue;
+
+                        // skip if objects not matched to the same trigger path
+                        if (jet1AssignedPathIdxInConfig != jet1AssignedPathIdxInConfig)
+                            continue;
+
+                        if ((jet1MatchedTriggerObject->isHLT()) && (jet2MatchedTriggerObject->isHLT())) {
+                            // both matches are HLT trigger objects
+                            triggerBitsets.hltMatches[jet1AssignedPathIdxInConfig] = true;
+                        }
+                        else if ((!jet1MatchedTriggerObject->isHLT()) && (!jet2MatchedTriggerObject->isHLT())) {
+                            // both matches are L1 trigger objects
+                            triggerBitsets.l1Matches[jet1AssignedPathIdxInConfig] = true;
+                        }
+                        // no else, since no pairs of trigger objects of "mixed" type
+                    }
+                }
+
+                // set L1 and HLT emulation trigger bits if jets (jet pair) pass(es) preset thresholds
+                for (size_t idxInConfig = 0; idxInConfig < globalCache()->hltPaths_.size(); ++idxInConfig) {
+
+                    // if HLT objects
+                    if (((jet1MatchedTriggerObject->isHLT()) && (jet2MatchedTriggerObject->isHLT()))) {
+                        // compute average pt on HLT level
+                        const double jet12HLTPtAve = 0.5 * (jet1MatchedTriggerObject->p4.Pt() + jet2MatchedTriggerObject->p4.Pt());
+                        // check threshold and set HLT bit
+                        if (jet12HLTPtAve >= globalCache()->hltThresholds_[idxInConfig])
+                            triggerBitsets.hltPassThresholds[idxInConfig] = true;
+                    }
+                    // else, if L1 objects
+                    else if ((!jet1MatchedTriggerObject->isHLT()) && (!jet2MatchedTriggerObject->isHLT())) {
+                        // check thresholds separately for each L1 object
+                        if ((jet1MatchedTriggerObject->p4.Pt() >= globalCache()->l1Thresholds_[idxInConfig]) && (jet1MatchedTriggerObject->p4.Pt() >= globalCache()->l1Thresholds_[idxInConfig])) {
+                            triggerBitsets.l1PassThresholds[idxInConfig] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     return triggerBitsets;
 }

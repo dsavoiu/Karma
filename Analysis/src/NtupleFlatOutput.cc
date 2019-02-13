@@ -63,6 +63,7 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     m_tree->Branch("hltBits",                                      &m_productForFill->hltBits,                                       "hltBits/L"                                      );
     m_tree->Branch("hltJet1Match",                                 &m_productForFill->hltJet1Match,                                  "hltJet1Match/L"                                 );
     m_tree->Branch("hltJet2Match",                                 &m_productForFill->hltJet2Match,                                  "hltJet2Match/L"                                 );
+    m_tree->Branch("hltJet12Match",                                &m_productForFill->hltJet12Match,                                 "hltJet12Match/L"                                );
     m_tree->Branch("hltJet1PtPassThresholds",                      &m_productForFill->hltJet1PtPassThresholds,                       "hltJet1PtPassThresholds/L"                      );
     m_tree->Branch("hltJet2PtPassThresholds",                      &m_productForFill->hltJet2PtPassThresholds,                       "hltJet2PtPassThresholds/L"                      );
     m_tree->Branch("hltJet12PtAvePassThresholds",                  &m_productForFill->hltJet12PtAvePassThresholds,                   "hltJet12PtAvePassThresholds/L"                  );

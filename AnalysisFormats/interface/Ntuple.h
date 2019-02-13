@@ -60,6 +60,7 @@ namespace dijet {
         unsigned long hltBits;
         unsigned long hltJet1Match;
         unsigned long hltJet2Match;
+        unsigned long hltJet12Match;
         unsigned long hltJet1PtPassThresholds;
         unsigned long hltJet2PtPassThresholds;
         unsigned long hltJet12PtAvePassThresholds;

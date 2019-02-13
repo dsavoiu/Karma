@@ -39,6 +39,9 @@
 //
 namespace dijet {
 
+    // alias for representing an array of booleans, one for each trigger path
+    typedef std::bitset<8*sizeof(unsigned long)> TriggerBits;
+
     // -- helper objects
 
     struct HLTAssignment {
@@ -53,10 +56,10 @@ namespace dijet {
      * whether these matches pass the configured thresholds.
      */
     struct TriggerBitsets {
-        std::bitset<8*sizeof(unsigned long)> hltMatches;
-        std::bitset<8*sizeof(unsigned long)> hltPassThresholds;
-        std::bitset<8*sizeof(unsigned long)> l1Matches;
-        std::bitset<8*sizeof(unsigned long)> l1PassThresholds;
+        dijet::TriggerBits hltMatches;
+        dijet::TriggerBits hltPassThresholds;
+        dijet::TriggerBits l1Matches;
+        dijet::TriggerBits l1PassThresholds;
     };
 
     // -- caches
@@ -78,10 +81,13 @@ namespace dijet {
 
             // create list of requested HLT path names
             const auto& hltPathsCfg = pSet_.getParameter<std::vector<edm::ParameterSet>>("hltPaths");
-            for (const auto& hltPathCfg : hltPathsCfg) {
+            for (size_t iPath = 0; iPath < hltPathsCfg.size(); ++iPath) {
+                const auto& hltPathCfg = hltPathsCfg[iPath];
                 hltPaths_.push_back(hltPathCfg.getParameter<std::string>("name"));
                 l1Thresholds_.push_back(hltPathCfg.getParameter<double>("l1Threshold"));
                 hltThresholds_.push_back(hltPathCfg.getParameter<double>("hltThreshold"));
+                hltZeroThresholdMask_[iPath] = (hltPathCfg.getParameter<double>("hltThreshold") == 0);
+                l1ZeroThresholdMask_[iPath] = (hltPathCfg.getParameter<double>("l1Threshold") == 0);
             }
 
             // throw if number of configured paths exceeds size of TTree branch used to store them
@@ -103,6 +109,9 @@ namespace dijet {
         std::vector<std::string> hltPaths_;
         std::vector<double> hltThresholds_;
         std::vector<double> l1Thresholds_;
+        // bit *i* is set iff non-zero threshold configured for path with index *i*
+        dijet::TriggerBits hltZeroThresholdMask_;
+        dijet::TriggerBits l1ZeroThresholdMask_;
 
         std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
         std::unique_ptr<JetIDProvider> jetIDProvider_;
@@ -156,6 +165,7 @@ namespace dijet {
         dijet::HLTAssignment getHLTAssignment(unsigned int jetIndex);
         const dijet::LV* getMatchedGenJet(unsigned int jetIndex);
         dijet::TriggerBitsets getTriggerBitsetsForJet(unsigned int jetIndex);
+        dijet::TriggerBitsets getTriggerBitsetsForLeadingJetPair();
 
         // ----------member data ---------------------------
 
