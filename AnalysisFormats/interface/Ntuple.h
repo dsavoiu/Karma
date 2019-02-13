@@ -87,6 +87,8 @@ namespace dijet {
         int jet2HadronFlavor = -999;
 
         // weights
+        double generatorWeight = 1.0;
+        double generatorWeightProduct = 1.0;
         double weightForStitching = 1.0;
 
         // GenJets

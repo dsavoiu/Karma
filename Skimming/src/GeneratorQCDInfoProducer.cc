@@ -37,6 +37,10 @@ void dijet::GeneratorQCDInfoProducer::produce(edm::Event& event, const edm::Even
 
     // -- populate outputs
 
+    outputGeneratorQCDInfo->weight = this->genEventInfoProductHandle->weight();
+    outputGeneratorQCDInfo->weightProduct = this->genEventInfoProductHandle->weightProduct();
+    outputGeneratorQCDInfo->binningValues = this->genEventInfoProductHandle->binningValues();
+
     if (this->genEventInfoProductHandle->hasPDF()) {
         // parton flavors (PDG IDs)
         outputGeneratorQCDInfo->parton1PdgId = this->genEventInfoProductHandle->pdf()->id.first;

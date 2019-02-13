@@ -30,6 +30,12 @@ namespace dijet {
 
     class GeneratorQCDInfo {
       public:
+
+        // -- generator information
+        double weight = UNDEFINED_DOUBLE;
+        double weightProduct = UNDEFINED_DOUBLE;
+        std::vector<double> binningValues;
+
         // -- QCD subprocess information
         int parton1PdgId = -999;
         int parton2PdgId = -999;

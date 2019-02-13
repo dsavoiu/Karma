@@ -109,6 +109,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         m_tree->Branch("jet1HadronFlavor",                             &m_productForFill->jet1HadronFlavor,                              "jet1HadronFlavor/I"                             );
         m_tree->Branch("jet2HadronFlavor",                             &m_productForFill->jet2HadronFlavor,                              "jet2HadronFlavor/I"                             );
         // weights
+        m_tree->Branch("generatorWeight",                              &m_productForFill->generatorWeight,                               "generatorWeight/D"                              );
+        m_tree->Branch("generatorWeightProduct",                       &m_productForFill->generatorWeightProduct,                        "generatorWeightProduct/D"                       );
         m_tree->Branch("weightForStitching",                           &m_productForFill->weightForStitching,                            "weightForStitching/D"                           );
     }
 
