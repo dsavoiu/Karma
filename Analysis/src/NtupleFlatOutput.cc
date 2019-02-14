@@ -7,6 +7,14 @@
 
 #include "DijetAnalysis/Analysis/interface/NtupleFlatOutput.h"
 
+/* helper macro for writing TTree branches
+ *                                                           branch name               product member name/type
+ *                                                                    pointer to product member */
+#define ADD_BRANCH(tree, product, branch, type) tree->Branch(#branch, &product->branch, #branch"/"#type);
+
+// Note: ADD_BRANCH(tree, product, branch, type) expands to:
+//    tree->Branch("branch", &product->branch, "branch/type")
+
 // -- constructor
 dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_configPSet(config) {
 
@@ -37,82 +45,86 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     // initialize a TTree branch for each of the product members
     std::cout << "Wiring TTree branches..." << std::endl;
     /*             branch name                                     pointer to product member                                         product member name/type                         */
-    m_tree->Branch("run",                                          &m_productForFill->run,                                           "run/L"                                          );
-    m_tree->Branch("lumi",                                         &m_productForFill->lumi,                                          "lumi/I"                                         );
-    m_tree->Branch("event",                                        &m_productForFill->event,                                         "event/L"                                        );
-    m_tree->Branch("bx",                                           &m_productForFill->bx,                                            "bx/I"                                           );
-    m_tree->Branch("rho",                                          &m_productForFill->rho,                                           "rho/D"                                          );
-    m_tree->Branch("npv",                                          &m_productForFill->npv,                                           "npv/I"                                          );
-    m_tree->Branch("npvGood",                                      &m_productForFill->npvGood,                                       "npvGood/I"                                      );
-    m_tree->Branch("jet1pt",                                       &m_productForFill->jet1pt,                                        "jet1pt/D"                                       );
-    m_tree->Branch("jet1phi",                                      &m_productForFill->jet1phi,                                       "jet1phi/D"                                      );
-    m_tree->Branch("jet1eta",                                      &m_productForFill->jet1eta,                                       "jet1eta/D"                                      );
-    m_tree->Branch("jet1y",                                        &m_productForFill->jet1y,                                         "jet1y/D"                                        );
-    m_tree->Branch("jet1id",                                       &m_productForFill->jet1id,                                        "jet1id/I"                                       );
-    m_tree->Branch("jet2pt",                                       &m_productForFill->jet2pt,                                        "jet2pt/D"                                       );
-    m_tree->Branch("jet2phi",                                      &m_productForFill->jet2phi,                                       "jet2phi/D"                                      );
-    m_tree->Branch("jet2eta",                                      &m_productForFill->jet2eta,                                       "jet2eta/D"                                      );
-    m_tree->Branch("jet2y",                                        &m_productForFill->jet2y,                                         "jet2y/D"                                        );
-    m_tree->Branch("jet2id",                                       &m_productForFill->jet2id,                                        "jet2id/I"                                       );
-    m_tree->Branch("jet12mass",                                    &m_productForFill->jet12mass,                                     "jet12mass/D"                                    );
-    m_tree->Branch("jet12ptave",                                   &m_productForFill->jet12ptave,                                    "jet12ptave/D"                                   );
-    m_tree->Branch("jet12ystar",                                   &m_productForFill->jet12ystar,                                    "jet12ystar/D"                                   );
-    m_tree->Branch("jet12yboost",                                  &m_productForFill->jet12yboost,                                   "jet12yboost/D"                                  );
-    m_tree->Branch("met",                                          &m_productForFill->met,                                           "met/D"                                          );
-    m_tree->Branch("sumEt",                                        &m_productForFill->sumEt,                                         "sumEt/D"                                        );
-    m_tree->Branch("hltBits",                                      &m_productForFill->hltBits,                                       "hltBits/L"                                      );
-    m_tree->Branch("hltJet1Match",                                 &m_productForFill->hltJet1Match,                                  "hltJet1Match/L"                                 );
-    m_tree->Branch("hltJet2Match",                                 &m_productForFill->hltJet2Match,                                  "hltJet2Match/L"                                 );
-    m_tree->Branch("hltJet12Match",                                &m_productForFill->hltJet12Match,                                 "hltJet12Match/L"                                );
-    m_tree->Branch("hltJet1PtPassThresholds",                      &m_productForFill->hltJet1PtPassThresholds,                       "hltJet1PtPassThresholds/L"                      );
-    m_tree->Branch("hltJet2PtPassThresholds",                      &m_productForFill->hltJet2PtPassThresholds,                       "hltJet2PtPassThresholds/L"                      );
-    m_tree->Branch("hltJet12PtAvePassThresholds",                  &m_productForFill->hltJet12PtAvePassThresholds,                   "hltJet12PtAvePassThresholds/L"                  );
+    ADD_BRANCH(m_tree, m_productForFill, run, L);
+    ADD_BRANCH(m_tree, m_productForFill, lumi, I);
+    ADD_BRANCH(m_tree, m_productForFill, event, L);
+    ADD_BRANCH(m_tree, m_productForFill, bx, I);
+    ADD_BRANCH(m_tree, m_productForFill, rho, D);
+    ADD_BRANCH(m_tree, m_productForFill, npv, I);
+    ADD_BRANCH(m_tree, m_productForFill, npvGood, I);
+    ADD_BRANCH(m_tree, m_productForFill, jet1pt, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1phi, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1eta, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1y, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1id, I);
+    ADD_BRANCH(m_tree, m_productForFill, jet2pt, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2phi, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2eta, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2y, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2id, I);
+    ADD_BRANCH(m_tree, m_productForFill, jet12mass, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet12ptave, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet12ystar, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet12yboost, D);
+    ADD_BRANCH(m_tree, m_productForFill, met, D);
+    ADD_BRANCH(m_tree, m_productForFill, sumEt, D);
+    ADD_BRANCH(m_tree, m_productForFill, hltBits, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet1Match, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet2Match, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet12Match, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet1PtPassThresholdsL1, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet1PtPassThresholdsHLT, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet2PtPassThresholdsL1, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet2PtPassThresholdsHLT, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet12PtAvePassThresholdsL1, L);
+    ADD_BRANCH(m_tree, m_productForFill, hltJet12PtAvePassThresholdsHLT, L);
     // PF energy fractions
-    m_tree->Branch("jet1NeutralHadronFraction",                    &m_productForFill->jet1NeutralHadronFraction,                     "jet1NeutralHadronFraction/D"                    );
-    m_tree->Branch("jet1ChargedHadronFraction",                    &m_productForFill->jet1ChargedHadronFraction,                     "jet1ChargedHadronFraction/D"                    );
-    m_tree->Branch("jet1MuonFraction",                             &m_productForFill->jet1MuonFraction,                              "jet1MuonFraction/D"                             );
-    m_tree->Branch("jet1PhotonFraction",                           &m_productForFill->jet1PhotonFraction,                            "jet1PhotonFraction/D"                           );
-    m_tree->Branch("jet1ElectronFraction",                         &m_productForFill->jet1ElectronFraction,                          "jet1ElectronFraction/D"                         );
-    m_tree->Branch("jet1HFHadronFraction",                         &m_productForFill->jet1HFHadronFraction,                          "jet1HFHadronFraction/D"                         );
-    m_tree->Branch("jet1HFEMFraction",                             &m_productForFill->jet1HFEMFraction,                              "jet1HFEMFraction/D"                             );
-    m_tree->Branch("jet2NeutralHadronFraction",                    &m_productForFill->jet2NeutralHadronFraction,                     "jet2NeutralHadronFraction/D"                    );
-    m_tree->Branch("jet2ChargedHadronFraction",                    &m_productForFill->jet2ChargedHadronFraction,                     "jet2ChargedHadronFraction/D"                    );
-    m_tree->Branch("jet2MuonFraction",                             &m_productForFill->jet2MuonFraction,                              "jet2MuonFraction/D"                             );
-    m_tree->Branch("jet2PhotonFraction",                           &m_productForFill->jet2PhotonFraction,                            "jet2PhotonFraction/D"                           );
-    m_tree->Branch("jet2ElectronFraction",                         &m_productForFill->jet2ElectronFraction,                          "jet2ElectronFraction/D"                         );
-    m_tree->Branch("jet2HFHadronFraction",                         &m_productForFill->jet2HFHadronFraction,                          "jet2HFHadronFraction/D"                         );
-    m_tree->Branch("jet2HFEMFraction",                             &m_productForFill->jet2HFEMFraction,                              "jet2HFEMFraction/D"                             );
+    ADD_BRANCH(m_tree, m_productForFill, jet1NeutralHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1ChargedHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1MuonFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1PhotonFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1ElectronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1HFHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet1HFEMFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2NeutralHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2ChargedHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2MuonFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2PhotonFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2ElectronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2HFHadronFraction, D);
+    ADD_BRANCH(m_tree, m_productForFill, jet2HFEMFraction, D);
 
     // MC
     if (!m_isData) {
-        m_tree->Branch("jet1MatchedGenJetPt",                          &m_productForFill->jet1MatchedGenJetPt,                           "jet1MatchedGenJetPt/D"                          );
-        m_tree->Branch("jet1MatchedGenJetPhi",                         &m_productForFill->jet1MatchedGenJetPhi,                          "jet1MatchedGenJetPhi/D"                         );
-        m_tree->Branch("jet1MatchedGenJetEta",                         &m_productForFill->jet1MatchedGenJetEta,                          "jet1MatchedGenJetEta/D"                         );
-        m_tree->Branch("jet1MatchedGenJetY",                           &m_productForFill->jet1MatchedGenJetY,                            "jet1MatchedGenJetY/D"                           );
-        m_tree->Branch("jet2MatchedGenJetPt",                          &m_productForFill->jet2MatchedGenJetPt,                           "jet2MatchedGenJetPt/D"                          );
-        m_tree->Branch("jet2MatchedGenJetPhi",                         &m_productForFill->jet2MatchedGenJetPhi,                          "jet2MatchedGenJetPhi/D"                         );
-        m_tree->Branch("jet2MatchedGenJetEta",                         &m_productForFill->jet2MatchedGenJetEta,                          "jet2MatchedGenJetEta/D"                         );
-        m_tree->Branch("jet2MatchedGenJetY",                           &m_productForFill->jet2MatchedGenJetY,                            "jet2MatchedGenJetY/D"                           );
-        m_tree->Branch("jet12MatchedGenJetPairMass",                   &m_productForFill->jet12MatchedGenJetPairMass,                    "jet12MatchedGenJetPairMass/D"                   );
-        m_tree->Branch("jet12MatchedGenJetPairPtAve",                  &m_productForFill->jet12MatchedGenJetPairPtAve,                   "jet12MatchedGenJetPairPtAve/D"                  );
-        m_tree->Branch("jet12MatchedGenJetPairYStar",                  &m_productForFill->jet12MatchedGenJetPairYStar,                   "jet12MatchedGenJetPairYStar/D"                  );
-        m_tree->Branch("jet12MatchedGenJetPairYBoost",                 &m_productForFill->jet12MatchedGenJetPairYBoost,                  "jet12MatchedGenJetPairYBoost/D"                 );
+        // gen jets (matched to reco)
+        ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPt, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPhi, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetEta, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetY, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet2MatchedGenJetPt, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet2MatchedGenJetPhi, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet2MatchedGenJetEta, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet2MatchedGenJetY, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairMass, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairPtAve, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairYStar, D);
+        ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairYBoost, D);
         // QCD subprocess info
-        m_tree->Branch("incomingParton1Flavor",                        &m_productForFill->incomingParton1Flavor,                         "incomingParton1Flavor/I"                        );
-        m_tree->Branch("incomingParton2Flavor",                        &m_productForFill->incomingParton2Flavor,                         "incomingParton2Flavor/I"                        );
-        m_tree->Branch("incomingParton1x",                             &m_productForFill->incomingParton1x,                              "incomingParton1x/D"                             );
-        m_tree->Branch("incomingParton2x",                             &m_productForFill->incomingParton2x,                              "incomingParton2x/D"                             );
-        m_tree->Branch("alphaQCD",                                     &m_productForFill->alphaQCD,                                      "alphaQCD/D"                                     );
-        m_tree->Branch("scalePDF",                                     &m_productForFill->scalePDF,                                      "scalePDF/D"                                     );
+        ADD_BRANCH(m_tree, m_productForFill, incomingParton1Flavor, I);
+        ADD_BRANCH(m_tree, m_productForFill, incomingParton2Flavor, I);
+        ADD_BRANCH(m_tree, m_productForFill, incomingParton1x, D);
+        ADD_BRANCH(m_tree, m_productForFill, incomingParton2x, D);
+        ADD_BRANCH(m_tree, m_productForFill, alphaQCD, D);
+        ADD_BRANCH(m_tree, m_productForFill, scalePDF, D);
         // flavor
-        m_tree->Branch("jet1PartonFlavor",                             &m_productForFill->jet1PartonFlavor,                              "jet1PartonFlavor/I"                             );
-        m_tree->Branch("jet2PartonFlavor",                             &m_productForFill->jet2PartonFlavor,                              "jet2PartonFlavor/I"                             );
-        m_tree->Branch("jet1HadronFlavor",                             &m_productForFill->jet1HadronFlavor,                              "jet1HadronFlavor/I"                             );
-        m_tree->Branch("jet2HadronFlavor",                             &m_productForFill->jet2HadronFlavor,                              "jet2HadronFlavor/I"                             );
+        ADD_BRANCH(m_tree, m_productForFill, jet1PartonFlavor, I);
+        ADD_BRANCH(m_tree, m_productForFill, jet2PartonFlavor, I);
+        ADD_BRANCH(m_tree, m_productForFill, jet1HadronFlavor, I);
+        ADD_BRANCH(m_tree, m_productForFill, jet2HadronFlavor, I);
         // weights
-        m_tree->Branch("generatorWeight",                              &m_productForFill->generatorWeight,                               "generatorWeight/D"                              );
-        m_tree->Branch("generatorWeightProduct",                       &m_productForFill->generatorWeightProduct,                        "generatorWeightProduct/D"                       );
-        m_tree->Branch("weightForStitching",                           &m_productForFill->weightForStitching,                            "weightForStitching/D"                           );
+        ADD_BRANCH(m_tree, m_productForFill, generatorWeight, D);
+        ADD_BRANCH(m_tree, m_productForFill, generatorWeightProduct, D);
+        ADD_BRANCH(m_tree, m_productForFill, weightForStitching, D);
     }
 
     std::cout << "Done wiring TTree branches" << std::endl;
