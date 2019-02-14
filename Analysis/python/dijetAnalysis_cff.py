@@ -141,6 +141,10 @@ class DijetAnalysis:
                 #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
                 isData = cms.bool(self._is_data),
+                npuMeanFile = "{}/src/DijetAnalysis/Analysis/data/pileup/{YEAR}/npumean.txt".format(
+                    os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                ),
             )
         )
 

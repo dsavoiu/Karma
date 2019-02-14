@@ -18,6 +18,7 @@ dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet
 
     // -- declare which collections are consumed and create tokens
     pileupDensityToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("pileupDensitySrc"));
+    pileupSummaryInfosToken = consumes<edm::View<PileupSummaryInfo>>(m_configPSet.getParameter<edm::InputTag>("pileupSummaryInfoSrc"));
     triggerResultsToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("triggerResultsSrc"));
     //triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesSrc"));
     primaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("primaryVerticesSrc"));
@@ -175,15 +176,29 @@ void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     obtained &= event.getByToken(this->primaryVerticesToken, this->primaryVerticesHandle);
     obtained &= event.getByToken(this->goodPrimaryVerticesToken, this->goodPrimaryVerticesHandle);
 
+    // MC-specific products
+    if (!globalCache()->isData_) {
+        obtained &= event.getByToken(this->pileupSummaryInfosToken, this->pileupSummaryInfosHandle);
+    }
+
     assert(obtained);  // raise if one collection could not be obtained
 
     // -- populate outputs
-
 
     // pileup density (rho)
     outputEvent->rho = *this->pileupDensityHandle;
     outputEvent->npv = this->primaryVerticesHandle->size();
     outputEvent->npvGood = this->goodPrimaryVerticesHandle->size();
+
+    // pileup summary informations (nPU, nPUTrue, etc.)
+    if (!globalCache()->isData_) {
+        for (const auto& pileupSummaryInfo : (*this->pileupSummaryInfosHandle)) {
+            if (pileupSummaryInfo.getBunchCrossing() == 0) {
+                outputEvent->nPU = pileupSummaryInfo.getPU_NumInteractions();
+                outputEvent->nPUTrue = pileupSummaryInfo.getTrueNumInteractions();
+            }
+        }
+    }
 
     // -- trigger decisions (bits) and prescales
     bool hltChanged(true);

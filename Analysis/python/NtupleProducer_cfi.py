@@ -18,6 +18,9 @@ dijetNtupleProducer = cms.EDProducer(
         # -- other configuration
 
         #triggerEfficienciesFile = cms.string("trigger_efficiencies.root"),
+        npuMeanFile = cms.string("npumean.txt"),
+        minBiasCrossSection = cms.double(69.2),  # in mb
+
         weightForStitching = cms.double(1.0),
 
         #: vector of PSets, one for each trigger path to consider

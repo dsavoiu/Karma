@@ -25,6 +25,16 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     m_isData = m_configPSet.getParameter<bool>("isData");
     m_weightForStitching = m_configPSet.getParameter<double>("weightForStitching");
 
+    // load external file to get `nPUMean` in data
+    if (m_isData) {
+        m_npuMeanProvider = std::unique_ptr<NPUMeanProvider>(
+            new NPUMeanProvider(
+                m_configPSet.getParameter<std::string>("npuMeanFile"),
+                m_configPSet.getParameter<double>("minBiasCrossSection")
+            )
+        );
+    }
+
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
     dijetRunToken = consumes<dijet::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("dijetRunSrc"));
@@ -131,6 +141,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // -- copy event content to ntuple
     outputNtupleEntry->rho     = this->dijetEventHandle->rho;
+    if (m_isData) {
+        // nPUMean estimate in data, taken from external file
+        if (m_npuMeanProvider) {
+            outputNtupleEntry->nPUMean = m_npuMeanProvider->getNPUMean(
+                outputNtupleEntry->run,
+                outputNtupleEntry->lumi
+            );
+        }
+    }
+    else {
+        outputNtupleEntry->nPU     = this->dijetEventHandle->nPU;
+        outputNtupleEntry->nPUMean = this->dijetEventHandle->nPUTrue;
+    }
 
     // write information related to primary vertices
 

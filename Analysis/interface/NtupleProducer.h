@@ -20,6 +20,7 @@
 
 #include "DijetAnalysis/Core/interface/Caches.h"
 #include "DijetAnalysis/Core/interface/TriggerEfficienciesProvider.h"
+#include "DijetAnalysis/Core/interface/NPUMeanProvider.h"
 #include "DijetAnalysis/Core/interface/JetIDProvider.h"
 
 // -- output data formats
@@ -174,6 +175,7 @@ namespace dijet {
         double m_weightForStitching;
 
         /// std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
+        std::unique_ptr<NPUMeanProvider> m_npuMeanProvider;
 
         // -- handles and tokens
         typename edm::Handle<dijet::Event> dijetEventHandle;

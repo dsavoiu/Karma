@@ -12,8 +12,10 @@ namespace dijet {
         int lumi = -1;
         long event = -1;
         int bx = -1;
-        // pileup density
-        double rho = UNDEFINED_DOUBLE;
+        // pileup-related
+        double rho = UNDEFINED_DOUBLE;      // PU density
+        double nPUMean = UNDEFINED_DOUBLE;  // true (MC) or estimated (DATA) mean of Poisson distribution of `nPU`
+
         // number of primary vertices
         int npv = -1;
         int npvGood = -1;
@@ -75,6 +77,9 @@ namespace dijet {
         /// unsigned int jet2HLTNumMatchedTriggerObjects = 0;
 
         // -- MC-specific
+
+        // pileup truth info
+        int nPU = -1;
 
         // qcd subprocess
         int incomingParton1Flavor = -999;

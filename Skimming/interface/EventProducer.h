@@ -33,6 +33,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 
 
@@ -48,7 +49,7 @@ namespace dijet {
     class GlobalCache : public dijet::CacheBase {
 
       public:
-        GlobalCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet), hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
+        GlobalCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet), isData_(pSet.getParameter<bool>("isData")), hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
 
             // create the regex objects for matching HLTtrigger names
             const std::vector<std::string>& hltRegexes = pSet_.getParameter<std::vector<std::string>>("hltRegexes");
@@ -59,6 +60,7 @@ namespace dijet {
 
         };
 
+        bool isData_;
         std::string hltProcessName_;  // name of the process that producer the trigger path information
 
         std::vector<boost::regex> hltPathRegexes_;  // list of pre-compiled regular expressions that 'interesting' trigger paths are required to match
@@ -172,6 +174,9 @@ namespace dijet {
 
         typename edm::Handle<double> pileupDensityHandle;
         edm::EDGetTokenT<double> pileupDensityToken;
+
+        typename edm::Handle<edm::View<PileupSummaryInfo>> pileupSummaryInfosHandle;
+        edm::EDGetTokenT<edm::View<PileupSummaryInfo>> pileupSummaryInfosToken;
 
         typename edm::Handle<edm::View<reco::Vertex>> primaryVerticesHandle;
         edm::EDGetTokenT<edm::View<reco::Vertex>> primaryVerticesToken;

@@ -52,6 +52,7 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     ADD_BRANCH(m_tree, m_productForFill, rho, D);
     ADD_BRANCH(m_tree, m_productForFill, npv, I);
     ADD_BRANCH(m_tree, m_productForFill, npvGood, I);
+    ADD_BRANCH(m_tree, m_productForFill, nPUMean, D);
     ADD_BRANCH(m_tree, m_productForFill, jet1pt, D);
     ADD_BRANCH(m_tree, m_productForFill, jet1phi, D);
     ADD_BRANCH(m_tree, m_productForFill, jet1eta, D);
@@ -96,6 +97,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
 
     // MC
     if (!m_isData) {
+        // number of pile-up interactions
+        ADD_BRANCH(m_tree, m_productForFill, nPU, I);
         // gen jets (not matched to reco)
         ADD_BRANCH(m_tree, m_productForFill, genJet1Pt, D);
         ADD_BRANCH(m_tree, m_productForFill, genJet1Phi, D);

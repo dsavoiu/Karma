@@ -16,7 +16,11 @@ namespace dijet {
         // -- event metadata
         double rho = UNDEFINED_DOUBLE;  // pileup density
         double npv = -1;                // number of primary vertices
-        double npvGood = -1;                // number of 'good' primary vertices
+        double npvGood = -1;            // number of 'good' primary vertices
+
+        // -- pileup-related
+        int nPU = -1;                       // # of interactions in event (including pile-up mixing)
+        double nPUTrue = UNDEFINED_DOUBLE;  // mean of Poisson distribution from which nPU is sampled
 
         // -- trigger decisions
         std::vector<bool> hltBits;

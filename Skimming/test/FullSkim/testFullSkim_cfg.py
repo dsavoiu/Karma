@@ -64,7 +64,7 @@ process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
     ),  # ndof >= 4, rho <= 2
 )
 
-process.dijetEvents = dijetEventProducer.clone(
+process.dijetEvents = dijetEventProducer(isData=options.isData).clone(
     goodPrimaryVerticesSrc = cms.InputTag("goodOfflinePrimaryVertices"),
 )
 _accumulated_output_commands.append("keep *_dijetEvents_*_DIJET")
