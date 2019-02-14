@@ -54,7 +54,7 @@ dijetNtupleProducer = cms.EDProducer(
             cms.PSet(name=cms.string("HLT_AK8PFJet500"),    hltThreshold=cms.double(500), l1Threshold=cms.double(170)),
             #
             cms.PSet(name=cms.string("HLT_DiPFJetAve40"),   hltThreshold=cms.double(40),  l1Threshold=cms.double(0)),
-            cms.PSet(name=cms.string("HLT_DiPFJetAve60"),   hltThreshold=cms.double(60),  l1Threshold=cms.double(35)),
+            cms.PSet(name=cms.string("HLT_DiPFJetAve60"),   hltThreshold=cms.double(60),  l1Threshold=cms.double(0)),
             cms.PSet(name=cms.string("HLT_DiPFJetAve80"),   hltThreshold=cms.double(80),  l1Threshold=cms.double(60)),
             cms.PSet(name=cms.string("HLT_DiPFJetAve140"),  hltThreshold=cms.double(140), l1Threshold=cms.double(90)),
             cms.PSet(name=cms.string("HLT_DiPFJetAve200"),  hltThreshold=cms.double(200), l1Threshold=cms.double(120)),
