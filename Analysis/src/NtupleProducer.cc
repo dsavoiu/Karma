@@ -10,7 +10,8 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     // -- register products
     produces<dijet::NtupleEntry>();
 
-    /// // -- process configuration
+    // -- process configuration
+
     /// m_triggerEfficienciesProvider = std::unique_ptr<TriggerEfficienciesProvider>(
     ///     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
     /// );
@@ -32,6 +33,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
     dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
     if (!m_isData) {
+        dijetGenJetCollectionToken = consumes<dijet::LVCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenJetCollectionSrc"));
         dijetGeneratorQCDInfoToken = consumes<dijet::GeneratorQCDInfo>(m_configPSet.getParameter<edm::InputTag>("dijetGeneratorQCDInfoSrc"));
         dijetJetGenJetMapToken = consumes<dijet::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetGenJetMapSrc"));
         dijetGenParticleCollectionToken = consumes<dijet::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenParticleCollectionSrc"));
@@ -110,6 +112,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         obtained &= event.getByToken(this->dijetGeneratorQCDInfoToken, this->dijetGeneratorQCDInfoHandle);
         // genParticle collection
         obtained &= event.getByToken(this->dijetGenParticleCollectionToken, this->dijetGenParticleCollectionHandle);
+        // gen jet collection
+        obtained &= event.getByToken(this->dijetGenJetCollectionToken, this->dijetGenJetCollectionHandle);
         // jet genJet map
         obtained &= event.getByToken(this->dijetJetGenJetMapToken, this->dijetJetGenJetMapHandle);
     }
@@ -184,6 +188,32 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->incomingParton2x = this->dijetGeneratorQCDInfoHandle->parton2x;
         outputNtupleEntry->scalePDF = this->dijetGeneratorQCDInfoHandle->scalePDF;
         outputNtupleEntry->alphaQCD = this->dijetGeneratorQCDInfoHandle->alphaQCD;
+
+        // gen jets
+        const auto& genJets = this->dijetGenJetCollectionHandle;  // convenience
+        if (genJets->size() > 0) {
+            const dijet::LV* genJet1 = &genJets->at(0);
+
+            outputNtupleEntry->genJet1Pt = genJet1->p4.pt();
+            outputNtupleEntry->genJet1Phi = genJet1->p4.phi();
+            outputNtupleEntry->genJet1Eta = genJet1->p4.eta();
+            outputNtupleEntry->genJet1Y = genJet1->p4.Rapidity();
+
+            if (genJets->size() > 1) {
+                const dijet::LV* genJet2 = &genJets->at(1);
+
+                outputNtupleEntry->genJet2Pt = genJet2->p4.pt();
+                outputNtupleEntry->genJet2Phi = genJet2->p4.phi();
+                outputNtupleEntry->genJet2Eta = genJet2->p4.eta();
+                outputNtupleEntry->genJet2Y = genJet2->p4.Rapidity();
+
+                // leading gen jet pair
+                outputNtupleEntry->genJet12Mass = (genJet1->p4 + genJet2->p4).M();
+                outputNtupleEntry->genJet12PtAve = 0.5 * (genJet1->p4.pt() + genJet2->p4.pt());
+                outputNtupleEntry->genJet12YStar = 0.5 * (genJet1->p4.Rapidity() - genJet2->p4.Rapidity());
+                outputNtupleEntry->genJet12YBoost = 0.5 * (genJet1->p4.Rapidity() + genJet2->p4.Rapidity());
+            }
+        }
     }
 
     const auto& jets = this->dijetJetCollectionHandle;  // convenience

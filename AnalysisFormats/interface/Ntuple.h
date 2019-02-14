@@ -95,7 +95,24 @@ namespace dijet {
         double generatorWeightProduct = 1.0;
         double weightForStitching = 1.0;
 
-        // GenJets
+        // leading GenJets (unmatched to reco)
+        double genJet1Pt = UNDEFINED_DOUBLE;
+        double genJet1Eta = UNDEFINED_DOUBLE;
+        double genJet1Y = UNDEFINED_DOUBLE;
+        double genJet1Phi = UNDEFINED_DOUBLE;
+
+        double genJet2Pt = UNDEFINED_DOUBLE;
+        double genJet2Eta = UNDEFINED_DOUBLE;
+        double genJet2Y = UNDEFINED_DOUBLE;
+        double genJet2Phi = UNDEFINED_DOUBLE;
+
+        // leading gen jet pair kinematics
+        double genJet12Mass = UNDEFINED_DOUBLE;
+        double genJet12PtAve = UNDEFINED_DOUBLE;
+        double genJet12YStar = UNDEFINED_DOUBLE;
+        double genJet12YBoost = UNDEFINED_DOUBLE;
+
+        // Matched Gen Jets
         double jet1MatchedGenJetPt = UNDEFINED_DOUBLE;
         double jet1MatchedGenJetEta = UNDEFINED_DOUBLE;
         double jet1MatchedGenJetY = UNDEFINED_DOUBLE;

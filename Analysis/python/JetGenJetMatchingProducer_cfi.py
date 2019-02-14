@@ -7,7 +7,7 @@ dijetJetGenJetMatchingProducer = cms.EDProducer(
         # -- input sources
         dijetEventSrc = cms.InputTag("dijetEvents"),
         dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),
-        dijetGenJetSrc = cms.InputTag("dijetGenJets"),
+        dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets"),
 
         # -- other configuration
         maxDeltaR = cms.double(0.2),

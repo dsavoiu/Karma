@@ -96,6 +96,19 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
 
     // MC
     if (!m_isData) {
+        // gen jets (not matched to reco)
+        ADD_BRANCH(m_tree, m_productForFill, genJet1Pt, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet1Phi, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet1Eta, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet1Y, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet2Pt, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet2Phi, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet2Eta, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet2Y, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet12Mass, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet12PtAve, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet12YStar, D);
+        ADD_BRANCH(m_tree, m_productForFill, genJet12YBoost, D);
         // gen jets (matched to reco)
         ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPt, D);
         ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPhi, D);

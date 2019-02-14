@@ -200,6 +200,9 @@ namespace dijet {
         typename edm::Handle<dijet::GeneratorQCDInfo> dijetGeneratorQCDInfoHandle;
         edm::EDGetTokenT<dijet::GeneratorQCDInfo> dijetGeneratorQCDInfoToken;
 
+        typename edm::Handle<dijet::LVCollection> dijetGenJetCollectionHandle;
+        edm::EDGetTokenT<dijet::LVCollection> dijetGenJetCollectionToken;
+
         typename edm::Handle<dijet::Run> dijetRunHandle;
         edm::EDGetTokenT<dijet::Run> dijetRunToken;
 

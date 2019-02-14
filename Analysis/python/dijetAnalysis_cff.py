@@ -132,6 +132,7 @@ class DijetAnalysis:
             dijetNtupleProducer.clone(
                 dijetJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, jet_collection_suffix)),
                 #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),  # no JEC
+                dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets{}".format(jet_algo_name[:3])),
 
                 dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}{}".format(jet_algo_name, jet_collection_suffix)),
                 dijetJetGenJetMapSrc = cms.InputTag("jetGenJetMap{}{}".format(jet_algo_name, jet_collection_suffix)),
