@@ -15,6 +15,8 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
+import scipy.stats as stats
+
 
 __all__ = ['InputROOTFile', 'InputROOT']
 
@@ -45,10 +47,125 @@ class _ROOTObjectFunctions(object):
         return _new_tobject_1
 
     @staticmethod
+    def max_yield_index(yields, efficiencies, eff_threshold):
+        """for each bin, return index of object in `yields` which is maximizes yield, subject to the efficiency remaining above threshold"""
+
+        # `yields` and `efficiencies` must have the same length
+        assert len(yields) == len(efficiencies)
+        # all `yields` and `efficiencies` must have the same number of bins
+        assert all([len(_tobj_yld) == len(yields[0]) for _tobj_yld in yields[1:]])
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(yields[0])
+
+        for _bin_idx in range(len(yields[0])):
+            _max_yield_for_bin = 0
+            _max_yield_obj_idx = -1
+
+            for _obj_index, (_tobj_yld, _tobj_eff) in enumerate(zip(yields, efficiencies)):
+                # skip bins with efficiency below threshold
+                if _tobj_eff[_bin_idx].value < eff_threshold:
+                    continue
+                # keep index of object with maximum yield
+                if _tobj_yld[_bin_idx].value > _max_yield_for_bin:
+                    _max_yield_for_bin = _tobj_yld[_bin_idx].value
+                    _max_yield_obj_idx = _obj_index
+
+            _new_tobject[_bin_idx].value = _max_yield_obj_idx
+            _new_tobject[_bin_idx].error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def max_value_index(tobjects):
+        """for each bin *i*, return index of object in `tobjects` which contains the largest value for bin *i*"""
+
+        # all `tobjects` must have the same number of bins
+        assert all([len(_tobj) == len(tobjects[0]) for _tobj in tobjects[1:]])
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobjects[0])
+
+        for _bin_idx in range(len(tobjects[0])):
+            _max_yield_for_bin = 0
+            _max_yield_obj_idx = -1
+
+            for _obj_index, _tobj in enumerate(tobjects):
+                # keep index of object with maximum yield
+                if _tobj[_bin_idx].value > _max_yield_for_bin:
+                    _max_yield_for_bin = _tobj[_bin_idx].value
+                    _max_yield_obj_idx = _obj_index
+
+            _new_tobject[_bin_idx].value = _max_yield_obj_idx
+            _new_tobject[_bin_idx].error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def select(tobjects, indices):
+        """the content of each bin *i* in the return object is taken from the object whose index in `tobjects` is given by bin *i* in `indices`"""
+        # if indices are outside the range of `tobjects`, the bins are set to zero
+        # all `yields` and `efficiencies` must have the same binning
+        # `yields` and `efficiencies` must have the same length
+        assert len(tobjects) > 0
+        assert len(tobjects[0]) == len(indices)
+        # all `tobjects` must have the same number of bins
+        assert all([len(_tobj) == len(tobjects[0]) for _tobj in tobjects[1:]])
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobjects[0])
+
+        for _i_bin, (_bin_proxy, _obj_idx) in enumerate(zip(_new_tobject, indices)):
+            # range check
+            if _obj_idx.value >= 0 and _obj_idx.value < len(tobjects):
+                _bin_proxy.value = tobjects[int(_obj_idx.value)][_i_bin].value
+                _bin_proxy.error = tobjects[int(_obj_idx.value)][_i_bin].error
+            else:
+                _bin_proxy.value = 0
+                _bin_proxy.error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def mask_lookup_value(tobject, tobject_lookup, lookup_value):
+        """bin *i* in return object is bin *i* in `tobject` if bin *i* in `tobject_lookup` is equal to `lookup_value`"""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+
+        for _bin_proxy, _bin_proxy_lookup in zip(_new_tobject, tobject_lookup):
+            # mask bins where looked up value is different than the reference
+            if _bin_proxy_lookup.value != lookup_value:
+                _bin_proxy.value = 0
+                _bin_proxy.error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def apply_efficiency_correction(tobject, efficiency, threshold=None):
+        """Divide each bin in `tobject` by the corresponding bin in `efficiency`. If `efficiency` is lower than `threshold`, the number of events is set to zero."""
+        assert len(efficiency) == len(tobject)
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
+
+        for _eff, _bin_proxy in zip(efficiency.efficiencies(), _new_tobject):
+            if (_eff <= 0) or (threshold is not None and _eff < threshold):
+                _bin_proxy.value = 0
+                _bin_proxy.error = 0
+            else:
+                _bin_proxy.value /= _eff
+                _bin_proxy.error /= _eff  # should this be done?
+
+        return _new_tobject
+
+    @staticmethod
     def efficiency(tobject_numerator, tobject_denominator):
         """Compute TEfficiency"""
 
         return Efficiency(tobject_numerator, tobject_denominator)
+
+    @staticmethod
+    def efficiency_graph(tobject_numerator, tobject_denominator):
+        """Compute TEfficiency with proper clopper-pearson intervals"""
+
+        _eff = Efficiency(tobject_numerator, tobject_denominator)
+        return asrootpy(_eff.CreateGraph())
 
     @staticmethod
     def project_x(tobject):
@@ -146,6 +263,33 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
+    def max_val_min_err(*tobjects):
+        """binwise 'max' on value followed by a binwise 'min' on error."""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobjects[0], "e")
+
+        _tobj_clones = []
+        for _tobj in tobjects:
+            _tobj_clones.append(_ROOTObjectFunctions._project_or_clone(_tobj, "e"))
+
+        for _bin_proxies in zip(_new_tobject, *_tobj_clones):
+            _maxval = None
+            for _bin_proxy in _bin_proxies[1:]:
+                if _maxval is None or _bin_proxy.value > _maxval:
+                    _maxval = _bin_proxy.value
+                    _minerr = _bin_proxy.error
+                elif _maxval == _bin_proxy.value and _bin_proxy.error < _minerr:
+                    _minerr = _bin_proxy.error
+            _bin_proxies[0].value = _maxval
+            _bin_proxies[0].error = _minerr
+
+        # cleanup
+        for _tobj_clone in _tobj_clones:
+            _tobj_clone.Delete()
+
+        return _new_tobject
+
+    @staticmethod
     def mask_if_less(tobject, tobject_ref):
         """set `tobject` bins and their errors to zero if their content is less than the value in `tobject_ref`"""
 
@@ -153,8 +297,15 @@ class _ROOTObjectFunctions(object):
         _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref, "e")
 
         for _bin_proxy, _bin_proxy_ref in zip(_new_tobject, _new_tobject_ref):
-            if _bin_proxy.value < _bin_proxy_ref.value:
-                _bin_proxy.value, _bin_proxy.error = 0, 0
+            if hasattr(_bin_proxy, 'value'):
+                # for TH1D etc.
+                if _bin_proxy.value < _bin_proxy_ref.value:
+                    _bin_proxy.value, _bin_proxy.error = 0, 0
+            else:
+                # for TGraph etc.
+                if _bin_proxy.y < _bin_proxy_ref.y:
+                    _bin_proxy.y.value = 0
+                    _bin_proxy.y.error_hi, _bin_proxy.y.error_lo = 0, 0
 
         # cleanup
         _new_tobject_ref.Delete()
@@ -256,6 +407,36 @@ class _ROOTObjectFunctions(object):
         """Make value of n-th bin equal to the sum of all bins from n up to and inclufing the last bin (but excluding overflow bins)."""
         #                                     forward  suffix
         return asrootpy(tobject.GetCumulative(False,   uuid.uuid4().get_hex()))
+
+    @staticmethod
+    def bin_differences(tobject):
+        """Make value of n-th bin equal to the difference between the n-th and (n-1)-th bins."""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
+
+        for _bin_proxy, _bin_proxy_1, _bin_proxy_2 in zip(_new_tobject[1:-2], tobject[2:-1], tobject[1:-2]):
+            if _bin_proxy_2.value:
+                _bin_proxy.value = _bin_proxy_1.value - _bin_proxy_2.value
+            else:
+                _bin_proxy.error = 0
+            _bin_proxy.error = 0
+
+        return _new_tobject
+
+    @staticmethod
+    def bin_ratios(tobject):
+        """Make value of n-th bin equal to the ratio between the n-th and (n-1)-th bins."""
+
+        _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
+
+        for _bin_proxy, _bin_proxy_num, _bin_proxy_denom in zip(_new_tobject[1:-2], tobject[2:-1], tobject[1:-2]):
+            if _bin_proxy_denom.value:
+                _bin_proxy.value = _bin_proxy_num.value / _bin_proxy_denom.value
+            else:
+                _bin_proxy.error = 0
+            _bin_proxy.error = 0
+
+        return _new_tobject
 
 
 class InputROOTFile(object):
@@ -387,24 +568,33 @@ class InputROOT(object):
 
     # functions which can be applied to ROOT objects
     functions = {
-        'yerr':                     _ROOTObjectFunctions.yerr,
-        'bin_width':                _ROOTObjectFunctions.bin_width,
-        'project_x':                _ROOTObjectFunctions.project_x,
-        'h':                        _ROOTObjectFunctions.project_x,  # alias
-        'hist':                     _ROOTObjectFunctions.project_x,  # alias
-        'divide':                   _ROOTObjectFunctions.histdivide,
-        'discard_errors':           _ROOTObjectFunctions.discard_errors,
-        'efficiency':               _ROOTObjectFunctions.efficiency,
-        'atleast':                  _ROOTObjectFunctions.atleast,
-        'max':                      _ROOTObjectFunctions.max,
-        'mask_if_less':             _ROOTObjectFunctions.mask_if_less,
-        'threshold':                _ROOTObjectFunctions.threshold,
-        'threshold_by_ref':         _ROOTObjectFunctions.threshold_by_ref,
-        'normalize_x':              _ROOTObjectFunctions.normalize_x,
-        'unfold':                   _ROOTObjectFunctions.unfold,
-        'normalize_to_ref':         _ROOTObjectFunctions.normalize_to_ref,
-        'cumulate':                 _ROOTObjectFunctions.cumulate,
-        'cumulate_reverse':         _ROOTObjectFunctions.cumulate_reverse,
+        'yerr':                                _ROOTObjectFunctions.yerr,
+        'bin_width':                           _ROOTObjectFunctions.bin_width,
+        'project_x':                           _ROOTObjectFunctions.project_x,
+        'h':                                   _ROOTObjectFunctions.project_x,  # alias
+        'hist':                                _ROOTObjectFunctions.project_x,  # alias
+        'divide':                              _ROOTObjectFunctions.histdivide,
+        'discard_errors':                      _ROOTObjectFunctions.discard_errors,
+        'efficiency':                          _ROOTObjectFunctions.efficiency,
+        'efficiency_graph':                    _ROOTObjectFunctions.efficiency_graph,
+        'apply_efficiency_correction':         _ROOTObjectFunctions.apply_efficiency_correction,
+        'atleast':                             _ROOTObjectFunctions.atleast,
+        'max':                                 _ROOTObjectFunctions.max,
+        'max_val_min_err':                     _ROOTObjectFunctions.max_val_min_err,
+        'max_value_index':                     _ROOTObjectFunctions.max_value_index,
+        'max_yield_index':                     _ROOTObjectFunctions.max_yield_index,
+        'mask_if_less':                        _ROOTObjectFunctions.mask_if_less,
+        'mask_lookup_value':                   _ROOTObjectFunctions.mask_lookup_value,
+        'threshold':                           _ROOTObjectFunctions.threshold,
+        'threshold_by_ref':                    _ROOTObjectFunctions.threshold_by_ref,
+        'normalize_x':                         _ROOTObjectFunctions.normalize_x,
+        'unfold':                              _ROOTObjectFunctions.unfold,
+        'normalize_to_ref':                    _ROOTObjectFunctions.normalize_to_ref,
+        'cumulate':                            _ROOTObjectFunctions.cumulate,
+        'cumulate_reverse':                    _ROOTObjectFunctions.cumulate_reverse,
+        'bin_differences':                     _ROOTObjectFunctions.bin_differences,
+        'bin_ratios':                          _ROOTObjectFunctions.bin_ratios,
+        'select':                              _ROOTObjectFunctions.select,
     }
 
     def __init__(self, files_spec=None):
