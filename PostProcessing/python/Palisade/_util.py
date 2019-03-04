@@ -14,19 +14,19 @@ __all__ = ['xs_expression', 'xs_expression_mc', 'FIGURE_TEMPLATES', 'FONTPROPERT
 
 _max_te = 'max(' + ', '.join([
     '"te:{ybys[name]}/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{quantity[name]}"'
-    for _tpi in EXPANSIONS['trigger']
+    for _tpi in EXPANSIONS['trigger_ak4']
     if _tpi['name'] != "all"
 ]) + ')'
 
 _max_yield_99 = 'max(' + ', '.join([
     '"ey:{ybys[name]}/'+_tpi['name']+'/h_{quantity[name]}" * threshold("te:{ybys[name]}/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{quantity[name]}", 0.99)'
-    for _tpi in EXPANSIONS['trigger']
+    for _tpi in EXPANSIONS['trigger_ak4']
     if _tpi['name'] != "all"
 ]) + ')'
 
 _max_te_99 = 'max(' + ', '.join([
     'h("te:{ybys[name]}/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{quantity[name]}") * threshold("te:{ybys[name]}/'+_tpi['name']+'/jet1HLTAssignedPathEfficiency/p_{quantity[name]}", 0.99)'
-    for _tpi in EXPANSIONS['trigger']
+    for _tpi in EXPANSIONS['trigger_ak4']
     if _tpi['name'] != "all"
 ]) + ')'
 
@@ -35,7 +35,7 @@ def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions, te_
     """Return expression for cross section with phase space partitioning choosing trigger path with maximal event yield."""
     # let outer expansion determine ybys slice
     if ybys_dict is None:
-        ybys_dict = dict(name='{ybys[name]}')
+        ybys_dict = dict(name='{ybys[name]}', area='{ybys[area]}')
 
     # get yield for trigger path which maximizes yield
     _max_yield_string = ('max(' +
@@ -67,7 +67,9 @@ def xs_expression(ey_nick, tep_nick, ybys_dict, tp_dict, trigger_expansions, te_
         # divide by the trigger efficiency
         ' / discard_errors("{tep}:{ybys[name]}/{tp[name]}/jet1HLTAssignedPathEfficiency/p_{{quantity[name]}}")'
         # divide by the luminosity
-        ' / ' + str(tp_dict['lumi_ub']/1e6)
+        ' / ' + str(tp_dict['lumi_ub']/1e6) +
+        # divide by the y-star/y-boost bin area (0.5**2)
+        ' / {ybys[area]}'
     ).format(ey=ey_nick, tep=tep_nick, ybys=ybys_dict, tp=tp_dict)
 
 
@@ -82,7 +84,7 @@ def xs_expression_mc(ey_nick, ybys_dict, mc_subsample_expansions, event_number_t
         '((1.0*{mc_subsample[xs]}) / {mc_subsample[n_events]} * '
         'atleast("{ey}:{ybys[name]}/{mc_subsample[name]}/h_{{quantity[name]}}", {en_thres}))'.format(ey=ey_nick, ybys=ybys_dict, mc_subsample=_ms_dict, en_thres=event_number_threshold)
         for _ms_dict in mc_subsample_expansions
-    ]) + ')'
+    ]) + ') / {ybys[area]}'
 
 
 FONTPROPERTIES = dict(
@@ -118,7 +120,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (12, 8),
         'subplots' : [
             {
-                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger_ak4']),
                 'label': _ybys['label'] + r' ($\times$10$^{{{quantity[stagger_factors]['+_ybys['name']+']}}}$)' if _tp['name'] == "HLT_PFJet500" else None,
                 'color': _ybys['color'],
                 'marker': _ybys['marker'],
@@ -127,7 +129,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': True,
             }
-            for _tp in EXPANSIONS['trigger']
+            for _tp in EXPANSIONS['trigger_ak4']
             for _ybys in EXPANSIONS['ybys_narrow']
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
@@ -167,7 +169,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (12, 8),
         'subplots' : [
             {
-                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']),
+                'expression': '10**({quantity[stagger_factors]['+_ybys['name']+']}) * ' + xs_expression('ey', 'te', ybys_dict=_ybys, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger_ak4']),
                 'label': _tp['label'] if _ybys['name'] == EXPANSIONS['ybys_narrow'][1]['name'] else None,
                 'color': _tp['color'],
                 'marker': _tp['marker'],
@@ -176,7 +178,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': True,
             }
-            for _tp in EXPANSIONS['trigger']
+            for _tp in EXPANSIONS['trigger_ak4']
             for _ybys in EXPANSIONS['ybys_narrow']
             if (_tp['name'] != "all") and (_ybys['name'] != "inclusive")
         ] + [
@@ -214,7 +216,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (8, 2.5),
         'subplots' : [
             {
-                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
+                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger_ak4']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
                 'label': "{ybys[label]}" if _tp['name'] == "HLT_PFJet200" else None,
                 'color': "{ybys[color]}",
                 'marker': "{ybys[marker]}",
@@ -223,7 +225,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': False,
             }
-            for _tp in EXPANSIONS['trigger']
+            for _tp in EXPANSIONS['trigger_ak4']
             if (_tp['name'] != "all")
         ],
         'pads' : [
@@ -244,7 +246,7 @@ FIGURE_TEMPLATES = {
         'figsize' : (8, 2.5),
         'subplots' : [
             {
-                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
+                'expression': '(' + xs_expression('ey', 'te', ybys_dict=None, tp_dict=_tp, trigger_expansions=EXPANSIONS['trigger_ak4']) + ')/(' + xs_expression_mc("eymc", None, mc_subsample_expansions=EXPANSIONS['mc_subsample']) + ')',
                 'label': "{ybys[label]}" if _tp['name'] == "HLT_PFJet200" else None,
                 'color': _tp['color'],
                 'marker': _tp['marker'],
@@ -253,7 +255,7 @@ FIGURE_TEMPLATES = {
                 'mask_zero_errors': True,
                 'normalize_to_width': False,
             }
-            for _tp in EXPANSIONS['trigger']
+            for _tp in EXPANSIONS['trigger_ak4']
             if (_tp['name'] != "all")
         ],
         'pads' : [
@@ -377,7 +379,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -404,7 +406,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -457,7 +459,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger_dijet'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -492,7 +494,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -527,7 +529,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -562,7 +564,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -597,7 +599,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {
@@ -632,7 +634,7 @@ FIGURE_TEMPLATES = {
                 'plot_method': 'errorbar',
                 #'mask_zero_errors': True,
             }
-            for _tp in EXPANSIONS['trigger'] if _tp['name'] != "all"
+            for _tp in EXPANSIONS['trigger_ak4'] if _tp['name'] != "all"
         ],
         'pads' : [
             {

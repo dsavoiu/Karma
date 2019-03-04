@@ -43,10 +43,19 @@ EXPANSIONS = {
             }
         },
         {
+            "name": "jet2pt",
+            "label": r"${p_{\mathrm{T}}^{\mathrm{jet2}}}$ /  GeV",
+            "scale": "log",
+            'range' : (60, 4827),
+            'gen_name': "jet2MatchedGenJetPt",
+            'gen_label': r"${p_{\mathrm{T}}^{\mathrm{jet2,gen}}}$ /  GeV",
+        },
+        {
             "name": "jet12ptave",
             "label": r"${\langle p_{\mathrm{T}} \rangle}_{1,2}$ / GeV",
             "scale": "log",
             'range' : (100, 4045),
+            'larger_range' : (100, 25000),
             'xs_range': (5*1e-7, 1e30),
             'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{\langle p_{\mathrm{T}} \rangle}_{1,2}"),
             'gen_name': "jet12MatchedGenJetPairPtAve",
@@ -81,7 +90,8 @@ EXPANSIONS = {
             "label": r"${m_{\mathrm{jj}}}$ / GeV",
             "scale": "log",
             'range' : (200, 9607),
-            'xs_range': (1e-9, 1e10),
+            'larger_range' : (200, 1e5/2),
+            'xs_range': (1e-6, 1e17),
             'xs_label': r"Diff. cross section $\frac{{\mathrm{{d}}^3\sigma}}{{\mathrm{{d}}{{{}}}\,\mathrm{{d}}y_{{\mathrm{{b}}}}\,\mathrm{{d}}y*}}\,\,/\,\,\mathrm{{pb}}\,\,\mathrm{{GeV}}^{{-1}}$".format(r"{m_{\mathrm{jj}}}"),
             'gen_name': "jet12MatchedGenJetPairMass",
             'gen_label': r"${m_{\mathrm{jj}}^{\mathrm{gen}}}$ / GeV",
@@ -93,42 +103,108 @@ EXPANSIONS = {
                 "YB12_YS01": -3,
                 "YB12_YS12": 1,
                 "YB23_YS01": -3,
-                "YB_00_05_YS_00_05": 0,
-                "YB_00_05_YS_05_10": 0,
-                "YB_00_05_YS_10_15": 0,
-                "YB_00_05_YS_15_20": 0,
-                "YB_00_05_YS_20_25": 0,
-                "YB_05_10_YS_00_05": 0,
-                "YB_05_10_YS_05_10": 0,
-                "YB_05_10_YS_10_15": 0,
-                "YB_05_10_YS_15_20": 0,
-                "YB_10_15_YS_00_05": 0,
-                "YB_10_15_YS_05_10": 0,
-                "YB_10_15_YS_10_15": 0,
-                "YB_15_20_YS_00_05": 0,
-                "YB_15_20_YS_05_10": 0,
-                "YB_20_25_YS_00_05": 0,
+                "YB_00_05_YS_00_05": 1*(4-0) + 3*(4-0) - 4,  #4+3+3+3,    # D
+                "YB_00_05_YS_05_10": 1*(4-1) + 3*(4-0) - 4,  #4+3+3+2,    # D
+                "YB_00_05_YS_10_15": 1*(4-2) + 3*(4-0) - 4,  #3+3+3,      # v
+                "YB_00_05_YS_15_20": 1*(4-3) + 3*(4-0) - 4,  #3+3+1,      # v
+                "YB_00_05_YS_20_25": 1*(4-4) + 3*(4-0) - 4,  #-1,         # ^
+                "YB_05_10_YS_00_05": 1*(4-0) + 3*(4-1) - 5,  #4+3+3+1,    # D
+                "YB_05_10_YS_05_10": 1*(4-1) + 3*(4-1) - 5,  #4+3+3+0,    # D
+                "YB_05_10_YS_10_15": 1*(4-2) + 3*(4-1) - 5,  #3+3+2,      # v
+                "YB_05_10_YS_15_20": 1*(4-3) + 3*(4-1) - 5,  #3+3+0,      # v
+                "YB_10_15_YS_00_05": 1*(4-0) + 3*(4-2) - 6,  #1+3,        # s
+                "YB_10_15_YS_05_10": 1*(4-1) + 3*(4-2) - 6,  #1+2,        # s
+                "YB_10_15_YS_10_15": 1*(4-2) + 3*(4-2) - 6,  #0,          # >
+                "YB_15_20_YS_00_05": 1*(4-0) + 3*(4-3) - 6,  #1+1,        # s
+                "YB_15_20_YS_05_10": 1*(4-1) + 3*(4-3) - 6,  #1+0,        # s
+                "YB_20_25_YS_00_05": 1*(4-0) + 3*(4-4) - 4,  #-3,         # o
             }
         },
         {
-            "name": "metOverSumET",
-            "label": r"${E_{\mathrm{T}}^{\mathrm{miss}}}/\sum{|E_{\mathrm{T}}^{\mathrm{miss}}|}$",
+            "name": "jet1y",
+            "label": r"${y^{\mathrm{jet1}}}$",
             "scale": "linear",
-            'range' : (0, 1),
-            'xs_range': None,
-            'xs_label': "Diff. cross section / pb",
-            'gen_name': None,
-            'gen_label': None,
+            'range' : (-3, 3),
+            'gen_name': "jet1MatchedGenJetY",
+            'gen_label': r"$y^{\mathrm{jet1,gen}}$",
+        },
+        {
+            "name": "jet2y",
+            "label": r"${y^{\mathrm{jet2}}}$",
+            "scale": "linear",
+            'range' : (-3, 3),
+            'gen_name': "jet2MatchedGenJetY",
+            'gen_label': r"$y^{\mathrm{jet2,gen}}$",
         },
         {
             "name": "jet1phi",
             "label": r"${\phi^{\mathrm{jet1}}}$",
             "scale": "linear",
-            'range' : (-3.2, 3.2),
+            'range' : (-np.pi, np.pi),
             'xs_range': None,
             'xs_label': "Cross section / pb",
             'gen_name': None,
             'gen_label': None,
+        },
+        {
+            "name": "jet2phi",
+            "label": r"${\phi^{\mathrm{jet2}}}$",
+            "scale": "linear",
+            'range' : (-np.pi, np.pi),
+            'xs_range': None,
+            'xs_label': "Cross section / pb",
+            'gen_name': None,
+            'gen_label': None,
+        },
+        {
+            "name": "ystar",
+            "label": r"${y^{\mathrm{*}}}$",
+            "scale": "linear",
+            'range' : (0, 3),
+        },
+        {
+            "name": "yboost",
+            "label": r"${y_{\mathrm{b}}}$",
+            "scale": "linear",
+            'range' : (0, 3),
+        },
+        {
+            "name": "metOverSumET",
+            "label": r"${E_{\mathrm{T}}^{\mathrm{miss}}}/\sum_i{E_{\mathrm{T}}^{\mathrm{i}}}$",
+            "scale": "linear",
+            'range' : (0, 1),
+            'xs_range': None,
+            'xs_label': "Diff. cross section / pb",
+        },
+        {
+            "name": "npv",
+            "label": r"# of primary vertices $n_{\mathrm{PV}}$",
+            "scale": "linear",
+            'range' : (-0.5, 80.5),
+        },
+        {
+            "name": "npvGood",
+            "label": r"# of good primary vertices $n_{\mathrm{PV,good}}$",
+            "scale": "linear",
+            'range' : (-0.5, 80.5),
+        },
+        {
+            "name": "nPUMean",
+            "label": r"Expected pileup $\mu$",
+            "scale": "linear",
+            'range' : (-0.5, 80.5),
+        },
+        {
+            "name": "jet12DeltaPhi",
+            "label": r"$\Delta\phi_{1,2}$",
+            "scale": "linear",
+            'range' : (0, np.pi),
+        },
+        {
+            "name": "jet12DeltaR",
+            "label": r"$\Delta R_{1,2}$",
+            "scale": "linear",
+            'range' : (0, 8),
         },
     ],
     # phase space regions (in y_boost, y_star)
@@ -185,21 +261,21 @@ EXPANSIONS = {
     ],
     # phase space regions (in y_boost, y_star)
     'ybys_narrow' : [
-        {"name": "YB_00_05_YS_00_05", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#5c15b6", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_00_05_YS_05_10", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#2659a2", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_00_05_YS_10_15", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#139913", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_00_05_YS_15_20", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $1.5 \leq y{{*}} <   2$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$1.5 \leq y{{*}} <   2$", "color": "#c55200", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_00_05_YS_20_25", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $2   \leq y{{*}} < 2.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$2   \leq y{{*}} < 2.5$", "color": "#a11313", "marker": "^", "marker_style": "full"},   # YB01_YS23
-        {"name": "YB_05_10_YS_00_05", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#7959c4", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_05_10_YS_05_10", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#3e98b2", "marker": "D", "marker_style": "full"},   # YB01_YS01
-        {"name": "YB_05_10_YS_10_15", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#51c230", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_05_10_YS_15_20", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $1.5 \leq y{{*}} <   2$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$1.5 \leq y{{*}} <   2$", "color": "#ffa500", "marker": "v", "marker_style": "full"},   # YB01_YS12
-        {"name": "YB_10_15_YS_00_05", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#9983cf", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_10_15_YS_05_10", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#67b4cb", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_10_15_YS_10_15", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#8def56", "marker": ">", "marker_style": "full"},   # YB12_YS12
-        {"name": "YB_15_20_YS_00_05", "label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#c6b2e2", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_15_20_YS_05_10", "label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#a0eaff", "marker": "s", "marker_style": "full"},   # YB12_YS01
-        {"name": "YB_20_25_YS_00_05", "label": r"$2   \leq y_{{\mathrm{{b}}}} < 2.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$2   \leq y_{{\mathrm{{b}}}} < 2.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#fab0ff", "marker": "o", "marker_style": "full"},   # YB23_YS01
+        {"name": "YB_00_05_YS_00_05", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#5c15b6", "marker": "D", "marker_style": "full", "area": 0.25},   # YB01_YS01
+        {"name": "YB_00_05_YS_05_10", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#2659a2", "marker": "D", "marker_style": "full", "area": 0.25},   # YB01_YS01
+        {"name": "YB_00_05_YS_10_15", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#139913", "marker": "v", "marker_style": "full", "area": 0.25},   # YB01_YS12
+        {"name": "YB_00_05_YS_15_20", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $1.5 \leq y{{*}} <   2$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$1.5 \leq y{{*}} <   2$", "color": "#c55200", "marker": "v", "marker_style": "full", "area": 0.25},   # YB01_YS12
+        {"name": "YB_00_05_YS_20_25", "label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$, $2   \leq y{{*}} < 2.5$", "yb_label": r"$0   \leq y_{{\mathrm{{b}}}} < 0.5$", "ys_label": r"$2   \leq y{{*}} < 2.5$", "color": "#a11313", "marker": "^", "marker_style": "full", "area": 0.25},   # YB01_YS23
+        {"name": "YB_05_10_YS_00_05", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#7959c4", "marker": "D", "marker_style": "full", "area": 0.25},   # YB01_YS01
+        {"name": "YB_05_10_YS_05_10", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#3e98b2", "marker": "D", "marker_style": "full", "area": 0.25},   # YB01_YS01
+        {"name": "YB_05_10_YS_10_15", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#51c230", "marker": "v", "marker_style": "full", "area": 0.25},   # YB01_YS12
+        {"name": "YB_05_10_YS_15_20", "label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$, $1.5 \leq y{{*}} <   2$", "yb_label": r"$0.5 \leq y_{{\mathrm{{b}}}} <   1$", "ys_label": r"$1.5 \leq y{{*}} <   2$", "color": "#ffa500", "marker": "v", "marker_style": "full", "area": 0.25},   # YB01_YS12
+        {"name": "YB_10_15_YS_00_05", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#9983cf", "marker": "s", "marker_style": "full", "area": 0.25},   # YB12_YS01
+        {"name": "YB_10_15_YS_05_10", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#67b4cb", "marker": "s", "marker_style": "full", "area": 0.25},   # YB12_YS01
+        {"name": "YB_10_15_YS_10_15", "label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$, $1   \leq y{{*}} < 1.5$", "yb_label": r"$1   \leq y_{{\mathrm{{b}}}} < 1.5$", "ys_label": r"$1   \leq y{{*}} < 1.5$", "color": "#8def56", "marker": ">", "marker_style": "full", "area": 0.25},   # YB12_YS12
+        {"name": "YB_15_20_YS_00_05", "label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#c6b2e2", "marker": "s", "marker_style": "full", "area": 0.25},   # YB12_YS01
+        {"name": "YB_15_20_YS_05_10", "label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$, $0.5 \leq y{{*}} <   1$", "yb_label": r"$1.5 \leq y_{{\mathrm{{b}}}} <   2$", "ys_label": r"$0.5 \leq y{{*}} <   1$", "color": "#a0eaff", "marker": "s", "marker_style": "full", "area": 0.25},   # YB12_YS01
+        {"name": "YB_20_25_YS_00_05", "label": r"$2   \leq y_{{\mathrm{{b}}}} < 2.5$, $0   \leq y{{*}} < 0.5$", "yb_label": r"$2   \leq y_{{\mathrm{{b}}}} < 2.5$", "ys_label": r"$0   \leq y{{*}} < 0.5$", "color": "#fab0ff", "marker": "o", "marker_style": "full", "area": 0.25},   # YB23_YS01
         {
             "name": "inclusive",
             "label": r"inclusive",
@@ -331,7 +407,7 @@ EXPANSIONS = {
             "marker": "o",
             'marker_style': 'full',
             'l1_factor': 10000.0,
-            'lumi_ub': 48714.091,  # Run2016G
+            'lumi_ub': 9742.818,  # Run2016G
         },
         {
             "name": "HLT_AK8PFJet60",
@@ -340,7 +416,7 @@ EXPANSIONS = {
             "marker": "D",
             'marker_style': 'full',
             'l1_factor': 1000.0,
-            'lumi_ub': 123328.102,  # Run2016G
+            'lumi_ub': 61664.051,  # Run2016G
         },
         {
             "name": "HLT_AK8PFJet80",
@@ -349,7 +425,7 @@ EXPANSIONS = {
             "marker": "v",
             'marker_style': 'full',
             'l1_factor': 1000.0,
-            'lumi_ub': 369296.644,  # Run2016G
+            'lumi_ub': 184648.322,  # Run2016G
         },
         {
             "name": "HLT_AK8PFJet140",
@@ -358,7 +434,7 @@ EXPANSIONS = {
             "marker": "^",
             'marker_style': 'full',
             'l1_factor': 1000.0,
-            'lumi_ub': 3618461.972,  # Run2016G
+            'lumi_ub': 1809230.986,  # Run2016G
         },
         {
             "name": "HLT_AK8PFJet200",
@@ -433,7 +509,7 @@ EXPANSIONS = {
             "marker": "o",
             'marker_style': 'full',
             'l1_factor': 10000.0,
-            'lumi_ub': 48714.091,  # Run2016G
+            'lumi_ub': 11311.920,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve60",
@@ -442,7 +518,7 @@ EXPANSIONS = {
             "marker": "D",
             'marker_style': 'full',
             'l1_factor': 1000.0,
-            'lumi_ub': 123328.102,  # Run2016G
+            'lumi_ub': 350986.611,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve80",
@@ -451,7 +527,7 @@ EXPANSIONS = {
             "marker": "v",
             'marker_style': 'full',
             'l1_factor': 1000.0,
-            'lumi_ub': 369296.644,  # Run2016G
+            'lumi_ub': 340824.353,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve140",
@@ -469,7 +545,7 @@ EXPANSIONS = {
             "marker": "s",
             'marker_style': 'full',
             'l1_factor': 100.0,
-            'lumi_ub': 11962959.393,  # Run2016G
+            'lumi_ub': 17873786.697,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve260",
@@ -478,7 +554,7 @@ EXPANSIONS = {
             "marker": ">",
             'marker_style': 'full',
             'l1_factor': 1.0,
-            'lumi_ub': 102345547.894,  # Run2016G
+            'lumi_ub': 107807705.356,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve320",
@@ -487,7 +563,7 @@ EXPANSIONS = {
             "marker": "o",
             'marker_style': 'full',
             'l1_factor': 1.0,
-            'lumi_ub': 310001081.812,  # Run2016G
+            'lumi_ub': 594238641.781,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve400",
@@ -496,7 +572,7 @@ EXPANSIONS = {
             "marker": "x",
             'marker_style': 'empty',
             'l1_factor': 1.0,
-            'lumi_ub': 918960478.743,  # Run2016G
+            'lumi_ub': 1705794763.427,  # Run2016G
         },
         {
             "name": "HLT_DiPFJetAve500",
@@ -505,7 +581,7 @@ EXPANSIONS = {
             "marker": "s",
             'marker_style': 'full',
             'l1_factor': 1.0,
-            'lumi_ub': 7544015569.439,  # Run2016G
+            'lumi_ub': 5736356853.437,  # Run2016G
         },
         {
             "name": "all",
@@ -514,7 +590,7 @@ EXPANSIONS = {
             "marker": "o",
             'marker_style': 'empty',
             'l1_factor': 1.0,
-            'lumi_ub': 7544015569.439,  # Run2016G
+            'lumi_ub': 5736356853.437,  # Run2016G
         },
     ],
     # event yields (2D binnings)
