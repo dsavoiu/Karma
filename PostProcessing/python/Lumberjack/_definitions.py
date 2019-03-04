@@ -3,6 +3,12 @@ import numpy as np
 from ._core import Quantity
 
 
+_QCD_BINNING = [15, 30, 50, 80, 120, 170, 300, 470, 600, 800, 1000, 1400, 1800, 1800, 2400, 3200, 7000]
+_QCD_BINNING_FINE = np.hstack(
+    [np.linspace(lo, hi, 21)[:-1] for lo, hi in zip(_QCD_BINNING[:-1], _QCD_BINNING[1:])]
+        + [_QCD_BINNING[-1]]  # add final bin edge
+)
+
 # specification of quantities
 # NOTE: a 'Define' will be applied to the data frame for every quantity whose name is different from its expression
 QUANTITIES = {
@@ -20,17 +26,34 @@ QUANTITIES = {
             binning=(0, 1)
         ),
 
+        # pileup-related
+        'npv': Quantity(
+            name='npv',
+            expression='npv',
+            binning=np.arange(0, 101)-0.5
+        ),
+        'npvGood': Quantity(
+            name='npvGood',
+            expression='npvGood',
+            binning=np.arange(0, 101)-0.5
+        ),
+        'nPUMean': Quantity(
+            name='nPUMean',
+            expression='nPUMean',
+            binning=np.arange(0, 101)-0.5
+        ),
+
         'metOverSumET': Quantity(
             name='metOverSumET',
             expression='met/sumEt',
-            binning=np.linspace(0, 1, 101)
+            binning=np.linspace(0, 1, 51)
         ),
 
         # "wide" binning with target resolution/bin_width of 0.5
         'jet1pt_wide': Quantity(
             name='jet1pt_wide',
             expression='jet1pt',
-            binning=(60, 80, 106, 137, 174, 215, 264, 321, 384, 461, 539, 631, 731, 845, 966, 1099, 1245, 1407, 1582, 1782, 1977, 2192, 2443, 2681, 2944, 3218, 3518, 3874, 4170, 4827)
+            binning=(60, 100, 122, 147, 175, 207, 243, 284, 329, 380, 437, 499, 569, 646, 732, 827, 931, 1046, 1171, 1307, 1458, 1621, 1806, 2003, 2217, 2453, 2702, 2977, 3249, 3557, 3816, 4045),
         ),
         'jet12mass_wide': Quantity(
             name='jet12mass_wide',
@@ -158,7 +181,35 @@ QUANTITIES = {
         'jet1phi': Quantity(
             name='jet1phi',
             expression='jet1phi',
-            binning=np.linspace(-np.pi, np.pi, 101),
+            binning=np.linspace(-np.pi, np.pi, 41),
+        ),
+        'jet2y': Quantity(
+            name='jet2y',
+            expression='jet2y',
+            binning=[-5, -3.0, -2.853, -2.650, -2.500, -2.322, -2.172, -1.930, -1.653, -1.479, -1.305, -1.044, -0.783, -0.522, -0.261, 0.000, 0.261, 0.522, 0.783, 1.044, 1.305, 1.479, 1.653, 1.930, 2.172, 2.322, 2.500, 2.650, 2.853, 3.0, 5]
+        ),
+        'absjet2y': Quantity(
+            name='absjet2y',
+            expression='abs(jet2y)',
+            binning=[0.000, 0.261, 0.522, 0.783, 1.044, 1.305, 1.479, 1.653, 1.930, 2.172, 2.322, 2.500, 2.650, 2.853, 3.0, 5]
+        ),
+        'jet2phi': Quantity(
+            name='jet2phi',
+            expression='jet2phi',
+            binning=np.linspace(-np.pi, np.pi, 41),
+        ),
+
+        # derived jet quantities
+        'jet12DeltaPhi': Quantity(
+            name='jet12DeltaPhi',
+            #expression='abs(abs(jet1phi-jet2phi)-TMath::Pi())',
+            expression='TMath::Pi() - fabs(fmod(fabs(jet1phi-jet2phi), 2*TMath::Pi()) - TMath::Pi())',
+            binning=np.linspace(0, np.pi, 31),
+        ),
+        'jet12DeltaR': Quantity(
+            name='jet12DeltaR',
+            expression='TMath::Sqrt(TMath::Sq(TMath::Pi() - fabs(fmod(fabs(jet1phi-jet2phi), 2*TMath::Pi()) - TMath::Pi())) + TMath::Sq(abs(jet1eta-jet2eta)))',
+            binning=np.linspace(0, 7, 51),
         ),
 
         # fine binning in y*/yb
@@ -174,12 +225,40 @@ QUANTITIES = {
         ),
     },
     'mc': {
-        'weightForStitching': Quantity(
-            name='weightForStitching',
-            expression='weightForStitching',
+        'computedWeightForStitching': Quantity(
+            name='computedWeightForStitching',
+            #expression='weightForStitching',
+            expression='getWeightForStitching(binningValue)',  # defined in '_root_macros.C'
             binning=[8E-09, 7E-08, 8E-07, 3E-06, 5E-06, 2E-05, 9E-05, 0.0006, 0.006, 0.03, 0.2, 0.9, 5, 30, 60],
         ),
+        'nPU': Quantity(
+            name='nPU',
+            expression='nPU',
+            binning=np.arange(0, 101)-0.5
+        ),
+        'binningValue': Quantity(
+            name='binningValue',
+            expression='binningValue',
+            binning=_QCD_BINNING,
+        ),
+        'binningValue_fine': Quantity(
+            name='binningValue_fine',
+            expression='binningValue',
+            binning=_QCD_BINNING_FINE,
+        ),
     },
+    'data': {
+        'activeAK4TriggerPathByPtAve': Quantity(
+            name='activeAK4TriggerPathByPtAve',
+            expression='getActiveAK4TriggerPathByPtAve(jet12ptave)',  # defined in '_root_macros.C'
+            binning=np.arange(0, 30)-0.5,
+        ),
+        'assignedTriggerLuminosityWeight': Quantity(
+            name='assignedTriggerLuminosityWeight',
+            expression='getEventLuminosityWeightByPtAve_PFJetTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+    }
 }
 QUANTITIES['global'].update({
     'jet1eta':          Quantity(name='jet1eta',       expression='jet1eta',       binning=QUANTITIES['global']['jet1y'].binning),
@@ -370,6 +449,10 @@ SELECTIONS = {
 
 # specification of ways to split sample into subsamples
 SPLITTINGS = {
+    # no splitting
+    'none' : {
+        'everything' : dict(),
+    },
     # in (y_boost, y_star) bins
     'ybys' : {
         'inclusive' : dict(),

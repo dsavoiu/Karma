@@ -1,9 +1,15 @@
 import itertools
 
+from ._definitions import QUANTITIES
 
 TASKS = {
 
     # -- DATA --
+
+    "Count" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ["count"],
+    },
 
     "EventYield" : {
         "splittings": ["ybys_narrow"],
@@ -59,6 +65,33 @@ TASKS = {
         ]),
     },
 
+    "MainShapes" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                ["jet12ptave_wide", "jet12mass_wide"],
+                ["", "@assignedTriggerLuminosityWeight"]
+            )
+        ],
+    },
+
+    "AllShapes" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                QUANTITIES['global'].keys() + QUANTITIES['data'].keys(),  # all quantities
+                ["", "@assignedTriggerLuminosityWeight"]
+            )
+        ],
+    },
+
+    "PileupShapes" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ['npv', 'nPUMean']
+    },
+
     "PFEnergyFractions" : {
         "splittings": ["ybys_narrow"],
         "profiles" : ([
@@ -84,6 +117,41 @@ TASKS = {
 
     # -- MC --
 
+    "AllShapesMC" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ["{}{}".format(_qn, _qweight)
+            for _qn, _qweight in itertools.product(
+              QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),
+              ["", "@generatorWeight"],
+            )
+        ],
+    },
+    "AllShapesMCBinned" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ["{}{}".format(_qn, _qweight)
+            for _qn, _qweight in itertools.product(
+              QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),
+              ["", "@computedWeightForStitching"],
+            )
+        ],
+    },
+
+    "MainShapesMCBinned" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                ["jet12ptave_wide", "jet12mass_wide"],
+                ["", "@computedWeightForStitching"],
+            )
+        ],
+    },
+
+    "PileupShapesMC" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ['npv@generatorWeight', 'nPUMean@generatorWeight', 'nPU@generatorWeight']
+    },
+
     "EventYieldMC" : {
         "splittings": ["ybys_narrow"],
         "histograms" : (
@@ -92,13 +160,13 @@ TASKS = {
                 for (_qbasename, _qbinning, _qweight) in itertools.product(
                     ['jet1pt', 'jet12ptave', 'jet12mass', 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
                     ['wide', 'narrow'],
-                    ["", "@weightForStitching"]
+                    ["", "@generatorWeight"]
                 )
             ] + [
                 "{}{}".format(_qbasename, _qweight)
                 for (_qbasename, _qweight) in itertools.product(
                     ['metOverSumET', 'jet1phi', 'count'],
-                    ["", "@weightForStitching"]
+                    ["", "@generatorWeight"]
                 )
             ]
         ),
@@ -115,12 +183,12 @@ TASKS = {
             "{}_{}:{}_{}".format(_q1, _qbinning1, _q2, _qbinning2)
             for ((_q1, _q2), (_qbinning1, _qbinning2)) in itertools.product(
                 zip(
-                    ['jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                    ['jet1pt',              'jet12ptave',                  'jet12mass'                 ],
+                    ['jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
+                    ['jet12ptave',                  'jet12mass'                 ],
                 ),
                 zip(
-                    ['wide', 'wide',   'narrow'],
-                    ['wide', 'narrow', 'narrow'],
+                    ['wide'],
+                    ['wide'],
                 )
             )
         ],
@@ -128,12 +196,12 @@ TASKS = {
             "{}_{}:{}_{}".format(_q1, _qbinning1, _q2, _qbinning2)
             for ((_q1, _q2), (_qbinning1, _qbinning2)) in itertools.product(
                 zip(
-                    ['jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                    ['jet1pt',              'jet12ptave',                  'jet12mass'                 ],
+                    ['jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
+                    ['jet12ptave',                  'jet12mass'                 ],
                 ),
                 zip(
-                    ['wide', 'wide',   'narrow'],
-                    ['wide', 'narrow', 'narrow'],
+                    ['wide'],
+                    ['wide'],
                 )
             )
         ],
