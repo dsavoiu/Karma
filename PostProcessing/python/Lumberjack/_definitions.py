@@ -81,7 +81,6 @@ QUANTITIES = {
                     'YB_15_20_YS_00_05' : [60, 100, 122, 147, 175, 207, 243, 284, 329, 380, 437, 499, 569, 646, 732, 827, 931, 1046],
                     'YB_15_20_YS_05_10' : [60, 100, 122, 147, 175, 207, 243, 284, 329, 380, 437, 499, 569, 646, 732, 827, 931],
                     'YB_20_25_YS_00_05' : [60, 100, 122, 147, 175, 207, 243, 284, 329, 380, 437, 499, 569, 646, 732],
-
                 },
             },
         ),
@@ -145,18 +144,6 @@ QUANTITIES = {
             },
         ),
 
-        # HLT
-        'jet1HLTAssignedPathIndex': Quantity(
-            name='jet1HLTAssignedPathIndex',
-            expression='jet1HLTAssignedPathIndex',
-            binning=np.arange(-1, 12) - 0.5
-        ),
-        'jet1HLTAssignedPathEfficiency': Quantity(
-            name='jet1HLTAssignedPathEfficiency',
-            expression='jet1HLTAssignedPathEfficiency',
-            binning=np.linspace(0, 1, 25)
-        ),
-
         # other jet quantities
         'jet1y': Quantity(
             name='jet1y',
@@ -207,9 +194,6 @@ QUANTITIES['global'].update({
     'jet2phi':          Quantity(name='jet2phi',       expression='jet2phi',       binning=QUANTITIES['global']['jet1phi'].binning),
     'jet2y':            Quantity(name='jet2y',         expression='jet2y',         binning=QUANTITIES['global']['jet1y'].binning),
     'jet2eta':          Quantity(name='jet2eta',       expression='jet2eta',       binning=QUANTITIES['global']['jet1eta'].binning),
-
-    'jet2HLTAssignedPathIndex':         Quantity(name='jet2HLTAssignedPathIndex',       expression='jet2HLTAssignedPathIndex',      binning=QUANTITIES['global']['jet1HLTAssignedPathIndex'].binning),
-    'jet2HLTAssignedPathEfficiency':    Quantity(name='jet2HLTAssignedPathEfficiency',  expression='jet2HLTAssignedPathEfficiency', binning=QUANTITIES['global']['jet1HLTAssignedPathEfficiency'].binning),
 })
 QUANTITIES['mc'].update({
     'jet1MatchedGenJetPt_narrow': Quantity(
@@ -261,77 +245,95 @@ for _pf_energy_fraction in ['NeutralHadron', 'ChargedHadron', 'Muon', 'Photon', 
             binning=np.linspace(0, 1, 100),
         )
 
+# map trigger path names to indices in analysis config (always cross-check!)
+_trigger_index_map = {
+    # extract HLT path bits
+    "HLT_IsoMu24":        0,
 
-# specification of defines to be applied to data frame
-DEFINES = {
-    # defines to be applied globally
-    'global': {
-        # extract HLT path bits
-        "HLT_PFJet40":  "(hltBits&{})>0".format(2**0),
-        "HLT_PFJet60":  "(hltBits&{})>0".format(2**1),
-        "HLT_PFJet80":  "(hltBits&{})>0".format(2**2),
-        "HLT_PFJet140": "(hltBits&{})>0".format(2**3),
-        "HLT_PFJet200": "(hltBits&{})>0".format(2**4),
-        "HLT_PFJet260": "(hltBits&{})>0".format(2**5),
-        "HLT_PFJet320": "(hltBits&{})>0".format(2**6),
-        "HLT_PFJet400": "(hltBits&{})>0".format(2**7),
-        "HLT_PFJet450": "(hltBits&{})>0".format(2**8),
-        "HLT_PFJet500": "(hltBits&{})>0".format(2**9),
+    "HLT_PFJet40":        1,
+    "HLT_PFJet60":        2,
+    "HLT_PFJet80":        3,
+    "HLT_PFJet140":       4,
+    "HLT_PFJet200":       5,
+    "HLT_PFJet260":       6,
+    "HLT_PFJet320":       7,
+    "HLT_PFJet400":       8,
+    "HLT_PFJet450":       9,
+    "HLT_PFJet500":      10,
 
-        "HLT_AK8PFJet40":  "(hltBits&{})>0".format(2**10),
-        "HLT_AK8PFJet60":  "(hltBits&{})>0".format(2**11),
-        "HLT_AK8PFJet80":  "(hltBits&{})>0".format(2**12),
-        "HLT_AK8PFJet140": "(hltBits&{})>0".format(2**13),
-        "HLT_AK8PFJet200": "(hltBits&{})>0".format(2**14),
-        "HLT_AK8PFJet260": "(hltBits&{})>0".format(2**15),
-        "HLT_AK8PFJet320": "(hltBits&{})>0".format(2**16),
-        "HLT_AK8PFJet400": "(hltBits&{})>0".format(2**17),
-        "HLT_AK8PFJet450": "(hltBits&{})>0".format(2**18),
-        "HLT_AK8PFJet500": "(hltBits&{})>0".format(2**19),
+    "HLT_AK8PFJet40":    11,
+    "HLT_AK8PFJet60":    12,
+    "HLT_AK8PFJet80":    13,
+    "HLT_AK8PFJet140":   14,
+    "HLT_AK8PFJet200":   15,
+    "HLT_AK8PFJet260":   16,
+    "HLT_AK8PFJet320":   17,
+    "HLT_AK8PFJet400":   18,
+    "HLT_AK8PFJet450":   19,
+    "HLT_AK8PFJet500":   20,
 
-        "HLT_DiPFJetAve40":  "(hltBits&{})>0".format(2**20),
-        "HLT_DiPFJetAve60":  "(hltBits&{})>0".format(2**21),
-        "HLT_DiPFJetAve80":  "(hltBits&{})>0".format(2**22),
-        "HLT_DiPFJetAve140": "(hltBits&{})>0".format(2**23),
-        "HLT_DiPFJetAve200": "(hltBits&{})>0".format(2**24),
-        "HLT_DiPFJetAve260": "(hltBits&{})>0".format(2**25),
-        "HLT_DiPFJetAve320": "(hltBits&{})>0".format(2**26),
-        "HLT_DiPFJetAve400": "(hltBits&{})>0".format(2**27),
-        "HLT_DiPFJetAve500": "(hltBits&{})>0".format(2**28),
+    "HLT_DiPFJetAve40":  21,
+    "HLT_DiPFJetAve60":  22,
+    "HLT_DiPFJetAve80":  23,
+    "HLT_DiPFJetAve140": 24,
+    "HLT_DiPFJetAve200": 25,
+    "HLT_DiPFJetAve260": 26,
+    "HLT_DiPFJetAve320": 27,
+    "HLT_DiPFJetAve400": 28,
+    "HLT_DiPFJetAve500": 29,
+}
 
-        "HLT_IsoMu24":  "(hltBits&{})>0".format(2**29),
-    },
-    # defines to be applied for MC samples only
-    'mc': {
+DEFINES = dict()
 
-        # jet flavor categories
+# defines to be applied globally
+DEFINES['global'] = dict()
 
-        "Flavor_QQ":  "(abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)",
-        "Flavor_QG":  "((abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(jet2PartonFlavor==21))||((abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)&&(jet1PartonFlavor==21))",
-        "Flavor_GG":  "(jet1PartonFlavor==21)&&(jet2PartonFlavor==21)",
-        "Flavor_XX":  "(jet1PartonFlavor==0)||(jet2PartonFlavor==0)",
+# boolean values indicating if a particular trigger path fired for an event
+DEFINES['global'].update({
+    "{}".format(_trigger_name) : "(hltBits&{})>0".format(2**(_trigger_index)) for (_trigger_name, _trigger_index) in _trigger_index_map.items()
+})
 
-        "Flavor_aa":  "(jet1PartonFlavor<0)&&(jet2PartonFlavor<0)",
-        "Flavor_pp":  "(jet1PartonFlavor>0)&&(jet2PartonFlavor>0)",
-        "Flavor_ap":  "((jet1PartonFlavor>0)&&(jet2PartonFlavor<0))||((jet1PartonFlavor<0)&&(jet2PartonFlavor>0))",
+# boolean values indicating if the leading jet is matched to a particular trigger path
+DEFINES['global'].update({
+    "{}_".format(_trigger_name)+("Jet12Match" if "DiPFJetAve" in _trigger_name else "Jet1Match") : "(hlt"+("Jet12Match" if "DiPFJetAve" in _trigger_name else "Jet1Match")+"&{})>0".format(2**(_trigger_index)) for (_trigger_name, _trigger_index) in _trigger_index_map.items()
+})
 
-        "Flavor_IsDiagonal":  "abs(jet1PartonFlavor)==abs(jet2PartonFlavor)",
+# boolean values indicating if the leading jet passes the L1  pT thresholds for a particular trigger path
+DEFINES['global'].update({
+    "{}_".format(_trigger_name)+("Jet12PtAve" if "DiPFJetAve" in _trigger_name else "Jet1Pt")+"PassThresholdsL1" : "(hlt"+("Jet12PtAve" if "DiPFJetAve" in _trigger_name else "Jet1Pt")+"PassThresholdsL1&{})>0".format(2**(_trigger_index)) for (_trigger_name, _trigger_index) in _trigger_index_map.items()
+})
+# boolean values indicating if the leading jet passes the HLT pT thresholds for a particular trigger path
+DEFINES['global'].update({
+    "{}_".format(_trigger_name)+("Jet12PtAve" if "DiPFJetAve" in _trigger_name else "Jet1Pt")+"PassThresholdsHLT" : "(hlt"+("Jet12PtAve" if "DiPFJetAve" in _trigger_name else "Jet1Pt")+"PassThresholdsHLT&{})>0".format(2**(_trigger_index)) for (_trigger_name, _trigger_index) in _trigger_index_map.items()
+})
 
-        # qcd subprocess categories
+# defines to be applied for MC samples only
+DEFINES['mc'] = {
+    # jet flavor categories
+    "Flavor_QQ":  "(abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)",
+    "Flavor_QG":  "((abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(jet2PartonFlavor==21))||((abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)&&(jet1PartonFlavor==21))",
+    "Flavor_GG":  "(jet1PartonFlavor==21)&&(jet2PartonFlavor==21)",
+    "Flavor_XX":  "(jet1PartonFlavor==0)||(jet2PartonFlavor==0)",
 
-        "QCDSubprocess_XX":  "(incomingParton1Flavor==0)||(incomingParton2Flavor==0)",
-        "QCDSubprocess_QQ":  "(abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)",
-        "QCDSubprocess_GG":  "(incomingParton1Flavor==21)&&(incomingParton2Flavor==21)",
-        "QCDSubprocess_QG":  "((abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(incomingParton2Flavor==21))||((abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)&&(incomingParton1Flavor==21))",
+    "Flavor_aa":  "(jet1PartonFlavor<0)&&(jet2PartonFlavor<0)",
+    "Flavor_pp":  "(jet1PartonFlavor>0)&&(jet2PartonFlavor>0)",
+    "Flavor_ap":  "((jet1PartonFlavor>0)&&(jet2PartonFlavor<0))||((jet1PartonFlavor<0)&&(jet2PartonFlavor>0))",
 
-        "QCDSubprocess_xg_gt_xq": "((incomingParton1Flavor==21)&&(incomingParton1x>incomingParton2x))||((incomingParton2Flavor==21)&&(incomingParton2x>incomingParton1x))",
+    "Flavor_IsDiagonal":  "abs(jet1PartonFlavor)==abs(jet2PartonFlavor)",
 
-        "QCDSubprocess_aa":  "(incomingParton1Flavor<0)&&(incomingParton2Flavor<0)",
-        "QCDSubprocess_pp":  "(incomingParton1Flavor>0)&&(incomingParton2Flavor>0)",
-        "QCDSubprocess_ap":  "((incomingParton1Flavor>0)&&(incomingParton2Flavor<0))||((incomingParton1Flavor<0)&&(incomingParton2Flavor>0))",
+    # qcd subprocess categories
+    "QCDSubprocess_XX":  "(incomingParton1Flavor==0)||(incomingParton2Flavor==0)",
+    "QCDSubprocess_QQ":  "(abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)",
+    "QCDSubprocess_GG":  "(incomingParton1Flavor==21)&&(incomingParton2Flavor==21)",
+    "QCDSubprocess_QG":  "((abs(incomingParton1Flavor)>0)&&(abs(incomingParton1Flavor)<=5)&&(incomingParton2Flavor==21))||((abs(incomingParton2Flavor)>0)&&(abs(incomingParton2Flavor)<=5)&&(incomingParton1Flavor==21))",
 
-        "QCDSubprocess_IsDiagonal":  "abs(incomingParton1Flavor)==abs(incomingParton2Flavor)",
-    }
+    "QCDSubprocess_xg_gt_xq": "((incomingParton1Flavor==21)&&(incomingParton1x>incomingParton2x))||((incomingParton2Flavor==21)&&(incomingParton2x>incomingParton1x))",
+
+    "QCDSubprocess_aa":  "(incomingParton1Flavor<0)&&(incomingParton2Flavor<0)",
+    "QCDSubprocess_pp":  "(incomingParton1Flavor>0)&&(incomingParton2Flavor>0)",
+    "QCDSubprocess_ap":  "((incomingParton1Flavor>0)&&(incomingParton2Flavor<0))||((incomingParton1Flavor<0)&&(incomingParton2Flavor>0))",
+
+    "QCDSubprocess_IsDiagonal":  "abs(incomingParton1Flavor)==abs(incomingParton2Flavor)",
 }
 
 
@@ -339,8 +341,7 @@ DEFINES = {
 BASIC_SELECTIONS = {
     'global' : [
         # leading jet has matched trigger object
-        #"(jet1HLTAssignedPathEfficiency>0.0&&jet1HLTAssignedPathIndex>=0)",
-        "jet1HLTpt > 0.0",
+        "hltJet1Match > 0",
 
         # kinematics of leading jets
         "jet1pt > 60",
@@ -386,6 +387,79 @@ SPLITTINGS = {
         'YB_20_25_YS_00_05' : dict(yboost=(2.0, 2.5), ystar=(0.0, 0.5)),
     },
     # by AK4 single-jet trigger path (with overlap)
+    'trigger_efficiencies_ak4' : {
+        'all'  : dict(),
+        'HLT_PFJet40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_PFJet60_Ref'  : dict(HLT_PFJet40_Jet1Match=1 ),
+        'HLT_PFJet80_Ref'  : dict(HLT_PFJet60_Jet1Match=1 ),
+        'HLT_PFJet140_Ref' : dict(HLT_PFJet80_Jet1Match=1 ),
+        'HLT_PFJet200_Ref' : dict(HLT_PFJet140_Jet1Match=1),
+        'HLT_PFJet260_Ref' : dict(HLT_PFJet200_Jet1Match=1),
+        'HLT_PFJet320_Ref' : dict(HLT_PFJet260_Jet1Match=1),
+        'HLT_PFJet400_Ref' : dict(HLT_PFJet320_Jet1Match=1),
+        'HLT_PFJet450_Ref' : dict(HLT_PFJet400_Jet1Match=1),
+        'HLT_PFJet500_Ref' : dict(HLT_PFJet450_Jet1Match=1),
+
+        'HLT_PFJet40_Num'  : dict(HLT_IsoMu24=1,            HLT_PFJet40=1),
+        'HLT_PFJet60_Num'  : dict(HLT_PFJet40_Jet1Match=1,  HLT_PFJet60_Jet1PtPassThresholdsHLT=1),
+        'HLT_PFJet80_Num'  : dict(HLT_PFJet60_Jet1Match=1,  HLT_PFJet80_Jet1PtPassThresholdsHLT=1,  HLT_PFJet80_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet140_Num' : dict(HLT_PFJet80_Jet1Match=1,  HLT_PFJet140_Jet1PtPassThresholdsHLT=1, HLT_PFJet140_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet200_Num' : dict(HLT_PFJet140_Jet1Match=1, HLT_PFJet200_Jet1PtPassThresholdsHLT=1, HLT_PFJet200_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet260_Num' : dict(HLT_PFJet200_Jet1Match=1, HLT_PFJet260_Jet1PtPassThresholdsHLT=1, HLT_PFJet260_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet320_Num' : dict(HLT_PFJet260_Jet1Match=1, HLT_PFJet320_Jet1PtPassThresholdsHLT=1, HLT_PFJet320_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet400_Num' : dict(HLT_PFJet320_Jet1Match=1, HLT_PFJet400_Jet1PtPassThresholdsHLT=1, HLT_PFJet400_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet450_Num' : dict(HLT_PFJet400_Jet1Match=1, HLT_PFJet450_Jet1PtPassThresholdsHLT=1, HLT_PFJet450_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet500_Num' : dict(HLT_PFJet450_Jet1Match=1, HLT_PFJet500_Jet1PtPassThresholdsHLT=1, HLT_PFJet500_Jet1PtPassThresholdsL1=1),
+    },
+    # by AK8 single-jet trigger path (with overlap)
+    'trigger_efficiencies_ak8' : {
+        'all'  : dict(),
+        'HLT_AK8PFJet40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_AK8PFJet60_Ref'  : dict(HLT_AK8PFJet40_Jet1Match=1),
+        'HLT_AK8PFJet80_Ref'  : dict(HLT_AK8PFJet60_Jet1Match=1),
+        'HLT_AK8PFJet140_Ref' : dict(HLT_AK8PFJet80_Jet1Match=1),
+        'HLT_AK8PFJet200_Ref' : dict(HLT_AK8PFJet140_Jet1Match=1),
+        'HLT_AK8PFJet260_Ref' : dict(HLT_AK8PFJet200_Jet1Match=1),
+        'HLT_AK8PFJet320_Ref' : dict(HLT_AK8PFJet260_Jet1Match=1),
+        'HLT_AK8PFJet400_Ref' : dict(HLT_AK8PFJet320_Jet1Match=1),
+        'HLT_AK8PFJet450_Ref' : dict(HLT_AK8PFJet400_Jet1Match=1),
+        'HLT_AK8PFJet500_Ref' : dict(HLT_AK8PFJet450_Jet1Match=1),
+
+        'HLT_AK8PFJet40_Num'  : dict(HLT_IsoMu24=1,               HLT_AK8PFJet40=1),
+        'HLT_AK8PFJet60_Num'  : dict(HLT_AK8PFJet40_Jet1Match=1,  HLT_AK8PFJet60_Jet1PtPassThresholdsHLT=1),
+        'HLT_AK8PFJet80_Num'  : dict(HLT_AK8PFJet60_Jet1Match=1,  HLT_AK8PFJet80_Jet1PtPassThresholdsHLT=1,  HLT_AK8PFJet80_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet140_Num' : dict(HLT_AK8PFJet80_Jet1Match=1,  HLT_AK8PFJet140_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet140_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet200_Num' : dict(HLT_AK8PFJet140_Jet1Match=1, HLT_AK8PFJet200_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet200_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet260_Num' : dict(HLT_AK8PFJet200_Jet1Match=1, HLT_AK8PFJet260_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet260_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet320_Num' : dict(HLT_AK8PFJet260_Jet1Match=1, HLT_AK8PFJet320_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet320_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet400_Num' : dict(HLT_AK8PFJet320_Jet1Match=1, HLT_AK8PFJet400_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet400_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet450_Num' : dict(HLT_AK8PFJet400_Jet1Match=1, HLT_AK8PFJet450_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet450_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet500_Num' : dict(HLT_AK8PFJet450_Jet1Match=1, HLT_AK8PFJet500_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet500_Jet1PtPassThresholdsL1=1),
+    },
+    # by AK8 single-jet trigger path (with overlap)
+    'trigger_efficiencies_dijet' : {
+        'all'  : dict(),
+        'HLT_DiPFJetAve40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_DiPFJetAve60_Ref'  : dict(HLT_DiPFJetAve40_Jet12Match=1),
+        'HLT_DiPFJetAve80_Ref'  : dict(HLT_DiPFJetAve60_Jet12Match=1),
+        'HLT_DiPFJetAve140_Ref' : dict(HLT_DiPFJetAve80_Jet12Match=1),
+        'HLT_DiPFJetAve200_Ref' : dict(HLT_DiPFJetAve140_Jet12Match=1),
+        'HLT_DiPFJetAve260_Ref' : dict(HLT_DiPFJetAve200_Jet12Match=1),
+        'HLT_DiPFJetAve320_Ref' : dict(HLT_DiPFJetAve260_Jet12Match=1),
+        'HLT_DiPFJetAve400_Ref' : dict(HLT_DiPFJetAve320_Jet12Match=1),
+        'HLT_DiPFJetAve500_Ref' : dict(HLT_DiPFJetAve400_Jet12Match=1),
+
+        'HLT_DiPFJetAve40_Num'  : dict(HLT_IsoMu24=1,                  HLT_DiPFJetAve40=1),
+        'HLT_DiPFJetAve60_Num'  : dict(HLT_DiPFJetAve40_Jet12Match=1,  HLT_DiPFJetAve60_Jet12PtAvePassThresholdsHLT=1),
+        'HLT_DiPFJetAve80_Num'  : dict(HLT_DiPFJetAve60_Jet12Match=1,  HLT_DiPFJetAve80_Jet12PtAvePassThresholdsHLT=1),
+        'HLT_DiPFJetAve140_Num' : dict(HLT_DiPFJetAve80_Jet12Match=1,  HLT_DiPFJetAve140_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve140_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve200_Num' : dict(HLT_DiPFJetAve140_Jet12Match=1, HLT_DiPFJetAve200_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve200_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve260_Num' : dict(HLT_DiPFJetAve200_Jet12Match=1, HLT_DiPFJetAve260_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve260_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve320_Num' : dict(HLT_DiPFJetAve260_Jet12Match=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve400_Num' : dict(HLT_DiPFJetAve320_Jet12Match=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve500_Num' : dict(HLT_DiPFJetAve400_Jet12Match=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsL1=1),
+    },
+    # by AK4 single-jet trigger path (with overlap)
     'triggers_ak4' : {
         'all' : dict(),
         'HLT_PFJet40'  : dict(HLT_PFJet40=1),
@@ -416,29 +490,15 @@ SPLITTINGS = {
     # by dijet trigger path (with overlap)
     'triggers_dijet' : {
         'all' : dict(),
-        'HLT_DiPFJetAve40'  : dict(HLT_AK8PFJet40=1),
-        'HLT_DiPFJetAve60'  : dict(HLT_AK8PFJet60=1),
-        'HLT_DiPFJetAve80'  : dict(HLT_AK8PFJet80=1),
-        'HLT_DiPFJetAve140' : dict(HLT_AK8PFJet140=1),
-        'HLT_DiPFJetAve200' : dict(HLT_AK8PFJet200=1),
-        'HLT_DiPFJetAve260' : dict(HLT_AK8PFJet260=1),
-        'HLT_DiPFJetAve320' : dict(HLT_AK8PFJet320=1),
-        'HLT_DiPFJetAve400' : dict(HLT_AK8PFJet400=1),
-        'HLT_DiPFJetAve500' : dict(HLT_AK8PFJet500=1),
-    },
-    # by trigger path (mutually exclusive)
-    'triggers_exclusive' : {
-        'all' : dict(),
-        'HLT_PFJet40' : dict(jet1HLTAssignedPathIndex=0),
-        'HLT_PFJet60' : dict(jet1HLTAssignedPathIndex=1),
-        'HLT_PFJet80' : dict(jet1HLTAssignedPathIndex=2),
-        'HLT_PFJet140' : dict(jet1HLTAssignedPathIndex=3),
-        'HLT_PFJet200' : dict(jet1HLTAssignedPathIndex=4),
-        'HLT_PFJet260' : dict(jet1HLTAssignedPathIndex=5),
-        'HLT_PFJet320' : dict(jet1HLTAssignedPathIndex=6),
-        'HLT_PFJet400' : dict(jet1HLTAssignedPathIndex=7),
-        'HLT_PFJet450' : dict(jet1HLTAssignedPathIndex=8),
-        'HLT_PFJet500' : dict(jet1HLTAssignedPathIndex=9),
+        'HLT_DiPFJetAve40'  : dict(HLT_DiPFJetAve40=1),
+        'HLT_DiPFJetAve60'  : dict(HLT_DiPFJetAve60=1),
+        'HLT_DiPFJetAve80'  : dict(HLT_DiPFJetAve80=1),
+        'HLT_DiPFJetAve140' : dict(HLT_DiPFJetAve140=1),
+        'HLT_DiPFJetAve200' : dict(HLT_DiPFJetAve200=1),
+        'HLT_DiPFJetAve260' : dict(HLT_DiPFJetAve260=1),
+        'HLT_DiPFJetAve320' : dict(HLT_DiPFJetAve320=1),
+        'HLT_DiPFJetAve400' : dict(HLT_DiPFJetAve400=1),
+        'HLT_DiPFJetAve500' : dict(HLT_DiPFJetAve500=1),
     },
     # by flavor category
     'flavors' : {

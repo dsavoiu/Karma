@@ -211,9 +211,10 @@ EXPANSIONS = {
         },
     ],
     # trigger paths
-    'trigger' : [
+    'trigger_ak4' : [
         {
             "name": "HLT_PFJet40",
+            "preceding_path_name": None,
             "label": r"PFJet40",
             "color": "#1b09aa",
             "marker": "o",
@@ -223,6 +224,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet60",
+            "preceding_path_name": "HLT_PFJet40",
             "label": r"PFJet60",
             "color": "#094aaa",
             "marker": "D",
@@ -232,6 +234,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet80",
+            "preceding_path_name": "HLT_PFJet60",
             "label": r"PFJet80",
             "color": "#0bd1d1",
             "marker": "v",
@@ -241,6 +244,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet140",
+            "preceding_path_name": "HLT_PFJet80",
             "label": r"PFJet140",
             "color": "#0ce41f",
             "marker": "^",
@@ -250,6 +254,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet200",
+            "preceding_path_name": "HLT_PFJet140",
             "label": r"PFJet200",
             "color": "#dee40c",
             "marker": "s",
@@ -259,6 +264,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet260",
+            "preceding_path_name": "HLT_PFJet200",
             "label": r"PFJet260",
             "color": "#e4ac0c",
             "marker": ">",
@@ -268,6 +274,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet320",
+            "preceding_path_name": "HLT_PFJet260",
             "label": r"PFJet320",
             "color": "#ed690c",
             "marker": "o",
@@ -277,6 +284,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet400",
+            "preceding_path_name": "HLT_PFJet320",
             "label": r"PFJet400",
             "color": "#ed360c",
             "marker": "x",
@@ -286,6 +294,7 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet450",
+            "preceding_path_name": "HLT_PFJet400",
             "label": r"PFJet450",
             "color": "#d1110b",
             "marker": "d",
@@ -295,7 +304,110 @@ EXPANSIONS = {
         },
         {
             "name": "HLT_PFJet500",
+            "preceding_path_name": "HLT_PFJet450",
             "label": r"PFJet500",
+            "color": "#a52509",
+            "marker": "s",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 7544015569.439,  # Run2016G
+        },
+        {
+            "name": "all",
+            "preceding_path_name": None,
+            "label": r"all triggers",
+            "color": "k",
+            "marker": "o",
+            'marker_style': 'empty',
+            'l1_factor': 1.0,
+            'lumi_ub': 7544015569.439,  # Run2016G
+        },
+    ],
+    'trigger_ak8' : [
+        {
+            "name": "HLT_AK8PFJet40",
+            "label": r"AK8PFJet40",
+            "color": "#1b09aa",
+            "marker": "o",
+            'marker_style': 'full',
+            'l1_factor': 10000.0,
+            'lumi_ub': 48714.091,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet60",
+            "label": r"AK8PFJet60",
+            "color": "#094aaa",
+            "marker": "D",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 123328.102,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet80",
+            "label": r"AK8PFJet80",
+            "color": "#0bd1d1",
+            "marker": "v",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 369296.644,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet140",
+            "label": r"AK8PFJet140",
+            "color": "#0ce41f",
+            "marker": "^",
+            'marker_style': 'full',
+            'l1_factor': 1000.0,
+            'lumi_ub': 3618461.972,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet200",
+            "label": r"AK8PFJet200",
+            "color": "#dee40c",
+            "marker": "s",
+            'marker_style': 'full',
+            'l1_factor': 100.0,
+            'lumi_ub': 11962959.393,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet260",
+            "label": r"AK8PFJet260",
+            "color": "#e4ac0c",
+            "marker": ">",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 102345547.894,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet320",
+            "label": r"AK8PFJet320",
+            "color": "#ed690c",
+            "marker": "o",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 310001081.812,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet400",
+            "label": r"AK8PFJet400",
+            "color": "#ed360c",
+            "marker": "x",
+            'marker_style': 'empty',
+            'l1_factor': 1.0,
+            'lumi_ub': 918960478.743,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet450",
+            "label": r"AK8PFJet450",
+            "color": "#d1110b",
+            "marker": "d",
+            'marker_style': 'full',
+            'l1_factor': 1.0,
+            'lumi_ub': 7544015569.439,  # Run2016G
+        },
+        {
+            "name": "HLT_AK8PFJet500",
+            "label": r"AK8PFJet500",
             "color": "#a52509",
             "marker": "s",
             'marker_style': 'full',

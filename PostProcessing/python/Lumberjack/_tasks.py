@@ -13,14 +13,26 @@ TASKS = {
         ),
     },
 
-    # TODO: differentiate between AK4, AK8 and dijet triggers...
-    #"TriggerEfficiencies" : {
-    #    "splittings": ["ybys_narrow", "triggers_exclusive"],
-    #    "profiles" : (
-    #        ["{}_{}:jet1HLTAssignedPathEfficiency".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-    #        + ["metOverSumET:jet1HLTAssignedPathEfficiency"]
-    #    ),
-    #},
+    "TriggerEfficienciesAK4" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_ak4"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
+
+    "TriggerEfficienciesAK8" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_ak8"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
+
+    "TriggerEfficienciesDijet" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_dijet"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
 
     "Occupancy" : {
         "splittings": ["ybys_narrow"],
@@ -73,7 +85,7 @@ TASKS = {
     # -- MC --
 
     "EventYieldMC" : {
-        "splittings": ["ybys_narrow", "mc_subsamples"],
+        "splittings": ["ybys_narrow"],
         "histograms" : (
             [
                 "{}_{}{}".format(_qbasename, _qbinning, _qweight)
@@ -128,7 +140,7 @@ TASKS = {
     },
 
     "Flavors" : {
-        "splittings": ["ybys_narrow", "mc_subsamples", "flavors"],
+        "splittings": ["ybys_narrow", "flavors"],
         "histograms" : ([
             "{}_{}".format(_qbasename, _qbinning)
             for (_qbasename, _qbinning) in itertools.product(
@@ -139,7 +151,7 @@ TASKS = {
     },
 
     "QCDSubprocesses" : {
-        "splittings": ["ybys_narrow@4", "mc_subsamples", "qcd_subprocesses"],
+        "splittings": ["ybys_narrow", "qcd_subprocesses"],
         "histograms" : ([
             "{}_{}".format(_qbasename, _qbinning)
             for (_qbasename, _qbinning) in itertools.product(
@@ -152,7 +164,7 @@ TASKS = {
         ]),
     },
 
-    "QCDSubprocesses_Weighted" : {
+    "QCDSubprocesses_SubsampleWeighted" : {
         "splittings": ["ybys_narrow", "qcd_subprocesses"],
         "histograms" : ([
             "{}_{}@weightForStitching".format(_qbasename, _qbinning)
@@ -168,10 +180,17 @@ TASKS = {
 TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
 TASKS['PFEnergyFractionsMC'] = dict(TASKS['PFEnergyFractions'], splittings=["ybys_narrow"])
 
-TASKS['Occupancy_PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['Occupancy_AK4PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['Occupancy_AK8PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak8"])
 TASKS['Occupancy_DiPFJetAveTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_dijet"])
 
-TASKS['EventYield_PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['EventYield_AK4PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak4"])
+TASKS['EventYield_AK8PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak8"])
 TASKS['EventYield_DiPFJetAveTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_dijet"])
+
+TASKS['EventYieldMC_Subsamples'] = dict(TASKS['EventYieldMC'], splittings=["ybys_narrow", "mc_subsamples"])
+
+TASKS['Flavors_Subsamples'] = dict(TASKS['Flavors'], splittings=["ybys_narrow", "mc_subsamples", "flavors"])
+TASKS['QCDSubprocesses_Subsamples'] = dict(TASKS['QCDSubprocesses'], splittings=["ybys_narrow@4", "mc_subsamples", "qcd_subprocesses"])
 
 
