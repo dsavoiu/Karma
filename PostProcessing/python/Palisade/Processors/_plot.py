@@ -255,9 +255,13 @@ class PlotProcessor(_ProcessorBase):
             self._input_controller._request_all_objects_in_expression(_subplot_cfg['expression'], **request_params)
             print 'REQ', _subplot_cfg['expression']
 
+
     def _plot(self, config):
         '''plot all figures'''
         _mplrc()
+
+        # register expressions as locals for lookup by the input controller's `get` call
+        self._input_controller.register_local('expressions', [_subplot_cfg['expression'] for _subplot_cfg in config['subplots']])
 
         _filename = os.path.join(self._output_folder, config['filename'])
 
@@ -639,6 +643,9 @@ class PlotProcessor(_ProcessorBase):
         _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
         #plt.close(_fig)  # close figure to save memory
+
+        # de-register all the locals after a plot is done
+        self._input_controller.clear_locals()
 
 
     # -- register action slots

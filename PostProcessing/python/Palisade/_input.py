@@ -417,6 +417,7 @@ class InputROOT(object):
         """
         self._input_controllers = {}
         self._file_nick_to_realpath = {}
+        self._locals = {}
         if files_spec is not None:
             for _nickname, _file_path in files_spec.iteritems():
                 self.add_file(_file_path, nickname=_nickname)
@@ -513,13 +514,13 @@ class InputROOT(object):
             _ic.request(_requests)
 
 
-    def get_expr(self, expr):
+    def get_expr(self, expr, allow_locals=True):
         """
         Perform basic arithmetic on objects and return result
         """
         expr = expr.strip()   # extraneous spaces otherwise interpreted as indentation
         self._request_all_objects_in_expression(expr)
-        return self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions)
+        return self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions, allow_locals=allow_locals)
 
     def _request_all_objects_in_expression(self, expr, **other_request_params):
         """Walk through the expression AST and request an object for each string or identifier"""
@@ -537,30 +538,69 @@ class InputROOT(object):
                 _reqs.append(dict(object_spec=_obj_spec, force_rerequest=False, **other_request_params))
         self.request(_reqs)
 
-    def _eval(self, node, operators, functions):
+    def register_local(self, name, value):
+        try:
+            assert name not in self._locals
+        except AssertionError as e:
+            print "[ERROR] Can't set local '{}' to '{}'! It already exists and is: {}".format(name, value, self._locals[name])
+            raise e
+        self._locals[name] = value
+
+    def clear_locals(self):
+        self._locals = dict()
+
+    def _eval(self, node, operators, functions, allow_locals):
         """Evaluate an AST node"""
+        #print "Call _eval. allow_locals={}".format(allow_locals)
         if node is None:
             return None
         elif isinstance(node, ast.Name): # <string> : array column
+            # lookup identifiers in local namespace first
+            if node.id in self._locals:
+                _local = self._locals[node.id]
+                if not allow_locals:
+                    return type(_local)()  # "default" construction to get dummy
+                if isinstance(_local, list):
+                    _retlist = []
+                    for _local_el in _local:
+                        #print "trying: {}".format(_local_el)
+                        try:
+                            _ret_el = self.get_expr(_local_el, allow_locals=False)
+                        except Exception as e:
+                            #print "Failed!"
+                            #print dir(e.args)
+                            #raise
+                            _retlist.append(123.0)
+                        else:
+                            #print "Success!"
+                            _retlist.append(_ret_el)
+                    #return [self.get_expr(_local_el, allow_locals=False) for _local_el in _local]
+                    return _retlist
+                else:
+                    return self.get_expr(_local, allow_locals=False)
+            # if not local is found, treat identifier as string and lookup in ROOT file
             return self.get(node.id)
         elif isinstance(node, ast.Str): # <string> : array column
+            # lookup in ROOT file
             return self.get(node.s)
         elif isinstance(node, ast.Num): # <number>
             return node.n
         elif isinstance(node, ast.Call): # node names containing parentheses (interpreted as 'Call' objects)
-            return functions[node.func.id](*map(lambda _arg: self._eval(_arg, operators, functions), node.args))
+            return functions[node.func.id](*map(lambda _arg: self._eval(_arg, operators, functions, allow_locals), node.args))
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
-            return operators[type(node.op)](self._eval(node.left, operators, functions), self._eval(node.right, operators, functions))
+            return operators[type(node.op)](self._eval(node.left, operators, functions, allow_locals), self._eval(node.right, operators, functions, allow_locals))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
-            return operators[type(node.op)](self._eval(node.operand, operators, functions))
+            return operators[type(node.op)](self._eval(node.operand, operators, functions, allow_locals))
         elif isinstance(node, ast.Subscript): # <operator> <operand> e.g., -1
             if isinstance(node.slice, ast.Index): # support subscripting via simple index
-                return self._eval(node.value, operators, functions)[self._eval(node.slice.value, operators, functions)]
+                return self._eval(node.value, operators, functions, allow_locals)[self._eval(node.slice.value, operators, functions, allow_locals)]
             elif isinstance(node.slice, ast.Slice): # support subscripting via slice
-                return self._eval(node.value, operators, functions)[self._eval(node.slice.lower, operators, functions):self._eval(node.slice.upper, operators, functions):self._eval(node.slice.step, operators, functions)]
+                return self._eval(node.value, operators, functions, allow_locals)[self._eval(node.slice.lower, operators, functions, allow_locals):self._eval(node.slice.upper, operators, functions, allow_locals):self._eval(node.slice.step, operators, functions, allow_locals)]
             else:
                 raise TypeError(node)
         elif isinstance(node, ast.Attribute): # <value>.<attr>
-            return getattr(self._eval(node.value, operators, functions), node.attr)
+            return getattr(self._eval(node.value, operators, functions, allow_locals), node.attr)
+        elif isinstance(node, ast.List): # list of node names
+            return [self._eval(_el, operators, functions, allow_locals) for _el in node.elts]
         else:
             raise TypeError(node)
