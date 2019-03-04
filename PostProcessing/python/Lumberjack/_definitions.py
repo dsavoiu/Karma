@@ -338,19 +338,32 @@ DEFINES['mc'] = {
 
 
 # specification of filters to be applied to data frame
-BASIC_SELECTIONS = {
-    'global' : [
+SELECTIONS = {
+    'jet1TriggerMatch' : [
         # leading jet has matched trigger object
         "hltJet1Match > 0",
-
+    ],
+    'recoJetPhaseSpace' : [
         # kinematics of leading jets
-        "jet1pt > 60",
-        "jet2pt > 60",
+        "jet1pt > 100",
+        "jet2pt > 100",
         "abs(jet1y) < 3.0",
         "abs(jet2y) < 3.0",
-
-        ##MET/sumEt filter
-        #"metOverSumET < 0.3"
+    ],
+    'metSumEtFilter' : [
+        # met/sumet cut (for background rejection)
+        "metOverSumET < 0.3",
+    ],
+    'npvGoodFilter' : [
+        # met/sumet cut (for background rejection)
+        "npvGood > 0",
+    ],
+    'genJetPhaseSpace' : [
+        # kinematics of leading gen jets
+        "genjet1pt > 100",
+        "genjet2pt > 100",
+        "abs(genjet1y) < 3.0",
+        "abs(genjet2y) < 3.0",
     ],
 }
 

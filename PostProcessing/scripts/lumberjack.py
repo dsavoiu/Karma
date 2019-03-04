@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import abc
 import datetime
 import hashlib
 import time
@@ -56,102 +57,71 @@ def log_stdout_to_file(filename):
         sys.stdout = _old_stdout
 
 
-class PostProcessingCLI(object):
+# determine correct ROOT DataFrame class
+try:
+    ROOT_DF_CLASS = ROOT.ROOT.RDataFrame
+except AttributeError:
+    ROOT_DF_CLASS = ROOT.ROOT.Experimental.TDataFrame
+
+
+
+class PostProcessingInterfaceBase(object):
 
     RE_SPLITTING_KEY_SPEC = re.compile(r"([^[]]*)(\[(.*)\])?")
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self._config = self._get_config(**kwargs)
 
-        # determine correct ROOT DataFrame class
-        try:
-            self._df_class = ROOT.ROOT.RDataFrame
-        except AttributeError:
-            self._df_class = ROOT.ROOT.Experimental.TDataFrame
-
-        self._log = None
-        self._parse_args()
-
-    def _parse_args(self):
-        import argparse
-
-        from DijetAnalysis.PostProcessing.Lumberjack import TASKS, SPLITTINGS
-
-        self._top_parser = argparse.ArgumentParser(description='Split an input TTree into subsamples and produce ROOT files containing TH1D, TH2D or TProfile objects for each subdivision.')
-        self._top_parser.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
-        self._top_parser.add_argument('-t', '--tree', metavar='TREE', help="Name of the TTree containng the ntuple (default: 'Events')", default='Events')
-        self._top_parser.add_argument('--type', metavar='TYPE', type=str, help='Sample type', choices=['data', 'mc'], required=True)
-        self._top_parser.add_argument('-j', '--jobs', help="Number of jobs (threads) to use with EnableImplicitMT (default: 1)", default=1)
-        self._top_parser.add_argument('-n', '--num-events', help="Number of events to process. Incompatible with multithreading. Use 0 or negative for all (default)", default=-1)
-        self._top_parser.add_argument('--dry-run', help="Set up post-processing tasks, but do not execute", action='store_true')
-        self._top_parser.add_argument('--overwrite', help="Overwrite output file, if it exists.", action='store_true')
-        self._top_parser.add_argument('--log', help="Whether to output a log file.", action="store_true")
-        self._top_parser.add_argument('--progress', help="Whether to show a progress bar.", action="store_true")
-
-        self._subparsers = self._top_parser.add_subparsers(help='Operation to perform', dest='subparser_name')
-        self._subparsers.required = True
-
-        self._parsers = {}
-
-        # subcommand 'task' for executing pre-defined tasks
-        self._parsers['task'] = self._subparsers.add_parser('task', help='Perform a pre-defined task')
-        self._parsers['task'].add_argument('TASK_NAME', type=str, help='Name of task(s) to perform', nargs='+', choices=TASKS.keys())
-        self._parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filename(s). If none is provided, the current date is used instead.", default=None)
-
-        # subcommand 'freestyle' for manually specifying histograms and profiles
-        self._parsers['freestyle'] = self._subparsers.add_parser('freestyle', help='Specify desired objects by hand')
-        self._parsers['freestyle'].add_argument('SPLITTING_KEY', type=str, help='Key(s) which identify the set of cuts used for separating the sample into subsamples', nargs='+', choices=SPLITTINGS.keys())
-        self._parsers['freestyle'].add_argument('--histograms', metavar='HISTOGRAM', help='Specification of histograms', nargs='+')
-        self._parsers['freestyle'].add_argument('--profiles', metavar='PROFILE', help='Specification of profiles', nargs='+')
-        self._parsers['freestyle'].add_argument('--output-file', metavar='OUTPUT', help="Name of the output file.", required=True)
-
-        self._args = self._top_parser.parse_args()
-
+    @abc.abstractmethod
+    def _get_config(self, **kwargs):
+        raise NotImplementedError  # implement in derived classes
 
     def _prepare_bare_data_frame(self):
 
         # -- enable multithreading
-        if int(self._args.jobs) > 1:
-            print "[INFO] Enabling multithreading with {} threads...".format(self._args.jobs)
-            ROOT.ROOT.EnableImplicitMT(int(self._args.jobs))
+        if int(self._config.jobs) > 1:
+            print "[INFO] Enabling multithreading with {} threads...".format(self._config.jobs)
+            ROOT.ROOT.EnableImplicitMT(int(self._config.jobs))
 
         # -- set up data frame
         print "[INFO] Setting up data frame..."
-        print "[INFO] Sample file: {}".format(self._args.input_file)
+        print "[INFO] Sample file: {}".format(self._config.input_file)
 
         # exit if input file does not exits exists
-        if not os.path.exists(self._args.input_file):
-            print("[ERROR] Input file does not exist: '{}'".format(self._args.input_file))
+        if not os.path.exists(self._config.input_file):
+            print("[ERROR] Input file does not exist: '{}'".format(self._config.input_file))
             exit(1)
 
         # exit if tree does not exist in file
-        _f = ROOT.TFile(self._args.input_file, "READ")
-        _tree = _f.Get(self._args.tree)
+        _f = ROOT.TFile(self._config.input_file, "READ")
+        _tree = _f.Get(self._config.tree)
         if not isinstance(_tree, ROOT.TTree):
-            print("[ERROR] Input file does not contain TTree '{}'".format(self._args.input_file))
+            print("[ERROR] Input file does not contain TTree '{}'".format(self._config.input_file))
             exit(1)
         self._df_size = _tree.GetEntries()
         _f.Close()
 
-        print "[INFO] Sample type: {}".format(self._args.type)
-        self._df_bare = self._df_class(self._args.tree, self._args.input_file)
+        print "[INFO] Sample type: {}".format(self._config.type)
+        self._df_bare = ROOT_DF_CLASS(self._config.tree, self._config.input_file)
+
 
     def _prepare_data_frame(self):
 
-        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, BASIC_SELECTIONS
+        from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, DEFINES, SELECTIONS
         from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
 
         # -- limit the number of processed events
-        if self._args.num_events >= 0:
-            print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
-            self._df_bare = self._df_bare.Range(0, int(self._args.num_events))
-            self._df_size = min(self._df_size, int(self._args.num_events))
+        if self._config.num_events >= 0:
+            print "[INFO] Limiting number of processed events to: ".format(self._config.num_events)
+            self._df_bare = self._df_bare.Range(0, int(self._config.num_events))
+            self._df_size = min(self._df_size, int(self._config.num_events))
             self._df_count_increment = max(self._df_size//100, 10)
 
         # -- set up event counter (for progress reporting)
         self._df_count = self._df_bare.Count()
         self._df_count_increment = 100000
 
-        if self._args.progress:
+        if self._config.progress:
             self._progress = tqdm(
                 unit=" events",
                 unit_scale=False,
@@ -186,14 +156,18 @@ class PostProcessingCLI(object):
         # -- apply basic analysis selection
         print "[INFO] Defining quantities..."
         self._df = apply_defines(self._df_bare, DEFINES['global'])
-        if self._args.type in DEFINES:
-            self._df = apply_defines(self._df, DEFINES[self._args.type])
+        if self._config.type in DEFINES:
+            self._df = apply_defines(self._df, DEFINES[self._config.type])
 
-        _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
+        _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._config.type, {}))
         self._df = define_quantities(self._df, _quantities)
 
-        print "[INFO] Applying global selection..."
-        self._df = apply_filters(self._df, BASIC_SELECTIONS['global'])
+        if self._config.selections is not None:
+            for _sel in self._config.selections:
+                print "[INFO] Applying global selection '{}'...".format(_sel)
+                if _sel not in SELECTIONS:
+                    raise ValueError("Unknown selection '{}'".format(_sel))
+                self._df = apply_filters(self._df, SELECTIONS[_sel])
 
     def _cleanup_data_frame(self):
         pass  # what to do here?
@@ -267,7 +241,7 @@ class PostProcessingCLI(object):
         for _task_name, _task_spec in task_configs:
 
             # skip task if output file exists
-            if os.path.exists(_task_spec['_filename']) and not self._args.overwrite:
+            if os.path.exists(_task_spec['_filename']) and not self._config.overwrite:
                 print("[INFO] Task output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_spec['_filename']))
                 continue
 
@@ -351,14 +325,14 @@ class PostProcessingCLI(object):
 
                 # run PostProcessor and time execution
                 with Timer(_task_name) as _t:
-                    if self._args.dry_run:
+                    if self._config.dry_run:
                         print "[INFO] `--dry-run` has been specified: not running task '{}'".format(_task_name)
                         time.sleep(0.1)
                     else:
                         _pp.run(output_file_path=_task_spec['_filename'])
 
                 # print report
-                if not self._args.dry_run:
+                if not self._config.dry_run:
                     print "[INFO] Processed a total of {} events.".format(self._df_count.GetValue())
                 _t.report()
 
@@ -376,18 +350,18 @@ class PostProcessingCLI(object):
         # -- configure and queue freestyle task
 
         # exit if output filename exists
-        if os.path.exists(self._args.output_file) and not self._args.overwrite:
-            print("[INFO] Output file exists: '{}' and `--overwrite` not set. Exiting...".format(self._args.output_file))
+        if os.path.exists(self._config.output_file) and not self._config.overwrite:
+            print("[INFO] Output file exists: '{}' and `--overwrite` not set. Exiting...".format(self._config.output_file))
             exit(1)
 
         # configure single 'Freestyle' task
         _task_spec = dict(
-            _filename = self._args.output_file,
-            _log_filename = "{}.log".format(self._args.output_file.split('.', 1)[0]) if self._args.log else None,
-            _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {})),
-            splittings = self._args.SPLITTING_KEY,
-            histograms = self._args.histograms,
-            profiles = self._args.profiles,
+            _filename = self._config.output_file,
+            _log_filename = "{}.log".format(self._config.output_file.split('.', 1)[0]) if self._config.log else None,
+            _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._config.type, {})),
+            splittings = self._config.SPLITTING_KEY,
+            histograms = self._config.histograms,
+            profiles = self._config.profiles,
         )
         _tasks = [("Freestyle", _task_spec)]
 
@@ -400,13 +374,13 @@ class PostProcessingCLI(object):
         from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES, TASKS
 
         # -- determine output filename suffix
-        _suffix = self._args.output_file_suffix
+        _suffix = self._config.output_file_suffix
         if _suffix is None:
             _suffix = "{}".format(datetime.datetime.now().strftime("%Y-%m-%d"))
 
         # -- configure and queue task(s)
         _tasks = []
-        for _task_name in self._args.TASK_NAME:
+        for _task_name in self._config.TASK_NAME:
             _task_spec = TASKS.get(_task_name, None)
             if _task_spec is None:
                 raise ValueError("[ERROR] Unknown task '{}': expected one of {}".format(_task, set(TASKS.keys())))
@@ -414,8 +388,8 @@ class PostProcessingCLI(object):
 
             # add task to queue
             _task_spec['_filename'] = "{}_{}.root".format(_task_name, _suffix)
-            _task_spec['_log_filename'] = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
-            _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
+            _task_spec['_log_filename'] = "{}_{}.log".format(_task_name, _suffix) if self._config.log else None
+            _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._config.type, {}))
             _tasks.append((_task_name, _task_spec))
 
         if not _tasks:
@@ -430,14 +404,56 @@ class PostProcessingCLI(object):
 
     def run(self):
 
-        if self._args.subparser_name == 'task':
+        if self._config.subparser_name == 'task':
             self._subcommand_task()
 
-        elif self._args.subparser_name == 'freestyle':
+        elif self._config.subparser_name == 'freestyle':
             self._subcommand_freestyle()
 
         else:
             raise ValueError("Unknown operation '{}'! Exiting...".format(_args.subparser_name))
+
+
+class PostProcessingCLI(PostProcessingInterfaceBase):
+    def __init__(self):
+        super(PostProcessingCLI, self).__init__()  # no kwargs
+
+    def _get_config(self):
+        '''parse CLI arguments and store in self._config'''
+        import argparse
+
+        from DijetAnalysis.PostProcessing.Lumberjack import TASKS, SPLITTINGS
+
+        _top_parser = argparse.ArgumentParser(description='Split an input TTree into subsamples and produce ROOT files containing TH1D, TH2D or TProfile objects for each subdivision.')
+        _top_parser.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
+        _top_parser.add_argument('-t', '--tree', metavar='TREE', help="Name of the TTree containng the ntuple (default: 'Events')", default='Events')
+        _top_parser.add_argument('--type', metavar='TYPE', type=str, help='Sample type', choices=['data', 'mc'], required=True)
+        _top_parser.add_argument('-j', '--jobs', help="Number of jobs (threads) to use with EnableImplicitMT (default: 1)", default=1)
+        _top_parser.add_argument('-n', '--num-events', help="Number of events to process. Incompatible with multithreading. Use 0 or negative for all (default)", default=-1)
+        _top_parser.add_argument('--dry-run', help="Set up post-processing tasks, but do not execute", action='store_true')
+        _top_parser.add_argument('--overwrite', help="Overwrite output file, if it exists.", action='store_true')
+        _top_parser.add_argument('--log', help="Whether to output a log file.", action="store_true")
+        _top_parser.add_argument('--progress', help="Whether to show a progress bar.", action="store_true")
+        _top_parser.add_argument('--selections', metavar='SELECTION', help='Specification of event selection cuts', nargs='+')
+
+        _subparsers = _top_parser.add_subparsers(help='Operation to perform', dest='subparser_name')
+        _subparsers.required = True
+
+        _parsers = {}
+
+        # subcommand 'task' for executing pre-defined tasks
+        _parsers['task'] = _subparsers.add_parser('task', help='Perform a pre-defined task')
+        _parsers['task'].add_argument('TASK_NAME', type=str, help='Name of task(s) to perform', nargs='+', choices=TASKS.keys())
+        _parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filename(s). If none is provided, the current date is used instead.", default=None)
+
+        # subcommand 'freestyle' for manually specifying histograms and profiles
+        _parsers['freestyle'] = _subparsers.add_parser('freestyle', help='Specify desired objects by hand')
+        _parsers['freestyle'].add_argument('SPLITTING_KEY', type=str, help='Key(s) which identify the set of cuts used for separating the sample into subsamples', nargs='+', choices=SPLITTINGS.keys())
+        _parsers['freestyle'].add_argument('--histograms', metavar='HISTOGRAM', help='Specification of histograms', nargs='+')
+        _parsers['freestyle'].add_argument('--profiles', metavar='PROFILE', help='Specification of profiles', nargs='+')
+        _parsers['freestyle'].add_argument('--output-file', metavar='OUTPUT', help="Name of the output file.", required=True)
+
+        return _top_parser.parse_args()
 
 
 if __name__ == "__main__":
