@@ -63,6 +63,8 @@ try:
 except AttributeError:
     ROOT_DF_CLASS = ROOT.ROOT.Experimental.TDataFrame
 
+import DijetAnalysis.PostProcessing.Lumberjack as lj_module
+ROOT_MACRO_FILENAME = os.path.join(os.path.dirname(lj_module.__file__), "_root_macros.C")
 
 
 class PostProcessingInterfaceBase(object):
@@ -104,6 +106,10 @@ class PostProcessingInterfaceBase(object):
         print "[INFO] Sample type: {}".format(self._config.type)
         self._df_bare = ROOT_DF_CLASS(self._config.tree, self._config.input_file)
 
+        print "[INFO] Defining ROOT macros..."
+
+        with open(ROOT_MACRO_FILENAME, 'r') as _root_macro_file:
+            ROOT.gInterpreter.Declare(''.join(_root_macro_file.readlines()))
 
     def _prepare_data_frame(self):
 
