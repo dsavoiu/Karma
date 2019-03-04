@@ -201,8 +201,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     if (!m_isData) {
         outputNtupleEntry->generatorWeight = this->dijetGeneratorQCDInfoHandle->weight;
         outputNtupleEntry->generatorWeightProduct = this->dijetGeneratorQCDInfoHandle->weightProduct;
-        //if (this->dijetGeneratorQCDInfoHandle->binningValues.size() > 0)
-        //    outputNtupleEntry->binningValue1 = this->dijetGeneratorQCDInfoHandle->binningValues[0];
+        if (this->dijetGeneratorQCDInfoHandle->binningValues.size() > 0)
+            outputNtupleEntry->binningValue = this->dijetGeneratorQCDInfoHandle->binningValues[0];
         //if (this->dijetGeneratorQCDInfoHandle->binningValues.size() > 1)
         //    outputNtupleEntry->binningValue2 = this->dijetGeneratorQCDInfoHandle->binningValues[1];
         outputNtupleEntry->incomingParton1Flavor = this->dijetGeneratorQCDInfoHandle->parton1PdgId;

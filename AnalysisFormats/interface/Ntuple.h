@@ -100,6 +100,9 @@ namespace dijet {
         double generatorWeightProduct = 1.0;
         double weightForStitching = 1.0;
 
+        // binning values
+        double binningValue = UNDEFINED_DOUBLE;
+
         // leading GenJets (unmatched to reco)
         double genJet1Pt = UNDEFINED_DOUBLE;
         double genJet1Eta = UNDEFINED_DOUBLE;
