@@ -236,6 +236,10 @@ class PlotProcessor(_ProcessorBase):
         for _i_pad, _pad_config in enumerate(_pad_configs):
             _pad_config['axes'] = _fig.add_subplot(_gs[_i_pad])
 
+        _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
+        _bin_labels = _pad_config.setdefault('bin_labels', {})
+        _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
+
         # enable text output, if requested
         if config.pop("text_output", False):
             _text_filename = '.'.join(_filename.split('.')[:-1]) + '.txt'
@@ -276,9 +280,13 @@ class PlotProcessor(_ProcessorBase):
 
             # extract individual bin labels (if they exist)
             for _i_axis, _axis in enumerate("xyz"):
-                if bool(_plot_object.axis(_i_axis).GetLabels()):
+                try:
+                    _root_obj_axis = _plot_object.axis(_i_axis)
+                except AttributeError:
+                    _root_obj_axis = None
+                if _root_obj_axis is not None and bool(_root_obj_axis.GetLabels()):
                     _axis_nbins_method = getattr(_plot_object, "GetNbins{}".format(_axis.upper()))
-                    _plot_data['{}binlabels'.format(_axis)] = [_plot_object.axis(_i_axis).GetBinLabel(_i_bin) for _i_bin in range(1, _axis_nbins_method() + 1)]
+                    _plot_data['{}binlabels'.format(_axis)] = [_root_obj_axis.GetBinLabel(_i_bin) for _i_bin in range(1, _axis_nbins_method() + 1)]
 
             # map fields for TEfficiency objects
             if isinstance(_plot_object, Efficiency):
