@@ -40,21 +40,15 @@ NUMBER_OF_EVENTS_LOOKUP = {
 
 if __name__ == "__main__":
 
-    #parser = ArgumentParser()
-    #
-    ## parser.add_argument()...
-    #
-    #args = parser.parse_args()
-
     _deployer = DijetAnalysisDeployerGC(
-        nick="DijetAna_QCD_RunIISummer16MiniAODv2_2018-11-13",
+        nick="DijetAna_QCD_RunIISummer16MiniAODv2_2019-02-27",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/DijetAnalysis/Analysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="_tmpwork",
-        files_per_job=15,
+        files_per_job=10,
     )
 
-    _skim_date = "2018-11-12"
+    _skim_date = "2019-02-15"
     _deployer.add_input_files("QCD_Pt_15to30",     "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_QCD_Pt_15to30_RunIISummer16MiniAODv2_{}/*.root".format(_skim_date))
     _deployer.add_input_files("QCD_Pt_30to50",     "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_QCD_Pt_30to50_RunIISummer16MiniAODv2_{}/*.root".format(_skim_date))
     _deployer.add_input_files("QCD_Pt_50to80",     "/storage/gridka-nrg/dsavoiu/Dijet/test_skims/Dijet_QCD_Pt_50to80_RunIISummer16MiniAODv2_{}/*.root".format(_skim_date))
@@ -74,6 +68,7 @@ if __name__ == "__main__":
 
     _deployer.add_constant("GLOBALTAG", "80X_mcRun2_asymptotic_2016_TrancheIV_v6")
     _deployer.add_constant("IS_DATA", "False")
+    _deployer.add_constant("JEC_VERSION", "Summer16_07Aug2017_V11")
 
     _deployer.add_lookup_parameter("CROSS_SECTION", CROSS_SECTION_LOOKUP, key="DATASETNICK")
     _deployer.add_lookup_parameter("NUMBER_OF_EVENTS", NUMBER_OF_EVENTS_LOOKUP, key="DATASETNICK")

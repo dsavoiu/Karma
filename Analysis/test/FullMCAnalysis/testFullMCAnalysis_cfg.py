@@ -22,7 +22,7 @@ process.TFileService = cms.Service(
     closeFileFast = cms.untracked.bool(True),
 )
 
-ana = DijetAnalysis(process, is_data=options.isData)
+ana = DijetAnalysis(process, is_data=options.isData, jec_version="Summer16_07Aug2017_V11")
 
 ana.configure()
 

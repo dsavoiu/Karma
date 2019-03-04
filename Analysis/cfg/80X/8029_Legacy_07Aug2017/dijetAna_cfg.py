@@ -4,13 +4,14 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles = "file://{}".format(os.path.realpath("../../../../Skimming/test/FullSkim/testFullSkim_out.root"))
+    options.inputFiles = "file://{}".format(os.path.realpath(os.path.join(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullSkim/testFullSkim_out.root")))
     options.isData = 1
     options.globalTag = "80X_dataRun2_2016LegacyRepro_v4"
     #options.edmOut="testSkim_out.root"
     options.maxEvents = 1000
     options.dumpPython = 1
     options.weightForStitching = 1.0
+    options.jecVersion = "Summer16_07Aug2017GH_V11"
 else:
     # -- running on grid node
     options.globalTag = "__GLOBALTAG__"
@@ -21,6 +22,7 @@ else:
 
     # temporary; gc later sets process.source.fileNames directly!
     options.inputFiles = [__FILE_NAMES__]
+    options.jecVersion = "__JEC_VERSION__"
     options.weightForStitching = 1.0
 
 
@@ -39,7 +41,7 @@ process.TFileService = cms.Service(
     closeFileFast = cms.untracked.bool(True),
 )
 
-ana = DijetAnalysis(process, is_data=options.isData)
+ana = DijetAnalysis(process, is_data=options.isData, jec_version=options.jecVersion)
 
 ana.configure()
 

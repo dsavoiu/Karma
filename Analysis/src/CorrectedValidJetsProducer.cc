@@ -23,6 +23,8 @@ dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
                 jec + "_" + jecLevel + "_" + jecAlgoName + ".txt"
             )
         );
+        std::cout << "[CorrectedValidJetsProducer] Loaded JEC file '" <<
+                     jec << "_" << jecLevel << "_" << jecAlgoName << ".txt" << "'" << std::endl;
     }
     m_jetCorrector = std::unique_ptr<FactorizedJetCorrector>(new FactorizedJetCorrector(jecParameters));
 
@@ -40,6 +42,8 @@ dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
     m_jetCorrectionUncertainty = std::unique_ptr<JetCorrectionUncertainty>(new JetCorrectionUncertainty(
         jec + "_Uncertainty_" + jecAlgoName + ".txt"
     ));
+    std::cout << "[CorrectedValidJetsProducer] Loaded JEU file '" <<
+                 jec << "_Uncertainty_" << jecAlgoName << ".txt" << "'" << std::endl;
 }
 
 

@@ -61,6 +61,10 @@ register_option('weightForStitching',
                 default=1.0,
                 type_=float,
                 description=('weight to use when stitching together MC samples'))
+register_option('jecVersion',
+                default="",
+                type_=str,
+                description=('version of Jet Energy Corrections to use, e.g. "Summer16_07Aug2017BCD"'))
 
 
 # parse the command-line arguments

@@ -11,6 +11,7 @@ if not os.getenv("GC_VERSION"):
     options.maxEvents = 1000
     options.dumpPython = 1
     options.weightForStitching = 1.0
+    options.jecVersion = "Summer16_07Aug2017_V11"
 else:
     # -- running on grid node
     options.globalTag = "__GLOBALTAG__"
@@ -21,6 +22,7 @@ else:
 
     # temporary; gc later sets process.source.fileNames directly!
     options.inputFiles = [__FILE_NAMES__]
+    options.jecVersion = "__JEC_VERSION__"
     options.weightForStitching = float(__CROSS_SECTION__) / float(__NUMBER_OF_EVENTS__)
 
 
@@ -39,7 +41,7 @@ process.TFileService = cms.Service(
     closeFileFast = cms.untracked.bool(True),
 )
 
-ana = DijetAnalysis(process, is_data=options.isData)
+ana = DijetAnalysis(process, is_data=options.isData, jec_version=options.jecVersion, weight_for_stitching=options.weightForStitching)
 
 ana.configure()
 

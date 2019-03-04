@@ -13,9 +13,11 @@ from NtupleProducer_cfi import dijetNtupleProducer
 class DijetAnalysis:
     """Helper class. Defines an interface for setting up a CMSSW process for running the dijet analysis."""
 
-    def __init__(self, process, is_data):
+    def __init__(self, process, is_data, jec_version, weight_for_stitching=1.0):
         self._is_data = is_data
+        self._weight_for_stitching = weight_for_stitching
         self._process = process
+        self._jec_version = jec_version
         self._pipeline_sequences = {}
 
     def _init_modules(self, jet_algo_name):
@@ -28,15 +30,16 @@ class DijetAnalysis:
                 dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJets{}".format(jet_algo_name)),
 
                 # -- other configuration
-                jecVersion = "{}/src/JECDatabase/textFiles/Summer16_07Aug2017{RUN}_V11_DATA/Summer16_07Aug2017{RUN}_V11_DATA".format(
+                jecVersion = "{}/src/JECDatabase/textFiles/{jec_version}_{data_or_mc}/{jec_version}_{data_or_mc}".format(
                     os.getenv('CMSSW_BASE'),
-                    RUN="GH",
+                    jec_version=self._jec_version,
+                    data_or_mc="DATA" if self._is_data else "MC",
                 ),
                 jecAlgoName = cms.string(jet_algo_name),
                 jecLevels = cms.vstring(
                     "L1FastJet",
                     "L2Relative",
-                    "L2L3Residual",
+                    "L2L3Residual",  # safe to apply in MC (files contain dummy value 1.0)
                 ),
                 jecUncertaintyShift = cms.double(0.0),
 
@@ -141,6 +144,7 @@ class DijetAnalysis:
                 #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
 
                 isData = cms.bool(self._is_data),
+                weightForStitching = cms.double(self._weight_for_stitching),
                 npuMeanFile = "{}/src/DijetAnalysis/Analysis/data/pileup/{YEAR}/npumean.txt".format(
                     os.getenv('CMSSW_BASE'),
                     YEAR="2016",
