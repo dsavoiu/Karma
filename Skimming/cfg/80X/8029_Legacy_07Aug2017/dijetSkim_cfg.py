@@ -8,7 +8,7 @@ from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyC
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles="file://{}".format(os.path.realpath("../../../data/test_JetHT2016G.root"))
+    options.inputFiles="file://{}".format(os.path.realpath("/ceph/storage/c/dsavoiu/miniaod-test/data/test_JetHT2016G.root"))
     options.isData=1
     options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
     options.edmOut="testSkim_out.root"
@@ -63,6 +63,7 @@ from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTrig
 from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
 from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
 from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
+from DijetAnalysis.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
@@ -72,7 +73,7 @@ process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
     ),  # ndof >= 4, rho <= 2
 )
 
-process.dijetEvents = dijetEventProducer.clone(
+process.dijetEvents = dijetEventProducer(isData=options.isData).clone(
     goodPrimaryVerticesSrc = cms.InputTag("goodOfflinePrimaryVertices"),
 )
 _accumulated_output_commands.append("keep *_dijetEvents_*_DIJET")
@@ -90,10 +91,14 @@ process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
 )
 _accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
 
+process.dijetVertices = dijetVertexCollectionProducer.clone()
+_accumulated_output_commands.append("keep *_dijetVertices_*_DIJET")
+
 mainSequence = cms.Sequence(
     process.dijetEvents *
     process.dijetEventHLTFilter *
-    process.dijetTriggerObjects
+    process.dijetTriggerObjects *
+    process.dijetVertices
 );
 
 # uncorrect pat::Jets for JEC
