@@ -119,6 +119,50 @@ class DijetLogFormatterSciNotation(LogFormatter):
         return _ret
 
 
+def _plot_as_step(*args, **kwargs):
+
+    assert len(args) == 2
+    _x = np.asarray(args[0])
+    _y = np.asarray(args[1])
+    _zeros = np.zeros_like(_x)
+
+    assert 'xerr' in kwargs
+    if len(kwargs['xerr']) == 1:
+        _xerr_dn = _xerr_up = kwargs.pop('xerr')[0]
+    else:
+        _xerr_dn, _xerr_up = kwargs.pop('xerr')
+
+    _yerr = kwargs.pop('yerr', None)
+    if _yerr is not None:
+        if len(_yerr) == 1:
+            _yerr_dn = _yerr_up = _yerr[0]
+        else:
+            _yerr_dn, _yerr_up = _yerr
+        _yerr_dn = np.asarray(_yerr_dn)
+        _yerr_up = np.asarray(_yerr_up)
+
+    _xerr_dn = np.asarray(_xerr_dn)
+    _xerr_up = np.asarray(_xerr_up)
+
+    # replicate each point three times (left edge, center, right edge)
+    _x = np.vstack([_x, _x, _x]).T.flatten()
+    _y = np.vstack([_y, _y, _y]).T.flatten()
+
+    # stop processing y errors if they are zero
+    if np.allclose(_yerr, 0):
+        _yerr = None
+
+    # attach y errors (if any) to "bin" center
+    if _yerr is not None:
+        _yerr_dn = np.vstack([_zeros, _yerr_dn, _zeros]).T.flatten()
+        _yerr_up = np.vstack([_zeros, _yerr_up, _zeros]).T.flatten()
+        _yerr = [_yerr_dn, _yerr_up]
+
+    # shift left and right replicas in x by xerr
+    _x += np.vstack([-_xerr_dn, _zeros, _xerr_up]).T.flatten()
+
+    return plt.errorbar(_x, _y, yerr=_yerr, **kwargs)
+
 
 class PlotProcessor(_ProcessorBase):
     """Processor for plotting objects from ROOT files"""
@@ -126,6 +170,10 @@ class PlotProcessor(_ProcessorBase):
     CONFIG_KEY_FOR_TEMPLATES = "figures"
     SUBKEYS_FOR_CONTEXT_REPLACING = ["subplots", "pads", "texts"]
     CONFIG_KEY_FOR_CONTEXTS = "expansions"
+
+    _EXTERNAL_PLOT_METHODS = dict(
+        step = _plot_as_step
+    )
 
     _PC_KEYS_MPL_AXES_METHODS = dict(
         x_label = dict(
@@ -315,13 +363,23 @@ class PlotProcessor(_ProcessorBase):
             # -- draw
 
             _plot_method_name = _kwargs.pop('plot_method', 'errorbar')
-            _plot_method = getattr(_ax, _plot_method_name)
 
-            if _plot_method_name == 'errorbar':
-                _kwargs.setdefault('linestyle', '')
+            # -- obtain plot method
+            try:
+                # use external method, if available
+                _plot_method = self._EXTERNAL_PLOT_METHODS[_plot_method_name]
+            except KeyError:
+                #
+                _plot_method = getattr(_ax, _plot_method_name)
+
+            if _plot_method_name in ['errorbar', 'step']:
                 _kwargs.setdefault('capsize', 0)
                 if 'color' in _pc:
                     _kwargs.setdefault('markeredgecolor', _kwargs['color'])
+
+            # remove connecting lines for 'errorbar' plots only
+            if _plot_method_name == 'errorbar':
+                _kwargs.setdefault('linestyle', '')
 
             # marker styles
             _marker_style = _kwargs.pop('marker_style', None)
