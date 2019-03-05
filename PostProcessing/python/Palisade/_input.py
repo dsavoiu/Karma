@@ -313,6 +313,35 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
+    def double_profile(tprofile_x, tprofile_y):
+        """creates a graph with points whose x and y values and errors are taken from the bins of two profiles with identical binning"""
+        ## Note: underflow and overflow bins are discarded
+
+        if len(tprofile_x) != len(tprofile_y):
+            raise ValueError("Cannot build double profile: x and y profiles "
+                             "have different number or bins ({} and {})".format(
+                                len(tprofile_x)-2, len(tprofile_y)-2))
+
+        _dp_graph = Graph(len(tprofile_x)-2, type='errors')  # symmetric errors
+
+        _i_point = 0
+        for _i_bin, (_bin_proxy_x, _bin_proxy_y) in enumerate(zip(tprofile_x, tprofile_y)):
+            # disregard overflow/underflow bins
+            if _i_bin == 0 or _i_bin == len(tprofile_x) - 1:
+                continue
+
+            if _bin_proxy_y.value:
+                _dp_graph.SetPoint(_i_point, _bin_proxy_x.value, _bin_proxy_y.value)
+                _dp_graph.SetPointError(_i_point, _bin_proxy_x.error, _bin_proxy_y.error)
+                _i_point += 1
+
+        # remove "unfilled" points
+        while (_dp_graph.GetN() > _i_point):
+            _dp_graph.RemovePoint(_dp_graph.GetN()-1)
+
+        return _dp_graph
+
+    @staticmethod
     def threshold_by_ref(tobject, tobject_ref):
         """set `tobject` bins to zero if their content is less than the value in `tobject_ref`, and to 1 otherwise. Result bin errors are always set to zero."""
 
@@ -595,6 +624,7 @@ class InputROOT(object):
         'bin_differences':                     _ROOTObjectFunctions.bin_differences,
         'bin_ratios':                          _ROOTObjectFunctions.bin_ratios,
         'select':                              _ROOTObjectFunctions.select,
+        'double_profile':                      _ROOTObjectFunctions.double_profile,
     }
 
     def __init__(self, files_spec=None):
