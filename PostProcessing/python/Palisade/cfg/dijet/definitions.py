@@ -2,8 +2,9 @@ import numpy as np
 
 from copy import deepcopy
 
-from DijetAnalysis.PostProcessing.Lumberjack import QUANTITIES
+from DijetAnalysis.PostProcessing.Lumberjack.cfg.dijet import QUANTITIES
 
+__all__ = ["EXPANSIONS"]
 
 EXPANSIONS = {
     # quantities
