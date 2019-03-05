@@ -86,7 +86,11 @@ class AnalyzeProcessor(_ProcessorBase):
                     _dir = _tfile.mkdir(_dirname, recurse=True)
 
                 _dir.cd()
-                _plot_object.SetDirectory(_dir)
+                try:
+                    _plot_object.SetDirectory(_dir)
+                except AttributeError:
+                    # skip objects without 'SetDirectory' method (e.g. TGraph)
+                    pass
                 _plot_object.Write()
 
                 print "{} -> {}".format(_expression, _output_path)

@@ -11,7 +11,7 @@ from array import array
 
 from rootpy import asrootpy
 from rootpy.io import root_open
-from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
+from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
@@ -172,7 +172,7 @@ class _ROOTObjectFunctions(object):
         """Apply ProjectionX() operation."""
 
         if hasattr(tobject, 'ProjectionX'):
-            _new_tobject = asrootpy(tobject.ProjectionX())
+            _new_tobject = asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex()))
         else:
             print "[INFO] `project_x` not available for object with type {}".format(type(tobject))
             return tobject
