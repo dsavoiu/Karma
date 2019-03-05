@@ -1,6 +1,10 @@
 import itertools
 
-from ._definitions import QUANTITIES
+from .definitions import QUANTITIES
+
+
+__all__ = ["TASKS"]
+
 
 TASKS = {
 
@@ -260,5 +264,3 @@ TASKS['EventYieldMC_Subsamples'] = dict(TASKS['EventYieldMC'], splittings=["ybys
 
 TASKS['Flavors_Subsamples'] = dict(TASKS['Flavors'], splittings=["ybys_narrow", "mc_subsamples", "flavors"])
 TASKS['QCDSubprocesses_Subsamples'] = dict(TASKS['QCDSubprocesses'], splittings=["ybys_narrow@4", "mc_subsamples", "qcd_subprocesses"])
-
-
