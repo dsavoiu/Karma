@@ -4,6 +4,8 @@ from copy import deepcopy
 
 from Karma.PostProcessing.Lumberjack.cfg.zjet_excalibur import QUANTITIES
 
+__all__ = ["EXPANSIONS"]
+
 
 def _uniform_range(quantity, n_standard_deviations=1.5):
     "symmetric confidence interval based on uniform distribution over defined quantity range"
