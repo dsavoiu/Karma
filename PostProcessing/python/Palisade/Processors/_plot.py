@@ -253,7 +253,7 @@ class PlotProcessor(_ProcessorBase):
         for _subplot_cfg in config['subplots']:
             request_params = dict(self._global_request_params, **_subplot_cfg.get('request_params', {}))
             self._input_controller._request_all_objects_in_expression(_subplot_cfg['expression'], **request_params)
-            print 'REQ', _subplot_cfg['expression']
+            #print 'REQ', _subplot_cfg['expression']
 
 
     def _plot(self, config):

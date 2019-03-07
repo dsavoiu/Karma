@@ -501,7 +501,7 @@ class InputROOTFile(object):
 
                 _tobj = _tfile.Get(tobj_path)
                 _tobj.SetDirectory(0)
-                print tobj_path, _tobj
+                #print tobj_path, _tobj
 
                 # aply rebinning (if requested)
                 if _rebin_factor is not None:
