@@ -320,7 +320,7 @@ class PlotProcessor(_ProcessorBase):
             _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
 
             _expression = _kwargs.pop('expression')
-            print("PLT {}".format(_expression))
+            #("PLT {}".format(_expression))
             _plot_object = self._input_controller.get_expr(_expression)
 
             # extract arrays for keys which could be masked by 'mask_zero_errors'
@@ -552,9 +552,9 @@ class PlotProcessor(_ProcessorBase):
             if _pad_config.get('x_scale', None) == 'log' and _pad_config.get('x_ticklabels', True):
                 _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
                 _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+                _ax.xaxis.set_minor_formatter(_formatter)
                 _formatter.set_locs(locs=_log_decade_ticklabels)
 
-                _ax.xaxis.set_minor_formatter(_formatter)
 
             ## handle log y-axis formatting (only if 'y_ticklabels' is not given as [])
             #if _pad_config.get('y_scale', None) == 'log' and _pad_config.get('y_ticklabels', True):
