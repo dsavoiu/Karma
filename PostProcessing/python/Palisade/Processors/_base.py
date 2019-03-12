@@ -122,7 +122,11 @@ class _ProcessorBase(object):
                         elif isinstance(_v, ConfigurationEntry):
                             _dict_for_subkey[_k] = _v.get(context)
 
-            action_method(self, _config)
+            try:
+                action_method(self, _config)
+            except Exception as e:
+                print "{} encountered while processing job with config: {}".format(e.__class__.__name__, _config)
+                raise e
 
     # -- public API
 
