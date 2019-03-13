@@ -126,7 +126,7 @@ class _ProcessorBase(object):
                 action_method(self, _config)
             except Exception as e:
                 print "{} encountered while processing job with config: {}".format(e.__class__.__name__, _config)
-                raise e
+                raise
 
     # -- public API
 
