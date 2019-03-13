@@ -26,6 +26,9 @@ __all__ = ['DijetLogFormatterSciNotation', 'PlotProcessor']
 plt.register_cmap(name='viridis', cmap=viridis)
 
 def _mplrc():
+    mpl.rcParams.update({'font.size': 11})
+    mpl.rc('xtick', direction='in', bottom=True, top=True)
+    mpl.rc('ytick', direction='in', left=True, right=True)
     mpl.rc('mathtext', fontset='stixsans', fallback_to_cm=False, rm='sans')
     mpl.rc('axes', labelsize=16)
     mpl.rc('legend', labelspacing=.1, fontsize=8)
@@ -120,11 +123,16 @@ class DijetLogFormatterSciNotation(LogFormatter):
 
 
 def _plot_as_step(*args, **kwargs):
-
+    """display data as horizontal bars with given by `x` +/- `xerr`. `y` error bars are also drawn."""
     assert len(args) == 2
     _x = np.asarray(args[0])
     _y = np.asarray(args[1])
     _zeros = np.zeros_like(_x)
+
+    # kwarg `yerr_as_band` to display
+    _show_yerr_as = kwargs.pop('show_yerr_as', None)
+    if _show_yerr_as is not None and _show_yerr_as not in ('errorbar', 'band'):
+        raise ValueError("Invalid value '{}' for 'show_yerr_as'. Available: {}".format(_show_yerr_as, ('errorbar', 'band')))
 
     assert 'xerr' in kwargs
     if len(kwargs['xerr']) == 1:
@@ -154,14 +162,27 @@ def _plot_as_step(*args, **kwargs):
 
     # attach y errors (if any) to "bin" center
     if _yerr is not None:
-        _yerr_dn = np.vstack([_zeros, _yerr_dn, _zeros]).T.flatten()
-        _yerr_up = np.vstack([_zeros, _yerr_up, _zeros]).T.flatten()
+        if _show_yerr_as == 'band':
+            # error band: shade across entire bin width
+            _yerr_dn = np.vstack([_yerr_dn, _yerr_dn, _yerr_dn]).T.flatten()
+            _yerr_up = np.vstack([_yerr_up, _yerr_up, _yerr_up]).T.flatten()
+        else:
+            # errorbars: only show on central point
+            _yerr_dn = np.vstack([_zeros, _yerr_dn, _zeros]).T.flatten()
+            _yerr_up = np.vstack([_zeros, _yerr_up, _zeros]).T.flatten()
         _yerr = [_yerr_dn, _yerr_up]
 
     # shift left and right replicas in x by xerr
     _x += np.vstack([-_xerr_dn, _zeros, _xerr_up]).T.flatten()
 
-    return plt.errorbar(_x, _y, yerr=_yerr, **kwargs)
+    if _show_yerr_as == 'errorbar' or _show_yerr_as is None:
+        return plt.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
+    elif _show_yerr_as == 'band':
+        _capsize = kwargs.pop('capsize', None)
+        _markeredgecolor = kwargs.pop('markeredgecolor', None)
+        return (
+            plt.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, **kwargs),
+            plt.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=0.5)))
 
 
 class PlotProcessor(_ProcessorBase):
