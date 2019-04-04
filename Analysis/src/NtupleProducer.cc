@@ -575,7 +575,7 @@ dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForLeadingJetPair(
                             continue;
 
                         // skip if objects not matched to the same trigger path
-                        if (jet1AssignedPathIdxInConfig != jet1AssignedPathIdxInConfig)
+                        if (jet1AssignedPathIdxInConfig != jet2AssignedPathIdxInConfig)
                             continue;
 
                         if ((jet1MatchedTriggerObject->isHLT()) && (jet2MatchedTriggerObject->isHLT())) {
