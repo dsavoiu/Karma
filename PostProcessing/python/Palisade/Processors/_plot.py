@@ -1,3 +1,4 @@
+import colorsys  # for rgb_to_hls
 import math
 import os
 
@@ -5,11 +6,12 @@ from copy import deepcopy
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as PathEffects
 import numpy as np
 
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatter
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, colorConverter
 
 from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
 from rootpy.plotting.hist import _Hist, _Hist2D
@@ -489,6 +491,10 @@ class PlotProcessor(_ProcessorBase):
                 _kwargs.pop('color', None)
                 _kwargs.pop('xerr', None)
                 _kwargs.pop('yerr', None)
+                # some kwargs must be popped and stored for later use
+                _label_bins_with_content = _kwargs.pop('label_bins_with_content', False)
+                _bin_label_format = _kwargs.pop('bin_label_format', "{:f}")
+                _bin_label_color = _kwargs.pop('bin_label_color', 'k')
             else:
                 _args = [_plot_data['x'], _y_data]
 
@@ -505,6 +511,27 @@ class PlotProcessor(_ProcessorBase):
             # store 2D plots for displaying color bars
             if _plot_method_name == 'pcolormesh':
                 _pad_config.setdefault('2d_plots', []).append(_plot_handle)
+                # add 2D bin annotations, if requested
+                if _label_bins_with_content:
+                    _bin_center_x = 0.5 * (_plot_data['xedges'][1:] + _plot_data['xedges'][:-1])
+                    _bin_center_y = 0.5 * (_plot_data['yedges'][1:] + _plot_data['yedges'][:-1])
+                    _bin_center_xx, _bin_center_yy = np.meshgrid(_bin_center_x, _bin_center_y)
+                    _bin_content = _args[2]
+                    for _row_x_y_content in zip(_bin_center_xx, _bin_center_yy, _bin_content):
+                        for _x, _y, _content in zip(*_row_x_y_content):
+                            # skip masked and invalid bin contents
+                            if not isinstance(_content, np.ma.core.MaskedConstant) and not np.isnan(_content):
+                                if _bin_label_color == 'auto':
+                                    _patch_color_lightness = colorsys.rgb_to_hls(*(_plot_handle.to_rgba(_content)[:3]))[1]
+                                    _text_color = 'w' if _patch_color_lightness < 0.5 else 'k'
+                                else:
+                                    _text_color = _bin_label_color
+                                _ax.text(_x, _y, _bin_label_format.format(_content),
+                                         ha='center', va='center',
+                                         fontsize=16,
+                                         color=_text_color,
+                                         transform=_ax.transData
+                                 )
 
             if _text_file is not None:
                 np.set_printoptions(threshold=np.inf)
