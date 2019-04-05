@@ -2,6 +2,7 @@
 
 <use name="root"/>
 <use name="rootcore"/>
+<use name="yaml-cpp"/>
 
 <use name="boost"/>
 
