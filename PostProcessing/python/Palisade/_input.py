@@ -189,6 +189,33 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
+    def project_y(tobject):
+        """Apply ProjectionY() operation."""
+
+        if hasattr(tobject, 'ProjectionY'):
+            _new_tobject = asrootpy(tobject.ProjectionY(uuid.uuid4().get_hex()))
+        else:
+            raise ValueError("`project_y` not available for object with type {}".format(type(tobject)))
+
+        return _new_tobject
+
+    @staticmethod
+    def diagonal(th2d):
+        """Apply ProjectionX() operation."""
+
+        if hasattr(th2d, 'ProjectionX'):
+            _new_tobject = asrootpy(th2d.ProjectionX(uuid.uuid4().get_hex()))
+        else:
+            raise ValueError("`diagonal` not available for object with type {}".format(type(tobject)))
+
+        for _bp in th2d:
+            if _bp.xyz[0] == _bp.xyz[1]:
+                _new_tobject[_bp.xyz[0]].value = _bp.value
+                _new_tobject[_bp.xyz[0]].error = _bp.error
+
+        return _new_tobject
+
+    @staticmethod
     def yerr(tobject):
         """replace bin value with bin error and set bin error to zero"""
 
@@ -392,19 +419,66 @@ class _ROOTObjectFunctions(object):
         return _new_tobject
 
     @staticmethod
-    def unfold(tobject_reco, th2d_response):
-        """Use TUnfold to unfold a reconstructed spectrum."""
+    def unfold(th1d_input, th2d_response, th1d_marginal_gen, th1d_marginal_reco):
+        """Use TUnfold to unfold a reconstructed spectrum.
+            Parameters:
+                `th1d_input`: measured distribution to unfold
 
-        #_normalized_response = _ROOTObjectFunctions.normalize_x(th2d_response)
+                `th2d_response`: 2D response histogram. Contains event numbers
+                    per (gen, reco) bin **after** rejecting spurious reconstructions
+                    and accounting for losses due to the reco acceptance.
+                    Gen bins should be on the `x` axis.
+                    Overflow/underflow should not be present and will be ignored!
+                    Acceptance losses and spurious reconstructions ("fakes") are
+                    inferred from the difference between the projections of the response
+                    and the full marginal distributions, which are given separately.
+
+                `th1d_marginal_gen`: marginal distribution on gen-level
+                    Contains event numbers per gen bin, **without** accounting for
+                    losses due to detector acceptance. The losses are inferred
+                    by comparing to the projection of the 2D response histogram,
+                    where these losses are accounted for.
+                `th1d_marginal_reco`: marginal distribution on reco-level
+                    Contains event numbers per reco bin, **without** subtracting
+                    spurious reconstructions ("fakes"). The fakes are inferred
+                    by comparing to the projection of the 2D response histogram,
+                    where these fakes are not present.
+
+        """
+
+        # input sanity checks
+        _nbins_gen = th1d_marginal_gen.GetNbinsX()
+        _nbins_reco = th1d_marginal_reco.GetNbinsX()
+        assert(th2d_response.GetNbinsX() == _nbins_gen)
+        assert(th2d_response.GetNbinsY() == _nbins_reco)
+        assert(th2d_response.GetNbinsY() == _nbins_reco)
+
         _th2d_response_clone = asrootpy(th2d_response.Clone())
-        _tobject_reco_clone = asrootpy(tobject_reco.Clone())
+        _th1d_input_clone = asrootpy(th1d_input.Clone())
+
+        # determine relative fake rate per reco. bin
+        _th1d_true_reco = asrootpy(th2d_response.ProjectionY(uuid.uuid4().get_hex()))
+        _th1d_true_fraction_reco = _th1d_true_reco / th1d_marginal_reco
+
+        # determine absolute number of lost events per gen. bin
+        _th1d_accepted_gen = asrootpy(th2d_response.ProjectionX(uuid.uuid4().get_hex()))
+        _th1d_rejected_gen = th1d_marginal_gen - _th1d_accepted_gen
+
+        # correct reco. distribution for fakes using inferred true fraction
+        _th1d_input_clone = _th1d_true_fraction_reco * _th1d_input_clone
 
         # get rid of gen-level underflow/overflow:
         for _bin_proxy in _th2d_response_clone:
-            if _bin_proxy.xyz[0] == 0:
+            # get rid of gen-level underflow/overflow:
+            if _bin_proxy.xyz[0] == 0 or _bin_proxy.xyz[0] == _nbins_gen + 1:
                 _bin_proxy.value = 0
                 _bin_proxy.error = 0
+            # fill losses into y-underflow bins
+            elif _bin_proxy.xyz[1] == 0:
+                _bin_proxy.value = _th1d_rejected_gen[_bin_proxy.xyz[0]].value
+                _bin_proxy.error = _th1d_rejected_gen[_bin_proxy.xyz[0]].error
 
+        # construct TUnfold instance and perform unfolding
         _tunfold = ROOT.TUnfold(
             _th2d_response_clone,
             ROOT.TUnfold.kHistMapOutputHoriz,   # gen-level on x axis
@@ -412,18 +486,22 @@ class _ROOTObjectFunctions(object):
             ROOT.TUnfold.kEConstraintNone,      # no constraints
         )
         _tunfold.SetInput(
-            _tobject_reco_clone
+            _th1d_input_clone
         )
         _tunfold.DoUnfold(0)
 
-        _toutput = th2d_response.ProjectionX(uuid.uuid4().get_hex()) #tobject_reco.Clone()
-        _tunfold.GetOutput(_toutput)
+        _th1d_output = th2d_response.ProjectionX(uuid.uuid4().get_hex()) #tobject_reco.Clone()
+        _tunfold.GetOutput(_th1d_output)
 
         _th2d_response_clone.Delete()
-        _tobject_reco_clone.Delete()
+        _th1d_input_clone.Delete()
+        _th1d_accepted_gen.Delete()
+        _th1d_rejected_gen.Delete()
+        _th1d_true_reco.Delete()
+        _th1d_true_fraction_reco.Delete()
         _tunfold.Delete()
 
-        return asrootpy(_toutput)
+        return asrootpy(_th1d_output)
 
     @staticmethod
     def normalize_to_ref(tobject, tobject_ref):
