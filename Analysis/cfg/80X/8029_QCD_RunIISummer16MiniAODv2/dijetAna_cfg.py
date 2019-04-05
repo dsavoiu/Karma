@@ -4,7 +4,7 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles = "file://{}".format(os.path.realpath("../../../../../../Skimming/test/FullMCSkim/testFullMCSkim_out.root"))
+    options.inputFiles = "file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullMCSkim/testFullMCSkim_out.root")
     options.isData = 0
     options.globalTag = "80X_mcRun2_asymptotic_2016_TrancheIV_v6"
     #options.edmOut="testFullAnalysis_out.root"

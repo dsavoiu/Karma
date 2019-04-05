@@ -16,7 +16,7 @@ if __name__ == "__main__":
         nick="DijetAna_JetHT_Run2016G-Legacy-07Aug2017-v1_2019-02-14",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/DijetAnalysis/Analysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
-        work_directory="_tmpwork",
+        work_directory="/home/{}/work/dijet_ana".format(os.getenv("USER")),
         files_per_job=15,
     )
 

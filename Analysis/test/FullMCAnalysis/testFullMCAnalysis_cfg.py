@@ -2,16 +2,18 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 
 
 # -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullMCSkim/testFullMCSkim_out.root"))
+options.inputFiles="file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullMCSkim/testFullMCSkim_out.root")
 options.isData=0
 options.globalTag="80X_mcRun2_asymptotic_2016_TrancheIV_v6"
 #options.edmOut="testFullAnalysis_out.root"  # no EDM output
 options.maxEvents=-1 #10 #000
 options.dumpPython=1
+options.jecVersion = "Summer16_07Aug2017_V11"
 
 
 # -- must be called at the beginning
 process = createProcess("DIJETANA", num_threads=1)
+
 
 from DijetAnalysis.Analysis.dijetAnalysis_cff import DijetAnalysis
 
@@ -22,7 +24,7 @@ process.TFileService = cms.Service(
     closeFileFast = cms.untracked.bool(True),
 )
 
-ana = DijetAnalysis(process, is_data=options.isData, jec_version="Summer16_07Aug2017_V11")
+ana = DijetAnalysis(process, is_data=options.isData, jec_version=options.jecVersion)
 
 ana.configure()
 

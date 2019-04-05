@@ -4,10 +4,10 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 # -- for testing and debugging
 if not os.getenv("GC_VERSION"):
     # -- override CLI options for test
-    options.inputFiles = "file://{}".format(os.path.realpath(os.path.join(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullSkim/testFullSkim_out.root")))
+    options.inputFiles = "file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullSkim/testFullSkim_out.root")
     options.isData = 1
     options.globalTag = "80X_dataRun2_2016LegacyRepro_v4"
-    #options.edmOut="testSkim_out.root"
+    #options.edmOut="testFullAnalysis_out.root"
     options.maxEvents = 1000
     options.dumpPython = 1
     options.weightForStitching = 1.0

@@ -41,10 +41,10 @@ NUMBER_OF_EVENTS_LOOKUP = {
 if __name__ == "__main__":
 
     _deployer = DijetAnalysisDeployerGC(
-        nick="DijetAna_QCD_RunIISummer16MiniAODv2_2019-02-27",
+        nick="DijetAna_QCD_RunIISummer16MiniAODv2_2019-04-02",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/DijetAnalysis/Analysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
-        work_directory="_tmpwork",
+        work_directory="/home/{}/work/dijet_ana".format(os.getenv("USER")),
         files_per_job=10,
     )
 

@@ -2,12 +2,13 @@ from DijetAnalysis.Core.dijetPrelude_cff import *
 
 
 # -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../../Skimming/test/FullSkim/testFullSkim_out.root"))
+options.inputFiles="file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/DijetAnalysis/Skimming/test/FullSkim/testFullSkim_out.root")
 options.isData=1
 options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
 #options.edmOut="testFullAnalysis_out.root"  # no EDM output
 options.maxEvents=-1 #10 #000
 options.dumpPython=1
+options.jecVersion = "Summer16_07Aug2017GH_V11"
 
 
 # -- must be called at the beginning
@@ -23,9 +24,10 @@ process.TFileService = cms.Service(
     closeFileFast = cms.untracked.bool(True),
 )
 
-ana = DijetAnalysis(process, is_data=options.isData)
+ana = DijetAnalysis(process, is_data=options.isData, jec_version=options.jecVersion)
 
 ana.configure()
+
 
 
 # -- must be called at the end
