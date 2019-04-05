@@ -94,7 +94,7 @@ class LumberjackInterfaceBase(object):
         print "[INFO] Setting up data frame..."
         print "[INFO] Sample file: {}".format(self._args.input_file)
 
-        # exit if input file does not exits exists
+        # exit if input file does not exist
         if not os.path.exists(self._args.input_file):
             print("[ERROR] Input file does not exist: '{}'".format(self._args.input_file))
             exit(1)
@@ -108,7 +108,7 @@ class LumberjackInterfaceBase(object):
         self._df_size = _tree.GetEntries()
         _f.Close()
 
-        print "[INFO] Sample type: {}".format(self._args.type)
+        print "[INFO] Sample type: {}".format(self._args.input_type)
         self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
 
         print "[INFO] Defining ROOT macros..."
@@ -169,19 +169,25 @@ class LumberjackInterfaceBase(object):
             self._df_count.OnPartialResultSlot(self._df_count_increment, getattr(ROOT, _func_slotcallback_fullname))
 
         # -- apply basic analysis selection
-        print "[INFO] Defining quantities..."
-        self._df = apply_defines(self._df_bare, DEFINES['global'])
-        if self._args.type in DEFINES:
-            self._df = apply_defines(self._df, DEFINES[self._args.type])
 
-        _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
+        self._df = self._df_bare  #start from "bare" DataFrame (without defines)
+
+        print "[INFO] Defining quantities..."
+        # "main" quantities (with binning)
+        _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {}))
         self._df = define_quantities(self._df, _quantities)
+
+        # other quantities (only given as expressions, no binning)
+        self._df = apply_defines(self._df, DEFINES['global'])
+        if self._args.input_type in DEFINES:
+            self._df = apply_defines(self._df, DEFINES[self._args.input_type])
 
         if self._args.selections is not None:
             for _sel in self._args.selections:
-                print "[INFO] Applying global selection '{}'...".format(_sel)
                 if _sel not in SELECTIONS:
+                    print "[ERROR] Applying global selection '{}'...".format(_sel)
                     raise ValueError("Unknown selection '{}'".format(_sel))
+                print "[INFO] Applying global selection '{}': {}".format(_sel, ' && '.join(SELECTIONS[_sel]))
                 self._df = apply_filters(self._df, SELECTIONS[_sel])
 
     def _cleanup_data_frame(self):
@@ -313,6 +319,21 @@ class LumberjackInterfaceBase(object):
                     print "[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name)
                     continue
 
+
+                if _hs:
+                    print "[INFO] Requested histograms:"
+                    for _h in _hs:
+                        print "    - {}".format(_h)
+                else:
+                    print "[INFO] Requested histograms: <none>"
+
+                if _ps:
+                    print "[INFO] Requested profiles:"
+                    for _p in _ps:
+                        print "    - {}".format(_p)
+                else:
+                    print "[INFO] Requested profiles: <none>"
+
                 print "[INFO] Setting up PostProcessor..."
                 _pp = PostProcessor(
                     data_frame=self._df,
@@ -375,7 +396,7 @@ class LumberjackInterfaceBase(object):
         _task_spec = dict(
             _filename = self._args.output_file,
             _log_filename = "{}.log".format(self._args.output_file.split('.', 1)[0]) if self._args.log else None,
-            _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {})),
+            _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {})),
             splittings = self._args.SPLITTING_KEY,
             histograms = self._args.histograms,
             profiles = self._args.profiles,
@@ -407,7 +428,7 @@ class LumberjackInterfaceBase(object):
             # add task to queue
             _task_spec['_filename'] = "{}_{}.root".format(_task_name, _suffix)
             _task_spec['_log_filename'] = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
-            _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._args.type, {}))
+            _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {}))
             _tasks.append((_task_name, _task_spec))
 
         if not _tasks:
@@ -500,7 +521,6 @@ class LumberjackCLI(LumberjackInterfaceBase):
             required=True,
             choices=_available_analysis_configs)
         _required_args.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
-        _required_args.add_argument('--type', metavar='TYPE', type=str, help='Sample type. Choices: {%(choices)s}', choices=['data', 'mc'], required=True)
         _required_args.add_argument('--selections', metavar='SELECTION', help='Specification of event selection cuts', nargs='+')
 
         _optional_args = _top_parser.add_argument_group('optional arguments', '')
@@ -516,7 +536,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         # retrieve analysis config (tasks, splittings, quantities, etc.)
         if _analysis_name is not None:
             _analysis_config = importlib.import_module("{}.{}".format(cfg_module.__name__, _analysis_name))
-            for _required_config_key in ('TASKS', 'SPLITTINGS'):
+            for _required_config_key in ('TASKS', 'SPLITTINGS', 'QUANTITIES'):
                 try:
                     getattr(_analysis_config, _required_config_key)
                 except AttributeError:
@@ -524,9 +544,13 @@ class LumberjackCLI(LumberjackInterfaceBase):
                                         "mandatory key '{}' not defined!".format(_analysis_name, _required_config_key))
             TASKS = _analysis_config.TASKS.keys()
             SPLITTINGS = _analysis_config.SPLITTINGS.keys()
+            _allowed_input_types = set(_analysis_config.QUANTITIES.keys()) - {"global"}
         else:
             TASKS = None
             SPLITTINGS = None
+            _allowed_input_types = set()
+
+        _required_args.add_argument('--input-type', metavar='TYPE', type=str, help='Sample type. Choices: {%(choices)s}', choices=_allowed_input_types, required=True)
 
         _subparsers = _top_parser.add_subparsers(help='Operation to perform. Available: {%(choices)s}', dest='subparser_name', metavar='SUBCOMMAND')
         _subparsers.required = True
@@ -536,10 +560,12 @@ class LumberjackCLI(LumberjackInterfaceBase):
         # subcommand 'task' for executing pre-defined tasks
         _parsers['task'] = _subparsers.add_parser('task', help='Perform a pre-defined task')
         _parsers['task'].add_argument('TASK_NAME', type=str, help='Name of task(s) to perform. Choices: {%(choices)s}', nargs='+', choices=TASKS, metavar='TASK')
+        #_parsers['task'].add_argument('--input-type', metavar='TYPE', type=str, help='Sample type Choices: {%(choices)s}', choices=_allowed_input_types, required=True)
         _parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filename(s). If none is provided, the current date is used instead.", default=None)
 
         # subcommand 'freestyle' for manually specifying histograms and profiles
         _parsers['freestyle'] = _subparsers.add_parser('freestyle', help='Specify desired objects by hand')
+        #_parsers['freestyle'].add_argument('--input-type', metavar='TYPE', type=str, help='Sample type Choices: {%(choices)s}', choices=_allowed_input_types, required=True)
         _parsers['freestyle'].add_argument('SPLITTING_KEY', type=str, help='Key(s) which identify the set of cuts used for '
                                            'separating the sample into subsamples. Choices: {%(choices)s}', nargs='+', choices=SPLITTINGS, metavar='SPLITTING')
         _parsers['freestyle'].add_argument('--histograms', metavar='HISTOGRAM', help='Specification of histograms', nargs='+')
