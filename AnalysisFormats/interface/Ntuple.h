@@ -37,6 +37,10 @@ namespace dijet {
         double jet12ystar = UNDEFINED_DOUBLE;
         double jet12yboost = UNDEFINED_DOUBLE;
 
+        // global bin indices for reconstructed jet pair
+        int binIndexJet12PtAve = -1;
+        int binIndexJet12Mass = -1;
+
         // jet PF energy fractions
         double jet1NeutralHadronFraction = UNDEFINED_DOUBLE;
         double jet1ChargedHadronFraction = UNDEFINED_DOUBLE;
@@ -120,6 +124,10 @@ namespace dijet {
         double genJet12YStar = UNDEFINED_DOUBLE;
         double genJet12YBoost = UNDEFINED_DOUBLE;
 
+        // global bin indices for reconstructed jet pair
+        int binIndexGenJet12PtAve = -1;
+        int binIndexGenJet12Mass = -1;
+
         // Matched Gen Jets
         double jet1MatchedGenJetPt = UNDEFINED_DOUBLE;
         double jet1MatchedGenJetEta = UNDEFINED_DOUBLE;
@@ -136,6 +144,10 @@ namespace dijet {
         double jet12MatchedGenJetPairPtAve = UNDEFINED_DOUBLE;
         double jet12MatchedGenJetPairYStar = UNDEFINED_DOUBLE;
         double jet12MatchedGenJetPairYBoost = UNDEFINED_DOUBLE;
+
+        // global bin indices for reconstructed jet pair
+        int binIndexMatchedGenJet12PtAve = -1;
+        int binIndexMatchedGenJet12Mass = -1;
 
     };
     typedef std::vector<dijet::NtupleEntry> Ntuple;

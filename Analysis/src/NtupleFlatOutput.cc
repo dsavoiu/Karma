@@ -67,6 +67,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
     ADD_BRANCH(m_tree, m_productForFill, jet12ptave, D);
     ADD_BRANCH(m_tree, m_productForFill, jet12ystar, D);
     ADD_BRANCH(m_tree, m_productForFill, jet12yboost, D);
+    ADD_BRANCH(m_tree, m_productForFill, binIndexJet12PtAve, I);
+    ADD_BRANCH(m_tree, m_productForFill, binIndexJet12Mass, I);
     ADD_BRANCH(m_tree, m_productForFill, met, D);
     ADD_BRANCH(m_tree, m_productForFill, sumEt, D);
     ADD_BRANCH(m_tree, m_productForFill, hltBits, L);
@@ -112,6 +114,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         ADD_BRANCH(m_tree, m_productForFill, genJet12PtAve, D);
         ADD_BRANCH(m_tree, m_productForFill, genJet12YStar, D);
         ADD_BRANCH(m_tree, m_productForFill, genJet12YBoost, D);
+        ADD_BRANCH(m_tree, m_productForFill, binIndexGenJet12PtAve, I);
+        ADD_BRANCH(m_tree, m_productForFill, binIndexGenJet12Mass, I);
         // gen jets (matched to reco)
         ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPt, D);
         ADD_BRANCH(m_tree, m_productForFill, jet1MatchedGenJetPhi, D);
@@ -125,6 +129,8 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairPtAve, D);
         ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairYStar, D);
         ADD_BRANCH(m_tree, m_productForFill, jet12MatchedGenJetPairYBoost, D);
+        ADD_BRANCH(m_tree, m_productForFill, binIndexMatchedGenJet12PtAve, I);
+        ADD_BRANCH(m_tree, m_productForFill, binIndexMatchedGenJet12Mass, I);
         // QCD subprocess info
         ADD_BRANCH(m_tree, m_productForFill, incomingParton1Flavor, I);
         ADD_BRANCH(m_tree, m_productForFill, incomingParton2Flavor, I);

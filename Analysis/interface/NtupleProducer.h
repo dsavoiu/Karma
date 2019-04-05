@@ -22,6 +22,7 @@
 #include "DijetAnalysis/Core/interface/TriggerEfficienciesProvider.h"
 #include "DijetAnalysis/Core/interface/NPUMeanProvider.h"
 #include "DijetAnalysis/Core/interface/JetIDProvider.h"
+#include "DijetAnalysis/Core/interface/FlexGridBinProvider.h"
 
 // -- output data formats
 #include "DijetAnalysis/AnalysisFormats/interface/Ntuple.h"
@@ -176,6 +177,8 @@ namespace dijet {
 
         /// std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
         std::unique_ptr<NPUMeanProvider> m_npuMeanProvider;
+        std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetPtAve;
+        std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetMass;
 
         // -- handles and tokens
         typename edm::Handle<dijet::Event> dijetEventHandle;

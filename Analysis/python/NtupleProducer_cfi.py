@@ -23,6 +23,10 @@ dijetNtupleProducer = cms.EDProducer(
 
         weightForStitching = cms.double(1.0),
 
+        # YAML files specifying analysis binning
+        flexGridFileDijetPtAve = cms.string("flexgrid_ys_yb_ptave.yml"),
+        flexGridFileDijetMass = cms.string("flexgrid_ys_yb_mass.yml"),
+
         #: vector of PSets, one for each trigger path to consider
         # each PSet contains the following keys:
         #   - name (string):          the (unversioned) name of the trigger path, as it appears in the skim

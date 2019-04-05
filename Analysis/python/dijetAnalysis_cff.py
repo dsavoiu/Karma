@@ -149,6 +149,12 @@ class DijetAnalysis:
                     os.getenv('CMSSW_BASE'),
                     YEAR="2016",
                 ),
+
+                # YAML files specifying analysis binning
+                flexGridFileDijetPtAve = cms.string(
+                    "{}/src/DijetAnalysis/Analysis/data/binning/flexgrid_ys_yb_ptave.yml".format(os.getenv('CMSSW_BASE'))),
+                flexGridFileDijetMass = cms.string(
+                    "{}/src/DijetAnalysis/Analysis/data/binning/flexgrid_ys_yb_mass.yml".format(os.getenv('CMSSW_BASE'))),
             )
         )
 

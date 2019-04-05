@@ -33,6 +33,19 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
                 m_configPSet.getParameter<double>("minBiasCrossSection")
             )
         );
+        std::cout << "Reading nPUMean information from file: " << m_configPSet.getParameter<std::string>("npuMeanFile") << std::endl;
+    }
+
+    // construct FlexGrid bin finders with final analysis binning
+    const auto& flexGridFileDijetPtAve = m_configPSet.getParameter<std::string>("flexGridFileDijetPtAve");
+    if (!flexGridFileDijetPtAve.empty()) {
+        m_flexGridBinProviderDijetPtAve = std::unique_ptr<FlexGridBinProvider>(new FlexGridBinProvider(flexGridFileDijetPtAve));
+        std::cout << "Reading FlexGrid binning information (pT average) from file: " << flexGridFileDijetPtAve << std::endl;
+    }
+    const auto& flexGridFileDijetMass = m_configPSet.getParameter<std::string>("flexGridFileDijetMass");
+    if (!flexGridFileDijetMass.empty()) {
+        m_flexGridBinProviderDijetMass = std::unique_ptr<FlexGridBinProvider>(new FlexGridBinProvider(flexGridFileDijetMass));
+        std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
     }
 
     // -- declare which collections are consumed and create tokens
@@ -235,6 +248,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->genJet12PtAve = 0.5 * (genJet1->p4.pt() + genJet2->p4.pt());
                 outputNtupleEntry->genJet12YStar = 0.5 * (genJet1->p4.Rapidity() - genJet2->p4.Rapidity());
                 outputNtupleEntry->genJet12YBoost = 0.5 * (genJet1->p4.Rapidity() + genJet2->p4.Rapidity());
+
+                double absYStar = std::abs(outputNtupleEntry->genJet12YStar);
+                double absYBoost = std::abs(outputNtupleEntry->genJet12YBoost);
+                if (m_flexGridBinProviderDijetPtAve) {
+                    outputNtupleEntry->binIndexGenJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBin({
+                        absYStar, absYBoost, outputNtupleEntry->genJet12PtAve
+                    });
+                }
+                if (m_flexGridBinProviderDijetMass) {
+                    outputNtupleEntry->binIndexGenJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBin({
+                        absYStar, absYBoost, outputNtupleEntry->genJet12Mass
+                    });
+                }
             }
         }
     }
@@ -330,6 +356,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet12ystar = 0.5 * (jet1->p4.Rapidity() - jet2->p4.Rapidity());
             outputNtupleEntry->jet12yboost = 0.5 * (jet1->p4.Rapidity() + jet2->p4.Rapidity());
 
+            double absYStar = std::abs(outputNtupleEntry->jet12ystar);
+            double absYBoost = std::abs(outputNtupleEntry->jet12yboost);
+            if (m_flexGridBinProviderDijetPtAve) {
+                outputNtupleEntry->binIndexJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBin({
+                    absYStar, absYBoost, outputNtupleEntry->jet12ptave
+                });
+            }
+            if (m_flexGridBinProviderDijetMass) {
+                outputNtupleEntry->binIndexJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBin({
+                    absYStar, absYBoost, outputNtupleEntry->jet12mass
+                });
+            }
+
             // leading jet pair bitsets
             dijet::TriggerBitsets jet12PairTriggerBitsets = getTriggerBitsetsForLeadingJetPair();
             outputNtupleEntry->hltJet12Match = ((jet12PairTriggerBitsets.hltMatches | globalCache()->hltZeroThresholdMask_) & (jet12PairTriggerBitsets.l1Matches | globalCache()->l1ZeroThresholdMask_)).to_ulong();
@@ -342,6 +381,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->jet12MatchedGenJetPairPtAve = 0.5 * (jet1MatchedGenJet->p4.pt() + jet2MatchedGenJet->p4.pt());
                 outputNtupleEntry->jet12MatchedGenJetPairYStar = 0.5 * (jet1MatchedGenJet->p4.Rapidity() - jet2MatchedGenJet->p4.Rapidity());
                 outputNtupleEntry->jet12MatchedGenJetPairYBoost = 0.5 * (jet1MatchedGenJet->p4.Rapidity() + jet2MatchedGenJet->p4.Rapidity());
+
+                double absYStarGenMatched = std::abs(outputNtupleEntry->jet12MatchedGenJetPairYStar);
+                double absYBoostGenMatched = std::abs(outputNtupleEntry->jet12MatchedGenJetPairYBoost);
+                if (m_flexGridBinProviderDijetPtAve) {
+                    outputNtupleEntry->binIndexMatchedGenJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBin({
+                        absYStarGenMatched, absYBoostGenMatched, outputNtupleEntry->jet12MatchedGenJetPairPtAve
+                    });
+                }
+                if (m_flexGridBinProviderDijetMass) {
+                    outputNtupleEntry->binIndexMatchedGenJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBin({
+                        absYStarGenMatched, absYBoostGenMatched, outputNtupleEntry->jet12MatchedGenJetPairMass
+                    });
+                }
             }
         }
     }
