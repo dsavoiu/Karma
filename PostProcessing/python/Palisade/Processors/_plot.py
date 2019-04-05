@@ -235,6 +235,10 @@ class PlotProcessor(_ProcessorBase):
         ncol=1, numpoints=1, fontsize=12, frameon=False,
         loc='upper right'
     )
+    _DEFAULT_LINE_KWARGS = dict(
+        linestyle='--', color='gray', linewidth=1, zorder=-99
+    )
+
 
     def __init__(self, config, output_folder):
         super(PlotProcessor, self).__init__(config, output_folder)
@@ -579,13 +583,27 @@ class PlotProcessor(_ProcessorBase):
                     if _z_label is not None:
                         _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
-            # handle horizontal and vertical lines
+            # handle sets of horizontal lines
             _axhlines = _pad_config.pop('axhlines', [])
-            for _y in _axhlines:
-                _ax.axhline(_y, linestyle='--', color='gray')
+            if not isinstance(_axhlines, list):
+                _axhlines = [_axhlines]
+            for _axhlines_set in _axhlines:
+                if not isinstance(_axhlines_set, dict):
+                    _axhlines = dict(values=_axhlines_set)
+                _ys = _axhlines_set.pop('values')
+                for _y in _ys:
+                    _ax.axhline(_y, **dict(self._DEFAULT_LINE_KWARGS, **_axhlines_set))
+
+            # handle vertical lines
             _axvlines = _pad_config.pop('axvlines', [])
-            for _x in _axvlines:
-                _ax.axvline(_x, linestyle='--', color='gray')
+            if not isinstance(_axvlines, list):
+                _axvlines = [_axvlines]
+            for _axvlines_set in _axvlines:
+                if not isinstance(_axvlines_set, dict):
+                    _axvlines = dict(values=_axvlines_set)
+                _xs = _axvlines_set.pop('values')
+                for _x in _xs:
+                    _ax.axvline(_x, **dict(self._DEFAULT_LINE_KWARGS, **_axvlines_set))
 
             # -- handle plot legend
 
