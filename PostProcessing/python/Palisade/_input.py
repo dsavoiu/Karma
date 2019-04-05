@@ -24,6 +24,15 @@ __all__ = ['InputROOTFile', 'InputROOT']
 class _ROOTObjectFunctions(object):
 
     @staticmethod
+    def get_all():
+        """return all methods not beginning with a '_'"""
+        return {
+            _method : getattr(_ROOTObjectFunctions, _method)
+            for _method in dir(_ROOTObjectFunctions)
+            if not _method.startswith('_') and callable(getattr(_ROOTObjectFunctions, _method))
+        }
+
+    @staticmethod
     def _project_or_clone(tobject, projection_options=None):
 
         if isinstance(tobject, _ProfileBase):
@@ -596,36 +605,14 @@ class InputROOT(object):
     }
 
     # functions which can be applied to ROOT objects
-    functions = {
-        'yerr':                                _ROOTObjectFunctions.yerr,
-        'bin_width':                           _ROOTObjectFunctions.bin_width,
-        'project_x':                           _ROOTObjectFunctions.project_x,
-        'h':                                   _ROOTObjectFunctions.project_x,  # alias
-        'hist':                                _ROOTObjectFunctions.project_x,  # alias
-        'divide':                              _ROOTObjectFunctions.histdivide,
-        'discard_errors':                      _ROOTObjectFunctions.discard_errors,
-        'efficiency':                          _ROOTObjectFunctions.efficiency,
-        'efficiency_graph':                    _ROOTObjectFunctions.efficiency_graph,
-        'apply_efficiency_correction':         _ROOTObjectFunctions.apply_efficiency_correction,
-        'atleast':                             _ROOTObjectFunctions.atleast,
-        'max':                                 _ROOTObjectFunctions.max,
-        'max_val_min_err':                     _ROOTObjectFunctions.max_val_min_err,
-        'max_value_index':                     _ROOTObjectFunctions.max_value_index,
-        'max_yield_index':                     _ROOTObjectFunctions.max_yield_index,
-        'mask_if_less':                        _ROOTObjectFunctions.mask_if_less,
-        'mask_lookup_value':                   _ROOTObjectFunctions.mask_lookup_value,
-        'threshold':                           _ROOTObjectFunctions.threshold,
-        'threshold_by_ref':                    _ROOTObjectFunctions.threshold_by_ref,
-        'normalize_x':                         _ROOTObjectFunctions.normalize_x,
-        'unfold':                              _ROOTObjectFunctions.unfold,
-        'normalize_to_ref':                    _ROOTObjectFunctions.normalize_to_ref,
-        'cumulate':                            _ROOTObjectFunctions.cumulate,
-        'cumulate_reverse':                    _ROOTObjectFunctions.cumulate_reverse,
-        'bin_differences':                     _ROOTObjectFunctions.bin_differences,
-        'bin_ratios':                          _ROOTObjectFunctions.bin_ratios,
-        'select':                              _ROOTObjectFunctions.select,
-        'double_profile':                      _ROOTObjectFunctions.double_profile,
-    }
+    functions = dict(
+        _ROOTObjectFunctions.get_all(),
+        # add some useful aliases
+        **{
+            'h':                                   _ROOTObjectFunctions.project_x,  # alias
+            'hist':                                _ROOTObjectFunctions.project_x,  # alias
+        }
+    )
 
     def __init__(self, files_spec=None):
         """Create the module. A mapping of nicknames to file paths may be specified optionally.
