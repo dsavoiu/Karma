@@ -27,8 +27,12 @@ plt.register_cmap(name='viridis', cmap=viridis)
 
 def _mplrc():
     mpl.rcParams.update({'font.size': 11})
-    mpl.rc('xtick', direction='in', bottom=True, top=True)
-    mpl.rc('ytick', direction='in', left=True, right=True)
+    if int(mpl.__version__.split('.')[0]) >= 2:
+        mpl.rc('xtick', direction='in', bottom=True, top=True)
+        mpl.rc('ytick', direction='in', left=True, right=True)
+    else:
+        mpl.rc('xtick', direction='in')
+        mpl.rc('ytick', direction='in')
     mpl.rc('mathtext', fontset='stixsans', fallback_to_cm=False, rm='sans')
     mpl.rc('axes', labelsize=16)
     mpl.rc('legend', labelspacing=.1, fontsize=8)
