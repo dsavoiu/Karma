@@ -79,7 +79,7 @@ class ContextValue(ConfigurationEntry):
 
 
 class LiteralString(ConfigurationEntry):
-    """Configuration object. Used for strings containing curly braces to avoid test substitution."""
+    """Configuration object. Used for strings containing curly braces to avoid context substitution."""
     __slots__ = ['s']
     def __init__(self, string):
         self.s = string
@@ -102,25 +102,37 @@ class _ProcessorBase(object):
         self._config = config
         self._output_folder = output_folder
 
+    @staticmethod
+    def _resolve_context(dct, context):
+        '''recursively replace string templates and `ConfigurationEntry` with contextual values'''
+        for _k, _v in dct.iteritems():
+            if isinstance(_v, dict):
+                dct[_k] = _ProcessorBase._resolve_context(_v, context)
+            elif isinstance(_v, list):
+                dct[_k] = [_ProcessorBase._resolve_context(_elem, context) if isinstance(_elem, dict) else _elem for _elem in _v]
+            elif isinstance(_v, str):
+                dct[_k] = _v.format(**context)
+            elif isinstance(_v, ConfigurationEntry):
+                dct[_k] = _v.get(context)
+        return dct
+
     def _run_with_context(self, action_method, context):
         for _template in self._config[self.CONFIG_KEY_FOR_TEMPLATES]:
             _config = deepcopy(_template)
 
+            # replace context in top-level keys
             for _k, _v in _config.iteritems():
                 if isinstance(_v, str):
                     _config[_k] = _v.format(**context)
                 elif isinstance(_v, ConfigurationEntry):
                     _config[_k] = _v.get(context)
 
+            # replace context only in children of specific subkeys
             for _subkey_for_context_replacing in self.SUBKEYS_FOR_CONTEXT_REPLACING:
                 if _subkey_for_context_replacing not in _config:
                     continue
                 for _dict_for_subkey in _config[_subkey_for_context_replacing]:
-                    for _k, _v in _dict_for_subkey.iteritems():
-                        if isinstance(_v, str):
-                            _dict_for_subkey[_k] = _v.format(**context)
-                        elif isinstance(_v, ConfigurationEntry):
-                            _dict_for_subkey[_k] = _v.get(context)
+                    _dict_for_subkey = _ProcessorBase._resolve_context(_dict_for_subkey, context)
 
             try:
                 action_method(self, _config)
