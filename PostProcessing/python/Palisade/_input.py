@@ -652,7 +652,6 @@ class InputROOTFile(object):
         self._outstanding_requests = {}
 
 
-
 class InputROOT(object):
     """An input module for accessing objects from multiple ROOT files.
 
@@ -665,10 +664,27 @@ class InputROOT(object):
     Usage example
     -------------
         m = InputROOT()
+
+        # add a file and register a nickname for it
         m.add_file('/path/to/rootfile.root', nickname='file0')
 
+        # optional: request object first (retrieves several objects at once)
         m.request(dict(file_nickname='file0', object_path='MyDirectory/myObject'))
-        my_object = m.get('file0', 'MyDirectory/myObject')
+
+        # retrieve an object from a file
+        my_object = m.get('file0:MyDirectory/myObject')
+
+        # apply simple arithmetical expressions to objects
+        my_sum_object = m.get_expr('"file0:MyDirectory1/myObject1" + "file0:MyDirectory2/myObject2"')
+
+        # use basic functions in expressions
+        my_object_noerrors = m.get_expr('discard_errors("file0:MyDirectory1/myObject1")')
+
+        # register user-defined input functions
+        InputRoot.add_function(my_custom_function)  # `my_custom_function` defined beforehand
+
+        # use function in expression:
+        my_function_result = m.get_expr('my_custom_function("file0:MyDirectory1/myObject1")')
     """
 
 
@@ -682,7 +698,7 @@ class InputROOT(object):
         ast.USub: op.neg
     }
 
-    # functions which can be applied to ROOT objects
+    # input functions (meant to be applied to ROOT objects in files)
     functions = dict(
         _ROOTObjectFunctions.get_all(),
         # add some useful aliases
@@ -719,6 +735,33 @@ class InputROOT(object):
     def _get_file_nickname_and_obj_path(object_spec):
         _file_nickname, _object_path_in_file = object_spec.split(':', 1)
         return _file_nickname, _object_path_in_file
+
+    @classmethod
+    def add_function(cls, function=None, name=None, override=False):
+        '''Register a user-defined input function. Can also be used as a decorator.'''
+        if name is None and function is not None:
+            name = function.__name__
+
+        if not override and name in cls.functions:
+            raise ValueError("Cannot add user-defined ROOT function with name "
+                "'{}': it already exists and `override` not explicitly allowed!".format(function))
+
+        def _decorator(f):
+            # add user-specified function to mapping
+            cls.functions[name or f.__name__] = f
+            return f
+
+        if function is not None:
+            # default decorator call, i.e. '@InputROOT.add_function'
+            return _decorator(function)
+        else:
+            # decorator call with parameters , e.g. '@InputROOT.add_function(override=True)'
+            return _decorator
+
+    @classmethod
+    def get_function(cls, name):
+        '''Retrieve an input function by name. Returns `None` if no such function exists.'''
+        return cls.functions.get(name, None)
 
     def add_file(self, file_path, nickname=None):
         """
