@@ -57,6 +57,20 @@ class Quantity(object):
             return None
         return _nb.keys()
 
+    def iter_bins(self, indices=slice(None)):
+        """Generator function. Yields tuple (lo, hi) of bin edges for each bin. A subset may be obtained by providing a list of indices or a `slice` object."""
+        if isinstance(indices, slice):
+            # can use `slice` object for indexing binnings directly
+            _iter_pairs = zip(self._dict['binning'][:-1][indices], self._dict['binning'][1:][indices])
+        else:
+            # use list comrehensions to iteratr over a subset bins with explicitly given `indices`
+            _iter_pairs = zip(
+                [self._dict['binning'][:-1][_i] for _i in indices],
+                [self._dict['binning'][1:][_i]  for _i in indices])
+
+        for _lo, _hi in _iter_pairs:
+            yield (_lo, _hi)
+
     def get_named_binning(self, key, value):
         """Retrieve a binning (if defined) for the case where the splitting key `key` has value `value`. If none defined, return `None`."""
         _nb = self._dict.get('named_binnings', None)
