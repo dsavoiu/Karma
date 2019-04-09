@@ -1,6 +1,7 @@
 import colorsys  # for rgb_to_hls
 import math
 import os
+import yaml
 
 from copy import deepcopy
 
@@ -296,6 +297,17 @@ class PlotProcessor(_ProcessorBase):
 
         _filename = os.path.join(self._output_folder, config['filename'])
 
+        # prepare dict for YAML dump, if requested
+        _dump_yaml = config.pop('dump_yaml', False)
+        if _dump_yaml:
+            _yaml_filename = '.'.join(_filename.split('.')[:-1]) + '.yml'
+            # need to create directory first
+            _make_directory(os.path.dirname(_yaml_filename))
+            # add input files to dump
+            _config_for_dump = dict(deepcopy(config), input_files=self._config['input_files'])
+        else:
+            _config_for_dump = config  # dummy link to original config
+
         # step 1: create figure and pads
 
         _figsize = config.pop('figsize', None)
@@ -334,8 +346,8 @@ class PlotProcessor(_ProcessorBase):
 
 
         # step 2: retrieve data and plot
-
-        for _pc in config['subplots']:
+        assert len(config['subplots']) == len(_config_for_dump['subplots'])
+        for _pc, _pc_for_dump in zip(config['subplots'], _config_for_dump['subplots']):
             _kwargs = deepcopy(_pc)
 
             # obtain and validate pad ID
@@ -537,6 +549,14 @@ class PlotProcessor(_ProcessorBase):
                                          transform=_ax.transData
                                  )
 
+            # write results to config dict that will be dumped
+            if _dump_yaml:
+                _pc_for_dump['plot_args'] = dict(
+                    # prevent dumping numpy arrays as binary
+                    args=[_a.tolist() if isinstance(_a, np.ndarray) else _a for _a in _args],
+                    **{_kw : _val.tolist() if isinstance(_val, np.ndarray) else _val for _kw, _val in _kwargs.iteritems()}
+                )
+
             if _text_file is not None:
                 np.set_printoptions(threshold=np.inf)
                 _text_file.write("- {}(\n\t{},\n\t{}\n)\n".format(
@@ -713,6 +733,11 @@ class PlotProcessor(_ProcessorBase):
         _make_directory(os.path.dirname(_filename))
         _fig.savefig('{}'.format(_filename))
         #plt.close(_fig)  # close figure to save memory
+
+        # dump YAML to file, if requested
+        if _dump_yaml:
+            with open(_yaml_filename, 'w') as _yaml_file:
+                yaml.dump(_config_for_dump, _yaml_file)
 
         # de-register all the locals after a plot is done
         self._input_controller.clear_locals()
