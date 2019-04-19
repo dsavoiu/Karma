@@ -5,6 +5,8 @@ import numpy as np
 from copy import deepcopy
 
 
+__all__ = ['Quantity', 'apply_defines', 'apply_filters', 'define_quantities']
+
 class Quantity(object):
 
     __slots__ = ('_dict',)

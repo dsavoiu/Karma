@@ -194,6 +194,10 @@ class PalisadeCLI(object):
             _task_cli_args = _task_cli_parser.parse_args(sys.argv[4:])
 
             return _task_cli_args, _task_module
+        else:
+            # no subcommand specified, presumably called for help only
+            _pre_parser.print_help()
+            _pre_parser.exit()
 
     # -- public API
 
