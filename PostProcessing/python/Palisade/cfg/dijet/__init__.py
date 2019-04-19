@@ -1,2 +1,3 @@
 from .definitions import *
-from .templates import *
+
+import tasks
