@@ -775,13 +775,14 @@ class InputROOT(object):
         # determine real (absolute) path for file
         _file_realpath = os.path.realpath(file_path)
 
-        # register nickname
+        # register file name (as given) as file nickname
+        self._file_nick_to_realpath[file_path] = _file_realpath
+
+        # register nickname (if given)
         if nickname is not None:
             if nickname in self._file_nick_to_realpath:
                 raise ValueError("Cannot add file for nickname '{}': nickname already registered for file '{}'".format(nickname, filename))
             self._file_nick_to_realpath[nickname] = _file_realpath
-            # also register filename (or relative file path) as alternative nickname
-            self._file_nick_to_realpath[file_path] = _file_realpath
 
         # create controller for file
         if _file_realpath not in self._input_controllers:
