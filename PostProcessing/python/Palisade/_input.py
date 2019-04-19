@@ -423,30 +423,37 @@ class _ROOTObjectFunctions(object):
 
     @staticmethod
     def unfold(th1d_input, th2d_response, th1d_marginal_gen, th1d_marginal_reco):
-        """Use TUnfold to unfold a reconstructed spectrum.
-            Parameters:
-                `th1d_input`: measured distribution to unfold
+        """
+        Use TUnfold to unfold a reconstructed spectrum.
 
-                `th2d_response`: 2D response histogram. Contains event numbers
-                    per (gen, reco) bin **after** rejecting spurious reconstructions
-                    and accounting for losses due to the reco acceptance.
-                    Gen bins should be on the `x` axis.
-                    Overflow/underflow should not be present and will be ignored!
-                    Acceptance losses and spurious reconstructions ("fakes") are
-                    inferred from the difference between the projections of the response
-                    and the full marginal distributions, which are given separately.
+        Parameters
+        ----------
+            th1d_input : `ROOT.TH1D`
+                measured distribution to unfold
 
-                `th1d_marginal_gen`: marginal distribution on gen-level
-                    Contains event numbers per gen bin, **without** accounting for
-                    losses due to detector acceptance. The losses are inferred
-                    by comparing to the projection of the 2D response histogram,
-                    where these losses are accounted for.
-                `th1d_marginal_reco`: marginal distribution on reco-level
-                    Contains event numbers per reco bin, **without** subtracting
-                    spurious reconstructions ("fakes"). The fakes are inferred
-                    by comparing to the projection of the 2D response histogram,
-                    where these fakes are not present.
+            th2d_response :`ROOT.TH2D`
+                2D response histogram. Contains event numbers
+                per (gen, reco) bin **after** rejecting spurious reconstructions
+                and accounting for losses due to the reco acceptance.
+                Gen bins should be on the `x` axis.
+                Overflow/underflow should not be present and will be ignored!
+                Acceptance losses and spurious reconstructions ("fakes") are
+                inferred from the difference between the projections of the response
+                and the full marginal distributions, which are given separately.
 
+            th1d_marginal_gen : `ROOT.TH1D`
+                marginal distribution on gen-level
+                Contains event numbers per gen bin, **without** accounting for
+                losses due to detector acceptance. The losses are inferred
+                by comparing to the projection of the 2D response histogram,
+                where these losses are accounted for.
+
+            th1d_marginal_reco : `ROOT.TH1D`
+                marginal distribution on reco-level
+                Contains event numbers per reco bin, **without** subtracting
+                spurious reconstructions ("fakes"). The fakes are inferred
+                by comparing to the projection of the 2D response histogram,
+                where these fakes are not present.
         """
 
         # input sanity checks
@@ -565,8 +572,8 @@ class InputROOTFile(object):
     simultaneously and cached on the first subsequent call to `get()`.
     The file will thus only be opened once.
 
-    Usage example
-    -------------
+    Usage example:
+
         m = InputROOTFile('/path/to/rootfile.root')
 
         m.request(dict(object_path='MyDirectory/myObject'))
@@ -665,34 +672,10 @@ class InputROOT(object):
 
     A nickname can be registered for each file, which then allows
     object retrieval by prefixing it to the object path
-    (i.e. '<file_nickname>:<object_path_in_file>').
+    (i.e. ``<file_nickname>:<object_path_in_file>``).
 
-    Single-file functionality is delegated to child `InputROOTFile` objects.
-
-    Usage example
-    -------------
-        m = InputROOT()
-
-        # add a file and register a nickname for it
-        m.add_file('/path/to/rootfile.root', nickname='file0')
-
-        # optional: request object first (retrieves several objects at once)
-        m.request(dict(file_nickname='file0', object_path='MyDirectory/myObject'))
-
-        # retrieve an object from a file
-        my_object = m.get('file0:MyDirectory/myObject')
-
-        # apply simple arithmetical expressions to objects
-        my_sum_object = m.get_expr('"file0:MyDirectory1/myObject1" + "file0:MyDirectory2/myObject2"')
-
-        # use basic functions in expressions
-        my_object_noerrors = m.get_expr('discard_errors("file0:MyDirectory1/myObject1")')
-
-        # register user-defined input functions
-        InputRoot.add_function(my_custom_function)  # `my_custom_function` defined beforehand
-
-        # use function in expression:
-        my_function_result = m.get_expr('my_custom_function("file0:MyDirectory1/myObject1")')
+    Single-file functionality is delegated to child
+    :py:class:`~DijetAnalysis.PostProcessing.Palisade.InputROOTFile` objects.
     """
 
 
@@ -717,12 +700,40 @@ class InputROOT(object):
     )
 
     def __init__(self, files_spec=None):
-        """Create the module. A mapping of nicknames to file paths may be specified optionally.
-
+        """
         Parameters
         ----------
+            files_spec : `dict`, optional
+                specification of file nicknames (keys) and paths pointed to (values).
+                Can be omitted (files can be added later via
+                :py:class:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.add_file`)
 
-            files_spec [optional]: dict specifying file nicknames (keys) and paths pointed to (values)
+        Usage example:
+
+        .. code:: python
+
+            m = InputROOT()
+
+            # add a file and register a nickname for it
+            m.add_file('/path/to/rootfile.root', nickname='file0')
+
+            # optional: request object first (retrieves several objects at once)
+            m.request(dict(file_nickname='file0', object_path='MyDirectory/myObject'))
+
+            # retrieve an object from a file
+            my_object = m.get('file0:MyDirectory/myObject')
+
+            # apply simple arithmetical expressions to objects
+            my_sum_object = m.get_expr('"file0:MyDirectory1/myObject1" + "file0:MyDirectory2/myObject2"')
+
+            # use basic functions in expressions
+            my_object_noerrors = m.get_expr('discard_errors("file0:MyDirectory1/myObject1")')
+
+            # register user-defined input functions
+            InputRoot.add_function(my_custom_function)  # `my_custom_function` defined beforehand
+
+            # use function in expression:
+            my_function_result = m.get_expr('my_custom_function("file0:MyDirectory1/myObject1")')
         """
         self._input_controllers = {}
         self._file_nick_to_realpath = {}
@@ -746,7 +757,65 @@ class InputROOT(object):
 
     @classmethod
     def add_function(cls, function=None, name=None, override=False):
-        '''Register a user-defined input function. Can also be used as a decorator.'''
+        '''Register a user-defined input function. Can also be used as a decorator.
+
+        .. note::
+
+            Functions are registered **globally** in the ``InputROOT`` **class** and are
+            immediately available to all ``InputROOT`` instances.
+
+        Parameters
+        ----------
+            function : `function`, optional
+                function or method to add. Can be omitted when used as a decorator.
+            name : `str`, optional
+                function name. If not given, taken from ``function.__name__``
+            override : `bool`, optional
+                if ``True``, allow existing functions to be overridden (*default*: ``False``)
+
+        Usage examples:
+
+
+            * as a simple decorator:
+
+            .. code:: python
+
+                @InputROOT.add_function
+                def my_function(rootpy_object):
+                    ...
+
+            * to override a function that has already been registered:
+
+            .. code:: python
+
+                @InputROOT.add_function(override=True)
+                def my_function(rootpy_object):
+                    ...
+
+            * to register a function under a different name:
+
+            .. code:: python
+
+                @InputROOT.add_function(name='short_name')
+                def very_long_fuction_name_we_do_not_want_to_use_in_expressions(rootpy_object):
+                    ...
+
+            * as a method:
+
+            .. code:: python
+
+                InputROOT.add_function(my_function)
+
+        .. note::
+
+            All *Palisade* processors (and especially the
+            :py:class:`~DijetAnalysis.PostProcessing.Lumberjack.PlotProcessor`)
+            expect the objects returned by functions to
+            be valid *rootpy* objects. When implementing user-defined functions,
+            make sure to convert "naked" ROOT (PyROOT) objects by wrapping
+            them in :py:func:`rootpy.asrootpy` before returning them.
+
+        '''
         if name is None and function is not None:
             name = function.__name__
 
@@ -768,7 +837,7 @@ class InputROOT(object):
 
     @classmethod
     def get_function(cls, name):
-        '''Retrieve an input function by name. Returns `None` if no such function exists.'''
+        '''Retrieve a defined input function by name. Returns `None` if no such function exists.'''
         return cls.functions.get(name, None)
 
     def add_file(self, file_path, nickname=None):
@@ -777,7 +846,10 @@ class InputROOT(object):
 
         Parameters
         ----------
-            file_path : string (path to ROOT file)
+            file_path : `str`
+                path to ROOT file
+            nickname : `str`, optional
+                file nickname. If not given, ``file_path`` will be used
         """
 
         # determine real (absolute) path for file
@@ -799,11 +871,22 @@ class InputROOT(object):
 
     def get(self, object_spec):
         """
-        Get an object.
+        Get an object from one of the registered files.
+
+        .. tip::
+
+            If calling :py:meth:`get` on multiple objects (e.g. in a loop), consider
+            issuing a
+            :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.request`
+            call for all objects beforehand. The first call to :py:meth:`get` will
+            then retrieve all requested objects in one go, opening and closing
+            the file only once.
 
         Parameters
         ----------
-            object_spec : string, path to resource in ROOT file (e.g. "file_nickname:directory/object")
+            object_spec : `str`
+                file nickname and path to object in ROOT file, separated by
+                a colon, e.g. :py:data:`"file_nickname:directory/object"`
         """
         _file_nickname, _object_path_in_file = self._get_file_nickname_and_obj_path(object_spec)
         _ic = self._get_input_controller_for_file(_file_nickname)
@@ -812,23 +895,30 @@ class InputROOT(object):
 
     def request(self, request_specs):
         """
-        Request an object. Requested objects are all retrieved in one
-        go when one of them is retrived via 'get()'
-
-        `request_specs` must be a list of dicts specifying requests for
-        objects from files.
-
-        A request dict must have either a key `object_spec`, which contains both the
-        file nickname and the path to the object within the file, or two keys
-        `file_nickname` and `object_path` specifying these separately.
-
-        The following requests behave identically:
-            * dict(file_nickname='file0', object_path="directory/object")
-            * dict(object_spec="file0:directory/object")
+        Request objects from the registered files. Requests for objects
+        are stored until
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.get`
+        is called for one of the objects.
+        All requested objects are then be retrieved in one go and
+        cached.
 
         Parameters
         ----------
-            request_specs : list of dict
+            request_specs : `list` of `dict`
+                each `dict` represents a request for *one* object from
+                *one* file.
+
+        A request dict must have either a key :py:const:`object_spec`, which
+        contains both the file nickname and the path to the object
+        within the file (separated by a colon, ``:``), or two keys
+        :py:const:`file_nickname` and :py:const:`object_path` specifying these
+        separately.
+
+        The following requests behave identically:
+
+            * :py:data:`dict(file_nickname='file0', object_path="directory/object")`
+            * :py:data:`dict(object_spec="file0:directory/object")`
+
         """
         _delegations = {}
         for request_spec in request_specs:
@@ -853,7 +943,80 @@ class InputROOT(object):
 
     def get_expr(self, expr, allow_locals=True):
         """
-        Perform basic arithmetic on objects and return result
+        Evaluate an expression involving objects retrieved from file(s).
+
+        The string given must be a valid Python expression.
+        All strings contained in the expression are interpreted as
+        specifications of objects in files (see
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.get`
+        for the object specification syntax).
+        Before the expression is evaluated, all strings are replaced
+        by the objects they refer to.
+
+        .. note::
+            Currently there is no straightforward way of having
+            *literal strings* in expressions (e.g. as arguments to functions),
+            since all of them are interpreted as object specifications
+            indiscriminately.
+            If absolutely needed, registering a string-valued local
+            variable via
+            :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
+            could be used to overcome this limitation.
+
+        .. todo::
+            Fix this.
+
+        Any *functions* called in the expression must have been defined
+        beforehand using
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.add_function`.
+
+        All *Python identifiers* used in the expression are interpreted as local
+        variables. They must be declared via
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
+        before calling this method.
+
+        Parameters
+        ----------
+            expr : `str`
+                valid Python expression
+            allow_locals : `str`, optional
+                interpret all non-function names in `expr` as local variables.
+                These must have been defined via
+                :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
+                before calling this method. If :py:const:`False`, a :py:exc:`NameError`
+                will be raised
+
+        Usage examples:
+
+        .. code:: python
+
+            my_result = my_input_root.get_expr(
+                'my_function('                      # this function gets called
+                    '"my_file:path/to/my_object",'  # this gets replaced by ROOT object
+                    '42'                            # this argument is passed literally
+                ')'
+            )
+
+        .. code:: python
+
+            # register a local variable and assign it a value
+            my_input_root.register_local('local_variable', 42)
+
+            my_result = my_input_root.get_expr(
+                'my_function('                      # this function gets called
+                    '"my_file:path/to/my_object",'  # this gets replaced by ROOT object
+                    'local_variable,'               # this gets replaced by its assigned value
+                ')'
+            )
+
+        .. tip::
+
+            Writing expressions inside a single string can get very convoluted.
+            To maintain legiblity, the expression string can be spread out on
+            several lines, by taking advantage of Python's automatic string concatenation
+            inside parentheses (see above). Alternatively, triple-quoted strings
+            can be used.
+
         """
         expr = expr.strip()   # extraneous spaces otherwise interpreted as indentation
         self._request_all_objects_in_expression(expr)
@@ -876,6 +1039,17 @@ class InputROOT(object):
         self.request(_reqs)
 
     def register_local(self, name, value):
+        """
+        Register a local variable to be used when evaluating an expression using
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.get_expr`
+
+        Parameters
+        ----------
+            name : `str`
+                valid Python identifier. Must not have been registered before.
+            value :
+                any Python object to be made accessible in expressions under :py:const:`name`.
+        """
         try:
             assert name not in self._locals
         except AssertionError as e:
@@ -884,6 +1058,10 @@ class InputROOT(object):
         self._locals[name] = value
 
     def clear_locals(self):
+        """
+        Clear all locals defined via
+        :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`.
+        """
         self._locals = dict()
 
     def _eval(self, node, operators, functions, allow_locals):

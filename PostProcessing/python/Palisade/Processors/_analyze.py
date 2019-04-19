@@ -33,7 +33,12 @@ __all__ = ['AnalyzeProcessor']
 
 
 class AnalyzeProcessor(_ProcessorBase):
-    """Processor for analyzing objects from ROOT files. A ROOT file is written"""
+    """Processor for analyzing objects from ROOT files.
+    The resulting objects are written to one or more output ROOT files.
+
+    .. todo::
+        API documentation
+    """
 
     CONFIG_KEY_FOR_TEMPLATES = "tasks"
     SUBKEYS_FOR_CONTEXT_REPLACING = ["subtasks"]

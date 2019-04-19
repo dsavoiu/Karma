@@ -102,6 +102,16 @@ class _ProcessorBase(object):
     _ACTIONS = []
 
     def __init__(self, config, output_folder):
+        """Initialize the processor.
+
+        Parameters
+        ----------
+
+            config : `dict`
+                processor configuration
+            output_folder : `str`
+                directory in which to place the output files produced by this task
+        """
         self._config = config
         self._output_folder = output_folder
 
@@ -156,6 +166,14 @@ class _ProcessorBase(object):
     # -- public API
 
     def run(self, show_progress=True):
+        """Run the processor.
+
+        Parameters
+        ----------
+
+            show_progress : `bool`
+                if :py:const:`True`, a progress bar will be shown
+        """
         # -- run over cross product of expansion
 
         # go through each configured action

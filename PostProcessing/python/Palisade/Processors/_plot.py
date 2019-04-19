@@ -197,7 +197,11 @@ def _plot_as_step(ax, *args, **kwargs):
 
 
 class PlotProcessor(_ProcessorBase):
-    """Processor for plotting objects from ROOT files"""
+    """Processor for plotting objects from ROOT files.
+
+    .. todo::
+        API documentation.
+    """
 
     CONFIG_KEY_FOR_TEMPLATES = "figures"
     SUBKEYS_FOR_CONTEXT_REPLACING = ["subplots", "pads", "texts"]
@@ -760,6 +764,8 @@ class PlotProcessor(_ProcessorBase):
     # -- additional public API
 
     def clear_figures(self):
+        """Close all figures created while running this processor."""
+
         for _fign, _fig in six.iteritems(self._figures):
             plt.close(_fig)
         self._figures = {}
