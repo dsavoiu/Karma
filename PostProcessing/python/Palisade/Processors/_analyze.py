@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import math
 import os
 import ROOT
@@ -62,7 +64,7 @@ class AnalyzeProcessor(_ProcessorBase):
         for _subplot_cfg in config['subtasks']:
             request_params = dict(self._global_request_params, **_subplot_cfg.get('request_params', {}))
             self._input_controller._request_all_objects_in_expression(_subplot_cfg['expression'], **request_params)
-            #print 'REQ', _subplot_cfg['expression']
+            #print('REQ', _subplot_cfg['expression'])
 
     def _process(self, config):
         '''process all tasks'''
@@ -93,7 +95,7 @@ class AnalyzeProcessor(_ProcessorBase):
                     pass
                 _plot_object.Write()
 
-                #print "{} -> {}".format(_expression, _output_path)
+                #print("{} -> {}".format(_expression, _output_path))
 
     def _close_files(self, config):
         '''close all files opened by expanded configs'''

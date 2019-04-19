@@ -1,7 +1,10 @@
+from __future__ import print_function
+
 import abc
 import ast
 import itertools
 import os
+import six
 
 from copy import deepcopy
 from tqdm import tqdm
@@ -105,7 +108,7 @@ class _ProcessorBase(object):
     @staticmethod
     def _resolve_context(dct, context):
         '''recursively replace string templates and `ConfigurationEntry` with contextual values'''
-        for _k, _v in dct.iteritems():
+        for _k, _v in six.iteritems(dct):
             if isinstance(_v, dict):
                 dct[_k] = _ProcessorBase._resolve_context(_v, context)
             elif isinstance(_v, list):
@@ -121,7 +124,7 @@ class _ProcessorBase(object):
             _config = deepcopy(_template)
 
             # replace context in top-level keys
-            for _k, _v in _config.iteritems():
+            for _k, _v in six.iteritems(_config):
                 if isinstance(_v, str):
                     _config[_k] = _v.format(**context)
                 elif isinstance(_v, ConfigurationEntry):
@@ -137,7 +140,7 @@ class _ProcessorBase(object):
             try:
                 action_method(self, _config)
             except Exception as e:
-                print "{} encountered while processing job with config: {}".format(e.__class__.__name__, _config)
+                print("{} encountered while processing job with config: {}".format(e.__class__.__name__, _config))
                 raise
 
     # -- public API

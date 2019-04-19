@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import ast
 import collections
 import ROOT
@@ -5,6 +7,7 @@ import numpy as np
 import operator as op
 import os
 import pandas as pd
+import six
 import uuid
 
 from array import array
@@ -183,7 +186,7 @@ class _ROOTObjectFunctions(object):
         if hasattr(tobject, 'ProjectionX'):
             _new_tobject = asrootpy(tobject.ProjectionX(uuid.uuid4().get_hex()))
         else:
-            print "[INFO] `project_x` not available for object with type {}".format(type(tobject))
+            print("[INFO] `project_x` not available for object with type {}".format(type(tobject)))
             return tobject
 
         return _new_tobject
@@ -582,13 +585,13 @@ class InputROOTFile(object):
 
         # process outstanding requests
         with root_open(self._filename) as _tfile:
-            for tobj_path, request_spec in self._outstanding_requests.iteritems():
+            for tobj_path, request_spec in six.iteritems(self._outstanding_requests):
                 _rebin_factor = request_spec.pop('rebin_factor', None)
                 _profile_error_option = request_spec.pop('profile_error_option', None)
 
                 _tobj = _tfile.Get(tobj_path)
                 _tobj.SetDirectory(0)
-                #print tobj_path, _tobj
+                #print(tobj_path, _tobj)
 
                 # aply rebinning (if requested)
                 if _rebin_factor is not None:
@@ -720,7 +723,7 @@ class InputROOT(object):
         self._file_nick_to_realpath = {}
         self._locals = {}
         if files_spec is not None:
-            for _nickname, _file_path in files_spec.iteritems():
+            for _nickname, _file_path in six.iteritems(files_spec):
                 self.add_file(_file_path, nickname=_nickname)
 
     def _get_input_controller_for_file(self, file_spec):
@@ -838,7 +841,7 @@ class InputROOT(object):
                 _delegations[_file_nickname] = []
             _delegations[_file_nickname].append(dict(object_path=_object_path_in_file, **request_spec))
 
-        for _file_nickname, _requests in _delegations.iteritems():
+        for _file_nickname, _requests in six.iteritems(_delegations):
             _ic = self._get_input_controller_for_file(_file_nickname)
             _ic.request(_requests)
 
@@ -871,7 +874,7 @@ class InputROOT(object):
         try:
             assert name not in self._locals
         except AssertionError as e:
-            print "[ERROR] Can't set local '{}' to '{}'! It already exists and is: {}".format(name, value, self._locals[name])
+            print("[ERROR] Can't set local '{}' to '{}'! It already exists and is: {}".format(name, value, self._locals[name]))
             raise e
         self._locals[name] = value
 
@@ -880,7 +883,7 @@ class InputROOT(object):
 
     def _eval(self, node, operators, functions, allow_locals):
         """Evaluate an AST node"""
-        #print "Call _eval. allow_locals={}".format(allow_locals)
+        #print("Call _eval. allow_locals={}".format(allow_locals))
         if node is None:
             return None
         elif isinstance(node, ast.Name): # <string> : array column
@@ -892,16 +895,16 @@ class InputROOT(object):
                 if isinstance(_local, list):
                     _retlist = []
                     for _local_el in _local:
-                        #print "trying: {}".format(_local_el)
+                        #print("trying: {}".format(_local_el))
                         try:
                             _ret_el = self.get_expr(_local_el, allow_locals=False)
                         except Exception as e:
-                            #print "Failed!"
-                            #print dir(e.args)
+                            #print("Failed!")
+                            #print(dir(e.args))
                             #raise
                             _retlist.append(123.0)
                         else:
-                            #print "Success!"
+                            #print("Success!")
                             _retlist.append(_ret_el)
                     #return [self.get_expr(_local_el, allow_locals=False) for _local_el in _local]
                     return _retlist

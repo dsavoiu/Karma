@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import abc
 import argparse
 import datetime
@@ -87,12 +89,12 @@ class LumberjackInterfaceBase(object):
 
         # -- enable multithreading
         if int(self._args.jobs) > 1:
-            print "[INFO] Enabling multithreading with {} threads...".format(self._args.jobs)
+            print("[INFO] Enabling multithreading with {} threads...".format(self._args.jobs))
             ROOT.ROOT.EnableImplicitMT(int(self._args.jobs))
 
         # -- set up data frame
-        print "[INFO] Setting up data frame..."
-        print "[INFO] Sample file: {}".format(self._args.input_file)
+        print("[INFO] Setting up data frame...")
+        print("[INFO] Sample file: {}".format(self._args.input_file))
 
         # exit if input file does not exist
         if not os.path.exists(self._args.input_file):
@@ -108,10 +110,10 @@ class LumberjackInterfaceBase(object):
         self._df_size = _tree.GetEntries()
         _f.Close()
 
-        print "[INFO] Sample type: {}".format(self._args.input_type)
+        print("[INFO] Sample type: {}".format(self._args.input_type))
         self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
 
-        print "[INFO] Defining ROOT macros..."
+        print("[INFO] Defining ROOT macros...")
 
         ROOT.gInterpreter.Declare(ROOT_MACROS)
 
@@ -125,7 +127,7 @@ class LumberjackInterfaceBase(object):
 
         # -- limit the number of processed events
         if self._args.num_events >= 0:
-            print "[INFO] Limiting number of processed events to: ".format(self._args.num_events)
+            print("[INFO] Limiting number of processed events to: ".format(self._args.num_events))
             self._df_bare = self._df_bare.Range(0, int(self._args.num_events))
             self._df_size = min(self._df_size, int(self._args.num_events))
             self._df_count_increment = max(self._df_size//100, 10)
@@ -172,7 +174,7 @@ class LumberjackInterfaceBase(object):
 
         self._df = self._df_bare  #start from "bare" DataFrame (without defines)
 
-        print "[INFO] Defining quantities..."
+        print("[INFO] Defining quantities...")
         # "main" quantities (with binning)
         _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {}))
         self._df = define_quantities(self._df, _quantities)
@@ -185,9 +187,9 @@ class LumberjackInterfaceBase(object):
         if self._args.selections is not None:
             for _sel in self._args.selections:
                 if _sel not in SELECTIONS:
-                    print "[ERROR] Applying global selection '{}'...".format(_sel)
+                    print("[ERROR] Applying global selection '{}'...".format(_sel))
                     raise ValueError("Unknown selection '{}'".format(_sel))
-                print "[INFO] Applying global selection '{}': {}".format(_sel, ' && '.join(SELECTIONS[_sel]))
+                print("[INFO] Applying global selection '{}': {}".format(_sel, ' && '.join(SELECTIONS[_sel])))
                 self._df = apply_filters(self._df, SELECTIONS[_sel])
 
     def _cleanup_data_frame(self):
@@ -268,7 +270,7 @@ class LumberjackInterfaceBase(object):
                 continue
 
             with log_stdout_to_file(_task_spec['_log_filename']):
-                print "[INFO] Running task '{}'...".format(_task_name)
+                print("[INFO] Running task '{}'...".format(_task_name))
 
                 # apply defines, basic selection, etc.
                 self._prepare_data_frame()
@@ -316,25 +318,25 @@ class LumberjackInterfaceBase(object):
                 _ps = _task_spec.get('profiles', None)
 
                 if _hs is None and _ps is None:
-                    print "[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name)
+                    print("[ERROR] No `histograms` or `profiles` configured for task '{}': skipping...".format(_task_name))
                     continue
 
 
                 if _hs:
-                    print "[INFO] Requested histograms:"
+                    print("[INFO] Requested histograms:")
                     for _h in _hs:
-                        print "    - {}".format(_h)
+                        print("    - {}".format(_h))
                 else:
-                    print "[INFO] Requested histograms: <none>"
+                    print("[INFO] Requested histograms: <none>")
 
                 if _ps:
-                    print "[INFO] Requested profiles:"
+                    print("[INFO] Requested profiles:")
                     for _p in _ps:
-                        print "    - {}".format(_p)
+                        print("    - {}".format(_p))
                 else:
-                    print "[INFO] Requested profiles: <none>"
+                    print("[INFO] Requested profiles: <none>")
 
-                print "[INFO] Setting up PostProcessor..."
+                print("[INFO] Setting up PostProcessor...")
                 _pp = PostProcessor(
                     data_frame=self._df,
                     splitting_spec=_combined_splittings,
@@ -351,29 +353,29 @@ class LumberjackInterfaceBase(object):
 
                 _n_subdiv = np.prod([len(_splitting) for _splitting in _splitting_specs.values()])
 
-                print "[INFO] Running Task '{}':".format(_task_name)
-                print "    - splitting RDataFrame by keys: {}".format(
+                print("[INFO] Running Task '{}':".format(_task_name))
+                print("    - splitting RDataFrame by keys: {}".format(
                     ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in _splitting_specs.iteritems()])
-                )
-                print "        -> total number of subdivisions: {}\n".format(_n_subdiv)
-                print "    - requested number of objects per subdivision: {}\n".format(_n_obj)
-                print "    -> total number of objects: {}\n".format(_n_obj * _n_subdiv)
-                print "    - output file: {}".format(_task_spec['_filename'])
+                ))
+                print("        -> total number of subdivisions: {}\n".format(_n_subdiv))
+                print("    - requested number of objects per subdivision: {}\n".format(_n_obj))
+                print("    -> total number of objects: {}\n".format(_n_obj * _n_subdiv))
+                print("    - output file: {}".format(_task_spec['_filename']))
 
                 # run PostProcessor and time execution
                 with Timer(_task_name) as _t:
                     if self._args.dry_run:
-                        print "[INFO] `--dry-run` has been specified: not running task '{}'".format(_task_name)
+                        print("[INFO] `--dry-run` has been specified: not running task '{}'".format(_task_name))
                         time.sleep(0.1)
                     else:
                         _pp.run(output_file_path=_task_spec['_filename'])
 
                 # print report
                 if not self._args.dry_run:
-                    print "[INFO] Processed a total of {} events.".format(self._df_count.GetValue())
+                    print("[INFO] Processed a total of {} events.".format(self._df_count.GetValue()))
                 _t.report()
 
-                print "[INFO] Cleaning up after task '{}'...".format(_task_name)
+                print("[INFO] Cleaning up after task '{}'...".format(_task_name))
                 self._cleanup_data_frame()
 
 
@@ -432,7 +434,7 @@ class LumberjackInterfaceBase(object):
             _tasks.append((_task_name, _task_spec))
 
         if not _tasks:
-            print "[INFO] No tasks in queue. Exiting..."
+            print("[INFO] No tasks in queue. Exiting...")
             exit(1)
 
         self._prepare_bare_data_frame()

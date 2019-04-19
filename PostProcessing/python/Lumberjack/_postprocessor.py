@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import numpy as np
 import os
@@ -42,9 +44,9 @@ class Timer:
 
     def report(self):
         if self._duration is None:
-            print "[INFO] Task '{}' has not yet been run..."
+            print("[INFO] Task '{}' has not yet been run...")
         else:
-            print "[INFO] Task '{}' took {} ({} seconds)".format(self._name, self.get_duration_string(), round(self._duration, 3))
+            print("[INFO] Task '{}' took {} ({} seconds)".format(self._name, self.get_duration_string(), round(self._duration, 3)))
 
 
 class PostProcessor(object):
@@ -247,7 +249,7 @@ class PostProcessor(object):
     def run(self, output_file_path):
 
         if not self._specs:
-            print "[WARNING] No histograms and/or profiles booked for output. No file written."
+            print("[WARNING] No histograms and/or profiles booked for output. No file written.")
             return
 
         self._split_df()

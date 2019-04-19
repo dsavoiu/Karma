@@ -736,7 +736,7 @@ TASKS = {
         "histograms" : [
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
-                QUANTITIES['global'].keys() + QUANTITIES['data'].keys(),  # all quantities
+                list(QUANTITIES['global']) + list(QUANTITIES['data']),  # all quantities
                 ["", "@assignedTriggerLuminosityWeight"]
             )
         ],
@@ -747,7 +747,7 @@ TASKS = {
         "histograms" : [
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
-                QUANTITIES['global'].keys() + QUANTITIES['data'].keys(),  # all quantities
+                list(QUANTITIES['global']) + list(QUANTITIES['data']),  # all quantities
                 [""]
             )
         ],
@@ -787,7 +787,7 @@ TASKS = {
         "splittings": ["ybys_narrow"],
         "histograms" : ["{}{}".format(_qn, _qweight)
             for _qn, _qweight in itertools.product(
-              QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),
+              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
               ["", "@generatorWeight"],
             )
         ],
@@ -796,7 +796,7 @@ TASKS = {
         "splittings": ["ybys_narrow"],
         "histograms" : ["{}{}".format(_qn, _qweight)
             for _qn, _qweight in itertools.product(
-              QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),
+              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
               ["", "@computedWeightForStitching"],
             )
         ],

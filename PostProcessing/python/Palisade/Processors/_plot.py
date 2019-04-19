@@ -1,6 +1,9 @@
+from __future__ import print_function
+
 import colorsys  # for rgb_to_hls
 import math
 import os
+import six
 import yaml
 
 from copy import deepcopy
@@ -285,7 +288,7 @@ class PlotProcessor(_ProcessorBase):
         for _subplot_cfg in config['subplots']:
             request_params = dict(self._global_request_params, **_subplot_cfg.get('request_params', {}))
             self._input_controller._request_all_objects_in_expression(_subplot_cfg['expression'], **request_params)
-            #print 'REQ', _subplot_cfg['expression']
+            #print('REQ', _subplot_cfg['expression'])
 
 
     def _plot(self, config):
@@ -397,7 +400,7 @@ class PlotProcessor(_ProcessorBase):
                 _mask = np.all((_plot_data['yerr'] != 0), axis=1)
                 _plot_data = {
                     _key : np.compress(_mask, _value, axis=0)
-                    for _key, _value in _plot_data.iteritems()
+                    for _key, _value in six.iteritems(_plot_data)
                 }
 
             # extract arrays for keys which cannot be masked
@@ -554,7 +557,7 @@ class PlotProcessor(_ProcessorBase):
                 _pc_for_dump['plot_args'] = dict(
                     # prevent dumping numpy arrays as binary
                     args=[_a.tolist() if isinstance(_a, np.ndarray) else _a for _a in _args],
-                    **{_kw : _val.tolist() if isinstance(_val, np.ndarray) else _val for _kw, _val in _kwargs.iteritems()}
+                    **{_kw : _val.tolist() if isinstance(_val, np.ndarray) else _val for _kw, _val in six.iteritems(_kwargs)}
                 )
 
             if _text_file is not None:
@@ -562,7 +565,7 @@ class PlotProcessor(_ProcessorBase):
                 _text_file.write("- {}(\n\t{},\n\t{}\n)\n".format(
                     _plot_method_name,
                     ',\n\t'.join(["{}".format(repr(_arg)) for _arg in _args]),
-                    ',\n\t'.join(["{} = {}".format(_k, repr(_v)) for _k, _v in _kwargs.iteritems()]),
+                    ',\n\t'.join(["{} = {}".format(_k, repr(_v)) for _k, _v in six.iteritems(_kwargs)]),
                 ))
                 np.set_printoptions(threshold=1000)
 
@@ -588,10 +591,10 @@ class PlotProcessor(_ProcessorBase):
             _ax = _pad_config['axes']
 
             # simple axes adjustments
-            for _prop_name, _meth_dict in self._PC_KEYS_MPL_AXES_METHODS.iteritems():
+            for _prop_name, _meth_dict in six.iteritems(self._PC_KEYS_MPL_AXES_METHODS):
                 _prop_val = _pad_config.get(_prop_name, None)
                 if _prop_val is not None:
-                    #print _prop_name, _prop_val
+                    #print(_prop_name, _prop_val)
                     getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
 
             # draw colorbar if there was a 2D plot involved
@@ -749,6 +752,6 @@ class PlotProcessor(_ProcessorBase):
     # -- additional public API
 
     def clear_figures(self):
-        for _fign, _fig in self._figures.iteritems():
+        for _fign, _fig in six.iteritems(self._figures):
             plt.close(_fig)
         self._figures = {}
