@@ -142,12 +142,13 @@ class _ProcessorBase(object):
 
     # -- public API
 
-    def run(self):
+    def run(self, show_progress=True):
         # -- run over cross product of expansion
 
         # go through each configured action
         for _action_method in self._ACTIONS:
             # run the action once for each expansion context
-            for _expansion_context in tqdm(list(product_dict(**self._config[self.CONFIG_KEY_FOR_CONTEXTS]))):
+            _expansion_contexts = list(product_dict(**self._config[self.CONFIG_KEY_FOR_CONTEXTS]))
+            for _expansion_context in (tqdm(_expansion_contexts) if show_progress else _expansion_contexts):
                 self._run_with_context(_action_method, _expansion_context)
 
