@@ -105,19 +105,24 @@ class _ProcessorBase(object):
         self._config = config
         self._output_folder = output_folder
 
+
     @staticmethod
-    def _resolve_context(dct, context):
+    def _resolve_context(var, context):
         '''recursively replace string templates and `ConfigurationEntry` with contextual values'''
-        for _k, _v in six.iteritems(dct):
-            if isinstance(_v, dict):
-                dct[_k] = _ProcessorBase._resolve_context(_v, context)
-            elif isinstance(_v, list):
-                dct[_k] = [_ProcessorBase._resolve_context(_elem, context) if isinstance(_elem, dict) else _elem for _elem in _v]
-            elif isinstance(_v, str):
-                dct[_k] = _v.format(**context)
-            elif isinstance(_v, ConfigurationEntry):
-                dct[_k] = _v.get(context)
-        return dct
+        if isinstance(var, dict):
+            for _k, _v in six.iteritems(var):
+                var[_k] = _ProcessorBase._resolve_context(_v, context)
+        elif isinstance(var, list):
+            for _idx, _v in enumerate(var):
+                var[_idx] = _ProcessorBase._resolve_context(_v, context)
+        elif isinstance(var, str):
+            return var.format(**context)
+        elif isinstance(var, ConfigurationEntry):
+            return var.get(context)
+        else:
+            raise ConfigurationError("Unsupported data structure encountered: '{}'".format(type(var)))
+
+        return var
 
     def _run_with_context(self, action_method, context):
         for _template in self._config[self.CONFIG_KEY_FOR_TEMPLATES]:
@@ -134,8 +139,7 @@ class _ProcessorBase(object):
             for _subkey_for_context_replacing in self.SUBKEYS_FOR_CONTEXT_REPLACING:
                 if _subkey_for_context_replacing not in _config:
                     continue
-                for _dict_for_subkey in _config[_subkey_for_context_replacing]:
-                    _dict_for_subkey = _ProcessorBase._resolve_context(_dict_for_subkey, context)
+                _config[_subkey_for_context_replacing] = _ProcessorBase._resolve_context(_config[_subkey_for_context_replacing], context)
 
             try:
                 action_method(self, _config)
