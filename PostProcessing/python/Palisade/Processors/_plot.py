@@ -17,7 +17,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatter
 from matplotlib.colors import LogNorm, Normalize, colorConverter
 
-from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
+from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, F1
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
@@ -393,6 +393,16 @@ class PlotProcessor(_ProcessorBase):
                 _plot_data['xerr'] = np.array(list(_total_hist.xerr()))
                 _plot_data['y'] = _plot_data.pop('efficiencies', None)
                 _plot_data['yerr'] = _plot_data.pop('errors', None)
+
+            # map fields for TF1 objects
+            elif isinstance(_plot_object, F1):
+                _xmin, _xmax = _plot_object.xaxis.get_xmin(), _plot_object.xaxis.get_xmax()
+                # compute support points (evenly-spaced)
+                _plot_data['x'] = np.linspace(_xmin, _xmax, 100)  # TODO: make configurable
+                _plot_data['xerr'] = np.zeros_like(_plot_data['x'])
+                # evaluate TF1 at every point
+                _plot_data['y'] = np.asarray(list(map(_plot_object, _plot_data['x'])))
+                _plot_data['yerr'] = np.zeros_like(_plot_data['y'])  # TODO: function errors (?)
 
             # mask all points with erorrs set to zero
             _mze = _kwargs.pop('mask_zero_errors', False)

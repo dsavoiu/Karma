@@ -590,7 +590,12 @@ class InputROOTFile(object):
                 _profile_error_option = request_spec.pop('profile_error_option', None)
 
                 _tobj = _tfile.Get(tobj_path)
-                _tobj.SetDirectory(0)
+                # for histograms: move to global directory
+                try:
+                    _tobj.SetDirectory(0)
+                except AttributeError:
+                    # call not needed to other objects
+                    pass
                 #print(tobj_path, _tobj)
 
                 # aply rebinning (if requested)
