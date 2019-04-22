@@ -1,7 +1,7 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
 from DijetAnalysis.Core.dijetPrelude_cff import *
-#from DijetAnalysis.Core.Sequences.jetToolbox_cff import addJetToolboxSequences
+from DijetAnalysis.Core.Sequences.jetToolbox_cff import addJetToolboxSequences
 from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyCorrections
 
 
@@ -42,13 +42,6 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 )
 
 # -- configure CMSSW modules
-
-# don't use JetToolbox to recluster jets
-# addJetToolboxSequences(process,
-#                        isData=options.isData,
-#                        jet_algorithm_specs=('ak4',),
-#                        pu_subtraction_methods=('', 'CHS'),
-#                        do_pu_jet_id=False)
 
 from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
 from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
@@ -92,12 +85,14 @@ mainSequence = cms.Sequence(
     process.dijetVertices
 );
 
-# uncorrect pat::Jets for JEC
-uncorrected_jet_collection_names = undoJetEnergyCorrections(
+
+# use JetToolbox to recluster (JEC-uncorrected) jets
+uncorrected_jet_collection_names = addJetToolboxSequences(
     process,
+    isData=options.isData,
     jet_algorithm_specs=('ak4', 'ak8'),
-    pu_subtraction_methods=('CHS',)
-)
+    pu_subtraction_methods=('CHS',),
+    do_pu_jet_id=False)
 
 # create "dijet::Jet" collections for JEC-uncorrected pat::Jets
 for _jet_collection_name in uncorrected_jet_collection_names:

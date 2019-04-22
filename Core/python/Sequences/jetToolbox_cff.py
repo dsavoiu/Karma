@@ -11,13 +11,15 @@
 import FWCore.ParameterSet.Config as cms
 
 def addJetToolboxSequences(process, isData,
-                           jet_algorithm_specs=('ak4',),
+                           jet_algorithm_specs=('ak4', 'ak8'),
                            pu_subtraction_methods=('', 'CHS'),
                            do_pu_jet_id=False):
 
     # jet collections obtained with 'JetToolbox' CMSSW module:
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox
     from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
+
+    _jet_collection_names = []
 
     # go through all combinations of jet radius and PU subtraction algorithms
     for _jet_algo_radius in jet_algorithm_specs:
@@ -86,4 +88,7 @@ def addJetToolboxSequences(process, isData,
                     getattr(process, "patJets{}".format(patJetCollectionName))*
                     getattr(process, "selectedPatJets{}".format(patJetCollectionName))
                 )
+            print "[JetToolbox] Add pat::Jet collection '{}'".format(patJetCollectionName)
             setattr(process, patJetCollectionName, patSequence)
+            _jet_collection_names.append("selectedPatJets{}".format(patJetCollectionName))
+    return _jet_collection_names

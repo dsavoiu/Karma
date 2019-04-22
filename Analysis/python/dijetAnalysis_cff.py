@@ -27,7 +27,7 @@ class DijetAnalysis:
             dijetCorrectedValidJetsProducer.clone(
                 # -- input sources
                 dijetEventSrc = cms.InputTag("dijetEvents"),
-                dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJets{}".format(jet_algo_name)),
+                dijetJetCollectionSrc = cms.InputTag("dijetSelectedPatJets{}".format(jet_algo_name)),
 
                 # -- other configuration
                 jecVersion = "{}/src/JECDatabase/textFiles/{jec_version}_{data_or_mc}/{jec_version}_{data_or_mc}".format(
@@ -35,7 +35,7 @@ class DijetAnalysis:
                     jec_version=self._jec_version,
                     data_or_mc="DATA" if self._is_data else "MC",
                 ),
-                jecAlgoName = cms.string(jet_algo_name),
+                jecAlgoName = cms.string(jet_algo_name.replace('CHS', 'chs')),
                 jecLevels = cms.vstring(
                     "L1FastJet",
                     "L2Relative",
@@ -240,18 +240,18 @@ class DijetAnalysis:
 
         # -- init modules
         for _jet_radius in (4, 8):
-            _jet_algo_name = "AK{}PFchs".format(_jet_radius)
+            _jet_algo_name = "AK{}PFCHS".format(_jet_radius)
 
             self._init_modules(_jet_algo_name)
 
         # -- configure pipelines
 
-        self.setup_pipeline(pipeline_name="AK4PFCHSNominal", jet_algo_name='AK4PFchs')
-        self.setup_pipeline(pipeline_name="AK4PFCHSJECUp", jet_algo_name='AK4PFchs', jet_collection_suffix='JECUp')
-        self.setup_pipeline(pipeline_name="AK4PFCHSJECDn", jet_algo_name='AK4PFchs', jet_collection_suffix='JECDn')
-        self.setup_pipeline(pipeline_name="AK8PFCHSNominal", jet_algo_name='AK8PFchs')
-        self.setup_pipeline(pipeline_name="AK8PFCHSJECUp", jet_algo_name='AK8PFchs', jet_collection_suffix='JECUp')
-        self.setup_pipeline(pipeline_name="AK8PFCHSJECDn", jet_algo_name='AK8PFchs', jet_collection_suffix='JECDn')
+        self.setup_pipeline(pipeline_name="AK4PFCHSNominal", jet_algo_name='AK4PFCHS')
+        self.setup_pipeline(pipeline_name="AK4PFCHSJECUp", jet_algo_name='AK4PFCHS', jet_collection_suffix='JECUp')
+        self.setup_pipeline(pipeline_name="AK4PFCHSJECDn", jet_algo_name='AK4PFCHS', jet_collection_suffix='JECDn')
+        self.setup_pipeline(pipeline_name="AK8PFCHSNominal", jet_algo_name='AK8PFCHS')
+        self.setup_pipeline(pipeline_name="AK8PFCHSJECUp", jet_algo_name='AK8PFCHS', jet_collection_suffix='JECUp')
+        self.setup_pipeline(pipeline_name="AK8PFCHSJECDn", jet_algo_name='AK8PFCHS', jet_collection_suffix='JECDn')
 
         # -- create paths for pipelines
         for _pipeline_name, _pipeline_sequence in sorted(self._pipeline_sequences.items()):
