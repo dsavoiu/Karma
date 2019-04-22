@@ -6,14 +6,14 @@
 // -- constructor
 dijet::JetTriggerObjectMatchingProducer::JetTriggerObjectMatchingProducer(const edm::ParameterSet& config) : m_configPSet(config) {
     // -- register products
-    produces<dijet::JetTriggerObjectsMap>();
+    produces<karma::JetTriggerObjectsMap>();
 
     // -- process configuration
 
     // -- declare which collections are consumed and create tokens
-    dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
-    dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
-    dijetTriggerObjectCollectionToken = consumes<dijet::TriggerObjectCollection>(m_configPSet.getParameter<edm::InputTag>("dijetTriggerObjectCollectionSrc"));
+    karmaEventToken = consumes<karma::Event>(m_configPSet.getParameter<edm::InputTag>("karmaEventSrc"));
+    karmaJetCollectionToken = consumes<karma::JetCollection>(m_configPSet.getParameter<edm::InputTag>("karmaJetCollectionSrc"));
+    karmaTriggerObjectCollectionToken = consumes<karma::TriggerObjectCollection>(m_configPSet.getParameter<edm::InputTag>("karmaTriggerObjectCollectionSrc"));
 
     maxDeltaR_ = m_configPSet.getParameter<double>("maxDeltaR");
 
@@ -32,34 +32,34 @@ void dijet::JetTriggerObjectMatchingProducer::produce(edm::Event& event, const e
     // -- get object collections for event
     bool obtained = true;
     // pileup density
-    obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
+    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
     // jet collection
-    obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
+    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
     // trigger object collection
-    obtained &= event.getByToken(this->dijetTriggerObjectCollectionToken, this->dijetTriggerObjectCollectionHandle);
+    obtained &= event.getByToken(this->karmaTriggerObjectCollectionToken, this->karmaTriggerObjectCollectionHandle);
 
     assert(obtained);  // raise if one collection could not be obtained
 
     // create new AssociationMap (note: need to specify RefProds explicitly here!)
-    std::unique_ptr<dijet::JetTriggerObjectsMap> jetTriggerObjectsMap(new dijet::JetTriggerObjectsMap(
-        edm::RefProd<dijet::JetCollection>(this->dijetJetCollectionHandle),
-        edm::RefProd<dijet::TriggerObjectCollection>(this->dijetTriggerObjectCollectionHandle)
+    std::unique_ptr<karma::JetTriggerObjectsMap> jetTriggerObjectsMap(new karma::JetTriggerObjectsMap(
+        edm::RefProd<karma::JetCollection>(this->karmaJetCollectionHandle),
+        edm::RefProd<karma::TriggerObjectCollection>(this->karmaTriggerObjectCollectionHandle)
     ));
 
     // -- do jet-to-trigger-object matching
-    for (size_t iTO = 0; iTO < this->dijetTriggerObjectCollectionHandle->size(); ++iTO) {
-        const auto& triggerObject = this->dijetTriggerObjectCollectionHandle->at(iTO);
+    for (size_t iTO = 0; iTO < this->karmaTriggerObjectCollectionHandle->size(); ++iTO) {
+        const auto& triggerObject = this->karmaTriggerObjectCollectionHandle->at(iTO);
 
         // match jets to objects
-        for (size_t iJet = 0; iJet < this->dijetJetCollectionHandle->size(); ++iJet) {
-            const auto& jet = this->dijetJetCollectionHandle->at(iJet);
+        for (size_t iJet = 0; iJet < this->karmaJetCollectionHandle->size(); ++iJet) {
+            const auto& jet = this->karmaJetCollectionHandle->at(iJet);
             double deltaR = ROOT::Math::VectorUtil::DeltaR(triggerObject.p4, jet.p4);
 
             // match *every* object within configured max DeltaR
             if (deltaR <= maxDeltaR_) {
                 jetTriggerObjectsMap->insert(
-                    edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, iJet),
-                    edm::Ref<dijet::TriggerObjectCollection>(this->dijetTriggerObjectCollectionHandle, iTO)
+                    edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, iJet),
+                    edm::Ref<karma::TriggerObjectCollection>(this->karmaTriggerObjectCollectionHandle, iTO)
                 );
             }
         }

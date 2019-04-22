@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetTriggerObjectCollectionProducer = cms.EDProducer(
+karmaTriggerObjectCollectionProducer = cms.EDProducer(
     "TriggerObjectCollectionProducer",
     cms.PSet(
         inputCollection = cms.InputTag("selectedPatTrigger", processName=cms.InputTag.skipCurrentProcess()),
-        dijetRunSrc = cms.InputTag("dijetEvents"),
+        karmaRunSrc = cms.InputTag("karmaEvents"),
         triggerResultsSrc = cms.InputTag("TriggerResults", "", "HLT"),
     )
 )

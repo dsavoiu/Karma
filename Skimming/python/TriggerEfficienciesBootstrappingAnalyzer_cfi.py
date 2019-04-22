@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 import numpy as np
 
 
-dijetTriggerEfficienciesBootstrappingAnalyzer = cms.EDAnalyzer(
+karmaTriggerEfficienciesBootstrappingAnalyzer = cms.EDAnalyzer(
     "TriggerEfficienciesBootstrappingAnalyzer",
     cms.PSet(
 

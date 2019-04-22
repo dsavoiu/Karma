@@ -142,7 +142,7 @@ class FlexGrid {
 };
 
 
-namespace dijet {
+namespace karma {
     class FlexGridBinProvider {
       public:
 

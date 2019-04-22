@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetPFMETCollectionProducer = cms.EDProducer(
+karmaPFMETCollectionProducer = cms.EDProducer(
     "METCollectionProducer",
     cms.PSet(
         # take default PAT::MET from RECO (==PFMet)
@@ -9,7 +9,7 @@ dijetPFMETCollectionProducer = cms.EDProducer(
     )
 )
 
-def dijetCHSMETCollectionProducer(process, isData):
+def karmaCHSMETCollectionProducer(process, isData):
     """create the producer for CHS MET, adding necessary prerequisites to the process"""
 
     # check that modules that will be registered do not already exist in process"
@@ -59,7 +59,7 @@ def dijetCHSMETCollectionProducer(process, isData):
     #_sequence = cms.Sequence(
     #    process.packedPFCandidatesCHSNotFromPV,
     #    process.packedPFCandidatesCHS,
-    #    process.dijetCHSMETProducer
+    #    process.karmaCHSMETProducer
     #)
     #setattr(process, sequence_name, _sequence)
     #

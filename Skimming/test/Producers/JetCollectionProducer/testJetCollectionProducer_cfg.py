@@ -18,9 +18,9 @@ enableVerboseLogging(process)
 
 # -- configure CMSSW modules
 
-from Karma.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
+from Karma.Skimming.JetCollectionProducer_cfi import karmaJetCollectionProducer
 
-process.dijetJets = dijetJetCollectionProducer
+process.dijetJets = karmaJetCollectionProducer
 process.path *= process.dijetJets
 
 

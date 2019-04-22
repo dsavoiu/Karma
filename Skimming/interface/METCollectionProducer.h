@@ -12,16 +12,16 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 
 
-namespace dijet {
+namespace karma {
 
-    class METCollectionProducer : public dijet::CollectionProducerBase<edm::View<pat::MET>, dijet::METCollection> {
+    class METCollectionProducer : public karma::CollectionProducerBase<edm::View<pat::MET>, karma::METCollection> {
 
       public:
         explicit METCollectionProducer(const edm::ParameterSet& config) :
-            dijet::CollectionProducerBase<edm::View<pat::MET>, dijet::METCollection>(config) {};
+            karma::CollectionProducerBase<edm::View<pat::MET>, karma::METCollection>(config) {};
         ~METCollectionProducer() {};
 
-        virtual void produceSingle(const pat::MET&, dijet::MET&, const edm::Event&, const edm::EventSetup&);
+        virtual void produceSingle(const pat::MET&, karma::MET&, const edm::Event&, const edm::EventSetup&);
 
     };
 

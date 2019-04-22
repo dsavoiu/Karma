@@ -1,7 +1,7 @@
 #include "Karma/Skimming/interface/METCollectionProducer.h"
 
 
-void dijet::METCollectionProducer::produceSingle(const pat::MET& in, dijet::MET& out, const edm::Event& event, const edm::EventSetup& setup) {
+void karma::METCollectionProducer::produceSingle(const pat::MET& in, karma::MET& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
     out.p4 =                     in.uncorP4();  // use only uncorrected MET in skims
@@ -20,5 +20,5 @@ void dijet::METCollectionProducer::produceSingle(const pat::MET& in, dijet::MET&
 
 
 //define this as a plug-in
-using dijet::METCollectionProducer;
+using karma::METCollectionProducer;
 DEFINE_FWK_MODULE(METCollectionProducer);

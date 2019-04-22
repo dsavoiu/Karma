@@ -4,7 +4,7 @@
 
 #include "Defaults.h"
 
-namespace dijet {
+namespace karma {
     class Lumi {
       public:
         // -- Lumi metadata
@@ -13,5 +13,5 @@ namespace dijet {
 
     };
 
-    typedef std::vector<dijet::Lumi> LumiCollection;
+    typedef std::vector<karma::Lumi> LumiCollection;
 }

@@ -22,7 +22,7 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
     // -- main producer
 
@@ -52,8 +52,8 @@ namespace dijet {
         const edm::ParameterSet& m_configPSet;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::Event> dijetEventHandle;
-        edm::EDGetTokenT<dijet::Event> dijetEventToken;
+        typename edm::Handle<karma::Event> karmaEventHandle;
+        edm::EDGetTokenT<karma::Event> karmaEventToken;
 
     };
 

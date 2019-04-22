@@ -12,16 +12,16 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 
-namespace dijet {
+namespace karma {
 
-    class JetCollectionProducer : public dijet::CollectionProducerBase<edm::View<pat::Jet>, dijet::JetCollection> {
+    class JetCollectionProducer : public karma::CollectionProducerBase<edm::View<pat::Jet>, karma::JetCollection> {
 
       public:
         explicit JetCollectionProducer(const edm::ParameterSet& config) :
-            dijet::CollectionProducerBase<edm::View<pat::Jet>, dijet::JetCollection>(config) {};
+            karma::CollectionProducerBase<edm::View<pat::Jet>, karma::JetCollection>(config) {};
         ~JetCollectionProducer() {};
 
-        virtual void produceSingle(const pat::Jet&, dijet::Jet&, const edm::Event&, const edm::EventSetup&);
+        virtual void produceSingle(const pat::Jet&, karma::Jet&, const edm::Event&, const edm::EventSetup&);
 
     };
 

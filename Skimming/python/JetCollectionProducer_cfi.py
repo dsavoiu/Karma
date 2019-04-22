@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetJets = cms.EDProducer(
+karmaJets = cms.EDProducer(
     "JetCollectionProducer",
     cms.PSet(
         # take miniAOD AK4 jets by default

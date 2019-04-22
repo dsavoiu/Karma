@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetVertexCollectionProducer = cms.EDProducer(
+karmaVertexCollectionProducer = cms.EDProducer(
     "VertexCollectionProducer",
     cms.PSet(
         inputCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),

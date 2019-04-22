@@ -25,7 +25,7 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
     // -- main producer
 

@@ -1,7 +1,7 @@
 #include "Karma/Skimming/interface/GenParticleCollectionProducer.h"
 
 
-void dijet::GenParticleCollectionProducer::produceSingle(const reco::GenParticle& in, dijet::GenParticle& out, const edm::Event& event, const edm::EventSetup& setup) {
+void karma::GenParticleCollectionProducer::produceSingle(const reco::GenParticle& in, karma::GenParticle& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
     out.p4 = in.p4();
@@ -28,11 +28,11 @@ void dijet::GenParticleCollectionProducer::produceSingle(const reco::GenParticle
 
 }
 
-bool dijet::GenParticleCollectionProducer::acceptSingle(const reco::GenParticle& in, const edm::Event& event, const edm::EventSetup& setup) {
+bool karma::GenParticleCollectionProducer::acceptSingle(const reco::GenParticle& in, const edm::Event& event, const edm::EventSetup& setup) {
 
     return (allowedPDGIds_.count(in.pdgId()));
 }
 
 //define this as a plug-in
-using dijet::GenParticleCollectionProducer;
+using karma::GenParticleCollectionProducer;
 DEFINE_FWK_MODULE(GenParticleCollectionProducer);

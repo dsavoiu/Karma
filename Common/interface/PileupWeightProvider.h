@@ -3,7 +3,7 @@
 #include "TH1D.h"
 
 
-namespace dijet {
+namespace karma {
     class PileupWeightProvider {
       public:
 

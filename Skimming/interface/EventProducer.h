@@ -40,16 +40,16 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
 
     /** Cache containing resources which do not change
      *  for the entire duration of the skiming job.
      */
-    class GlobalCache : public dijet::CacheBase {
+    class GlobalCache : public karma::CacheBase {
 
       public:
-        GlobalCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet), isData_(pSet.getParameter<bool>("isData")), hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
+        GlobalCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet), isData_(pSet.getParameter<bool>("isData")), hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
 
             // create the regex objects for matching HLTtrigger names
             const std::vector<std::string>& hltRegexes = pSet_.getParameter<std::vector<std::string>>("hltRegexes");
@@ -72,10 +72,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a luminosity block
      */
-    class LumiCache : public dijet::CacheBase {
+    class LumiCache : public karma::CacheBase {
 
       public:
-        LumiCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+        LumiCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
         std::vector<int> hltPathHLTPrescales_;
         std::vector<int> hltPathL1Prescales_;
@@ -86,10 +86,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a run
      */
-    class RunCache : public dijet::CacheBase {
+    class RunCache : public karma::CacheBase {
 
       public:
-        RunCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+        RunCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
         /*
         void initHLTPrescaleProvider(const edm::ParameterSet& hltPrescaleProvider, const edm::EDAnalyzer& parentAnalyzer, edm::ConsumesCollector& consumesCollector) {
@@ -100,7 +100,7 @@ namespace dijet {
 
         //std::unique_ptr<HLTPrescaleProvider> hltPrescaleProvider_;  // helper class for obtaining trigger (and prescale) information
         std::string hltMenuName_;
-        dijet::HLTPathInfos hltPathInfos_;  //! information about trigger paths
+        karma::HLTPathInfos hltPathInfos_;  //! information about trigger paths
 
     };
 
@@ -108,14 +108,14 @@ namespace dijet {
     // -- main producer
 
     class EventProducer : public edm::stream::EDProducer<
-        edm::GlobalCache<dijet::GlobalCache>,
-        edm::RunCache<dijet::RunCache>,
-        edm::LuminosityBlockCache<dijet::LumiCache>,
+        edm::GlobalCache<karma::GlobalCache>,
+        edm::RunCache<karma::RunCache>,
+        edm::LuminosityBlockCache<karma::LumiCache>,
         edm::BeginLuminosityBlockProducer,
         edm::BeginRunProducer> {
 
       public:
-        explicit EventProducer(const edm::ParameterSet&, const dijet::GlobalCache*);
+        explicit EventProducer(const edm::ParameterSet&, const karma::GlobalCache*);
         ~EventProducer();
 
         // -- pSet descriptions for CMSSW help info
@@ -123,15 +123,15 @@ namespace dijet {
 
 
         // -- global cache extension
-        static std::unique_ptr<dijet::GlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
-        static void globalEndJob(const dijet::GlobalCache*) {/* noop */};
+        static std::unique_ptr<karma::GlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(const karma::GlobalCache*) {/* noop */};
 
         // -- run cache extension
-        static std::shared_ptr<dijet::RunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
+        static std::shared_ptr<karma::RunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
         static void globalEndRun(const edm::Run&, const edm::EventSetup&, const RunContext*) {/* noop */};
 
         // -- lumi cache extension
-        static std::shared_ptr<dijet::LumiCache> globalBeginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&, const RunContext*);
+        static std::shared_ptr<karma::LumiCache> globalBeginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&, const RunContext*);
         static void globalEndLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&, const LuminosityBlockContext*) {/* noop */};
 
 

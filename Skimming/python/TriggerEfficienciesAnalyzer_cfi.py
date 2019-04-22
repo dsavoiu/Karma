@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 import numpy as np
 
 
-dijetTriggerEfficienciesAnalyzer = cms.EDAnalyzer(
+karmaTriggerEfficienciesAnalyzer = cms.EDAnalyzer(
     "TriggerEfficienciesAnalyzer",
     cms.PSet(
 

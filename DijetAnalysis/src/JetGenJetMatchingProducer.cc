@@ -6,14 +6,14 @@
 // -- constructor
 dijet::JetGenJetMatchingProducer::JetGenJetMatchingProducer(const edm::ParameterSet& config) : m_configPSet(config) {
     // -- register products
-    produces<dijet::JetGenJetMap>();
+    produces<karma::JetGenJetMap>();
 
     // -- process configuration
 
     // -- declare which collections are consumed and create tokens
-    dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
-    dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
-    dijetGenJetCollectionToken = consumes<dijet::LVCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenJetCollectionSrc"));
+    karmaEventToken = consumes<karma::Event>(m_configPSet.getParameter<edm::InputTag>("karmaEventSrc"));
+    karmaJetCollectionToken = consumes<karma::JetCollection>(m_configPSet.getParameter<edm::InputTag>("karmaJetCollectionSrc"));
+    karmaGenJetCollectionToken = consumes<karma::LVCollection>(m_configPSet.getParameter<edm::InputTag>("karmaGenJetCollectionSrc"));
 
     maxDeltaR_ = m_configPSet.getParameter<double>("maxDeltaR");
 
@@ -32,29 +32,29 @@ void dijet::JetGenJetMatchingProducer::produce(edm::Event& event, const edm::Eve
     // -- get object collections for event
     bool obtained = true;
     // pileup density
-    obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
+    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
     // jet collection
-    obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
+    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
     // jet collection
-    obtained &= event.getByToken(this->dijetGenJetCollectionToken, this->dijetGenJetCollectionHandle);
+    obtained &= event.getByToken(this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
 
     assert(obtained);  // raise if one collection could not be obtained
 
     // create new AssociationMap (note: need to specify RefProds explicitly here!)
-    std::unique_ptr<dijet::JetGenJetMap> jetGenJetMap(new dijet::JetGenJetMap(
-        edm::RefProd<dijet::JetCollection>(this->dijetJetCollectionHandle),
-        edm::RefProd<dijet::LVCollection>(this->dijetGenJetCollectionHandle)
+    std::unique_ptr<karma::JetGenJetMap> jetGenJetMap(new karma::JetGenJetMap(
+        edm::RefProd<karma::JetCollection>(this->karmaJetCollectionHandle),
+        edm::RefProd<karma::LVCollection>(this->karmaGenJetCollectionHandle)
     ));
 
     // do matching only if collections are not empty
-    if ((this->dijetJetCollectionHandle->size() != 0) && (this->dijetGenJetCollectionHandle->size() != 0)) {
+    if ((this->karmaJetCollectionHandle->size() != 0) && (this->karmaGenJetCollectionHandle->size() != 0)) {
 
         // -- compute delta-R for all recoJet-genJet pairs
-        double matDeltaR[this->dijetJetCollectionHandle->size()][this->dijetGenJetCollectionHandle->size()];
-        for (size_t iJet = 0; iJet < this->dijetJetCollectionHandle->size(); ++iJet) {
-            const auto& recoJet = this->dijetJetCollectionHandle->at(iJet);
-            for (size_t iGenJet = 0; iGenJet < this->dijetGenJetCollectionHandle->size(); ++iGenJet) {
-                const auto& genJet = this->dijetGenJetCollectionHandle->at(iGenJet);
+        double matDeltaR[this->karmaJetCollectionHandle->size()][this->karmaGenJetCollectionHandle->size()];
+        for (size_t iJet = 0; iJet < this->karmaJetCollectionHandle->size(); ++iJet) {
+            const auto& recoJet = this->karmaJetCollectionHandle->at(iJet);
+            for (size_t iGenJet = 0; iGenJet < this->karmaGenJetCollectionHandle->size(); ++iGenJet) {
+                const auto& genJet = this->karmaGenJetCollectionHandle->at(iGenJet);
                 const double deltaR = ROOT::Math::VectorUtil::DeltaR(genJet.p4, recoJet.p4);
                 if (deltaR <= maxDeltaR_) {
                     matDeltaR[iJet][iGenJet] = deltaR;
@@ -67,14 +67,14 @@ void dijet::JetGenJetMatchingProducer::produce(edm::Event& event, const edm::Eve
 
 
         // -- do jet-to-trigger-object matching
-        for (size_t iIteration = 0; iIteration < this->dijetJetCollectionHandle->size(); ++iIteration) {
+        for (size_t iIteration = 0; iIteration < this->karmaJetCollectionHandle->size(); ++iIteration) {
 
             // identify pair of reco and gen indices with best match (lowest overall delta-R)
             int bestMatchRecoJetIndex = -1;
             int bestMatchGenJetIndex = -1;
             double bestMatchDeltaR = std::numeric_limits<double>::quiet_NaN();
-            for (size_t iGenJet = 0; iGenJet < this->dijetGenJetCollectionHandle->size(); ++iGenJet) {
-                for (size_t iRecoJet = 0; iRecoJet < this->dijetJetCollectionHandle->size(); ++iRecoJet) {
+            for (size_t iGenJet = 0; iGenJet < this->karmaGenJetCollectionHandle->size(); ++iGenJet) {
+                for (size_t iRecoJet = 0; iRecoJet < this->karmaJetCollectionHandle->size(); ++iRecoJet) {
 
                     // update best match value and indices if better match is found
                     const double& deltaR = matDeltaR[iRecoJet][iGenJet];
@@ -95,15 +95,15 @@ void dijet::JetGenJetMatchingProducer::produce(edm::Event& event, const edm::Eve
 
             // new best match found! -> add to output
             jetGenJetMap->insert(
-                edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, bestMatchRecoJetIndex),
-                edm::Ref<dijet::LVCollection>(this->dijetGenJetCollectionHandle, bestMatchGenJetIndex)
+                edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, bestMatchRecoJetIndex),
+                edm::Ref<karma::LVCollection>(this->karmaGenJetCollectionHandle, bestMatchGenJetIndex)
             );
 
             // disallow further matches invoving these indices
-            for (size_t iRecoJet = 0; iRecoJet < this->dijetJetCollectionHandle->size(); ++iRecoJet) {
+            for (size_t iRecoJet = 0; iRecoJet < this->karmaJetCollectionHandle->size(); ++iRecoJet) {
                 matDeltaR[iRecoJet][bestMatchGenJetIndex] = std::numeric_limits<double>::quiet_NaN();
             }
-            for (size_t iGenJet = 0; iGenJet < this->dijetGenJetCollectionHandle->size(); ++iGenJet) {
+            for (size_t iGenJet = 0; iGenJet < this->karmaGenJetCollectionHandle->size(); ++iGenJet) {
                 matDeltaR[bestMatchRecoJetIndex][iGenJet] = std::numeric_limits<double>::quiet_NaN();
             }
 

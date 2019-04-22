@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-dijet::NPUMeanProvider::NPUMeanProvider(std::string fileName, double minBiasCrossSection) {
+karma::NPUMeanProvider::NPUMeanProvider(std::string fileName, double minBiasCrossSection) {
 
     unsigned long run(0), luminosityBlock(0);
     double luminosity(0), xsAverage(0), xsRMS(0);
@@ -33,7 +33,7 @@ dijet::NPUMeanProvider::NPUMeanProvider(std::string fileName, double minBiasCros
 }
 
 
-const double dijet::NPUMeanProvider::getNPUMean(const unsigned long run, const unsigned long luminosityBlock) {
+const double karma::NPUMeanProvider::getNPUMean(const unsigned long run, const unsigned long luminosityBlock) {
     try {
         return mapRunLumiBlockToNPUMean_.at(run).at(luminosityBlock);
     } catch (const std::out_of_range& err) {

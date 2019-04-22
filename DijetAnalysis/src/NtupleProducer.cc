@@ -12,7 +12,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
 
     // -- process configuration
 
-    /// m_triggerEfficienciesProvider = std::unique_ptr<TriggerEfficienciesProvider>(
+    /// m_triggerEfficienciesProvider = std::unique_ptr<karma::TriggerEfficienciesProvider>(
     ///     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
     /// );
 
@@ -27,8 +27,8 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
 
     // load external file to get `nPUMean` in data
     if (m_isData) {
-        m_npuMeanProvider = std::unique_ptr<NPUMeanProvider>(
-            new NPUMeanProvider(
+        m_npuMeanProvider = std::unique_ptr<karma::NPUMeanProvider>(
+            new karma::NPUMeanProvider(
                 m_configPSet.getParameter<std::string>("npuMeanFile"),
                 m_configPSet.getParameter<double>("minBiasCrossSection")
             )
@@ -39,18 +39,18 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     // construct FlexGrid bin finders with final analysis binning
     const auto& flexGridFileDijetPtAve = m_configPSet.getParameter<std::string>("flexGridFileDijetPtAve");
     if (!flexGridFileDijetPtAve.empty()) {
-        m_flexGridBinProviderDijetPtAve = std::unique_ptr<FlexGridBinProvider>(new FlexGridBinProvider(flexGridFileDijetPtAve));
+        m_flexGridBinProviderDijetPtAve = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(flexGridFileDijetPtAve));
         std::cout << "Reading FlexGrid binning information (pT average) from file: " << flexGridFileDijetPtAve << std::endl;
     }
     const auto& flexGridFileDijetMass = m_configPSet.getParameter<std::string>("flexGridFileDijetMass");
     if (!flexGridFileDijetMass.empty()) {
-        m_flexGridBinProviderDijetMass = std::unique_ptr<FlexGridBinProvider>(new FlexGridBinProvider(flexGridFileDijetMass));
+        m_flexGridBinProviderDijetMass = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(flexGridFileDijetMass));
         std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
     }
     else {
         if (!m_configPSet.getParameter<std::string>("pileupWeightFile").empty()) {
-            m_puWeightProvider = std::unique_ptr<PileupWeightProvider>(
-                new PileupWeightProvider(
+            m_puWeightProvider = std::unique_ptr<karma::PileupWeightProvider>(
+                new karma::PileupWeightProvider(
                     m_configPSet.getParameter<std::string>("pileupWeightFile"),
                     m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
                 )
@@ -59,17 +59,17 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     }
 
     // -- declare which collections are consumed and create tokens
-    dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
-    dijetRunToken = consumes<dijet::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("dijetRunSrc"));
-    dijetVertexCollectionToken = consumes<dijet::VertexCollection>(m_configPSet.getParameter<edm::InputTag>("dijetVertexCollectionSrc"));
-    dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
-    dijetMETCollectionToken = consumes<dijet::METCollection>(m_configPSet.getParameter<edm::InputTag>("dijetMETCollectionSrc"));
-    dijetJetTriggerObjectsMapToken = consumes<dijet::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetTriggerObjectMapSrc"));
+    karmaEventToken = consumes<karma::Event>(m_configPSet.getParameter<edm::InputTag>("karmaEventSrc"));
+    karmaRunToken = consumes<karma::Run, edm::InRun>(m_configPSet.getParameter<edm::InputTag>("karmaRunSrc"));
+    karmaVertexCollectionToken = consumes<karma::VertexCollection>(m_configPSet.getParameter<edm::InputTag>("karmaVertexCollectionSrc"));
+    karmaJetCollectionToken = consumes<karma::JetCollection>(m_configPSet.getParameter<edm::InputTag>("karmaJetCollectionSrc"));
+    karmaMETCollectionToken = consumes<karma::METCollection>(m_configPSet.getParameter<edm::InputTag>("karmaMETCollectionSrc"));
+    karmaJetTriggerObjectsMapToken = consumes<karma::JetTriggerObjectsMap>(m_configPSet.getParameter<edm::InputTag>("karmaJetTriggerObjectMapSrc"));
     if (!m_isData) {
-        dijetGenJetCollectionToken = consumes<dijet::LVCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenJetCollectionSrc"));
-        dijetGeneratorQCDInfoToken = consumes<dijet::GeneratorQCDInfo>(m_configPSet.getParameter<edm::InputTag>("dijetGeneratorQCDInfoSrc"));
-        dijetJetGenJetMapToken = consumes<dijet::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("dijetJetGenJetMapSrc"));
-        dijetGenParticleCollectionToken = consumes<dijet::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("dijetGenParticleCollectionSrc"));
+        karmaGenJetCollectionToken = consumes<karma::LVCollection>(m_configPSet.getParameter<edm::InputTag>("karmaGenJetCollectionSrc"));
+        karmaGeneratorQCDInfoToken = consumes<karma::GeneratorQCDInfo>(m_configPSet.getParameter<edm::InputTag>("karmaGeneratorQCDInfoSrc"));
+        karmaJetGenJetMapToken = consumes<karma::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("karmaJetGenJetMapSrc"));
+        karmaGenParticleCollectionToken = consumes<karma::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("karmaGenParticleCollectionSrc"));
     }
 
 }
@@ -91,8 +91,8 @@ dijet::NtupleProducer::~NtupleProducer() {
     // -- create the RunCache
     auto runCache = std::make_shared<dijet::NtupleProducerRunCache>(globalCache->pSet_);
 
-    typename edm::Handle<dijet::Run> runHandle;
-    run.getByLabel(globalCache->pSet_.getParameter<edm::InputTag>("dijetRunSrc"), runHandle);
+    typename edm::Handle<karma::Run> runHandle;
+    run.getByLabel(globalCache->pSet_.getParameter<edm::InputTag>("karmaRunSrc"), runHandle);
 
     // compute the unversioned HLT path names
     // (needed later to get the trigger efficiencies)
@@ -131,28 +131,28 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // -- get object collections for event
     bool obtained = true;
     // run data
-    obtained &= event.getRun().getByToken(this->dijetRunToken, this->dijetRunHandle);
+    obtained &= event.getRun().getByToken(this->karmaRunToken, this->karmaRunHandle);
     // pileup density
-    obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
+    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
     // jet collection
-    obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
+    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
     // MET collection
-    obtained &= event.getByToken(this->dijetMETCollectionToken, this->dijetMETCollectionHandle);
+    obtained &= event.getByToken(this->karmaMETCollectionToken, this->karmaMETCollectionHandle);
     // jet trigger objects map
-    obtained &= event.getByToken(this->dijetJetTriggerObjectsMapToken, this->dijetJetTriggerObjectsMapHandle);
+    obtained &= event.getByToken(this->karmaJetTriggerObjectsMapToken, this->karmaJetTriggerObjectsMapHandle);
     if (!m_isData) {
         // QCD generator information
-        obtained &= event.getByToken(this->dijetGeneratorQCDInfoToken, this->dijetGeneratorQCDInfoHandle);
+        obtained &= event.getByToken(this->karmaGeneratorQCDInfoToken, this->karmaGeneratorQCDInfoHandle);
         // genParticle collection
-        obtained &= event.getByToken(this->dijetGenParticleCollectionToken, this->dijetGenParticleCollectionHandle);
+        obtained &= event.getByToken(this->karmaGenParticleCollectionToken, this->karmaGenParticleCollectionHandle);
         // gen jet collection
-        obtained &= event.getByToken(this->dijetGenJetCollectionToken, this->dijetGenJetCollectionHandle);
+        obtained &= event.getByToken(this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
         // jet genJet map
-        obtained &= event.getByToken(this->dijetJetGenJetMapToken, this->dijetJetGenJetMapHandle);
+        obtained &= event.getByToken(this->karmaJetGenJetMapToken, this->karmaJetGenJetMapHandle);
     }
 
     assert(obtained);  // raise if one collection could not be obtained
-    assert(this->dijetMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
+    assert(this->karmaMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
     // -- populate outputs
 
@@ -163,7 +163,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->bx = event.bunchCrossing();
 
     // -- copy event content to ntuple
-    outputNtupleEntry->rho     = this->dijetEventHandle->rho;
+    outputNtupleEntry->rho     = this->karmaEventHandle->rho;
     if (m_isData) {
         // nPUMean estimate in data, taken from external file
         if (m_npuMeanProvider) {
@@ -174,8 +174,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         }
     }
     else {
-        outputNtupleEntry->nPU     = this->dijetEventHandle->nPU;
-        outputNtupleEntry->nPUMean = this->dijetEventHandle->nPUTrue;
+        outputNtupleEntry->nPU     = this->karmaEventHandle->nPU;
+        outputNtupleEntry->nPUMean = this->karmaEventHandle->nPUTrue;
         if (m_puWeightProvider) {
             outputNtupleEntry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleEntry->nPUMean);
         }
@@ -185,20 +185,20 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // TEMPORARY: make PV collection will be standard in newer skims
     // obtain primary vertex collection (if available)
-    bool hasPVCollection = event.getByToken(this->dijetVertexCollectionToken, this->dijetVertexCollectionHandle);
+    bool hasPVCollection = event.getByToken(this->karmaVertexCollectionToken, this->karmaVertexCollectionHandle);
     if (hasPVCollection) {
         // fill from PV collection
-        outputNtupleEntry->npv     = this->dijetVertexCollectionHandle->size();
+        outputNtupleEntry->npv     = this->karmaVertexCollectionHandle->size();
         outputNtupleEntry->npvGood = std::count_if(
-            this->dijetVertexCollectionHandle->begin(),
-            this->dijetVertexCollectionHandle->end(),
-            [](const dijet::Vertex& vtx) {return vtx.isGoodOfflineVertex();}
+            this->karmaVertexCollectionHandle->begin(),
+            this->karmaVertexCollectionHandle->end(),
+            [](const karma::Vertex& vtx) {return vtx.isGoodOfflineVertex();}
         );
     }
     else {
-        // fill from dijet::Event
-        outputNtupleEntry->npv     = this->dijetEventHandle->npv;
-        outputNtupleEntry->npvGood = this->dijetEventHandle->npvGood;
+        // fill from karma::Event
+        outputNtupleEntry->npv     = this->karmaEventHandle->npv;
+        outputNtupleEntry->npvGood = this->karmaEventHandle->npvGood;
     }
 
     // weights
@@ -207,9 +207,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // -- trigger results
     dijet::TriggerBits bitsetHLTBits;
     // go through all triggers in skim
-    for (size_t iBit = 0; iBit < this->dijetEventHandle->hltBits.size(); ++iBit) {
+    for (size_t iBit = 0; iBit < this->karmaEventHandle->hltBits.size(); ++iBit) {
         // if trigger fired
-        if (this->dijetEventHandle->hltBits[iBit]) {
+        if (this->karmaEventHandle->hltBits[iBit]) {
             // get the index of trigger in analysis config
             const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[iBit];
             // if trigger present in config
@@ -225,23 +225,23 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // -- generator data (MC-only)
     if (!m_isData) {
-        outputNtupleEntry->generatorWeight = this->dijetGeneratorQCDInfoHandle->weight;
-        outputNtupleEntry->generatorWeightProduct = this->dijetGeneratorQCDInfoHandle->weightProduct;
-        if (this->dijetGeneratorQCDInfoHandle->binningValues.size() > 0)
-            outputNtupleEntry->binningValue = this->dijetGeneratorQCDInfoHandle->binningValues[0];
-        //if (this->dijetGeneratorQCDInfoHandle->binningValues.size() > 1)
-        //    outputNtupleEntry->binningValue2 = this->dijetGeneratorQCDInfoHandle->binningValues[1];
-        outputNtupleEntry->incomingParton1Flavor = this->dijetGeneratorQCDInfoHandle->parton1PdgId;
-        outputNtupleEntry->incomingParton2Flavor = this->dijetGeneratorQCDInfoHandle->parton2PdgId;
-        outputNtupleEntry->incomingParton1x = this->dijetGeneratorQCDInfoHandle->parton1x;
-        outputNtupleEntry->incomingParton2x = this->dijetGeneratorQCDInfoHandle->parton2x;
-        outputNtupleEntry->scalePDF = this->dijetGeneratorQCDInfoHandle->scalePDF;
-        outputNtupleEntry->alphaQCD = this->dijetGeneratorQCDInfoHandle->alphaQCD;
+        outputNtupleEntry->generatorWeight = this->karmaGeneratorQCDInfoHandle->weight;
+        outputNtupleEntry->generatorWeightProduct = this->karmaGeneratorQCDInfoHandle->weightProduct;
+        if (this->karmaGeneratorQCDInfoHandle->binningValues.size() > 0)
+            outputNtupleEntry->binningValue = this->karmaGeneratorQCDInfoHandle->binningValues[0];
+        //if (this->karmaGeneratorQCDInfoHandle->binningValues.size() > 1)
+        //    outputNtupleEntry->binningValue2 = this->karmaGeneratorQCDInfoHandle->binningValues[1];
+        outputNtupleEntry->incomingParton1Flavor = this->karmaGeneratorQCDInfoHandle->parton1PdgId;
+        outputNtupleEntry->incomingParton2Flavor = this->karmaGeneratorQCDInfoHandle->parton2PdgId;
+        outputNtupleEntry->incomingParton1x = this->karmaGeneratorQCDInfoHandle->parton1x;
+        outputNtupleEntry->incomingParton2x = this->karmaGeneratorQCDInfoHandle->parton2x;
+        outputNtupleEntry->scalePDF = this->karmaGeneratorQCDInfoHandle->scalePDF;
+        outputNtupleEntry->alphaQCD = this->karmaGeneratorQCDInfoHandle->alphaQCD;
 
         // gen jets
-        const auto& genJets = this->dijetGenJetCollectionHandle;  // convenience
+        const auto& genJets = this->karmaGenJetCollectionHandle;  // convenience
         if (genJets->size() > 0) {
-            const dijet::LV* genJet1 = &genJets->at(0);
+            const karma::LV* genJet1 = &genJets->at(0);
 
             outputNtupleEntry->genJet1Pt = genJet1->p4.pt();
             outputNtupleEntry->genJet1Phi = genJet1->p4.phi();
@@ -249,7 +249,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->genJet1Y = genJet1->p4.Rapidity();
 
             if (genJets->size() > 1) {
-                const dijet::LV* genJet2 = &genJets->at(1);
+                const karma::LV* genJet2 = &genJets->at(1);
 
                 outputNtupleEntry->genJet2Pt = genJet2->p4.pt();
                 outputNtupleEntry->genJet2Phi = genJet2->p4.phi();
@@ -278,10 +278,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         }
     }
 
-    const auto& jets = this->dijetJetCollectionHandle;  // convenience
+    const auto& jets = this->karmaJetCollectionHandle;  // convenience
     // leading jet kinematics
     if (jets->size() > 0) {
-        const dijet::Jet* jet1 = &jets->at(0);
+        const karma::Jet* jet1 = &jets->at(0);
         // write out jetID (1 if pass, 0 if fail, -1 if not requested/not available)
         if (globalCache()->jetIDProvider_)
             outputNtupleEntry->jet1id = (globalCache()->jetIDProvider_->getJetID(*jet1));
@@ -301,7 +301,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->jet1HFEMFraction = jet1->hfEMFraction;
 
         // matched genJet (MC-only)
-        const dijet::LV* jet1MatchedGenJet = nullptr;
+        const karma::LV* jet1MatchedGenJet = nullptr;
         if (!m_isData) {
             jet1MatchedGenJet = getMatchedGenJet(0);
             if (jet1MatchedGenJet) {
@@ -323,7 +323,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
         // second-leading jet kinematics
         if (jets->size() > 1) {
-            const dijet::Jet* jet2 = &jets->at(1);
+            const karma::Jet* jet2 = &jets->at(1);
             // write out jetID (1 if pass, 0 if fail, -1 if not requested/not available)
             if (globalCache()->jetIDProvider_)
                 outputNtupleEntry->jet2id = (globalCache()->jetIDProvider_->getJetID(*jet2));
@@ -343,7 +343,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet2HFEMFraction = jet2->hfEMFraction;
 
             // matched genJet (MC-only)
-            const dijet::LV* jet2MatchedGenJet = nullptr;
+            const karma::LV* jet2MatchedGenJet = nullptr;
             if (!m_isData) {
                 jet2MatchedGenJet = getMatchedGenJet(1);
                 if (jet2MatchedGenJet) {
@@ -411,8 +411,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         }
     }
 
-    outputNtupleEntry->met = this->dijetMETCollectionHandle->at(0).p4.Pt();
-    outputNtupleEntry->sumEt = this->dijetMETCollectionHandle->at(0).sumEt;
+    outputNtupleEntry->met = this->karmaMETCollectionHandle->at(0).p4.Pt();
+    outputNtupleEntry->sumEt = this->karmaMETCollectionHandle->at(0).sumEt;
 
     // move outputs to event tree
     event.put(std::move(outputNtupleEntry));
@@ -436,12 +436,12 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
     dijet::HLTAssignment hltAssignment;
 
     // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
-    const auto& jetMatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
-        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
+    const auto& jetMatchedTriggerObjects = this->karmaJetTriggerObjectsMapHandle->find(
+        edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, jetIndex)
     );
 
     // if there is at least one trigger object match for the jet
-    if (jetMatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) {
+    if (jetMatchedTriggerObjects != this->karmaJetTriggerObjectsMapHandle->end()) {
 
         std::set<int> seenPathIndices;
         std::set<double> seenObjectPts;
@@ -498,15 +498,15 @@ dijet::HLTAssignment dijet::NtupleProducer::getHLTAssignment(unsigned int jetInd
  * Helper function to determine which HLT path (if any) can be assigned
  * to a reconstructed jet with a particular index.
  */
-const dijet::LV* dijet::NtupleProducer::getMatchedGenJet(unsigned int jetIndex) {
+const karma::LV* dijet::NtupleProducer::getMatchedGenJet(unsigned int jetIndex) {
 
     // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
-    const auto& jetMatchedJenJet = this->dijetJetGenJetMapHandle->find(
-        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
+    const auto& jetMatchedJenJet = this->karmaJetGenJetMapHandle->find(
+        edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, jetIndex)
     );
 
     // if there is a gen jet match, return it
-    if (jetMatchedJenJet != this->dijetJetGenJetMapHandle->end()) {
+    if (jetMatchedJenJet != this->karmaJetGenJetMapHandle->end()) {
         return &(*jetMatchedJenJet->val);
     }
 
@@ -531,12 +531,12 @@ dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForJet(unsigned in
      * */
 
     // -- obtain the collection of trigger objects matched to jet with index `jetIndex`
-    const auto& jetMatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
-        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, jetIndex)
+    const auto& jetMatchedTriggerObjects = this->karmaJetTriggerObjectsMapHandle->find(
+        edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, jetIndex)
     );
 
     // if there is at least one trigger object match for the jet
-    if (jetMatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) {
+    if (jetMatchedTriggerObjects != this->karmaJetTriggerObjectsMapHandle->end()) {
 
         // loop over all trigger objects matched to the jet
         for (const auto& jetMatchedTriggerObject : jetMatchedTriggerObjects->val) {
@@ -599,20 +599,20 @@ dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForLeadingJetPair(
      * */
 
     // return immediately if event has less than 2 jets
-    if (this->dijetJetCollectionHandle->size() < 2)
+    if (this->karmaJetCollectionHandle->size() < 2)
         return triggerBitsets;
 
     // -- obtain the collection of trigger objects matched to leading jet
-    const auto& jet1MatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
-        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, 0)
+    const auto& jet1MatchedTriggerObjects = this->karmaJetTriggerObjectsMapHandle->find(
+        edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, 0)
     );
     // -- obtain the collection of trigger objects matched to subleading jet
-    const auto& jet2MatchedTriggerObjects = this->dijetJetTriggerObjectsMapHandle->find(
-        edm::Ref<dijet::JetCollection>(this->dijetJetCollectionHandle, 1)
+    const auto& jet2MatchedTriggerObjects = this->karmaJetTriggerObjectsMapHandle->find(
+        edm::Ref<karma::JetCollection>(this->karmaJetCollectionHandle, 1)
     );
 
     // if there is at least one trigger object match for each jet
-    if ((jet1MatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end()) && (jet2MatchedTriggerObjects != this->dijetJetTriggerObjectsMapHandle->end())) {
+    if ((jet1MatchedTriggerObjects != this->karmaJetTriggerObjectsMapHandle->end()) && (jet2MatchedTriggerObjects != this->karmaJetTriggerObjectsMapHandle->end())) {
 
         // loop over all pairs trigger objects matched to the leading jet pair
         for (const auto& jet1MatchedTriggerObject : jet1MatchedTriggerObjects->val) {

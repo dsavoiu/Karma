@@ -3,13 +3,13 @@
 // -- constructor
 dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::ParameterSet& config, const dijet::CorrectedValidJetsProducerGlobalCache*) : m_configPSet(config) {
     // -- register products
-    produces<dijet::JetCollection>();
+    produces<karma::JetCollection>();
 
     // -- process configuration
 
     // -- declare which collections are consumed and create tokens
-    dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
-    dijetJetCollectionToken = consumes<dijet::JetCollection>(m_configPSet.getParameter<edm::InputTag>("dijetJetCollectionSrc"));
+    karmaEventToken = consumes<karma::Event>(m_configPSet.getParameter<edm::InputTag>("karmaEventSrc"));
+    karmaJetCollectionToken = consumes<karma::JetCollection>(m_configPSet.getParameter<edm::InputTag>("karmaJetCollectionSrc"));
 
     // set up a FactorizedJetCorrector (one per stream)
     const auto& jec = m_configPSet.getParameter<std::string>("jecVersion");
@@ -63,27 +63,27 @@ dijet::CorrectedValidJetsProducer::~CorrectedValidJetsProducer() {
 // -- member functions
 
 void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-    std::unique_ptr<dijet::JetCollection> outputJetCollection(new dijet::JetCollection());
+    std::unique_ptr<karma::JetCollection> outputJetCollection(new karma::JetCollection());
 
     // -- get object collections for event
     bool obtained = true;
     // pileup density
-    obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
+    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
     // jet collection
-    obtained &= event.getByToken(this->dijetJetCollectionToken, this->dijetJetCollectionHandle);
+    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
 
     assert(obtained);  // raise if one collection could not be obtained
 
     // -- populate outputs
 
-    for (const auto& inputJet : (*this->dijetJetCollectionHandle)) {
+    for (const auto& inputJet : (*this->karmaJetCollectionHandle)) {
         // reject jets which do not pass JetID (if requested)
         if (globalCache()->jetIDProvider_ && !globalCache()->jetIDProvider_->getJetID(inputJet))
             continue;
 
         // setup of FactorizedJetCorrector and JetCorrectionUncertainty
-        setupFactorizedJetCorrector(*m_jetCorrector, *this->dijetEventHandle, inputJet);
-        setupFactorizedJetCorrector(*m_jetCorrector_L1, *this->dijetEventHandle, inputJet);
+        setupFactorizedJetCorrector(*m_jetCorrector, *this->karmaEventHandle, inputJet);
+        setupFactorizedJetCorrector(*m_jetCorrector_L1, *this->karmaEventHandle, inputJet);
         setupFactorProvider(*m_jetCorrectionUncertainty, inputJet);
 
         // copy jet to output
@@ -102,7 +102,7 @@ void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
     std::sort(
         (*outputJetCollection).begin(),
         (*outputJetCollection).end(),
-        [](const dijet::Jet& jet1, const dijet::Jet& jet2) {
+        [](const karma::Jet& jet1, const karma::Jet& jet2) {
             return (jet1.p4.pt() > jet2.p4.pt());
         }
     );

@@ -10,7 +10,7 @@
 
 #include "DataFormats/Common/interface/AssociationMap.h"
 
-namespace dijet {
+namespace karma {
     class Event {
       public:
         // -- event metadata
@@ -30,7 +30,7 @@ namespace dijet {
         std::vector<int> triggerPathL1Prescales;
 
     };
-    typedef std::vector<dijet::Event> EventCollection;
+    typedef std::vector<karma::Event> EventCollection;
 
     class GeneratorQCDInfo {
       public:
@@ -54,7 +54,7 @@ namespace dijet {
         double alphaQCD = UNDEFINED_DOUBLE;
 
     };
-    typedef std::vector<dijet::GeneratorQCDInfo> GeneratorQCDInfoCollection;
+    typedef std::vector<karma::GeneratorQCDInfo> GeneratorQCDInfoCollection;
 
     /**
      * Simple lorentz vector class
@@ -63,19 +63,19 @@ namespace dijet {
       public:
 
         // -- kinematics
-        dijet::LorentzVector p4;
+        karma::LorentzVector p4;
 
         size_t ptHash() {
             return std::hash<double>()(p4.pt());
         }
 
     };
-    typedef std::vector<dijet::LV> LVCollection;
+    typedef std::vector<karma::LV> LVCollection;
 
     /**
      * Generator Particle class
      */
-    class GenParticle : public dijet::LV {
+    class GenParticle : public karma::LV {
       public:
         int pdgId = -999;
 
@@ -99,12 +99,12 @@ namespace dijet {
         std::vector<int> daughterIndices;
 
     };
-    typedef std::vector<dijet::GenParticle> GenParticleCollection;
+    typedef std::vector<karma::GenParticle> GenParticleCollection;
 
     /**
      * Jet class
      */
-    class Jet : public dijet::LV {
+    class Jet : public karma::LV {
       public:
         double area = UNDEFINED_DOUBLE
 
@@ -123,15 +123,15 @@ namespace dijet {
         double hfEMFraction = UNDEFINED_DOUBLE;
 
         // pileup-corrected p4 (JEC L1), needed for Type-I MET correction
-        dijet::LorentzVector p4CorrL1;
+        karma::LorentzVector p4CorrL1;
 
     };
-    typedef std::vector<dijet::Jet> JetCollection;
+    typedef std::vector<karma::Jet> JetCollection;
 
     /**
      * MET class
      */
-    class MET : public dijet::LV {
+    class MET : public karma::LV {
       public:
         double significance = UNDEFINED_DOUBLE;
         double sumEt = UNDEFINED_DOUBLE;
@@ -144,12 +144,12 @@ namespace dijet {
         double hfHadronFraction = UNDEFINED_DOUBLE;
         double hfEMFraction = UNDEFINED_DOUBLE;
     };
-    typedef std::vector<dijet::MET> METCollection;
+    typedef std::vector<karma::MET> METCollection;
 
     /**
      * Trigger Object class
      */
-    class TriggerObject : public dijet::LV {
+    class TriggerObject : public karma::LV {
       public:
 
         std::vector<int> types;
@@ -209,14 +209,14 @@ namespace dijet {
         }
 
     };
-    typedef std::vector<dijet::TriggerObject> TriggerObjectCollection;
+    typedef std::vector<karma::TriggerObject> TriggerObjectCollection;
 
     /**
      * reconstruted vertex class
      */
     class Vertex {
       public:
-        dijet::PositionVector3D position;
+        karma::PositionVector3D position;
         double time = UNDEFINED_DOUBLE;
 
         double chi2 = 0;
@@ -234,12 +234,12 @@ namespace dijet {
         }
 
     };
-    typedef std::vector<dijet::Vertex> VertexCollection;
+    typedef std::vector<karma::Vertex> VertexCollection;
 
     // -- association maps
-    typedef edm::AssociationMap<edm::OneToMany<dijet::JetCollection, dijet::TriggerObjectCollection>> JetTriggerObjectsMap;
-    typedef std::vector<dijet::JetTriggerObjectsMap> JetTriggerObjectsMaps;
+    typedef edm::AssociationMap<edm::OneToMany<karma::JetCollection, karma::TriggerObjectCollection>> JetTriggerObjectsMap;
+    typedef std::vector<karma::JetTriggerObjectsMap> JetTriggerObjectsMaps;
 
-    typedef edm::AssociationMap<edm::OneToOne<dijet::JetCollection, dijet::LVCollection>> JetGenJetMap;
-    typedef std::vector<dijet::JetGenJetMap> JetGenJetMaps;
+    typedef edm::AssociationMap<edm::OneToOne<karma::JetCollection, karma::LVCollection>> JetGenJetMap;
+    typedef std::vector<karma::JetGenJetMap> JetGenJetMaps;
 }

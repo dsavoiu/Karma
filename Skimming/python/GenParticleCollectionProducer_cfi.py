@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetGenParticleCollectionProducer = cms.EDProducer(
+karmaGenParticleCollectionProducer = cms.EDProducer(
     "GenParticleCollectionProducer",
     cms.PSet(
         inputCollection = cms.InputTag("prunedGenParticles"),

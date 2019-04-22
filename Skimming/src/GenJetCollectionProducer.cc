@@ -1,7 +1,7 @@
 #include "Karma/Skimming/interface/GenJetCollectionProducer.h"
 
 
-void dijet::GenJetCollectionProducer::produceSingle(const reco::GenJet& in, dijet::LV& out, const edm::Event& event, const edm::EventSetup& setup) {
+void karma::GenJetCollectionProducer::produceSingle(const reco::GenJet& in, karma::LV& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
     out.p4 = in.p4();
@@ -10,5 +10,5 @@ void dijet::GenJetCollectionProducer::produceSingle(const reco::GenJet& in, dije
 
 
 //define this as a plug-in
-using dijet::GenJetCollectionProducer;
+using karma::GenJetCollectionProducer;
 DEFINE_FWK_MODULE(GenJetCollectionProducer);

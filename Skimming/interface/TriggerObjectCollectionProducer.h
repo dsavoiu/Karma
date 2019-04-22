@@ -11,21 +11,21 @@
 #include "Karma/SkimmingFormats/interface/Run.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
-namespace dijet {
+namespace karma {
 
     class TriggerObjectCollectionProducer :
-        public dijet::CollectionProducerBase<
+        public karma::CollectionProducerBase<
             /* TInputType =*/ pat::TriggerObjectStandAloneCollection,
-            /* TOutputType =*/ dijet::TriggerObjectCollection> {
+            /* TOutputType =*/ karma::TriggerObjectCollection> {
 
       public:
         explicit TriggerObjectCollectionProducer(const edm::ParameterSet& config) :
-            dijet::CollectionProducerBase<pat::TriggerObjectStandAloneCollection, dijet::TriggerObjectCollection>(config) {
+            karma::CollectionProducerBase<pat::TriggerObjectStandAloneCollection, karma::TriggerObjectCollection>(config) {
 
-            // this producer needs a dijet::Run product so that it can access
+            // this producer needs a karma::Run product so that it can access
             // the active trigger path names
-            dijetRunToken_ = this->template consumes<dijet::Run, edm::InRun>(
-                this->m_configPSet.template getParameter<edm::InputTag>("dijetRunSrc")
+            karmaRunToken_ = this->template consumes<karma::Run, edm::InRun>(
+                this->m_configPSet.template getParameter<edm::InputTag>("karmaRunSrc")
             );
             triggerResultsToken_ = this->template consumes<edm::TriggerResults>(
                 this->m_configPSet.template getParameter<edm::InputTag>("triggerResultsSrc")
@@ -34,19 +34,19 @@ namespace dijet {
         ~TriggerObjectCollectionProducer() {};
 
 
-        // need to override produce function to update dijetRun handle
+        // need to override produce function to update karmaRun handle
         virtual void produce(edm::Event& event, const edm::EventSetup& setup) {
             // get additional event/run data
             bool obtained = true;
-            obtained &= event.getRun().getByToken(this->dijetRunToken_, this->dijetRunHandle_);  // can this be optimized?
+            obtained &= event.getRun().getByToken(this->karmaRunToken_, this->karmaRunHandle_);  // can this be optimized?
             obtained &= event.getByToken(this->triggerResultsToken_, this->triggerResultsHandle_);
             assert(obtained);
 
             // call "parent" produce function
-            dijet::CollectionProducerBase<pat::TriggerObjectStandAloneCollection, dijet::TriggerObjectCollection>::produce(event, setup);
+            karma::CollectionProducerBase<pat::TriggerObjectStandAloneCollection, karma::TriggerObjectCollection>::produce(event, setup);
         };
 
-        virtual void produceSingle(const pat::TriggerObjectStandAlone&, dijet::TriggerObject&, const edm::Event&, const edm::EventSetup&);
+        virtual void produceSingle(const pat::TriggerObjectStandAlone&, karma::TriggerObject&, const edm::Event&, const edm::EventSetup&);
 
         inline virtual bool acceptSingle(const pat::TriggerObjectStandAlone& in, const edm::Event& event, const edm::EventSetup& setup) override {
             // // -- check trigger object type (disabled, for now)
@@ -70,7 +70,7 @@ namespace dijet {
 
             bool pathAccepted = false;
             for (const auto& triggeredPathName : in.pathNames()) {
-                for (const auto& pathInfo : this->dijetRunHandle_->triggerPathInfos) {
+                for (const auto& pathInfo : this->karmaRunHandle_->triggerPathInfos) {
                     if (pathInfo.name_ == triggeredPathName) {
                         pathAccepted = true;
                         break;
@@ -86,9 +86,9 @@ namespace dijet {
         };
 
       private:
-        // -- extra handle and token for dijetRun
-        typename edm::Handle<dijet::Run> dijetRunHandle_;
-        edm::EDGetTokenT<dijet::Run> dijetRunToken_;
+        // -- extra handle and token for karmaRun
+        typename edm::Handle<karma::Run> karmaRunHandle_;
+        edm::EDGetTokenT<karma::Run> karmaRunToken_;
 
         // -- extra handle and token for TriggerResults
         typename edm::Handle<edm::TriggerResults> triggerResultsHandle_;

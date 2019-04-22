@@ -18,7 +18,7 @@ options.dumpPython=1
 
 
 # -- must be called at the beginning
-process = createProcess("DIJET", num_threads=1)
+process = createProcess("KARMA", num_threads=1)
 
 # modules will add to this list to register a product
 # for writeout
@@ -43,15 +43,15 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 
 # -- configure CMSSW modules
 
-from Karma.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
-from Karma.Skimming.JetCollectionProducer_cfi import dijetJets
-from Karma.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
-from Karma.Skimming.EventProducer_cfi import dijetEventProducer
-from Karma.Skimming.GeneratorQCDInfoProducer_cfi import dijetGeneratorQCDInfoProducer
-from Karma.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
+from Karma.Skimming.TriggerObjectCollectionProducer_cfi import karmaTriggerObjectCollectionProducer
+from Karma.Skimming.METCollectionProducer_cfi import karmaPFMETCollectionProducer, karmaCHSMETCollectionProducer
+from Karma.Skimming.JetCollectionProducer_cfi import karmaJets
+from Karma.Skimming.EventProducer_cfi import karmaEventProducer
+from Karma.Skimming.GeneratorQCDInfoProducer_cfi import karmaGeneratorQCDInfoProducer
+from Karma.Skimming.VertexCollectionProducer_cfi import karmaVertexCollectionProducer
 
-from Karma.Skimming.GenJetCollectionProducer_cfi import dijetGenJetsAK4, dijetGenJetsAK8
-from Karma.Skimming.GenParticleCollectionProducer_cfi import dijetGenParticleCollectionProducer
+from Karma.Skimming.GenJetCollectionProducer_cfi import karmaGenJetsAK4, karmaGenJetsAK8
+from Karma.Skimming.GenParticleCollectionProducer_cfi import karmaGenParticleCollectionProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
@@ -61,38 +61,38 @@ process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',
     ),  # ndof >= 4, rho <= 2
 )
 
-process.dijetEvents = dijetEventProducer(isData=options.isData).clone(
+process.karmaEvents = karmaEventProducer(isData=options.isData).clone(
     goodPrimaryVerticesSrc = cms.InputTag("goodOfflinePrimaryVertices"),
 )
-_accumulated_output_commands.append("keep *_dijetEvents_*_DIJET")
+_accumulated_output_commands.append("keep *_karmaEvents_*_KARMA")
 
 # filter events for which "interesting" HLT paths fired
-process.dijetEventHLTFilter = cms.EDFilter("EventHLTFilter",
+process.karmaEventHLTFilter = cms.EDFilter("EventHLTFilter",
     cms.PSet(
-        dijetEventSrc = cms.InputTag("dijetEvents")
+        karmaEventSrc = cms.InputTag("karmaEvents")
     )
 )
-_accumulated_output_commands.append("drop *_dijetEventHLTFilter_*_DIJET")
+_accumulated_output_commands.append("drop *_karmaEventHLTFilter_*_KARMA")
 
-process.dijetGeneratorQCDInfos = dijetGeneratorQCDInfoProducer.clone(
+process.karmaGeneratorQCDInfos = karmaGeneratorQCDInfoProducer.clone(
     genEventInfoProductSrc = cms.InputTag("generator"),
 )
-_accumulated_output_commands.append("keep *_dijetGeneratorQCDInfos_*_DIJET")
+_accumulated_output_commands.append("keep *_karmaGeneratorQCDInfos_*_KARMA")
 
-process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer.clone(
-    dijetRunSrc = cms.InputTag("dijetEvents"),
+process.karmaTriggerObjects = karmaTriggerObjectCollectionProducer.clone(
+    karmaRunSrc = cms.InputTag("karmaEvents"),
 )
-_accumulated_output_commands.append("keep *_dijetTriggerObjects_*_DIJET")
+_accumulated_output_commands.append("keep *_karmaTriggerObjects_*_KARMA")
 
-process.dijetVertices = dijetVertexCollectionProducer.clone()
-_accumulated_output_commands.append("keep *_dijetVertices_*_DIJET")
+process.karmaVertices = karmaVertexCollectionProducer.clone()
+_accumulated_output_commands.append("keep *_karmaVertices_*_KARMA")
 
 mainSequence = cms.Sequence(
-    process.dijetEvents *
-    process.dijetEventHLTFilter *
-    process.dijetGeneratorQCDInfos *
-    process.dijetTriggerObjects *
-    process.dijetVertices
+    process.karmaEvents *
+    process.karmaEventHLTFilter *
+    process.karmaGeneratorQCDInfos *
+    process.karmaTriggerObjects *
+    process.karmaVertices
 );
 
 
@@ -104,55 +104,55 @@ uncorrected_jet_collection_names = addJetToolboxSequences(
     pu_subtraction_methods=('CHS',),
     do_pu_jet_id=False)
 
-# create "dijet::Jet" collections for JEC-uncorrected pat::Jets
+# create "karma::Jet" collections for JEC-uncorrected pat::Jets
 for _jet_collection_name in uncorrected_jet_collection_names:
-    _module_name = "dijet{}{}".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
+    _module_name = "karma{}{}".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
     setattr(
         process,
         _module_name,
-        dijetJets.clone(
+        karmaJets.clone(
             inputCollection = cms.InputTag(_jet_collection_name),
         )
     )
     _accumulated_output_commands.extend([
-        "keep *_{}_*_DIJET".format(_module_name),
+        "keep *_{}_*_KARMA".format(_module_name),
     ])
     mainSequence *= getattr(process, _jet_collection_name)
 
-# create "dijet::MET" collections for (uncorrected) PF and CHS Mets
-process.dijetPFMETs = dijetPFMETCollectionProducer.clone(
+# create "karma::MET" collections for (uncorrected) PF and CHS Mets
+process.karmaPFMETs = karmaPFMETCollectionProducer.clone(
     # take default PAT::MET from PAT (==PFMet)
     inputCollection = cms.InputTag("slimmedMETs", "", "PAT"),
 )
-mainSequence *= process.dijetPFMETs
-_accumulated_output_commands.append("keep *_dijetPFMETs_*_DIJET")
+mainSequence *= process.karmaPFMETs
+_accumulated_output_commands.append("keep *_karmaPFMETs_*_KARMA")
 
-process.dijetCHSMETs = dijetCHSMETCollectionProducer(process, isData=options.isData).clone()
-mainSequence *= process.dijetCHSMETs
-_accumulated_output_commands.append("keep *_dijetCHSMETs_*_DIJET")
+process.karmaCHSMETs = karmaCHSMETCollectionProducer(process, isData=options.isData).clone()
+mainSequence *= process.karmaCHSMETs
+_accumulated_output_commands.append("keep *_karmaCHSMETs_*_KARMA")
 
 # -- MC-specific
 
 
 # create GetParticle collection
-process.dijetGenParticles = dijetGenParticleCollectionProducer.clone(
+process.karmaGenParticles = karmaGenParticleCollectionProducer.clone(
     inputCollection = cms.InputTag("prunedGenParticles"),
 )
-mainSequence *= process.dijetGenParticles
-_accumulated_output_commands.append("keep *_dijetGenParticles_*_DIJET")
+mainSequence *= process.karmaGenParticles
+_accumulated_output_commands.append("keep *_karmaGenParticles_*_KARMA")
 
 # create GetJet collections
-process.dijetGenJetsAK4 = dijetGenJetsAK4.clone(
+process.karmaGenJetsAK4 = karmaGenJetsAK4.clone(
     inputCollection = cms.InputTag("ak4GenJetsNoNu"),
 )
-mainSequence *= process.dijetGenJetsAK4
-_accumulated_output_commands.append("keep *_dijetGenJetsAK4_*_DIJET")
+mainSequence *= process.karmaGenJetsAK4
+_accumulated_output_commands.append("keep *_karmaGenJetsAK4_*_KARMA")
 
-process.dijetGenJetsAK8 = dijetGenJetsAK4.clone(
+process.karmaGenJetsAK8 = karmaGenJetsAK4.clone(
     inputCollection = cms.InputTag("ak8GenJetsNoNu"),
 )
-mainSequence *= process.dijetGenJetsAK8
-_accumulated_output_commands.append("keep *_dijetGenJetsAK8_*_DIJET")
+mainSequence *= process.karmaGenJetsAK8
+_accumulated_output_commands.append("keep *_karmaGenJetsAK8_*_KARMA")
 
 process.path = cms.Path(mainSequence)
 

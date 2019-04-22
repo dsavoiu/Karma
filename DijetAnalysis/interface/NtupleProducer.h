@@ -33,7 +33,7 @@
 #include "Karma/SkimmingFormats/interface/Lumi.h"
 #include "Karma/SkimmingFormats/interface/Run.h"
 
-//~ // for dijet::JetTriggerObjectMap type
+//~ // for karma::JetTriggerObjectMap type
 //~ #include "Karma/DijetAnalysis/interface/JetTriggerObjectMatchingProducer.h"
 
 
@@ -70,15 +70,15 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of the analysis job.
      */
-    class NtupleProducerGlobalCache : public dijet::CacheBase {
+    class NtupleProducerGlobalCache : public karma::CacheBase {
 
       public:
         NtupleProducerGlobalCache(const edm::ParameterSet& pSet) :
-            dijet::CacheBase(pSet),
+            karma::CacheBase(pSet),
             hltVersionPattern_(boost::regex("(HLT_.*)_v[0-9]+", boost::regex::extended)) {
 
             /// // create the global trigger efficiencies provider instance
-            /// triggerEfficienciesProvider_ = std::unique_ptr<TriggerEfficienciesProvider>(
+            /// triggerEfficienciesProvider_ = std::unique_ptr<karma::TriggerEfficienciesProvider>(
             ///     new TriggerEfficienciesProvider(m_configPSet.getParameter<std::string>("triggerEfficienciesFile"))
             /// );
 
@@ -98,8 +98,8 @@ namespace dijet {
 
             // if JetID set to 'None', leave jetIDProvider_ as nullptr
             if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
-                jetIDProvider_ = std::unique_ptr<JetIDProvider>(
-                    new JetIDProvider(
+                jetIDProvider_ = std::unique_ptr<karma::JetIDProvider>(
+                    new karma::JetIDProvider(
                         pSet_.getParameter<std::string>("jetIDSpec"),
                         pSet_.getParameter<std::string>("jetIDWorkingPoint")
                     )
@@ -116,8 +116,8 @@ namespace dijet {
         dijet::TriggerBits hltZeroThresholdMask_;
         dijet::TriggerBits l1ZeroThresholdMask_;
 
-        std::unique_ptr<TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
-        std::unique_ptr<JetIDProvider> jetIDProvider_;
+        std::unique_ptr<karma::TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
+        std::unique_ptr<karma::JetIDProvider> jetIDProvider_;
 
     };
 
@@ -125,10 +125,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a run
      */
-    class NtupleProducerRunCache : public dijet::CacheBase {
+    class NtupleProducerRunCache : public karma::CacheBase {
 
       public:
-        NtupleProducerRunCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+        NtupleProducerRunCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
         std::vector<std::string> triggerPathsUnversionedNames_;
         std::vector<int> triggerPathsIndicesInConfig_;
@@ -166,7 +166,7 @@ namespace dijet {
         // -- helper methods
 
         dijet::HLTAssignment getHLTAssignment(unsigned int jetIndex);
-        const dijet::LV* getMatchedGenJet(unsigned int jetIndex);
+        const karma::LV* getMatchedGenJet(unsigned int jetIndex);
         dijet::TriggerBitsets getTriggerBitsetsForJet(unsigned int jetIndex);
         dijet::TriggerBitsets getTriggerBitsetsForLeadingJetPair();
 
@@ -176,42 +176,42 @@ namespace dijet {
         bool m_isData;
         double m_weightForStitching;
 
-        /// std::unique_ptr<TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
-        std::unique_ptr<NPUMeanProvider> m_npuMeanProvider;
-        std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetPtAve;
-        std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetMass;
-        std::unique_ptr<PileupWeightProvider> m_puWeightProvider;
+        /// std::unique_ptr<karma::TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
+        std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider;
+        std::unique_ptr<karma::FlexGridBinProvider> m_flexGridBinProviderDijetPtAve;
+        std::unique_ptr<karma::FlexGridBinProvider> m_flexGridBinProviderDijetMass;
+        std::unique_ptr<karma::PileupWeightProvider> m_puWeightProvider;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::Event> dijetEventHandle;
-        edm::EDGetTokenT<dijet::Event> dijetEventToken;
+        typename edm::Handle<karma::Event> karmaEventHandle;
+        edm::EDGetTokenT<karma::Event> karmaEventToken;
 
-        typename edm::Handle<dijet::VertexCollection> dijetVertexCollectionHandle;
-        edm::EDGetTokenT<dijet::VertexCollection> dijetVertexCollectionToken;
+        typename edm::Handle<karma::VertexCollection> karmaVertexCollectionHandle;
+        edm::EDGetTokenT<karma::VertexCollection> karmaVertexCollectionToken;
 
-        typename edm::Handle<dijet::JetCollection> dijetJetCollectionHandle;
-        edm::EDGetTokenT<dijet::JetCollection> dijetJetCollectionToken;
+        typename edm::Handle<karma::JetCollection> karmaJetCollectionHandle;
+        edm::EDGetTokenT<karma::JetCollection> karmaJetCollectionToken;
 
-        typename edm::Handle<dijet::METCollection> dijetMETCollectionHandle;
-        edm::EDGetTokenT<dijet::METCollection> dijetMETCollectionToken;
+        typename edm::Handle<karma::METCollection> karmaMETCollectionHandle;
+        edm::EDGetTokenT<karma::METCollection> karmaMETCollectionToken;
 
-        typename edm::Handle<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapHandle;
-        edm::EDGetTokenT<dijet::JetTriggerObjectsMap> dijetJetTriggerObjectsMapToken;
+        typename edm::Handle<karma::JetTriggerObjectsMap> karmaJetTriggerObjectsMapHandle;
+        edm::EDGetTokenT<karma::JetTriggerObjectsMap> karmaJetTriggerObjectsMapToken;
 
-        typename edm::Handle<dijet::JetGenJetMap> dijetJetGenJetMapHandle;
-        edm::EDGetTokenT<dijet::JetGenJetMap> dijetJetGenJetMapToken;
+        typename edm::Handle<karma::JetGenJetMap> karmaJetGenJetMapHandle;
+        edm::EDGetTokenT<karma::JetGenJetMap> karmaJetGenJetMapToken;
 
-        typename edm::Handle<dijet::GenParticleCollection> dijetGenParticleCollectionHandle;
-        edm::EDGetTokenT<dijet::GenParticleCollection> dijetGenParticleCollectionToken;
+        typename edm::Handle<karma::GenParticleCollection> karmaGenParticleCollectionHandle;
+        edm::EDGetTokenT<karma::GenParticleCollection> karmaGenParticleCollectionToken;
 
-        typename edm::Handle<dijet::GeneratorQCDInfo> dijetGeneratorQCDInfoHandle;
-        edm::EDGetTokenT<dijet::GeneratorQCDInfo> dijetGeneratorQCDInfoToken;
+        typename edm::Handle<karma::GeneratorQCDInfo> karmaGeneratorQCDInfoHandle;
+        edm::EDGetTokenT<karma::GeneratorQCDInfo> karmaGeneratorQCDInfoToken;
 
-        typename edm::Handle<dijet::LVCollection> dijetGenJetCollectionHandle;
-        edm::EDGetTokenT<dijet::LVCollection> dijetGenJetCollectionToken;
+        typename edm::Handle<karma::LVCollection> karmaGenJetCollectionHandle;
+        edm::EDGetTokenT<karma::LVCollection> karmaGenJetCollectionToken;
 
-        typename edm::Handle<dijet::Run> dijetRunHandle;
-        edm::EDGetTokenT<dijet::Run> dijetRunToken;
+        typename edm::Handle<karma::Run> karmaRunHandle;
+        edm::EDGetTokenT<karma::Run> karmaRunToken;
 
     };
 }  // end namespace

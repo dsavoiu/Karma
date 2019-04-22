@@ -3,7 +3,7 @@
 #include "TKey.h"
 
 
-dijet::TriggerEfficienciesProvider::TriggerEfficienciesProvider(std::string fileName) {
+karma::TriggerEfficienciesProvider::TriggerEfficienciesProvider(std::string fileName) {
 
     TFile file(fileName.c_str());
     TIter next(file.GetListOfKeys());
@@ -25,7 +25,7 @@ dijet::TriggerEfficienciesProvider::TriggerEfficienciesProvider(std::string file
 }
 
 
-const TEfficiency* dijet::TriggerEfficienciesProvider::getEfficiency(const std::string& key) {
+const TEfficiency* karma::TriggerEfficienciesProvider::getEfficiency(const std::string& key) {
     const auto mapIter = triggerEfficiencies_.find(key);
     if (mapIter == triggerEfficiencies_.end())
         return nullptr;

@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-def dijetEventProducer(isData):
+def karmaEventProducer(isData):
     """create the producer for CHS MET, adding necessary prerequisites to the process"""
 
     return cms.EDProducer(

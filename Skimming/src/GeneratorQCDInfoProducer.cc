@@ -4,9 +4,9 @@
 #include "Karma/Skimming/interface/GeneratorQCDInfoProducer.h"
 
 // -- constructor
-dijet::GeneratorQCDInfoProducer::GeneratorQCDInfoProducer(const edm::ParameterSet& config) : m_configPSet(config) {
+karma::GeneratorQCDInfoProducer::GeneratorQCDInfoProducer(const edm::ParameterSet& config) : m_configPSet(config) {
     // -- register products
-    produces<dijet::GeneratorQCDInfo>();
+    produces<karma::GeneratorQCDInfo>();
 
     // -- process configuration
 
@@ -17,16 +17,16 @@ dijet::GeneratorQCDInfoProducer::GeneratorQCDInfoProducer(const edm::ParameterSe
 
 
 // -- destructor
-dijet::GeneratorQCDInfoProducer::~GeneratorQCDInfoProducer() {
+karma::GeneratorQCDInfoProducer::~GeneratorQCDInfoProducer() {
 }
 
 
 
 // -- member functions
 
-void dijet::GeneratorQCDInfoProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-    //std::unique_ptr<dijet::Event> dijetEvent(new dijet::Event());
-    std::unique_ptr<dijet::GeneratorQCDInfo> outputGeneratorQCDInfo(new dijet::GeneratorQCDInfo());
+void karma::GeneratorQCDInfoProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+    //std::unique_ptr<karma::Event> karmaEvent(new karma::Event());
+    std::unique_ptr<karma::GeneratorQCDInfo> outputGeneratorQCDInfo(new karma::GeneratorQCDInfo());
 
     // -- get object collections for event
     bool obtained = true;
@@ -64,7 +64,7 @@ void dijet::GeneratorQCDInfoProducer::produce(edm::Event& event, const edm::Even
 }
 
 
-void dijet::GeneratorQCDInfoProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::GeneratorQCDInfoProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -74,5 +74,5 @@ void dijet::GeneratorQCDInfoProducer::fillDescriptions(edm::ConfigurationDescrip
 
 
 //define this as a plug-in
-using dijet::GeneratorQCDInfoProducer;
+using karma::GeneratorQCDInfoProducer;
 DEFINE_FWK_MODULE(GeneratorQCDInfoProducer);

@@ -1,10 +1,10 @@
 #include "Karma/Common/interface/JetIDProvider.h"
 
 
-dijet::JetIDProvider::JetIDProvider(std::string jetIDSpec, std::string jetIDWorkingPoint) {
+karma::JetIDProvider::JetIDProvider(std::string jetIDSpec, std::string jetIDWorkingPoint) {
     boost::algorithm::to_lower(jetIDSpec);  // make lowercase
     if (jetIDSpec == "2016")
-        jetID_ = std::unique_ptr<dijet::JetID2016>(new dijet::JetID2016(jetIDWorkingPoint));
+        jetID_ = std::unique_ptr<karma::JetID2016>(new karma::JetID2016(jetIDWorkingPoint));
     else
         throw std::invalid_argument("Unknown JetID: " + jetIDSpec);
 
@@ -12,6 +12,6 @@ dijet::JetIDProvider::JetIDProvider(std::string jetIDSpec, std::string jetIDWork
 }
 
 
-bool dijet::JetIDProvider::getJetID(const dijet::Jet& jet) {
+bool karma::JetIDProvider::getJetID(const karma::Jet& jet) {
     return jetID_->getJetID(jet);
 }

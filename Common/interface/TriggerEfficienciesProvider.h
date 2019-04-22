@@ -4,7 +4,7 @@
 #include "TFile.h"
 
 
-namespace dijet {
+namespace karma {
     class TriggerEfficienciesProvider {
       public:
 

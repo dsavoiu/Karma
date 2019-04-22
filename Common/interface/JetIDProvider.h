@@ -4,13 +4,13 @@
 
 #include "Karma/SkimmingFormats/interface/Event.h"
 
-namespace dijet {
+namespace karma {
 
     class JetIDBaseUntemplated {
       public:
         JetIDBaseUntemplated() {};
         virtual ~JetIDBaseUntemplated() {};
-        virtual bool getJetID(const dijet::Jet& jet) = 0;
+        virtual bool getJetID(const karma::Jet& jet) = 0;
     };
 
     template<typename TWorkingPoint>
@@ -54,7 +54,7 @@ namespace dijet {
         };
         ~JetID2016() {};
 
-        virtual bool getJetID(const dijet::Jet& jet) override {
+        virtual bool getJetID(const karma::Jet& jet) override {
             const double absEta = std::abs(jet.p4.eta());
             if (absEta <= 2.7) {
                 return (
@@ -93,7 +93,7 @@ namespace dijet {
         JetIDProvider(std::string jetIDSpec, std::string jetIDWorkingPoint);
         ~JetIDProvider() {};
 
-        bool getJetID(const dijet::Jet& jet);
+        bool getJetID(const karma::Jet& jet);
 
       private:
 

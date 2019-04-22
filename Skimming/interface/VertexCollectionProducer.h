@@ -11,28 +11,28 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-namespace dijet {
+namespace karma {
 
     class VertexCollectionProducer :
-        public dijet::CollectionProducerBase<
+        public karma::CollectionProducerBase<
             /* TInputType =*/ reco::VertexCollection,
-            /* TOutputType =*/ dijet::VertexCollection> {
+            /* TOutputType =*/ karma::VertexCollection> {
 
       public:
         explicit VertexCollectionProducer(const edm::ParameterSet& config) :
-            dijet::CollectionProducerBase<reco::VertexCollection, dijet::VertexCollection>(config) {
+            karma::CollectionProducerBase<reco::VertexCollection, karma::VertexCollection>(config) {
 
         };
         ~VertexCollectionProducer() {};
 
 
-        /// // need to override produce function to update dijetRun handle
+        /// // need to override produce function to update karmaRun handle
         /// virtual void produce(edm::Event& event, const edm::EventSetup& setup) {
         ///     // call "parent" produce function
-        ///     dijet::CollectionProducerBase<reco::VertexCollection, dijet::VertexCollection>::produce(event, setup);
+        ///     karma::CollectionProducerBase<reco::VertexCollection, karma::VertexCollection>::produce(event, setup);
         /// };
 
-        virtual void produceSingle(const reco::Vertex&, dijet::Vertex&, const edm::Event&, const edm::EventSetup&);
+        virtual void produceSingle(const reco::Vertex&, karma::Vertex&, const edm::Event&, const edm::EventSetup&);
 
         inline virtual bool acceptSingle(const reco::Vertex& in, const edm::Event& event, const edm::EventSetup& setup) override {
             return true;  // accept all

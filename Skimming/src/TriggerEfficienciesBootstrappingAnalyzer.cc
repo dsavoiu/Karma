@@ -7,7 +7,7 @@
 #include "Karma/Skimming/interface/TriggerEfficienciesBootstrappingAnalyzer.h"
 
 // -- constructor
-dijet::TriggerEfficienciesBootstrappingAnalyzer::TriggerEfficienciesBootstrappingAnalyzer(const edm::ParameterSet& config, const dijet::GlobalCacheTEB* globalCache) :
+karma::TriggerEfficienciesBootstrappingAnalyzer::TriggerEfficienciesBootstrappingAnalyzer(const edm::ParameterSet& config, const karma::GlobalCacheTEB* globalCache) :
     m_configPSet(config) {
     // -- process configuration
 
@@ -30,21 +30,21 @@ dijet::TriggerEfficienciesBootstrappingAnalyzer::TriggerEfficienciesBootstrappin
 
 
 // -- destructor
-dijet::TriggerEfficienciesBootstrappingAnalyzer::~TriggerEfficienciesBootstrappingAnalyzer() {
+karma::TriggerEfficienciesBootstrappingAnalyzer::~TriggerEfficienciesBootstrappingAnalyzer() {
 }
 
 
 // -- static member functions
 
-/*static*/ std::unique_ptr<dijet::GlobalCacheTEB> dijet::TriggerEfficienciesBootstrappingAnalyzer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+/*static*/ std::unique_ptr<karma::GlobalCacheTEB> karma::TriggerEfficienciesBootstrappingAnalyzer::initializeGlobalCache(const edm::ParameterSet& pSet) {
     // -- create the GlobalCache
-    return std::unique_ptr<dijet::GlobalCacheTEB>(new dijet::GlobalCacheTEB(pSet));
+    return std::unique_ptr<karma::GlobalCacheTEB>(new karma::GlobalCacheTEB(pSet));
 }
 
 
-/*static*/ std::shared_ptr<dijet::RunCacheTEB> dijet::TriggerEfficienciesBootstrappingAnalyzer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const GlobalCache* globalCache) {
+/*static*/ std::shared_ptr<karma::RunCacheTEB> karma::TriggerEfficienciesBootstrappingAnalyzer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const GlobalCache* globalCache) {
     // -- create the RunCacheTEB
-    auto runCache = std::make_shared<dijet::RunCacheTEB>(globalCache->pSet_);
+    auto runCache = std::make_shared<karma::RunCacheTEB>(globalCache->pSet_);
 
     // -- populate the Run CacheTE
     edm::LogInfo("TriggerEfficienciesBootstrappingAnalyzer") << "Extracting HLT configuration for process name: " << globalCache->hltProcessName_;
@@ -96,7 +96,7 @@ dijet::TriggerEfficienciesBootstrappingAnalyzer::~TriggerEfficienciesBootstrappi
     return runCache;
 }
 
-void dijet::TriggerEfficienciesBootstrappingAnalyzer::endStream() {
+void karma::TriggerEfficienciesBootstrappingAnalyzer::endStream() {
     edm::LogInfo("TriggerEfficienciesBootstrappingAnalyzer") << "[" << std::hex << this << std::dec << "] End Stream";
     // write accumulated info on each stream to file
     edm::LogInfo("TriggerEfficienciesBootstrappingAnalyzer") << "Adding together histograms from stream.";
@@ -105,17 +105,17 @@ void dijet::TriggerEfficienciesBootstrappingAnalyzer::endStream() {
     }
 }
 
-/*static*/ void dijet::TriggerEfficienciesBootstrappingAnalyzer::globalEndJob(dijet::GlobalCacheTEB* globalCache) {
+/*static*/ void karma::TriggerEfficienciesBootstrappingAnalyzer::globalEndJob(karma::GlobalCacheTEB* globalCache) {
     globalCache->writeAllAndCloseFile();
 }
 
 // -- member functions
 
-void dijet::TriggerEfficienciesBootstrappingAnalyzer::beginStream(edm::StreamID streamID) {
+void karma::TriggerEfficienciesBootstrappingAnalyzer::beginStream(edm::StreamID streamID) {
     edm::LogInfo("TriggerEfficienciesBootstrappingAnalyzer") << "[" << std::hex << this << std::dec << "] Begin Stream with ID = " << streamID.value();
 }
 
-void dijet::TriggerEfficienciesBootstrappingAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void karma::TriggerEfficienciesBootstrappingAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
 
 
     // -- get object collections for event
@@ -203,7 +203,7 @@ void dijet::TriggerEfficienciesBootstrappingAnalyzer::analyze(const edm::Event& 
 }
 
 
-void dijet::TriggerEfficienciesBootstrappingAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::TriggerEfficienciesBootstrappingAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -213,5 +213,5 @@ void dijet::TriggerEfficienciesBootstrappingAnalyzer::fillDescriptions(edm::Conf
 
 
 //define this as a plug-in
-using dijet::TriggerEfficienciesBootstrappingAnalyzer;
+using karma::TriggerEfficienciesBootstrappingAnalyzer;
 DEFINE_FWK_MODULE(TriggerEfficienciesBootstrappingAnalyzer);

@@ -7,7 +7,7 @@
 
 #define UNDEFINED_DOUBLE -999;
 
-namespace dijet {
+namespace karma {
     // Lorentz four-vector
     typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > LorentzVector;
     // point in space with cartesian internal representation

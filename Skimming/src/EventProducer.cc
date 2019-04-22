@@ -8,11 +8,11 @@
 #include "Karma/Skimming/interface/EventProducer.h"
 
 // -- constructor
-dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet::GlobalCache* globalCache) : m_configPSet(config) {
+karma::EventProducer::EventProducer(const edm::ParameterSet& config, const karma::GlobalCache* globalCache) : m_configPSet(config) {
     // -- register products
-    produces<dijet::Event>();
-    produces<dijet::Lumi, edm::InLumi>();
-    produces<dijet::Run, edm::InRun>();
+    produces<karma::Event>();
+    produces<karma::Lumi, edm::InLumi>();
+    produces<karma::Run, edm::InRun>();
 
     // -- process configuration
 
@@ -36,21 +36,21 @@ dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet
 
 
 // -- destructor
-dijet::EventProducer::~EventProducer() {
+karma::EventProducer::~EventProducer() {
 }
 
 
 // -- static member functions
 
-/*static*/ std::unique_ptr<dijet::GlobalCache> dijet::EventProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+/*static*/ std::unique_ptr<karma::GlobalCache> karma::EventProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
     // -- create the GlobalCache
-    return std::unique_ptr<dijet::GlobalCache>(new dijet::GlobalCache(pSet));
+    return std::unique_ptr<karma::GlobalCache>(new karma::GlobalCache(pSet));
 }
 
 
-/*static*/ std::shared_ptr<dijet::RunCache> dijet::EventProducer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const dijet::EventProducer::GlobalCache* globalCache) {
+/*static*/ std::shared_ptr<karma::RunCache> karma::EventProducer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const karma::EventProducer::GlobalCache* globalCache) {
     // -- create the RunCache
-    auto runCache = std::make_shared<dijet::RunCache>(globalCache->pSet_);
+    auto runCache = std::make_shared<karma::RunCache>(globalCache->pSet_);
 
     // -- populate the Run Cache
     std::cout << "Extracting HLT configuration for process name: " << globalCache->hltProcessName_ << std::endl;
@@ -71,7 +71,7 @@ dijet::EventProducer::~EventProducer() {
     // -- get trigger path information
     //    (i.e. matching trigger path names and the indices indicating
     //    their position in the trigger menu)
-    dijet::HLTPathInfos* hltPathInfos = &(runCache->hltPathInfos_);
+    karma::HLTPathInfos* hltPathInfos = &(runCache->hltPathInfos_);
     size_t filtersNextStartIndex = 0;
 
     for (size_t iHLTPath = 0; iHLTPath < globalCache->hltConfigProvider_.size(); ++iHLTPath) {
@@ -120,9 +120,9 @@ dijet::EventProducer::~EventProducer() {
     return runCache;
 }
 
-/*static*/ std::shared_ptr<dijet::LumiCache> dijet::EventProducer::globalBeginLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup& setup, const dijet::EventProducer::RunContext* runContext) {
+/*static*/ std::shared_ptr<karma::LumiCache> karma::EventProducer::globalBeginLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup& setup, const karma::EventProducer::RunContext* runContext) {
     // -- create the LumiCache
-    auto lumiCache = std::make_shared<dijet::LumiCache>(runContext->global()->pSet_);
+    auto lumiCache = std::make_shared<karma::LumiCache>(runContext->global()->pSet_);
 
 
     // -- populate the LumiCache
@@ -131,39 +131,39 @@ dijet::EventProducer::~EventProducer() {
     return lumiCache;
 }
 
-/*static*/ void dijet::EventProducer::globalBeginRunProduce(edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext) {
-    std::unique_ptr<dijet::Run> dijetRun(new dijet::Run());
+/*static*/ void karma::EventProducer::globalBeginRunProduce(edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext) {
+    std::unique_ptr<karma::Run> karmaRun(new karma::Run());
 
     // -- populate run data and fill Run tree
-    dijetRun->run = run.run();
+    karmaRun->run = run.run();
 
-    dijetRun->triggerMenuName = runContext->run()->hltMenuName_;
-    dijetRun->triggerPathInfos = runContext->run()->hltPathInfos_;
+    karmaRun->triggerMenuName = runContext->run()->hltMenuName_;
+    karmaRun->triggerPathInfos = runContext->run()->hltPathInfos_;
 
-    run.put(std::move(dijetRun));
+    run.put(std::move(karmaRun));
 }
 
-/*static*/ void dijet::EventProducer::globalBeginLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup& setup, const LuminosityBlockContext* lumiContext) {
+/*static*/ void karma::EventProducer::globalBeginLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup& setup, const LuminosityBlockContext* lumiContext) {
     #if CMSSW_MAJOR_VERSION > 8
-        std::unique_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi()); // -> use unique_ptr
+        std::unique_ptr<karma::Lumi> karmaLumi(new karma::Lumi()); // -> use unique_ptr
     #else
         // bug in CMSSW8: upstream code missing "std::move" for unique_ptr
-        std::auto_ptr<dijet::Lumi> dijetLumi(new dijet::Lumi());  //  -> substitute auto_ptr
+        std::auto_ptr<karma::Lumi> karmaLumi(new karma::Lumi());  //  -> substitute auto_ptr
     #endif
 
     // -- populate luminosity block data and fill Lumi tree
-    dijetLumi->run = lumi.run();
-    dijetLumi->lumi = lumi.luminosityBlock();
+    karmaLumi->run = lumi.run();
+    karmaLumi->lumi = lumi.luminosityBlock();
 
-    lumi.put(std::move(dijetLumi));
+    lumi.put(std::move(karmaLumi));
 }
 
 
 // -- member functions
 
-void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-    //std::unique_ptr<dijet::Event> dijetEvent(new dijet::Event());
-    std::unique_ptr<dijet::Event> outputEvent(new dijet::Event());
+void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+    //std::unique_ptr<karma::Event> karmaEvent(new karma::Event());
+    std::unique_ptr<karma::Event> outputEvent(new karma::Event());
 
     // -- get object collections for event
     bool obtained = true;
@@ -228,7 +228,7 @@ void dijet::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
 }
 
 
-void dijet::EventProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::EventProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -238,5 +238,5 @@ void dijet::EventProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
 
 
 //define this as a plug-in
-using dijet::EventProducer;
+using karma::EventProducer;
 DEFINE_FWK_MODULE(EventProducer);

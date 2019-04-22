@@ -7,7 +7,7 @@
 #include "Karma/Skimming/interface/TriggerEfficienciesAnalyzer.h"
 
 // -- constructor
-dijet::TriggerEfficienciesAnalyzer::TriggerEfficienciesAnalyzer(const edm::ParameterSet& config, const dijet::GlobalCacheTE* globalCache) :
+karma::TriggerEfficienciesAnalyzer::TriggerEfficienciesAnalyzer(const edm::ParameterSet& config, const karma::GlobalCacheTE* globalCache) :
     m_configPSet(config) {
     // -- process configuration
 
@@ -33,21 +33,21 @@ dijet::TriggerEfficienciesAnalyzer::TriggerEfficienciesAnalyzer(const edm::Param
 
 
 // -- destructor
-dijet::TriggerEfficienciesAnalyzer::~TriggerEfficienciesAnalyzer() {
+karma::TriggerEfficienciesAnalyzer::~TriggerEfficienciesAnalyzer() {
 }
 
 
 // -- static member functions
 
-/*static*/ std::unique_ptr<dijet::GlobalCacheTE> dijet::TriggerEfficienciesAnalyzer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+/*static*/ std::unique_ptr<karma::GlobalCacheTE> karma::TriggerEfficienciesAnalyzer::initializeGlobalCache(const edm::ParameterSet& pSet) {
     // -- create the GlobalCache
-    return std::unique_ptr<dijet::GlobalCacheTE>(new dijet::GlobalCacheTE(pSet));
+    return std::unique_ptr<karma::GlobalCacheTE>(new karma::GlobalCacheTE(pSet));
 }
 
 
-/*static*/ std::shared_ptr<dijet::RunCacheTE> dijet::TriggerEfficienciesAnalyzer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const GlobalCache* globalCache) {
+/*static*/ std::shared_ptr<karma::RunCacheTE> karma::TriggerEfficienciesAnalyzer::globalBeginRun(const edm::Run& run, const edm::EventSetup& setup, const GlobalCache* globalCache) {
     // -- create the RunCacheTE
-    auto runCache = std::make_shared<dijet::RunCacheTE>(globalCache->pSet_);
+    auto runCache = std::make_shared<karma::RunCacheTE>(globalCache->pSet_);
 
     // -- populate the Run CacheTE
     edm::LogInfo("TriggerEfficienciesAnalyzer") << "Extracting HLT configuration for process name: " << globalCache->hltProcessName_;
@@ -95,25 +95,25 @@ dijet::TriggerEfficienciesAnalyzer::~TriggerEfficienciesAnalyzer() {
 }
 
 
-/*static*/ std::shared_ptr<dijet::RunSummaryCacheTE> dijet::TriggerEfficienciesAnalyzer::globalBeginRunSummary(const edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext) {
+/*static*/ std::shared_ptr<karma::RunSummaryCacheTE> karma::TriggerEfficienciesAnalyzer::globalBeginRunSummary(const edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext) {
     // -- create the RunSummaryCacheTE
 
-    auto runSummaryCache = std::make_shared<dijet::RunSummaryCacheTE>(runContext->global()->pSet_);
+    auto runSummaryCache = std::make_shared<karma::RunSummaryCacheTE>(runContext->global()->pSet_);
     //return runContext->globalCache()->makeHist1D(std::to_string(run.runNumber()), "a", runContext->global()->triggerEfficiencyBinning_);
     return runSummaryCache;
 };
 
 
-void dijet::TriggerEfficienciesAnalyzer::endRunSummary(const edm::Run& run, const edm::EventSetup& setup, dijet::RunSummaryCacheTE* runSummaryCache) const {
+void karma::TriggerEfficienciesAnalyzer::endRunSummary(const edm::Run& run, const edm::EventSetup& setup, karma::RunSummaryCacheTE* runSummaryCache) const {
     // NOOP
 };
 
 
-/*static*/ void dijet::TriggerEfficienciesAnalyzer::globalEndRunSummary(const edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext, dijet::RunSummaryCacheTE* runSummaryCache) {
+/*static*/ void karma::TriggerEfficienciesAnalyzer::globalEndRunSummary(const edm::Run& run, const edm::EventSetup& setup, const RunContext* runContext, karma::RunSummaryCacheTE* runSummaryCache) {
     // NOOP
 };
 
-void dijet::TriggerEfficienciesAnalyzer::endStream() {
+void karma::TriggerEfficienciesAnalyzer::endStream() {
     edm::LogInfo("TriggerEfficienciesAnalyzer") << "[" << std::hex << this << std::dec << "] End Stream";
     // write accumulated info on each stream to file
     edm::LogInfo("TriggerEfficienciesAnalyzer") << "Adding together histograms from stream.";
@@ -122,17 +122,17 @@ void dijet::TriggerEfficienciesAnalyzer::endStream() {
     }
 }
 
-/*static*/ void dijet::TriggerEfficienciesAnalyzer::globalEndJob(dijet::GlobalCacheTE* globalCache) {
+/*static*/ void karma::TriggerEfficienciesAnalyzer::globalEndJob(karma::GlobalCacheTE* globalCache) {
     globalCache->writeAllAndCloseFile();
 }
 
 // -- member functions
 
-void dijet::TriggerEfficienciesAnalyzer::beginStream(edm::StreamID streamID) {
+void karma::TriggerEfficienciesAnalyzer::beginStream(edm::StreamID streamID) {
     edm::LogInfo("TriggerEfficienciesAnalyzer") << "[" << std::hex << this << std::dec << "] Begin Stream with ID = " << streamID.value();
 }
 
-void dijet::TriggerEfficienciesAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void karma::TriggerEfficienciesAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
 
 
     // -- get object collections for event
@@ -277,7 +277,7 @@ void dijet::TriggerEfficienciesAnalyzer::analyze(const edm::Event& event, const 
 }
 
 
-void dijet::TriggerEfficienciesAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::TriggerEfficienciesAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -287,5 +287,5 @@ void dijet::TriggerEfficienciesAnalyzer::fillDescriptions(edm::ConfigurationDesc
 
 
 //define this as a plug-in
-using dijet::TriggerEfficienciesAnalyzer;
+using karma::TriggerEfficienciesAnalyzer;
 DEFINE_FWK_MODULE(TriggerEfficienciesAnalyzer);

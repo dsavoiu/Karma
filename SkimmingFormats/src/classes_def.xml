@@ -1,71 +1,71 @@
 <lcgdict>
-    <class name="dijet::Event"/>
-    <class name="edm::Wrapper<dijet::Event>"/>
-    <class name="dijet::EventCollection"/>
-    <class name="edm::Wrapper<dijet::EventCollection>"/>
+    <class name="karma::Event"/>
+    <class name="edm::Wrapper<karma::Event>"/>
+    <class name="karma::EventCollection"/>
+    <class name="edm::Wrapper<karma::EventCollection>"/>
 
-    <class name="dijet::GeneratorQCDInfo"/>
-    <class name="edm::Wrapper<dijet::GeneratorQCDInfo>"/>
-    <class name="dijet::GeneratorQCDInfoCollection"/>
-    <class name="edm::Wrapper<dijet::GeneratorQCDInfoCollection>"/>
+    <class name="karma::GeneratorQCDInfo"/>
+    <class name="edm::Wrapper<karma::GeneratorQCDInfo>"/>
+    <class name="karma::GeneratorQCDInfoCollection"/>
+    <class name="edm::Wrapper<karma::GeneratorQCDInfoCollection>"/>
 
-    <class name="dijet::Lumi"/>
-    <class name="edm::Wrapper<dijet::Lumi>"/>
-    <class name="dijet::LumiCollection"/>
-    <class name="edm::Wrapper<dijet::LumiCollection>"/>
+    <class name="karma::Lumi"/>
+    <class name="edm::Wrapper<karma::Lumi>"/>
+    <class name="karma::LumiCollection"/>
+    <class name="edm::Wrapper<karma::LumiCollection>"/>
 
-    <class name="dijet::Run"/>
-    <class name="edm::Wrapper<dijet::Run>"/>
-    <class name="dijet::RunCollection"/>
-    <class name="edm::Wrapper<dijet::RunCollection>"/>
+    <class name="karma::Run"/>
+    <class name="edm::Wrapper<karma::Run>"/>
+    <class name="karma::RunCollection"/>
+    <class name="edm::Wrapper<karma::RunCollection>"/>
 
-    <class name="dijet::HLTPathInfo"/>
-    <class name="edm::Wrapper<dijet::HLTPathInfo>"/>
-    <class name="dijet::HLTPathInfos"/>
-    <class name="edm::Wrapper<dijet::HLTPathInfos>"/>
+    <class name="karma::HLTPathInfo"/>
+    <class name="edm::Wrapper<karma::HLTPathInfo>"/>
+    <class name="karma::HLTPathInfos"/>
+    <class name="edm::Wrapper<karma::HLTPathInfos>"/>
 
-    <class name="dijet::LV"/>
-    <class name="edm::Wrapper<dijet::LV>"/>
-    <class name="dijet::LVCollection"/>
-    <class name="edm::Wrapper<dijet::LVCollection>"/>
+    <class name="karma::LV"/>
+    <class name="edm::Wrapper<karma::LV>"/>
+    <class name="karma::LVCollection"/>
+    <class name="edm::Wrapper<karma::LVCollection>"/>
 
-    <class name="dijet::GenParticle"/>
-    <class name="edm::Wrapper<dijet::GenParticle>"/>
-    <class name="dijet::GenParticleCollection"/>
-    <class name="edm::Wrapper<dijet::GenParticleCollection>"/>
+    <class name="karma::GenParticle"/>
+    <class name="edm::Wrapper<karma::GenParticle>"/>
+    <class name="karma::GenParticleCollection"/>
+    <class name="edm::Wrapper<karma::GenParticleCollection>"/>
 
-    <class name="dijet::Jet"/>
-    <class name="edm::Wrapper<dijet::Jet>"/>
-    <class name="dijet::JetCollection"/>
-    <class name="edm::Wrapper<dijet::JetCollection>"/>
+    <class name="karma::Jet"/>
+    <class name="edm::Wrapper<karma::Jet>"/>
+    <class name="karma::JetCollection"/>
+    <class name="edm::Wrapper<karma::JetCollection>"/>
 
-    <class name="dijet::MET"/>
-    <class name="edm::Wrapper<dijet::MET>"/>
-    <class name="dijet::METCollection"/>
-    <class name="edm::Wrapper<dijet::METCollection>"/>
+    <class name="karma::MET"/>
+    <class name="edm::Wrapper<karma::MET>"/>
+    <class name="karma::METCollection"/>
+    <class name="edm::Wrapper<karma::METCollection>"/>
 
-    <class name="dijet::TriggerObject"/>
-    <class name="edm::Wrapper<dijet::TriggerObject>"/>
-    <class name="dijet::TriggerObjectCollection"/>
-    <class name="edm::Wrapper<dijet::TriggerObjectCollection>"/>
+    <class name="karma::TriggerObject"/>
+    <class name="edm::Wrapper<karma::TriggerObject>"/>
+    <class name="karma::TriggerObjectCollection"/>
+    <class name="edm::Wrapper<karma::TriggerObjectCollection>"/>
 
-    <class name="dijet::Vertex"/>
-    <class name="edm::Wrapper<dijet::Vertex>"/>
-    <class name="dijet::VertexCollection"/>
-    <class name="edm::Wrapper<dijet::VertexCollection>"/>
+    <class name="karma::Vertex"/>
+    <class name="edm::Wrapper<karma::Vertex>"/>
+    <class name="karma::VertexCollection"/>
+    <class name="edm::Wrapper<karma::VertexCollection>"/>
 
-    <class name="dijet::JetTriggerObjectsMap">
+    <class name="karma::JetTriggerObjectsMap">
         <field name="transientMap_" transient="true" />
     </class>
-    <class name="edm::Wrapper<dijet::JetTriggerObjectsMap>"/>
-    <class name="dijet::JetTriggerObjectsMaps"/>
-    <class name="edm::Wrapper<dijet::JetTriggerObjectsMaps>"/>
+    <class name="edm::Wrapper<karma::JetTriggerObjectsMap>"/>
+    <class name="karma::JetTriggerObjectsMaps"/>
+    <class name="edm::Wrapper<karma::JetTriggerObjectsMaps>"/>
 
-    <class name="dijet::JetGenJetMap">
+    <class name="karma::JetGenJetMap">
         <field name="transientMap_" transient="true" />
     </class>
-    <class name="edm::Wrapper<dijet::JetGenJetMap>"/>
-    <class name="dijet::JetGenJetMaps"/>
-    <class name="edm::Wrapper<dijet::JetGenJetMaps>"/>
+    <class name="edm::Wrapper<karma::JetGenJetMap>"/>
+    <class name="karma::JetGenJetMaps"/>
+    <class name="edm::Wrapper<karma::JetGenJetMaps>"/>
 
 </lcgdict>

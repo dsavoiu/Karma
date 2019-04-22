@@ -1,7 +1,7 @@
 #include <map>
 
 
-namespace dijet {
+namespace karma {
     class NPUMeanProvider {
       public:
 

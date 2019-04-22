@@ -18,9 +18,9 @@ enableVerboseLogging(process)
 
 # -- configure CMSSW modules
 
-from Karma.Skimming.EventProducer_cfi import dijetEventProducer
+from Karma.Skimming.EventProducer_cfi import karmaEventProducer
 
-process.dijetEvents = dijetEventProducer
+process.dijetEvents = karmaEventProducer
 process.path *= process.dijetEvents
 
 

@@ -24,18 +24,18 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
     // -- declare global caches accessible by the processing streams
 
     /** Cache containing resources which do not change
      *  for the entire duration of the skiming job.
      */
-    class ExampleGlobalCache : public dijet::GlobalCacheWithOutputFile {
+    class ExampleGlobalCache : public karma::GlobalCacheWithOutputFile {
 
       public:
         ExampleGlobalCache(const edm::ParameterSet& pSet) :
-            dijet::GlobalCacheWithOutputFile(pSet, "outputFile") {
+            karma::GlobalCacheWithOutputFile(pSet, "outputFile") {
 
             // -- user code here: initialize cache
 
@@ -60,10 +60,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a luminosity block
      */
-    class ExampleLumiCache : public dijet::CacheBase {
+    class ExampleLumiCache : public karma::CacheBase {
 
       public:
-        ExampleLumiCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+        ExampleLumiCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
 
             // -- user code here: initialize cache
 
@@ -81,10 +81,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a run
      */
-    class ExampleRunCache : public dijet::CacheBase {
+    class ExampleRunCache : public karma::CacheBase {
 
       public:
-        ExampleRunCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+        ExampleRunCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
 
             // -- user code here: initialize cache
 
@@ -101,10 +101,10 @@ namespace dijet {
 
     /** Cache containing resources which accumulate during a run.
      */
-    class ExampleRunSummaryCache : public dijet::CacheBase {
+    class ExampleRunSummaryCache : public karma::CacheBase {
 
       public:
-        ExampleRunSummaryCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+        ExampleRunSummaryCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
 
             // -- user code here: initialize cache
 
@@ -122,12 +122,12 @@ namespace dijet {
 
     class ExampleAnalyzer : public edm::stream::EDAnalyzer<
         // declare which extensions (e.g. caches) are used
-        edm::GlobalCache<dijet::ExampleGlobalCache>,
-        edm::RunCache<dijet::ExampleRunCache>,
-        edm::RunSummaryCache<dijet::ExampleRunSummaryCache>> {
+        edm::GlobalCache<karma::ExampleGlobalCache>,
+        edm::RunCache<karma::ExampleRunCache>,
+        edm::RunSummaryCache<karma::ExampleRunSummaryCache>> {
 
       public:
-        explicit ExampleAnalyzer(const edm::ParameterSet&, const dijet::ExampleGlobalCache*);
+        explicit ExampleAnalyzer(const edm::ParameterSet&, const karma::ExampleGlobalCache*);
         ~ExampleAnalyzer();
 
         // -- pSet descriptions for CMSSW help info
@@ -137,17 +137,17 @@ namespace dijet {
         void beginStream(edm::StreamID);
 
         // -- global cache extension methods
-        static std::unique_ptr<dijet::ExampleGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
-        static void globalEndJob(dijet::ExampleGlobalCache*);
+        static std::unique_ptr<karma::ExampleGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(karma::ExampleGlobalCache*);
 
         // -- run cache extension methods
-        static std::shared_ptr<dijet::ExampleRunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
+        static std::shared_ptr<karma::ExampleRunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
         static void globalEndRun(const edm::Run&, const edm::EventSetup&, const RunContext*) {/* noop */};
 
         // -- run summary cache extension methods
-        static std::shared_ptr<dijet::ExampleRunSummaryCache> globalBeginRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*);
-        void endRunSummary(const edm::Run&, const edm::EventSetup&, dijet::ExampleRunSummaryCache*) const;
-        static void globalEndRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*, dijet::ExampleRunSummaryCache*);
+        static std::shared_ptr<karma::ExampleRunSummaryCache> globalBeginRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*);
+        void endRunSummary(const edm::Run&, const edm::EventSetup&, karma::ExampleRunSummaryCache*) const;
+        static void globalEndRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*, karma::ExampleRunSummaryCache*);
 
         // -- "regular" per-Event 'analyze' method
         virtual void analyze(const edm::Event&, const edm::EventSetup&);

@@ -1,7 +1,7 @@
 #include "Karma/Skimming/interface/JetCollectionProducer.h"
 
 
-void dijet::JetCollectionProducer::produceSingle(const pat::Jet& in, dijet::Jet& out, const edm::Event& event, const edm::EventSetup& setup) {
+void karma::JetCollectionProducer::produceSingle(const pat::Jet& in, karma::Jet& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
     out.p4 = in.p4();
@@ -24,5 +24,5 @@ void dijet::JetCollectionProducer::produceSingle(const pat::Jet& in, dijet::Jet&
 
 
 //define this as a plug-in
-using dijet::JetCollectionProducer;
+using karma::JetCollectionProducer;
 DEFINE_FWK_MODULE(JetCollectionProducer);

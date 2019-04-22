@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-dijet::PileupWeightProvider::PileupWeightProvider(std::string rootFileName, std::string pileupWeightHistogramName) {
+karma::PileupWeightProvider::PileupWeightProvider(std::string rootFileName, std::string pileupWeightHistogramName) {
 
     TFile file(rootFileName.c_str());
 
@@ -29,7 +29,7 @@ dijet::PileupWeightProvider::PileupWeightProvider(std::string rootFileName, std:
 }
 
 
-const double dijet::PileupWeightProvider::getPileupWeight(const double nPUMean) {
+const double karma::PileupWeightProvider::getPileupWeight(const double nPUMean) {
 
     int binIdx = pileupWeightHistogram_->FindFixBin(nPUMean);
     if ((binIdx < 1) || (binIdx > pileupWeightHistogram_->GetNbinsX()))

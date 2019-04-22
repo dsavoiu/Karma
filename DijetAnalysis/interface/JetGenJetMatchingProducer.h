@@ -61,17 +61,17 @@ namespace dijet {
         double maxDeltaR_;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::Event> dijetEventHandle;
-        edm::EDGetTokenT<dijet::Event> dijetEventToken;
+        typename edm::Handle<karma::Event> karmaEventHandle;
+        edm::EDGetTokenT<karma::Event> karmaEventToken;
 
-        typename edm::Handle<dijet::JetCollection> dijetJetCollectionHandle;
-        edm::EDGetTokenT<dijet::JetCollection> dijetJetCollectionToken;
+        typename edm::Handle<karma::JetCollection> karmaJetCollectionHandle;
+        edm::EDGetTokenT<karma::JetCollection> karmaJetCollectionToken;
 
-        typename edm::Handle<dijet::LVCollection> dijetGenJetCollectionHandle;
-        edm::EDGetTokenT<dijet::LVCollection> dijetGenJetCollectionToken;
+        typename edm::Handle<karma::LVCollection> karmaGenJetCollectionHandle;
+        edm::EDGetTokenT<karma::LVCollection> karmaGenJetCollectionToken;
 
-        //typename edm::Handle<dijet::Run> dijetRunHandle;
-        //edm::EDGetTokenT<dijet::Run> dijetRunToken;
+        //typename edm::Handle<karma::Run> karmaRunHandle;
+        //edm::EDGetTokenT<karma::Run> karmaRunToken;
 
     };
 }  // end namespace

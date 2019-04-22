@@ -5,7 +5,7 @@
 #include "Defaults.h"
 
 
-namespace dijet {
+namespace karma {
     /**
      * Helper data structure to store information about a particular HLT path
      *
@@ -26,7 +26,7 @@ namespace dijet {
         int filtersStartIndex_;
         std::vector<std::string> filterNames_;
     };
-    typedef std::vector<dijet::HLTPathInfo> HLTPathInfos;
+    typedef std::vector<karma::HLTPathInfo> HLTPathInfos;
 
 
     class Run {
@@ -39,6 +39,6 @@ namespace dijet {
         HLTPathInfos triggerPathInfos;
 
     };
-    typedef std::vector<dijet::Run> RunCollection;
+    typedef std::vector<karma::Run> RunCollection;
 
 }

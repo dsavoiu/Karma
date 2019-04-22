@@ -18,9 +18,9 @@ enableVerboseLogging(process)
 
 # -- configure CMSSW modules
 
-from Karma.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
+from Karma.Skimming.TriggerObjectCollectionProducer_cfi import karmaTriggerObjectCollectionProducer
 
-process.dijetTriggerObjects = dijetTriggerObjectCollectionProducer
+process.dijetTriggerObjects = karmaTriggerObjectCollectionProducer
 process.path *= process.dijetTriggerObjects
 
 

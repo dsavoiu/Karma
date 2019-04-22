@@ -26,8 +26,8 @@ class DijetAnalysis:
             "correctedJets{}".format(jet_algo_name),
             dijetCorrectedValidJetsProducer.clone(
                 # -- input sources
-                dijetEventSrc = cms.InputTag("dijetEvents"),
-                dijetJetCollectionSrc = cms.InputTag("dijetSelectedPatJets{}".format(jet_algo_name)),
+                karmaEventSrc = cms.InputTag("karmaEvents"),
+                karmaJetCollectionSrc = cms.InputTag("karmaSelectedPatJets{}".format(jet_algo_name)),
 
                 # -- other configuration
                 jecVersion = "{}/src/JECDatabase/textFiles/{jec_version}_{data_or_mc}/{jec_version}_{data_or_mc}".format(
@@ -54,9 +54,9 @@ class DijetAnalysis:
             "correctedMETs{}".format(jet_algo_name),
             dijetCorrectedMETsProducer.clone(
                 # -- input sources
-                dijetEventSrc = cms.InputTag("dijetEvents"),
-                dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
-                dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+                karmaEventSrc = cms.InputTag("karmaEvents"),
+                karmaMETCollectionSrc = cms.InputTag("karmaCHSMETs"),
+                karmaCorrectedJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
             )
         )
 
@@ -64,9 +64,9 @@ class DijetAnalysis:
             self._process,
             "jetTriggerObjectMap{}".format(jet_algo_name),
             dijetJetTriggerObjectMatchingProducer.clone(
-                dijetEventSrc = cms.InputTag("dijetEvents"),
-                dijetJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
-                dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
+                karmaEventSrc = cms.InputTag("karmaEvents"),
+                karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+                karmaTriggerObjectCollectionSrc = cms.InputTag("karmaTriggerObjects"),
             )
         )
 
@@ -75,9 +75,9 @@ class DijetAnalysis:
                 self._process,
                 "jetGenJetMap{}".format(jet_algo_name),
                 dijetJetGenJetMatchingProducer.clone(
-                    dijetEventSrc = cms.InputTag("dijetEvents"),
-                    dijetJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
-                    dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets{}".format(jet_algo_name[:3])),
+                    karmaEventSrc = cms.InputTag("karmaEvents"),
+                    karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+                    karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
                 )
             )
 
@@ -97,9 +97,9 @@ class DijetAnalysis:
                 "correctedMETs{}{}".format(jet_algo_name, _suffix),
                 dijetCorrectedMETsProducer.clone(
                     # -- input sources
-                    dijetEventSrc = cms.InputTag("dijetEvents"),
-                    dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
-                    dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                    karmaEventSrc = cms.InputTag("karmaEvents"),
+                    karmaMETCollectionSrc = cms.InputTag("karmaCHSMETs"),
+                    karmaCorrectedJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
                 )
             )
 
@@ -107,9 +107,9 @@ class DijetAnalysis:
                 self._process,
                 "jetTriggerObjectMap{}{}".format(jet_algo_name, _suffix),
                 dijetJetTriggerObjectMatchingProducer.clone(
-                    dijetEventSrc = cms.InputTag("dijetEvents"),
-                    dijetJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
-                    dijetTriggerObjectCollectionSrc = cms.InputTag("dijetTriggerObjects"),
+                    karmaEventSrc = cms.InputTag("karmaEvents"),
+                    karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                    karmaTriggerObjectCollectionSrc = cms.InputTag("karmaTriggerObjects"),
                 )
             )
 
@@ -118,9 +118,9 @@ class DijetAnalysis:
                     self._process,
                     "jetGenJetMap{}{}".format(jet_algo_name, _suffix),
                     dijetJetGenJetMatchingProducer.clone(
-                        dijetEventSrc = cms.InputTag("dijetEvents"),
-                        dijetJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
-                        dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets{}".format(jet_algo_name[:3])),
+                        karmaEventSrc = cms.InputTag("karmaEvents"),
+                        karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                        karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
                     )
                 )
 
@@ -133,15 +133,15 @@ class DijetAnalysis:
 
         setattr(self._process, "ntuple{}".format(pipeline_name),
             dijetNtupleProducer.clone(
-                dijetJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, jet_collection_suffix)),
-                #dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),  # no JEC
-                dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets{}".format(jet_algo_name[:3])),
+                karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, jet_collection_suffix)),
+                #karmaJetCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),  # no JEC
+                karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
 
-                dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}{}".format(jet_algo_name, jet_collection_suffix)),
-                dijetJetGenJetMapSrc = cms.InputTag("jetGenJetMap{}{}".format(jet_algo_name, jet_collection_suffix)),
+                karmaJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}{}".format(jet_algo_name, jet_collection_suffix)),
+                karmaJetGenJetMapSrc = cms.InputTag("jetGenJetMap{}{}".format(jet_algo_name, jet_collection_suffix)),
 
-                dijetMETCollectionSrc = cms.InputTag("correctedMETs{}{}".format(jet_algo_name, jet_collection_suffix)),
-                #dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),  # no Type-I correction
+                karmaMETCollectionSrc = cms.InputTag("correctedMETs{}{}".format(jet_algo_name, jet_collection_suffix)),
+                #karmaMETCollectionSrc = cms.InputTag("karmaCHSMETs"),  # no Type-I correction
 
                 isData = cms.bool(self._is_data),
                 weightForStitching = cms.double(self._weight_for_stitching),
@@ -203,7 +203,7 @@ class DijetAnalysis:
                 cms.PSet(
                     isData = cms.bool(self._is_data),
                     dijetNtupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
-                    dijetJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}".format(pipeline_name)),
+                    karmaJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}".format(pipeline_name)),
                     #outputFileName = cms.string("output_flat.root"),  # deprecated: using TFileService instead
                     treeName = cms.string("Events"),
                     checkForCompleteness = cms.bool(False),

@@ -38,15 +38,15 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of the analysis job.
      */
-    class CorrectedValidJetsProducerGlobalCache : public dijet::CacheBase {
+    class CorrectedValidJetsProducerGlobalCache : public karma::CacheBase {
 
       public:
-        CorrectedValidJetsProducerGlobalCache(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+        CorrectedValidJetsProducerGlobalCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
 
             // if JetID set to 'None', leave jetIDProvider_ as nullptr
             if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
-                jetIDProvider_ = std::unique_ptr<JetIDProvider>(
-                    new JetIDProvider(
+                jetIDProvider_ = std::unique_ptr<karma::JetIDProvider>(
+                    new karma::JetIDProvider(
                         pSet_.getParameter<std::string>("jetIDSpec"),
                         pSet_.getParameter<std::string>("jetIDWorkingPoint")
                     )
@@ -54,7 +54,7 @@ namespace dijet {
             }
         };
 
-        std::unique_ptr<JetIDProvider> jetIDProvider_;
+        std::unique_ptr<karma::JetIDProvider> jetIDProvider_;
 
     };
 
@@ -83,14 +83,14 @@ namespace dijet {
 
         // static method for setting up either a `FactorizedJetCorrector` or a `JetCorrectionUncertainty`
         template<typename TFactorProvider>
-        static void setupFactorProvider(TFactorProvider& factorProvider, const dijet::Jet& jet) {
+        static void setupFactorProvider(TFactorProvider& factorProvider, const karma::Jet& jet) {
             factorProvider.setJetEta(jet.p4.eta());
             factorProvider.setJetPt(jet.p4.pt());
             factorProvider.setJetE(jet.p4.E());
             factorProvider.setJetPhi(jet.p4.phi());
         };
 
-        static void setupFactorizedJetCorrector(FactorizedJetCorrector& jetCorrector, const dijet::Event& dijetEvent, const dijet::Jet& jet) {
+        static void setupFactorizedJetCorrector(FactorizedJetCorrector& jetCorrector, const karma::Event& dijetEvent, const karma::Jet& jet) {
             setupFactorProvider(jetCorrector, jet);
             jetCorrector.setJetA(jet.area);
             jetCorrector.setRho(static_cast<float>(dijetEvent.rho));
@@ -107,11 +107,11 @@ namespace dijet {
         double m_jecUncertaintyShift = 0.0;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::Event> dijetEventHandle;
-        edm::EDGetTokenT<dijet::Event> dijetEventToken;
+        typename edm::Handle<karma::Event> karmaEventHandle;
+        edm::EDGetTokenT<karma::Event> karmaEventToken;
 
-        typename edm::Handle<dijet::JetCollection> dijetJetCollectionHandle;
-        edm::EDGetTokenT<dijet::JetCollection> dijetJetCollectionToken;
+        typename edm::Handle<karma::JetCollection> karmaJetCollectionHandle;
+        edm::EDGetTokenT<karma::JetCollection> karmaJetCollectionToken;
 
     };
 }  // end namespace

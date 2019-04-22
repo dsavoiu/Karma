@@ -8,84 +8,84 @@
 namespace {
     struct dictionary {
         // event
-        dijet::Event dict_dijetEvent;
-        edm::Wrapper<dijet::Event> dict_edmWrapperDijetEvent;
-        dijet::EventCollection dict_dijetEventCollection;
-        edm::Wrapper<dijet::EventCollection> dict_edmWrapperDijetEventCollection;
+        karma::Event dict_karmaEvent;
+        edm::Wrapper<karma::Event> dict_edmWrapperDijetEvent;
+        karma::EventCollection dict_karmaEventCollection;
+        edm::Wrapper<karma::EventCollection> dict_edmWrapperDijetEventCollection;
 
         // generator information
-        dijet::Event dict_dijetGeneratorQCDInfo;
-        edm::Wrapper<dijet::GeneratorQCDInfo> dict_edmWrapperDijetGeneratorQCDInfo;
-        dijet::GeneratorQCDInfoCollection dict_dijetGeneratorQCDInfoCollection;
-        edm::Wrapper<dijet::GeneratorQCDInfoCollection> dict_edmWrapperDijetGeneratorQCDInfoCollection;
+        karma::Event dict_karmaGeneratorQCDInfo;
+        edm::Wrapper<karma::GeneratorQCDInfo> dict_edmWrapperDijetGeneratorQCDInfo;
+        karma::GeneratorQCDInfoCollection dict_karmaGeneratorQCDInfoCollection;
+        edm::Wrapper<karma::GeneratorQCDInfoCollection> dict_edmWrapperDijetGeneratorQCDInfoCollection;
 
         // luminosity block
-        dijet::Lumi dict_dijetLumi;
-        edm::Wrapper<dijet::Lumi> dict_edmWrapperDijetLumi;
-        dijet::LumiCollection dict_dijetLumiCollection;
-        edm::Wrapper<dijet::LumiCollection> dict_edmWrapperDijetLumiCollection;
+        karma::Lumi dict_karmaLumi;
+        edm::Wrapper<karma::Lumi> dict_edmWrapperDijetLumi;
+        karma::LumiCollection dict_karmaLumiCollection;
+        edm::Wrapper<karma::LumiCollection> dict_edmWrapperDijetLumiCollection;
 
         // run
-        dijet::Run dict_dijetRun;
-        edm::Wrapper<dijet::Run> dict_edmWrapperDijetRun;
-        dijet::RunCollection dict_dijetRunCollection;
-        edm::Wrapper<dijet::RunCollection> dict_edmWrapperDijetRunCollection;
+        karma::Run dict_karmaRun;
+        edm::Wrapper<karma::Run> dict_edmWrapperDijetRun;
+        karma::RunCollection dict_karmaRunCollection;
+        edm::Wrapper<karma::RunCollection> dict_edmWrapperDijetRunCollection;
 
         // HLT infos
-        dijet::HLTPathInfo dict_dijetHLTPathInfo;
-        edm::Wrapper<dijet::HLTPathInfo> dict_edmWrapperDijetHLTPathInfo;
-        dijet::HLTPathInfos dict_dijetHLTPathInfos;
-        edm::Wrapper<dijet::HLTPathInfos> dict_edmWrapperDijetHLTPathInfos;
+        karma::HLTPathInfo dict_karmaHLTPathInfo;
+        edm::Wrapper<karma::HLTPathInfo> dict_edmWrapperDijetHLTPathInfo;
+        karma::HLTPathInfos dict_karmaHLTPathInfos;
+        edm::Wrapper<karma::HLTPathInfos> dict_edmWrapperDijetHLTPathInfos;
 
         // -- event objects
 
         // lvs
-        dijet::LV dict_dijetLV;
-        edm::Wrapper<dijet::LV> dict_edmWrapperDijetLV;
-        dijet::LVCollection dict_dijetLVCollection;
-        edm::Wrapper<dijet::LVCollection> dict_edmWrapperDijetLVCollection;
+        karma::LV dict_karmaLV;
+        edm::Wrapper<karma::LV> dict_edmWrapperDijetLV;
+        karma::LVCollection dict_karmaLVCollection;
+        edm::Wrapper<karma::LVCollection> dict_edmWrapperDijetLVCollection;
 
         // lvs
-        dijet::GenParticle dict_dijetGenParticle;
-        edm::Wrapper<dijet::GenParticle> dict_edmWrapperDijetGenParticle;
-        dijet::GenParticleCollection dict_dijetGenParticleCollection;
-        edm::Wrapper<dijet::GenParticleCollection> dict_edmWrapperDijetGenParticleCollection;
+        karma::GenParticle dict_karmaGenParticle;
+        edm::Wrapper<karma::GenParticle> dict_edmWrapperDijetGenParticle;
+        karma::GenParticleCollection dict_karmaGenParticleCollection;
+        edm::Wrapper<karma::GenParticleCollection> dict_edmWrapperDijetGenParticleCollection;
 
         // jets
-        dijet::Jet dict_dijetJet;
-        edm::Wrapper<dijet::Jet> dict_edmWrapperDijetJet;
-        dijet::JetCollection dict_dijetJetCollection;
-        edm::Wrapper<dijet::JetCollection> dict_edmWrapperDijetJetCollection;
+        karma::Jet dict_karmaJet;
+        edm::Wrapper<karma::Jet> dict_edmWrapperDijetJet;
+        karma::JetCollection dict_karmaJetCollection;
+        edm::Wrapper<karma::JetCollection> dict_edmWrapperDijetJetCollection;
 
         // MET
-        dijet::MET dict_dijetMET;
-        edm::Wrapper<dijet::MET> dict_edmWrapperDijetMET;
-        dijet::METCollection dict_dijetMETCollection;
-        edm::Wrapper<dijet::METCollection> dict_edmWrapperDijetMETCollection;
+        karma::MET dict_karmaMET;
+        edm::Wrapper<karma::MET> dict_edmWrapperDijetMET;
+        karma::METCollection dict_karmaMETCollection;
+        edm::Wrapper<karma::METCollection> dict_edmWrapperDijetMETCollection;
 
         // trigger objects
-        dijet::TriggerObject dict_dijetTriggerObject;
-        edm::Wrapper<dijet::TriggerObject> dict_edmWrapperDijetTriggerObject;
-        dijet::TriggerObjectCollection dict_dijetTriggerObjectCollection;
-        edm::Wrapper<dijet::TriggerObjectCollection> dict_edmWrapperDijetTriggerObjectCollection;
+        karma::TriggerObject dict_karmaTriggerObject;
+        edm::Wrapper<karma::TriggerObject> dict_edmWrapperDijetTriggerObject;
+        karma::TriggerObjectCollection dict_karmaTriggerObjectCollection;
+        edm::Wrapper<karma::TriggerObjectCollection> dict_edmWrapperDijetTriggerObjectCollection;
 
         // primary vertices
-        dijet::Vertex dict_dijetVertex;
-        edm::Wrapper<dijet::Vertex> dict_edmWrapperDijetVertex;
-        dijet::VertexCollection dict_dijetVertexCollection;
-        edm::Wrapper<dijet::VertexCollection> dict_edmWrapperDijetVertexCollection;
+        karma::Vertex dict_karmaVertex;
+        edm::Wrapper<karma::Vertex> dict_edmWrapperDijetVertex;
+        karma::VertexCollection dict_karmaVertexCollection;
+        edm::Wrapper<karma::VertexCollection> dict_edmWrapperDijetVertexCollection;
 
         // jet-trigger association map
-        dijet::JetTriggerObjectsMap dict_dijetJetTriggerObjectsMap;
-        edm::Wrapper<dijet::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
-        dijet::JetTriggerObjectsMaps dict_dijetJetTriggerObjectsMaps;
-        edm::Wrapper<dijet::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
+        karma::JetTriggerObjectsMap dict_karmaJetTriggerObjectsMap;
+        edm::Wrapper<karma::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
+        karma::JetTriggerObjectsMaps dict_karmaJetTriggerObjectsMaps;
+        edm::Wrapper<karma::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
 
         // jet-genJet association map
-        dijet::JetGenJetMap dict_dijetJetGenJetMap;
-        edm::Wrapper<dijet::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;
-        dijet::JetGenJetMaps dict_dijetJetGenJetMaps;
-        edm::Wrapper<dijet::JetGenJetMaps> dict_edmWrapperDijetJetGenJetMaps;
+        karma::JetGenJetMap dict_karmaJetGenJetMap;
+        edm::Wrapper<karma::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;
+        karma::JetGenJetMaps dict_karmaJetGenJetMaps;
+        edm::Wrapper<karma::JetGenJetMaps> dict_edmWrapperDijetJetGenJetMaps;
 
     };
 }

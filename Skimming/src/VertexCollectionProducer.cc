@@ -1,7 +1,7 @@
 #include "Karma/Skimming/interface/VertexCollectionProducer.h"
 
 
-void dijet::VertexCollectionProducer::produceSingle(const reco::Vertex& in, dijet::Vertex& out, const edm::Event& event, const edm::EventSetup& setup) {
+void karma::VertexCollectionProducer::produceSingle(const reco::Vertex& in, karma::Vertex& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
     out.position = in.position();
@@ -20,5 +20,5 @@ void dijet::VertexCollectionProducer::produceSingle(const reco::Vertex& in, dije
 
 
 //define this as a plug-in
-using dijet::VertexCollectionProducer;
+using karma::VertexCollectionProducer;
 DEFINE_FWK_MODULE(VertexCollectionProducer);

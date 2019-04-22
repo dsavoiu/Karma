@@ -2,21 +2,21 @@
 
 
 // -- constructor
-dijet::EventHLTFilter::EventHLTFilter(const edm::ParameterSet& config) : m_configPSet(config) {
-    dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
+karma::EventHLTFilter::EventHLTFilter(const edm::ParameterSet& config) : m_configPSet(config) {
+    karmaEventToken = consumes<karma::Event>(m_configPSet.getParameter<edm::InputTag>("karmaEventSrc"));
 }
 
 
-bool dijet::EventHLTFilter::filter(edm::Event& event, const edm::EventSetup& setup) {
+bool karma::EventHLTFilter::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     bool obtained = true;
-    // dijet event
-    obtained &= event.getByToken(this->dijetEventToken, this->dijetEventHandle);
+    // karma event
+    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
     assert(obtained);  // raise if one collection could not be obtained
 
     // return true if at least one HLT bit is set
-    for (size_t iBit = 0; iBit < this->dijetEventHandle->hltBits.size(); ++iBit) {
-        if (this->dijetEventHandle->hltBits[iBit]) {
+    for (size_t iBit = 0; iBit < this->karmaEventHandle->hltBits.size(); ++iBit) {
+        if (this->karmaEventHandle->hltBits[iBit]) {
             return true;
         }
     }
@@ -27,5 +27,5 @@ bool dijet::EventHLTFilter::filter(edm::Event& event, const edm::EventSetup& set
 
 
 //define this as a plug-in
-using dijet::EventHLTFilter;
+using karma::EventHLTFilter;
 DEFINE_FWK_MODULE(EventHLTFilter);

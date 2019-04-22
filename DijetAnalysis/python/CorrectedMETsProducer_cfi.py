@@ -5,9 +5,9 @@ dijetCorrectedMETsProducer = cms.EDProducer(
     "CorrectedMETsProducer",
     cms.PSet(
         # -- input sources
-        dijetEventSrc = cms.InputTag("dijetEvents"),
-        dijetMETCollectionSrc = cms.InputTag("dijetCHSMETs"),
-        dijetCorrectedJetCollectionSrc = cms.InputTag("correctedJets"),
+        karmaEventSrc = cms.InputTag("karmaEvents"),
+        karmaMETCollectionSrc = cms.InputTag("karmaCHSMETs"),
+        karmaCorrectedJetCollectionSrc = cms.InputTag("correctedJets"),
 
         # -- other configuration
         typeICorrectionMinJetPt = cms.double(15),

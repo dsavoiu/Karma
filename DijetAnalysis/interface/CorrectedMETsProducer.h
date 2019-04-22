@@ -50,14 +50,14 @@ namespace dijet {
         double typeICorrectionMinJetPt_;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::Event> dijetEventHandle;
-        edm::EDGetTokenT<dijet::Event> dijetEventToken;
+        typename edm::Handle<karma::Event> karmaEventHandle;
+        edm::EDGetTokenT<karma::Event> karmaEventToken;
 
-        typename edm::Handle<dijet::METCollection> dijetMETCollectionHandle;
-        edm::EDGetTokenT<dijet::METCollection> dijetMETCollectionToken;
+        typename edm::Handle<karma::METCollection> karmaMETCollectionHandle;
+        edm::EDGetTokenT<karma::METCollection> karmaMETCollectionToken;
 
-        typename edm::Handle<dijet::JetCollection> dijetCorrectedJetCollectionHandle;
-        edm::EDGetTokenT<dijet::JetCollection> dijetCorrectedJetCollectionToken;
+        typename edm::Handle<karma::JetCollection> karmaCorrectedJetCollectionHandle;
+        edm::EDGetTokenT<karma::JetCollection> karmaCorrectedJetCollectionToken;
 
     };
 }  // end namespace

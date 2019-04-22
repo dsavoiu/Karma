@@ -40,16 +40,16 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
     /** Cache containing resources which do not change
      *  for the entire duration of the skiming job.
      */
-    class GlobalCacheTE : public dijet::GlobalCacheWithOutputFile {
+    class GlobalCacheTE : public karma::GlobalCacheWithOutputFile {
 
       public:
         GlobalCacheTE(const edm::ParameterSet& pSet) :
-            dijet::GlobalCacheWithOutputFile(pSet, pSet.getParameter<std::string>("outputFile")),
+            karma::GlobalCacheWithOutputFile(pSet, pSet.getParameter<std::string>("outputFile")),
             hltProcessName_(pSet.getParameter<std::string>("hltProcessName")),
             triggerEfficiencyBinning_(pSet_.getParameter<std::vector<double>>("triggerEfficiencyBinning")) {
 
@@ -126,10 +126,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a luminosity block
      */
-    class LumiCacheTE : public dijet::CacheBase {
+    class LumiCacheTE : public karma::CacheBase {
 
       public:
-        LumiCacheTE(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+        LumiCacheTE(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
     };
 
@@ -137,10 +137,10 @@ namespace dijet {
     /** Cache containing resources which do not change
      *  for the entire duration of a run
      */
-    class RunCacheTE : public dijet::CacheBase {
+    class RunCacheTE : public karma::CacheBase {
 
       public:
-        RunCacheTE(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {};
+        RunCacheTE(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
         /*
         void initHLTPrescaleProvider(const edm::ParameterSet& hltPrescaleProvider, const edm::EDAnalyzer& parentAnalyzer, edm::ConsumesCollector& consumesCollector) {
@@ -162,10 +162,10 @@ namespace dijet {
 
     /** Cache containing resources which accumulate during a run.
      */
-    class RunSummaryCacheTE : public dijet::CacheBase {
+    class RunSummaryCacheTE : public karma::CacheBase {
 
       public:
-        RunSummaryCacheTE(const edm::ParameterSet& pSet) : dijet::CacheBase(pSet) {
+        RunSummaryCacheTE(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
             // const std::vector<double>& triggerEfficiencyBinning = pSet_.getParameter<std::vector<double>>("triggerEfficiencyBinning");
             // // book the histograms for this run
             // for (const auto& hltPathName : hltPathNames) {
@@ -184,12 +184,12 @@ namespace dijet {
     // -- main analyzer
 
     class TriggerEfficienciesAnalyzer : public edm::stream::EDAnalyzer<
-        edm::GlobalCache<dijet::GlobalCacheTE>,
-        edm::RunCache<dijet::RunCacheTE>,
-        edm::RunSummaryCache<dijet::RunSummaryCacheTE>> {
+        edm::GlobalCache<karma::GlobalCacheTE>,
+        edm::RunCache<karma::RunCacheTE>,
+        edm::RunSummaryCache<karma::RunSummaryCacheTE>> {
 
       public:
-        explicit TriggerEfficienciesAnalyzer(const edm::ParameterSet&, const dijet::GlobalCacheTE*);
+        explicit TriggerEfficienciesAnalyzer(const edm::ParameterSet&, const karma::GlobalCacheTE*);
         ~TriggerEfficienciesAnalyzer();
 
         // -- pSet descriptions for CMSSW help info
@@ -198,17 +198,17 @@ namespace dijet {
         void beginStream(edm::StreamID);
 
         // -- global cache extension
-        static std::unique_ptr<dijet::GlobalCacheTE> initializeGlobalCache(const edm::ParameterSet& pSet);
-        static void globalEndJob(dijet::GlobalCacheTE*);
+        static std::unique_ptr<karma::GlobalCacheTE> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(karma::GlobalCacheTE*);
 
         // -- run cache extension
-        static std::shared_ptr<dijet::RunCacheTE> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
+        static std::shared_ptr<karma::RunCacheTE> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
         static void globalEndRun(const edm::Run&, const edm::EventSetup&, const RunContext*) {/* noop */};
 
         // -- run summary cache extension
-        static std::shared_ptr<dijet::RunSummaryCacheTE> globalBeginRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*);
-        void endRunSummary(const edm::Run&, const edm::EventSetup&, dijet::RunSummaryCacheTE*) const;
-        static void globalEndRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*, dijet::RunSummaryCacheTE*);
+        static std::shared_ptr<karma::RunSummaryCacheTE> globalBeginRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*);
+        void endRunSummary(const edm::Run&, const edm::EventSetup&, karma::RunSummaryCacheTE*) const;
+        static void globalEndRunSummary(const edm::Run&, const edm::EventSetup&, const RunContext*, karma::RunSummaryCacheTE*);
 
         // -- "regular" per-Event 'analyze' method
         virtual void analyze(const edm::Event&, const edm::EventSetup&);

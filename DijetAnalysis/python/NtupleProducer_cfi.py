@@ -5,15 +5,15 @@ dijetNtupleProducer = cms.EDProducer(
     "NtupleProducer",
     cms.PSet(
         # -- input sources
-        dijetEventSrc = cms.InputTag("dijetEvents"),
-        dijetVertexCollectionSrc = cms.InputTag("dijetVertices"),
-        dijetGeneratorQCDInfoSrc = cms.InputTag("dijetGeneratorQCDInfos"),
-        dijetRunSrc = cms.InputTag("dijetEvents"),
-        dijetJetCollectionSrc = cms.InputTag("dijetCorrectedJets"),
-        dijetMETCollectionSrc = cms.InputTag("dijetCorrectedMETs"),
-        dijetGenParticleCollectionSrc = cms.InputTag("dijetGenParticles"),
-        dijetGenJetCollectionSrc = cms.InputTag("dijetGenJets"),
-        dijetJetTriggerObjectMapSrc = cms.InputTag("dijetJetTriggerObjectMaps"),
+        karmaEventSrc = cms.InputTag("karmaEvents"),
+        karmaVertexCollectionSrc = cms.InputTag("karmaVertices"),
+        karmaGeneratorQCDInfoSrc = cms.InputTag("karmaGeneratorQCDInfos"),
+        karmaRunSrc = cms.InputTag("karmaEvents"),
+        karmaJetCollectionSrc = cms.InputTag("karmaCorrectedJets"),
+        karmaMETCollectionSrc = cms.InputTag("karmaCorrectedMETs"),
+        karmaGenParticleCollectionSrc = cms.InputTag("karmaGenParticles"),
+        karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets"),
+        karmaJetTriggerObjectMapSrc = cms.InputTag("karmaJetTriggerObjectMaps"),
 
         # -- other configuration
 

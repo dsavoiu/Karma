@@ -8,7 +8,7 @@
 #include "FWCore/Concurrency/interface/SerialTaskQueue.h"
 
 
-namespace dijet {
+namespace karma {
 
     // -- declare global caches accessible by the processing streams
 

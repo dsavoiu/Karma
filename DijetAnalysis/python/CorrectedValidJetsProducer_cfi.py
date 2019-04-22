@@ -5,8 +5,8 @@ dijetCorrectedValidJetsProducer = cms.EDProducer(
     "CorrectedValidJetsProducer",
     cms.PSet(
         # -- input sources
-        dijetEventSrc = cms.InputTag("dijetEvents"),
-        dijetJetCollectionSrc = cms.InputTag("dijetUpdatedPatJetsNoJEC"),
+        karmaEventSrc = cms.InputTag("karmaEvents"),
+        karmaJetCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),
 
         # -- other configuration
         jecVersion = cms.string("<REPLACE_ME>"),
