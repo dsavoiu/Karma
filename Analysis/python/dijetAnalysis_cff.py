@@ -145,7 +145,7 @@ class DijetAnalysis:
 
                 isData = cms.bool(self._is_data),
                 weightForStitching = cms.double(self._weight_for_stitching),
-                npuMeanFile = "{}/src/DijetAnalysis/Analysis/data/pileup/{YEAR}/npumean.txt".format(
+                npuMeanFile = "{}/src/DijetAnalysis/Analysis/data/pileup/{YEAR}/nPUMean_data.txt".format(
                     os.getenv('CMSSW_BASE'),
                     YEAR="2016",
                 ),
@@ -155,6 +155,12 @@ class DijetAnalysis:
                     "{}/src/DijetAnalysis/Analysis/data/binning/flexgrid_ys_yb_ptave.yml".format(os.getenv('CMSSW_BASE'))),
                 flexGridFileDijetMass = cms.string(
                     "{}/src/DijetAnalysis/Analysis/data/binning/flexgrid_ys_yb_mass.yml".format(os.getenv('CMSSW_BASE'))),
+
+                pileupWeightFile = "{}/src/DijetAnalysis/Analysis/data/pileup/{YEAR}/nPUMean_ratio.root".format(
+                    os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                ),
+                pileupWeightHistogramName = "pileup",
             )
         )
 

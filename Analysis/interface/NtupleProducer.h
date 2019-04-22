@@ -23,6 +23,7 @@
 #include "DijetAnalysis/Core/interface/NPUMeanProvider.h"
 #include "DijetAnalysis/Core/interface/JetIDProvider.h"
 #include "DijetAnalysis/Core/interface/FlexGridBinProvider.h"
+#include "DijetAnalysis/Core/interface/PileupWeightProvider.h"
 
 // -- output data formats
 #include "DijetAnalysis/AnalysisFormats/interface/Ntuple.h"
@@ -179,6 +180,7 @@ namespace dijet {
         std::unique_ptr<NPUMeanProvider> m_npuMeanProvider;
         std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetPtAve;
         std::unique_ptr<FlexGridBinProvider> m_flexGridBinProviderDijetMass;
+        std::unique_ptr<PileupWeightProvider> m_puWeightProvider;
 
         // -- handles and tokens
         typename edm::Handle<dijet::Event> dijetEventHandle;

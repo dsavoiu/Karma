@@ -47,6 +47,16 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
         m_flexGridBinProviderDijetMass = std::unique_ptr<FlexGridBinProvider>(new FlexGridBinProvider(flexGridFileDijetMass));
         std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
     }
+    else {
+        if (!m_configPSet.getParameter<std::string>("pileupWeightFile").empty()) {
+            m_puWeightProvider = std::unique_ptr<PileupWeightProvider>(
+                new PileupWeightProvider(
+                    m_configPSet.getParameter<std::string>("pileupWeightFile"),
+                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+                )
+            );
+        }
+    }
 
     // -- declare which collections are consumed and create tokens
     dijetEventToken = consumes<dijet::Event>(m_configPSet.getParameter<edm::InputTag>("dijetEventSrc"));
@@ -166,6 +176,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     else {
         outputNtupleEntry->nPU     = this->dijetEventHandle->nPU;
         outputNtupleEntry->nPUMean = this->dijetEventHandle->nPUTrue;
+        if (m_puWeightProvider) {
+            outputNtupleEntry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+        }
     }
 
     // write information related to primary vertices

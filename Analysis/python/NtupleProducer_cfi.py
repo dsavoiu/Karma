@@ -21,6 +21,9 @@ dijetNtupleProducer = cms.EDProducer(
         npuMeanFile = cms.string("npumean.txt"),
         minBiasCrossSection = cms.double(69.2),  # in mb
 
+        pileupWeightFile = cms.string("nPUMean_ratio.root"),
+        pileupWeightHistogramName = cms.string("pileup"),
+
         weightForStitching = cms.double(1.0),
 
         # YAML files specifying analysis binning

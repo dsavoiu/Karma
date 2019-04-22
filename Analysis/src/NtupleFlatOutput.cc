@@ -147,6 +147,7 @@ dijet::NtupleFlatOutput::NtupleFlatOutput(const edm::ParameterSet& config) : m_c
         ADD_BRANCH(m_tree, m_productForFill, generatorWeight, D);
         ADD_BRANCH(m_tree, m_productForFill, generatorWeightProduct, D);
         ADD_BRANCH(m_tree, m_productForFill, weightForStitching, D);
+        ADD_BRANCH(m_tree, m_productForFill, pileupWeight, D);
         // binning values
         ADD_BRANCH(m_tree, m_productForFill, binningValue, D);
     }
