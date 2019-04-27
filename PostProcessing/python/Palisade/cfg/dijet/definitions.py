@@ -2,7 +2,7 @@ import numpy as np
 
 from copy import deepcopy
 
-from DijetAnalysis.PostProcessing.Lumberjack.cfg.dijet import QUANTITIES
+from Karma.PostProcessing.Lumberjack.cfg.dijet import QUANTITIES
 
 __all__ = ["EXPANSIONS"]
 

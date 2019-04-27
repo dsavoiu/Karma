@@ -119,7 +119,7 @@ class LumberjackInterfaceBase(object):
 
     def _prepare_data_frame(self):
 
-        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
+        from Karma.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities
 
         QUANTITIES = self._config.QUANTITIES
         DEFINES = self._config.DEFINES
@@ -255,7 +255,7 @@ class LumberjackInterfaceBase(object):
 
     def _run_tasks(self, task_configs):
 
-        from DijetAnalysis.PostProcessing.Lumberjack import PostProcessor, Timer
+        from Karma.PostProcessing.Lumberjack import PostProcessor, Timer
 
         SPLITTINGS = self._config.SPLITTINGS
 
@@ -383,7 +383,7 @@ class LumberjackInterfaceBase(object):
 
     def _subcommand_freestyle(self):
 
-        from DijetAnalysis.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
+        from Karma.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
 
         QUANTITIES = self._config.QUANTITIES
 
@@ -491,7 +491,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         import importlib
         import pkgutil
 
-        import DijetAnalysis.PostProcessing.Lumberjack.cfg as cfg_module
+        import Karma.PostProcessing.Lumberjack.cfg as cfg_module
 
         # retrieve a list of available configuration modules for Lumberjack
         _available_analysis_configs = [

@@ -5,7 +5,7 @@
 #include "HLTrigger/HLTcore/interface/HLTPrescaleProvider.h"
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
-#include "DijetAnalysis/Skimming/interface/EventProducer.h"
+#include "Karma/Skimming/interface/EventProducer.h"
 
 // -- constructor
 dijet::EventProducer::EventProducer(const edm::ParameterSet& config, const dijet::GlobalCache* globalCache) : m_configPSet(config) {

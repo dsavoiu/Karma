@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/JetCollectionProducer.h"
+#include "Karma/Skimming/interface/JetCollectionProducer.h"
 
 
 void dijet::JetCollectionProducer::produceSingle(const pat::Jet& in, dijet::Jet& out, const edm::Event& event, const edm::EventSetup& setup) {

@@ -1,8 +1,8 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from DijetAnalysis.Core.dijetPrelude_cff import *
-from DijetAnalysis.Core.Sequences.jetToolbox_cff import addJetToolboxSequences
-from DijetAnalysis.Core.Sequences.jetEnergyCorrections_cff import undoJetEnergyCorrections
+from Karma.Common.karmaPrelude_cff import *
+#from Karma.Common.Sequences.jetToolbox_cff import addJetToolboxSequences
+from Karma.Common.Sequences.jetEnergyCorrections_cff import undoJetEnergyCorrections
 
 
 # -- for testing and debugging
@@ -37,7 +37,7 @@ _accumulated_output_commands = ['drop *']
 # -- only process certified runs and lumisections
 if options.isData:
     process.source.lumisToProcess = LumiList.LumiList(
-        filename = os.path.realpath("{}/src/DijetAnalysis/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
+        filename = os.path.realpath("{}/src/Karma/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
     ).getVLuminosityBlockRange()
 
 ## enable verbose log file output
@@ -52,11 +52,11 @@ process.MessageLogger.cerr.HLTPrescaleProvider = cms.untracked.PSet(
 
 # -- configure CMSSW modules
 
-from DijetAnalysis.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
-from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJets
-from DijetAnalysis.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
-from DijetAnalysis.Skimming.EventProducer_cfi import dijetEventProducer
-from DijetAnalysis.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
+from Karma.Skimming.TriggerObjectCollectionProducer_cfi import dijetTriggerObjectCollectionProducer
+from Karma.Skimming.JetCollectionProducer_cfi import dijetJets
+from Karma.Skimming.METCollectionProducer_cfi import dijetPFMETCollectionProducer, dijetCHSMETCollectionProducer
+from Karma.Skimming.EventProducer_cfi import dijetEventProducer
+from Karma.Skimming.VertexCollectionProducer_cfi import dijetVertexCollectionProducer
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter('PrimaryVertexObjectFilter',

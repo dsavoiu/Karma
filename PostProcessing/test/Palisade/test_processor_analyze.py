@@ -12,7 +12,7 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
-from DijetAnalysis.PostProcessing.Palisade import AnalyzeProcessor, InputROOT
+from Karma.PostProcessing.Palisade import AnalyzeProcessor, InputROOT
 
 
 class TestAnalyzeProcessor(unittest.TestCase):

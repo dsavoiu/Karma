@@ -12,9 +12,9 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
-from DijetAnalysis.PostProcessing.Palisade import ContextValue, LiteralString
-from DijetAnalysis.PostProcessing.Palisade.Processors._base import _ProcessorBase, ConfigurationError
-#from DijetAnalysis.PostProcessing.Palisade.Processors._base import _ProcessorBase
+from Karma.PostProcessing.Palisade import ContextValue, LiteralString
+from Karma.PostProcessing.Palisade.Processors._base import _ProcessorBase, ConfigurationError
+#from Karma.PostProcessing.Palisade.Processors._base import _ProcessorBase
 
 
 _RESULTS = []

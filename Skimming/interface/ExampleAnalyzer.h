@@ -15,7 +15,7 @@
 //#include "FWCore/Utilities/interface/Transition.h"  // CMSSW 9+
 
 // -- base classes for caches
-#include "DijetAnalysis/Core/interface/Caches.h"
+#include "Karma/Common/interface/Caches.h"
 
 // -- input data formats
 #include "DataFormats/PatCandidates/interface/Jet.h"

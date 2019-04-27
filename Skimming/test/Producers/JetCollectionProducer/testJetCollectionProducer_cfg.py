@@ -1,4 +1,4 @@
-from DijetAnalysis.Core.dijetPrelude_cff import *
+from Karma.Common.karmaPrelude_cff import *
 
 
 # -- override CLI options for test
@@ -18,7 +18,7 @@ enableVerboseLogging(process)
 
 # -- configure CMSSW modules
 
-from DijetAnalysis.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
+from Karma.Skimming.JetCollectionProducer_cfi import dijetJetCollectionProducer
 
 process.dijetJets = dijetJetCollectionProducer
 process.path *= process.dijetJets

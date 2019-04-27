@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from DijetAnalysis.PostProcessing.Lumberjack import Quantity
+from Karma.PostProcessing.Lumberjack import Quantity
 
 
 _QCD_BINNING = [15, 30, 50, 80, 120, 170, 300, 470, 600, 800, 1000, 1400, 1800, 1800, 2400, 3200, 7000]

@@ -1,4 +1,4 @@
-from DijetAnalysis.Core.dijetPrelude_cff import *
+from Karma.Common.karmaPrelude_cff import *
 
 
 # -- override CLI options for test
@@ -39,7 +39,7 @@ process.MessageLogger.critical = cms.untracked.PSet(
 
 # -- configure CMSSW modules
 
-from DijetAnalysis.Skimming.TriggerEfficienciesAnalyzer_cfi import dijetTriggerEfficienciesAnalyzer
+from Karma.Skimming.TriggerEfficienciesAnalyzer_cfi import dijetTriggerEfficienciesAnalyzer
 
 process.triggerEfficiencies = dijetTriggerEfficienciesAnalyzer
 process.path *= process.triggerEfficiencies

@@ -1,0 +1,17 @@
+<use name="Karma/SkimmingFormats"/>
+
+<use name="root"/>
+<use name="rootcore"/>
+<use name="yaml-cpp"/>
+
+<use name="boost"/>
+
+<export>
+  <use name="root"/>
+  <lib name="1"/>
+</export>
+
+
+<!--<flags EDM_PLUGIN="1"/>-->
+<flags CXXFLAGS="`printenv CMSSW_VERSION | sed 's/CMSSW_\([0-9]*\)_\([0-9]*\)_\([0-9]*\).*/-DCMSSW_MAJOR_VERSION=\1 -DCMSSW_MINOR_VERSION=\2 -DCMSSW_REVISION=\3/'`"/>
+<flags REM_CXXFLAGS="-fipa-pta"/>

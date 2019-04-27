@@ -23,12 +23,12 @@
 #include "TH1.h"
 
 // -- base classes for caches
-#include "DijetAnalysis/Core/interface/Caches.h"
+#include "Karma/Common/interface/Caches.h"
 
 // -- output data formats
-#include "DijetAnalysis/DataFormats/interface/Event.h"
-#include "DijetAnalysis/DataFormats/interface/Lumi.h"
-#include "DijetAnalysis/DataFormats/interface/Run.h"
+#include "Karma/SkimmingFormats/interface/Event.h"
+#include "Karma/SkimmingFormats/interface/Lumi.h"
+#include "Karma/SkimmingFormats/interface/Run.h"
 
 // -- input data formats
 #include "DataFormats/PatCandidates/interface/Jet.h"

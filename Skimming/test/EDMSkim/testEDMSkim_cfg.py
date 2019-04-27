@@ -1,6 +1,6 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from DijetAnalysis.Core.dijetPrelude_cff import *
+from Karma.Common.karmaPrelude_cff import *
 
 # -- override CLI options for test
 options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))

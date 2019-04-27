@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/TriggerObjectCollectionProducer.h"
+#include "Karma/Skimming/interface/TriggerObjectCollectionProducer.h"
 
 
 void dijet::TriggerObjectCollectionProducer::produceSingle(const pat::TriggerObjectStandAlone& in, dijet::TriggerObject& out, const edm::Event& event, const edm::EventSetup& setup) {

@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/VertexCollectionProducer.h"
+#include "Karma/Skimming/interface/VertexCollectionProducer.h"
 
 
 void dijet::VertexCollectionProducer::produceSingle(const reco::Vertex& in, dijet::Vertex& out, const edm::Event& event, const edm::EventSetup& setup) {

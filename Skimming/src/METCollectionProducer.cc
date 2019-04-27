@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/METCollectionProducer.h"
+#include "Karma/Skimming/interface/METCollectionProducer.h"
 
 
 void dijet::METCollectionProducer::produceSingle(const pat::MET& in, dijet::MET& out, const edm::Event& event, const edm::EventSetup& setup) {

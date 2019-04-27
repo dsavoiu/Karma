@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/EventHLTFilter.h"
+#include "Karma/Skimming/interface/EventHLTFilter.h"
 
 
 // -- constructor

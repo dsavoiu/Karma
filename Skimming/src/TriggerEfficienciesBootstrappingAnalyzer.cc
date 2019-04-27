@@ -4,7 +4,7 @@
 #include "HLTrigger/HLTcore/interface/HLTPrescaleProvider.h"
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
-#include "DijetAnalysis/Skimming/interface/TriggerEfficienciesBootstrappingAnalyzer.h"
+#include "Karma/Skimming/interface/TriggerEfficienciesBootstrappingAnalyzer.h"
 
 // -- constructor
 dijet::TriggerEfficienciesBootstrappingAnalyzer::TriggerEfficienciesBootstrappingAnalyzer(const edm::ParameterSet& config, const dijet::GlobalCacheTEB* globalCache) :

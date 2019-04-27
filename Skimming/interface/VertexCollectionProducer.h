@@ -5,7 +5,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 // -- output data formats
-#include "DijetAnalysis/DataFormats/interface/Event.h"
+#include "Karma/SkimmingFormats/interface/Event.h"
 
 // -- input data formats
 #include "DataFormats/VertexReco/interface/Vertex.h"

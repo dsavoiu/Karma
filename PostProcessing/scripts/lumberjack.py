@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from DijetAnalysis.PostProcessing.Lumberjack import LumberjackCLI
+from Karma.PostProcessing.Lumberjack import LumberjackCLI
 
 
 if __name__ == "__main__":

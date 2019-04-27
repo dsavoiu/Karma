@@ -1,4 +1,4 @@
-#include "DijetAnalysis/Skimming/interface/ExampleAnalyzer.h"
+#include "Karma/Skimming/interface/ExampleAnalyzer.h"
 
 // -- constructor
 dijet::ExampleAnalyzer::ExampleAnalyzer(const edm::ParameterSet& config, const dijet::ExampleGlobalCache* globalCache) :

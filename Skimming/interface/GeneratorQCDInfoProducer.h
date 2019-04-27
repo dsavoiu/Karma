@@ -15,7 +15,7 @@
 
 
 // -- output data formats
-#include "DijetAnalysis/DataFormats/interface/Event.h"
+#include "Karma/SkimmingFormats/interface/Event.h"
 
 // -- input data formats
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"

@@ -1,4 +1,4 @@
-<use name="DijetAnalysis/DataFormats"/>
+<use name="Karma/SkimmingFormats"/>
 
 <use name="DataFormats/EgammaCandidates"/>
 <use name="DataFormats/EgammaReco"/>

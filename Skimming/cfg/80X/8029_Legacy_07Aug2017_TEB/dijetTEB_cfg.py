@@ -1,6 +1,6 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from DijetAnalysis.Core.dijetPrelude_cff import *
+from Karma.Common.karmaPrelude_cff import *
 
 
 # -- for testing and debugging
@@ -34,13 +34,13 @@ _accumulated_output_commands = ['drop *']
 
 # -- only process certified runs and lumisections
 process.source.lumisToProcess = LumiList.LumiList(
-    filename = os.path.realpath("{}/src/DijetAnalysis/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
+    filename = os.path.realpath("{}/src/Karma/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE")))
 ).getVLuminosityBlockRange()
 
 
 # -- configure CMSSW modules
 
-from DijetAnalysis.Skimming.TriggerEfficienciesBootstrappingAnalyzer_cfi import dijetTriggerEfficienciesBootstrappingAnalyzer
+from Karma.Skimming.TriggerEfficienciesBootstrappingAnalyzer_cfi import dijetTriggerEfficienciesBootstrappingAnalyzer
 
 process.triggerEfficiencies = dijetTriggerEfficienciesBootstrappingAnalyzer
 process.path *= process.triggerEfficiencies

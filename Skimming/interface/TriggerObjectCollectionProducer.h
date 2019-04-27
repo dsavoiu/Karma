@@ -5,10 +5,10 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 // -- output data formats
-#include "DijetAnalysis/DataFormats/interface/Event.h"
+#include "Karma/SkimmingFormats/interface/Event.h"
 
 // -- input data formats
-#include "DijetAnalysis/DataFormats/interface/Run.h"
+#include "Karma/SkimmingFormats/interface/Run.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
 namespace dijet {

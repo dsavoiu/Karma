@@ -1,7 +1,7 @@
 // system include files
 #include <iostream>
 
-#include "DijetAnalysis/Skimming/interface/GeneratorQCDInfoProducer.h"
+#include "Karma/Skimming/interface/GeneratorQCDInfoProducer.h"
 
 // -- constructor
 dijet::GeneratorQCDInfoProducer::GeneratorQCDInfoProducer(const edm::ParameterSet& config) : m_configPSet(config) {

@@ -31,7 +31,7 @@ class PalisadeCLI(object):
                 return _is_incomplete
 
             import pkgutil
-            import DijetAnalysis.PostProcessing.Palisade.cfg as cfg_module
+            import Karma.PostProcessing.Palisade.cfg as cfg_module
 
             # retrieve available analysis configuration modules for Palisade
             _available_analysis_modules = {
@@ -93,7 +93,7 @@ class PalisadeCLI(object):
         import pkgutil
         import sys
 
-        import DijetAnalysis.PostProcessing.Palisade.cfg as cfg_module
+        import Karma.PostProcessing.Palisade.cfg as cfg_module
 
         # retrieve available analysis configuration modules for Palisade
         _available_analysis_modules = {
