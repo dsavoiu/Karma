@@ -110,19 +110,23 @@ class _ProcessorBase(object):
     def _resolve_context(var, context):
         '''recursively replace string templates and `ConfigurationEntry` with contextual values'''
         if isinstance(var, dict):
+            # thread over dictionaries
             for _k, _v in six.iteritems(var):
                 var[_k] = _ProcessorBase._resolve_context(_v, context)
         elif isinstance(var, list):
+            # thread over lists
             for _idx, _v in enumerate(var):
                 var[_idx] = _ProcessorBase._resolve_context(_v, context)
         elif isinstance(var, str):
+            # replace within string using 'format'
             return var.format(**context)
         elif isinstance(var, ConfigurationEntry):
+            # 'ConfigValue' etc. -> get directly from context dict
             return var.get(context)
         else:
-            raise ConfigurationError("Unsupported data structure encountered: '{}'".format(type(var)))
+            # direct passthrough: no replacement
+            return var
 
-        return var
 
     def _run_with_context(self, action_method, context):
         for _template in self._config[self.CONFIG_KEY_FOR_TEMPLATES]:
