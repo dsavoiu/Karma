@@ -125,7 +125,9 @@ class _ProcessorBase(object):
             return var.get(context)
         else:
             # direct passthrough: no replacement
-            return var
+            pass
+
+        return var
 
 
     def _run_with_context(self, action_method, context):

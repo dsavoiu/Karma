@@ -38,9 +38,6 @@ class DummyProcessor(_ProcessorBase):
     _ACTIONS = [_process]
 
 
-class DummyDataStructure:
-    pass
-
 
 class TestProcessorBase(unittest.TestCase):
     #MANDATORY_CONFIG_KEYS = ['input_files', 'expansions', 'templates']
@@ -234,18 +231,6 @@ class TestProcessorBase(unittest.TestCase):
         _results = self._run_palisade(config=_cfg)
         self.assertEqual(len(_results), 1)
         self.assertEqual(_results[0]['replace_this_as_well'], self.BASE_CFG['expansions']['namespace'][0]['key'])
-
-
-    def test_context_value_unsupported_data_structure_raise(self):
-        _cfg = deepcopy(self.BASE_CFG)
-        _cfg['templates'][0].update({
-            'replace_under_here': {
-                'context_value': DummyDataStructure(),
-            }
-        })
-
-        with self.assertRaises(ConfigurationError):
-            self._run_palisade(config=_cfg)
 
     def test_context_value_unsupported_syntax(self):
         _cfg = deepcopy(self.BASE_CFG)
