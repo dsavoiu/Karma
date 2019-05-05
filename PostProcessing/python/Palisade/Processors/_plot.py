@@ -7,6 +7,7 @@ import six
 import yaml
 
 from copy import deepcopy
+from functools import partial
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -132,7 +133,7 @@ class DijetLogFormatterSciNotation(LogFormatter):
         return _ret
 
 
-def _plot_as_step(*args, **kwargs):
+def _plot_as_step(ax, *args, **kwargs):
     """display data as horizontal bars with given by `x` +/- `xerr`. `y` error bars are also drawn."""
     assert len(args) == 2
     _x = np.asarray(args[0])
@@ -186,13 +187,13 @@ def _plot_as_step(*args, **kwargs):
     _x += np.vstack([-_xerr_dn, _zeros, _xerr_up]).T.flatten()
 
     if _show_yerr_as == 'errorbar' or _show_yerr_as is None:
-        return plt.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
+        return ax.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
     elif _show_yerr_as == 'band':
         _capsize = kwargs.pop('capsize', None)
         _markeredgecolor = kwargs.pop('markeredgecolor', None)
         return (
-            plt.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, **kwargs),
-            plt.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=0.5)))
+            ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, **kwargs),
+            ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=0.5)))
 
 
 class PlotProcessor(_ProcessorBase):
@@ -426,8 +427,8 @@ class PlotProcessor(_ProcessorBase):
 
             # -- obtain plot method
             try:
-                # use external method, if available
-                _plot_method = self._EXTERNAL_PLOT_METHODS[_plot_method_name]
+                # use external method (if available) and curry in the axes object
+                _plot_method = partial(self._EXTERNAL_PLOT_METHODS[_plot_method_name], _ax)
             except KeyError:
                 #
                 _plot_method = getattr(_ax, _plot_method_name)
