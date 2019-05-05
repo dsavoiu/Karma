@@ -139,7 +139,7 @@ class PalisadeCLI(object):
 
         # -- find task/file based on _pre_args
 
-        if _pre_args.subparser_name == 'file':
+        if _pre_args.subparser_name == 'config':
             raise NotImplementedError("Using config files has not been implemented yet...")
         elif _pre_args.subparser_name == 'task':
 
@@ -179,7 +179,7 @@ class PalisadeCLI(object):
 
             for _mandatory_func in ('cli', 'run'):
                 if not hasattr(_task_module, _mandatory_func):
-                    raise ValueError("Task '{}' does not define function mandatory '{}' (looked in "
+                    raise ValueError("Task '{}' does not define mandatory function '{}' (looked in "
                                      "{})".format(_pre_args.TASK, _mandatory_func,
                                                   _task_module.__file__))
 
