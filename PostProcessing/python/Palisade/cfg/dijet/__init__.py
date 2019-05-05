@@ -1,3 +1,3 @@
 from .definitions import *
 
-import tasks
+from . import tasks
