@@ -617,27 +617,24 @@ class PlotProcessor(_ProcessorBase):
                     if _z_label is not None:
                         _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
-            # handle sets of horizontal lines
-            _axhlines = _pad_config.pop('axhlines', [])
-            if not isinstance(_axhlines, list):
-                _axhlines = [_axhlines]
-            for _axhlines_set in _axhlines:
-                if not isinstance(_axhlines_set, dict):
-                    _axhlines = dict(values=_axhlines_set)
-                _ys = _axhlines_set.pop('values')
-                for _y in _ys:
-                    _ax.axhline(_y, **dict(self._DEFAULT_LINE_KWARGS, **_axhlines_set))
-
-            # handle vertical lines
-            _axvlines = _pad_config.pop('axvlines', [])
-            if not isinstance(_axvlines, list):
-                _axvlines = [_axvlines]
-            for _axvlines_set in _axvlines:
-                if not isinstance(_axvlines_set, dict):
-                    _axvlines = dict(values=_axvlines_set)
-                _xs = _axvlines_set.pop('values')
-                for _x in _xs:
-                    _ax.axvline(_x, **dict(self._DEFAULT_LINE_KWARGS, **_axvlines_set))
+            # handle sets of horizontal and vertical lines
+            for _axlines_key in ('axhlines', 'axvlines'):
+                _ax_method_name = _axlines_key[:-1]
+                assert hasattr(_ax, _ax_method_name)
+                _axlines = _pad_config.pop(_axlines_key, [])
+                # wrap in list if not already list
+                if not isinstance(_axlines, list):
+                    _axlines = [_axlines]
+                for _axlines_set in _axlines:
+                    if not isinstance(_axlines_set, dict):
+                        # wrap inner 'values' in list if not already list
+                        if not isinstance(_axlines_set, list):
+                            _axlines_set = [_axlines_set]
+                        _axlines_set = dict(values=_axlines_set)
+                    _vals = _axlines_set.pop('values')
+                    # draw the line
+                    for _val in _vals:
+                        getattr(_ax, _ax_method_name)(_val, **dict(self._DEFAULT_LINE_KWARGS, **_axlines_set))
 
             # -- handle plot legend
 
