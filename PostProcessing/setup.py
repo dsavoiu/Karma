@@ -6,16 +6,51 @@ import subprocess
 import sys
 
 from setuptools import find_packages, setup
+from setuptools.command.develop import develop
+
+
+class CustomDevelopCommand(develop):
+    """Custom handler for 'develop' command."""
+
+    @staticmethod
+    def _ensure_standalone_package_path(final_symlink_path):
+        '''ensure that a dummy prefix path exists which is importable as a package'''
+
+        _final_symlink_path_split = final_symlink_path.split('/')
+
+        _cumulated_paths = ''
+        for _i in range(len(_final_symlink_path_split)-1):
+            _cumulated_path = os.path.join(*_final_symlink_path_split[:_i+1])
+            # create directory
+            if not os.path.exists(_cumulated_path):
+                os.mkdir(_cumulated_path)
+            # 'touch' __init__ file to ensure it exists
+            _initfile_path = '{}/__init__.py'.format(_cumulated_path)
+            if not os.path.exists(_initfile_path):
+                open(_initfile_path, 'a').close()
+
+        if not os.path.exists(final_symlink_path):
+            os.symlink(os.path.join(*(['..']*(len(_final_symlink_path_split)-1)+['python'])), final_symlink_path)
+
+    def run(self):
+        print('custom_develop!')
+        # create 'dummy' path with '__init__' files and symlink to '/python'
+        self._ensure_standalone_package_path('Karma/PostProcessing')
+        # call super
+        develop.run(self)
 
 
 def get_version():
     '''try to determine version via git'''
     try:
         # is git available?
-        subprocess.call('git', stdout=subprocess.PIPE)
+        subprocess.call('git status', stdout=subprocess.PIPE)
     except IOError:
         # 'git' not available
-        version = "dev"  # the short X.Y version.
+        version = "dev"
+    except subprocess.CalledProcessError:
+        # not a 'git' repo
+        version = "dev"
     else:
         # 'git' found -> get release from git
 
@@ -39,6 +74,8 @@ def get_requirements():
         'mock',
         'tqdm',
         'pandas',
+        'PyYaml',
+        'unittest2',
     ]
 
     if six.PY2:
@@ -48,27 +85,6 @@ def get_requirements():
 
     return _basic_requirements
 
-def ensure_standalone_package_path(final_symlink_path):
-    '''ensure that a dummy prefix path exists which is importable as a package'''
-
-    _final_symlink_path_split = final_symlink_path.split('/')
-
-    _cumulated_paths = ''
-    for _i in range(len(_final_symlink_path_split)-1):
-        _cumulated_path = os.path.join(*_final_symlink_path_split[:_i+1])
-        # create directory
-        if not os.path.exists(_cumulated_path):
-            os.mkdir(_cumulated_path)
-        # 'touch' __init__ file to ensure it exists
-        _initfile_path = '{}/__init__.py'.format(_cumulated_path)
-        if not os.path.exists(_initfile_path):
-            open(_initfile_path, 'a').close()
-
-    if not os.path.exists(final_symlink_path):
-        os.symlink(os.path.join(*(['..']*(len(_final_symlink_path_split)-1)+['python'])), final_symlink_path)
-
-# create 'dummy' path with '__init__' files and symlink to '/python'
-ensure_standalone_package_path('Karma/PostProcessing')
 
 __version__ = get_version()
 
@@ -79,9 +95,17 @@ setup(
     author='Daniel Savoiu',
     author_email='daniel.savoiu@cern.ch',
     url='http://github.com/dsavoiu/Karma',
-    packages=find_packages(),
+    packages=['Karma.PostProcessing.{}'.format(_pkg) for _pkg in find_packages('python')],
+    package_dir = {
+        'Karma.PostProcessing': './python',
+    },
     scripts=['scripts/lumberjack.py', 'scripts/palisade.py'],
     keywords = "data analysis cms cern",
     license='MIT',
     install_requires=get_requirements(),
+
+    cmdclass={
+        'develop': CustomDevelopCommand,
+    },
+
  )
