@@ -45,7 +45,31 @@ namespace {
         karma::LVCollection dict_karmaLVCollection;
         edm::Wrapper<karma::LVCollection> dict_edmWrapperDijetLVCollection;
 
-        // lvs
+        // particles
+        karma::Particle dict_karmaParticle;
+        edm::Wrapper<karma::Particle> dict_edmWrapperDijetParticle;
+        karma::ParticleCollection dict_karmaParticleCollection;
+        edm::Wrapper<karma::ParticleCollection> dict_edmWrapperDijetParticleCollection;
+
+        // leptons
+        karma::Lepton dict_karmaLepton;
+        edm::Wrapper<karma::Lepton> dict_edmWrapperDijetLepton;
+        karma::LeptonCollection dict_karmaLeptonCollection;
+        edm::Wrapper<karma::LeptonCollection> dict_edmWrapperDijetLeptonCollection;
+
+        // electrons
+        karma::Electron dict_karmaElectron;
+        edm::Wrapper<karma::Electron> dict_edmWrapperDijetElectron;
+        karma::ElectronCollection dict_karmaElectronCollection;
+        edm::Wrapper<karma::ElectronCollection> dict_edmWrapperDijetElectronCollection;
+
+        // muons
+        karma::Muon dict_karmaMuon;
+        edm::Wrapper<karma::Muon> dict_edmWrapperDijetMuon;
+        karma::MuonCollection dict_karmaMuonCollection;
+        edm::Wrapper<karma::MuonCollection> dict_edmWrapperDijetMuonCollection;
+
+        // gen-particles
         karma::GenParticle dict_karmaGenParticle;
         edm::Wrapper<karma::GenParticle> dict_edmWrapperDijetGenParticle;
         karma::GenParticleCollection dict_karmaGenParticleCollection;

@@ -8,7 +8,10 @@
 
 #include "Defaults.h"
 
+
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
+
 
 namespace karma {
     class Event {
@@ -73,14 +76,24 @@ namespace karma {
     typedef std::vector<karma::LV> LVCollection;
 
     /**
-     * Generator Particle class
+     * Particle class
      */
-    class GenParticle : public karma::LV {
+    class Particle : public karma::LV {
       public:
         int pdgId = -999;
-
-        int nDaughters = -1;
         int status = -999;
+
+        int charge = -999;
+
+    };
+    typedef std::vector<karma::Particle> ParticleCollection;
+
+    /**
+     * Generator Particle class
+     */
+    class GenParticle : public karma::Particle {
+      public:
+        int nDaughters = -1;
 
         bool isPrompt = 0;
         bool isDecayedLeptonHadron = 0;
@@ -100,6 +113,55 @@ namespace karma {
 
     };
     typedef std::vector<karma::GenParticle> GenParticleCollection;
+
+    /**
+     * Lepton class
+     */
+    class Lepton : public karma::Particle {
+      public:
+        double trackIso = UNDEFINED_DOUBLE;
+        double caloIso = UNDEFINED_DOUBLE;
+        double ecalIso = UNDEFINED_DOUBLE;
+        double hcalIso = UNDEFINED_DOUBLE;
+
+        double particleIso = UNDEFINED_DOUBLE;
+        double chargedHadronIso = UNDEFINED_DOUBLE;
+        double neutralHadronIso = UNDEFINED_DOUBLE;
+        double photonIso = UNDEFINED_DOUBLE;
+        double puChargedHadronIso = UNDEFINED_DOUBLE;
+
+    };
+    typedef std::vector<karma::Lepton> LeptonCollection;
+
+    /**
+     * Muon class
+     */
+    class Muon : public karma::Lepton {
+      public:
+        /* no further quantities yet */
+        uint64_t recoSelectors;
+
+        bool passedSelection(reco::Muon::Selector selection) const {
+            return passedSelection(static_cast<unsigned int>(selection));
+        }
+
+      private:
+        bool passedSelection(uint64_t selection) const {
+            return (recoSelectors & selection)==selection;
+        }
+
+    };
+    typedef std::vector<karma::Muon> MuonCollection;
+
+    /**
+     * Electron class
+     */
+    class Electron : public karma::Lepton {
+      public:
+        double ecalScale = UNDEFINED_DOUBLE;
+        double ecalSmear = UNDEFINED_DOUBLE;
+    };
+    typedef std::vector<karma::Electron> ElectronCollection;
 
     /**
      * Jet class
