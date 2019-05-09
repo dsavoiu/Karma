@@ -39,7 +39,7 @@ namespace karma {
             // get additional event/run data
             bool obtained = true;
             obtained &= event.getRun().getByToken(this->karmaRunToken_, this->karmaRunHandle_);  // can this be optimized?
-            obtained &= event.getByToken(this->triggerResultsToken_, this->triggerResultsHandle_);
+            karma::util::getByTokenOrThrow(event, this->triggerResultsToken_, this->triggerResultsHandle_);
             assert(obtained);
 
             // call "parent" produce function

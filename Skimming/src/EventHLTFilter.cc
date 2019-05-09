@@ -9,10 +9,8 @@ karma::EventHLTFilter::EventHLTFilter(const edm::ParameterSet& config) : m_confi
 
 bool karma::EventHLTFilter::filter(edm::Event& event, const edm::EventSetup& setup) {
 
-    bool obtained = true;
     // karma event
-    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
-    assert(obtained);  // raise if one collection could not be obtained
+    karma::util::getByTokenOrThrow(event, this->karmaEventToken, this->karmaEventHandle);
 
     // return true if at least one HLT bit is set
     for (size_t iBit = 0; iBit < this->karmaEventHandle->hltBits.size(); ++iBit) {

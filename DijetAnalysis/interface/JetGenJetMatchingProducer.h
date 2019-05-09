@@ -16,6 +16,7 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/Util.h"
 
 // JEC and JER-related objects
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"

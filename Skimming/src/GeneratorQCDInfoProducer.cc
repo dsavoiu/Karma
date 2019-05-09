@@ -29,11 +29,9 @@ void karma::GeneratorQCDInfoProducer::produce(edm::Event& event, const edm::Even
     std::unique_ptr<karma::GeneratorQCDInfo> outputGeneratorQCDInfo(new karma::GeneratorQCDInfo());
 
     // -- get object collections for event
-    bool obtained = true;
-    // pileup density
-    obtained &= event.getByToken(this->genEventInfoProductToken, this->genEventInfoProductHandle);
 
-    assert(obtained);  // raise if one collection could not be obtained
+    // pileup density
+    karma::util::getByTokenOrThrow(event, this->genEventInfoProductToken, this->genEventInfoProductHandle);
 
     // -- populate outputs
 

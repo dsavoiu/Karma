@@ -19,6 +19,7 @@
 #include <boost/regex.hpp>
 
 #include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/Util.h"
 #include "Karma/Common/interface/TriggerEfficienciesProvider.h"
 #include "Karma/Common/interface/NPUMeanProvider.h"
 #include "Karma/Common/interface/JetIDProvider.h"

@@ -166,22 +166,20 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::unique_ptr<karma::Event> outputEvent(new karma::Event());
 
     // -- get object collections for event
-    bool obtained = true;
+
     // pileup density
-    obtained &= event.getByToken(this->pileupDensityToken, this->pileupDensityHandle);
+    karma::util::getByTokenOrThrow(event, this->pileupDensityToken, this->pileupDensityHandle);
     // trigger results and prescales
-    obtained &= event.getByToken(this->triggerResultsToken, this->triggerResultsHandle);
-    //obtained &= event.getByToken(this->triggerPrescalesToken, this->triggerPrescalesHandle);
+    karma::util::getByTokenOrThrow(event, this->triggerResultsToken, this->triggerResultsHandle);
+    //karma::util::getByTokenOrThrow(event, this->triggerPrescalesToken, this->triggerPrescalesHandle);
     // primary vertices
-    obtained &= event.getByToken(this->primaryVerticesToken, this->primaryVerticesHandle);
-    obtained &= event.getByToken(this->goodPrimaryVerticesToken, this->goodPrimaryVerticesHandle);
+    karma::util::getByTokenOrThrow(event, this->primaryVerticesToken, this->primaryVerticesHandle);
+    karma::util::getByTokenOrThrow(event, this->goodPrimaryVerticesToken, this->goodPrimaryVerticesHandle);
 
     // MC-specific products
     if (!globalCache()->isData_) {
-        obtained &= event.getByToken(this->pileupSummaryInfosToken, this->pileupSummaryInfosHandle);
+        karma::util::getByTokenOrThrow(event, this->pileupSummaryInfosToken, this->pileupSummaryInfosHandle);
     }
-
-    assert(obtained);  // raise if one collection could not be obtained
 
     // -- populate outputs
 

@@ -129,29 +129,28 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     std::unique_ptr<dijet::NtupleEntry> outputNtupleEntry(new dijet::NtupleEntry());
 
     // -- get object collections for event
-    bool obtained = true;
+
     // run data
-    obtained &= event.getRun().getByToken(this->karmaRunToken, this->karmaRunHandle);
+    karma::util::getByTokenOrThrow(event.getRun(), this->karmaRunToken, this->karmaRunHandle);
     // pileup density
-    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaEventToken, this->karmaEventHandle);
     // jet collection
-    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
     // MET collection
-    obtained &= event.getByToken(this->karmaMETCollectionToken, this->karmaMETCollectionHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaMETCollectionToken, this->karmaMETCollectionHandle);
     // jet trigger objects map
-    obtained &= event.getByToken(this->karmaJetTriggerObjectsMapToken, this->karmaJetTriggerObjectsMapHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaJetTriggerObjectsMapToken, this->karmaJetTriggerObjectsMapHandle);
     if (!m_isData) {
         // QCD generator information
-        obtained &= event.getByToken(this->karmaGeneratorQCDInfoToken, this->karmaGeneratorQCDInfoHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaGeneratorQCDInfoToken, this->karmaGeneratorQCDInfoHandle);
         // genParticle collection
-        obtained &= event.getByToken(this->karmaGenParticleCollectionToken, this->karmaGenParticleCollectionHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaGenParticleCollectionToken, this->karmaGenParticleCollectionHandle);
         // gen jet collection
-        obtained &= event.getByToken(this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
         // jet genJet map
-        obtained &= event.getByToken(this->karmaJetGenJetMapToken, this->karmaJetGenJetMapHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaJetGenJetMapToken, this->karmaJetGenJetMapHandle);
     }
 
-    assert(obtained);  // raise if one collection could not be obtained
     assert(this->karmaMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
     // -- populate outputs

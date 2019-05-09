@@ -4,6 +4,8 @@
 #include <memory>
 
 // user include files
+#include "Karma/Common/interface/Util.h"
+
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -11,8 +13,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
-
-
 
 //
 // class declaration
@@ -61,8 +61,7 @@ namespace karma {
 
         // -- "regular" per-Event 'produce' method
         virtual void produce(edm::Event& event, const edm::EventSetup& setup) {
-            bool obtained = event.getByToken(this->inputCollectionToken_, this->inputCollectionHandle_);
-            assert(obtained);
+            karma::util::getByTokenOrThrow(event, this->inputCollectionToken_, this->inputCollectionHandle_);
 
             // create output collection
             std::unique_ptr<TOutputCollection> outputJetCollection(new TOutputCollection());

@@ -22,8 +22,9 @@
 
 #include "TH1.h"
 
-// -- base classes for caches
+// -- common classes
 #include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/Util.h"
 
 // -- output data formats
 #include "Karma/SkimmingFormats/interface/Event.h"

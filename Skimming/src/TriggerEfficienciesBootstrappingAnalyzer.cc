@@ -119,16 +119,14 @@ void karma::TriggerEfficienciesBootstrappingAnalyzer::analyze(const edm::Event& 
 
 
     // -- get object collections for event
-    bool obtained = true;
-    // jets
-    obtained &= event.getByToken(this->jetCollectionToken, this->jetCollectionHandle);
-    // trigger results and prescales
-    obtained &= event.getByToken(this->triggerResultsToken, this->triggerResultsHandle);
-    //obtained &= event.getByToken(this->triggerPrescalesToken, this->triggerPrescalesHandle);
-    // trigger objects
-    obtained &= event.getByToken(this->triggerObjectsToken, this->triggerObjectsHandle);
 
-    assert(obtained);  // raise if one collection could not be obtained
+    // jets
+    karma::util::getByTokenOrThrow(event, this->jetCollectionToken, this->jetCollectionHandle);
+    // trigger results and prescales
+    karma::util::getByTokenOrThrow(event, this->triggerResultsToken, this->triggerResultsHandle);
+    //karma::util::getByTokenOrThrow(event, this->triggerPrescalesToken, this->triggerPrescalesHandle);
+    // trigger objects
+    karma::util::getByTokenOrThrow(event, this->triggerObjectsToken, this->triggerObjectsHandle);
 
     // skip event if there are no reco jets
     size_t nRecoJets = this->jetCollectionHandle->size();

@@ -13,6 +13,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 
+#include "Karma/Common/interface/Util.h"
 
 // -- input data formats
 #include "Karma/DijetAnalysisFormats/interface/Ntuple.h"
@@ -48,9 +49,7 @@ namespace dijet {
         // -- 'filter' method, called once per-Event
         virtual bool filter(edm::Event& event, const edm::EventSetup& setup) {
             // -- get object collections for event
-            bool obtained = true;
-            obtained &= event.getByToken(this->dijetNtupleEntryToken, this->dijetNtupleEntryHandle);
-            assert(obtained);  // throw if one collection could not be obtained
+            karma::util::getByTokenOrThrow(event, this->dijetNtupleEntryToken, this->dijetNtupleEntryHandle);
 
             return filterNtupleEntry(*dijetNtupleEntryHandle);
         };

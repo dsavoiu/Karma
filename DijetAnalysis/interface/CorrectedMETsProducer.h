@@ -12,6 +12,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
+#include "Karma/Common/interface/Util.h"
+
 // -- output data formats
 #include "Karma/SkimmingFormats/interface/Event.h"
 

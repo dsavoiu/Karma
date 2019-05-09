@@ -253,11 +253,9 @@ dijet::NtupleFlatOutput::~NtupleFlatOutput() {
 void dijet::NtupleFlatOutput::analyze(const edm::Event& event, const edm::EventSetup& setup) {
 
     // -- get object collections for event
-    bool obtained = true;
-    // ntuple entry
-    obtained &= event.getByToken(this->dijetNtupleEntryToken, this->dijetNtupleEntryHandle);
 
-    assert(obtained);  // raise if ntuple could not be obtained
+    // ntuple entry
+    karma::util::getByTokenOrThrow(event, this->dijetNtupleEntryToken, this->dijetNtupleEntryHandle);
 
     // copy event data
     *m_productForFill = *this->dijetNtupleEntryHandle;

@@ -28,15 +28,14 @@ void dijet::CorrectedMETsProducer::produce(edm::Event& event, const edm::EventSe
     std::unique_ptr<karma::METCollection> outputMETCollection(new karma::METCollection());
 
     // -- get object collections for event
-    bool obtained = true;
-    // pileup density
-    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
-    // MET collection
-    obtained &= event.getByToken(this->karmaMETCollectionToken, this->karmaMETCollectionHandle);
-    // jet collection
-    obtained &= event.getByToken(this->karmaCorrectedJetCollectionToken, this->karmaCorrectedJetCollectionHandle);
 
-    assert(obtained);  // raise if one collection could not be obtained
+    // pileup density
+    karma::util::getByTokenOrThrow(event, this->karmaEventToken, this->karmaEventHandle);
+    // MET collection
+    karma::util::getByTokenOrThrow(event, this->karmaMETCollectionToken, this->karmaMETCollectionHandle);
+    // jet collection
+    karma::util::getByTokenOrThrow(event, this->karmaCorrectedJetCollectionToken, this->karmaCorrectedJetCollectionHandle);
+
     assert(this->karmaMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
     // calculate Type-I correction (https://twiki.cern.ch/twiki/bin/view/CMS/METType1Type2Formulae#3_The_Type_I_correction)

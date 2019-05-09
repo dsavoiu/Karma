@@ -13,6 +13,7 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/Util.h"
 #include "Karma/Common/interface/JetIDProvider.h"
 
 // JEC and JER-related objects

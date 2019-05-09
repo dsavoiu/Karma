@@ -87,13 +87,10 @@ void karma::ExampleAnalyzer::analyze(const edm::Event& event, const edm::EventSe
 
     
     // -- get object collections for event
-    bool obtained = true;
-    
+
     // -- user code here: obtain event data (collection entries)
     // jets
-    obtained |= event.getByToken(this->jetCollectionToken, this->jetCollectionHandle);
-
-    assert(obtained);  // raise if one collection could not be obtained
+    karma::util::getByTokenOrThrow(event, this->jetCollectionToken, this->jetCollectionHandle);
 
     // -- user code here: main analyzer code
 }

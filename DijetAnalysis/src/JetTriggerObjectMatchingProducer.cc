@@ -30,15 +30,13 @@ dijet::JetTriggerObjectMatchingProducer::~JetTriggerObjectMatchingProducer() {
 void dijet::JetTriggerObjectMatchingProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     // -- get object collections for event
-    bool obtained = true;
-    // pileup density
-    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
-    // jet collection
-    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
-    // trigger object collection
-    obtained &= event.getByToken(this->karmaTriggerObjectCollectionToken, this->karmaTriggerObjectCollectionHandle);
 
-    assert(obtained);  // raise if one collection could not be obtained
+    // pileup density
+    karma::util::getByTokenOrThrow(event, this->karmaEventToken, this->karmaEventHandle);
+    // jet collection
+    karma::util::getByTokenOrThrow(event, this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
+    // trigger object collection
+    karma::util::getByTokenOrThrow(event, this->karmaTriggerObjectCollectionToken, this->karmaTriggerObjectCollectionHandle);
 
     // create new AssociationMap (note: need to specify RefProds explicitly here!)
     std::unique_ptr<karma::JetTriggerObjectsMap> jetTriggerObjectsMap(new karma::JetTriggerObjectsMap(

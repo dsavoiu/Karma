@@ -4,6 +4,8 @@
 #include <memory>
 
 // user include files
+#include "Karma/Common/interface/Util.h"
+
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"

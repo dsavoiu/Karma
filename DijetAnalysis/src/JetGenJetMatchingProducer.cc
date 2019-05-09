@@ -30,15 +30,13 @@ dijet::JetGenJetMatchingProducer::~JetGenJetMatchingProducer() {
 void dijet::JetGenJetMatchingProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     // -- get object collections for event
-    bool obtained = true;
-    // pileup density
-    obtained &= event.getByToken(this->karmaEventToken, this->karmaEventHandle);
-    // jet collection
-    obtained &= event.getByToken(this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
-    // jet collection
-    obtained &= event.getByToken(this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
 
-    assert(obtained);  // raise if one collection could not be obtained
+    // pileup density
+    karma::util::getByTokenOrThrow(event, this->karmaEventToken, this->karmaEventHandle);
+    // jet collection
+    karma::util::getByTokenOrThrow(event, this->karmaJetCollectionToken, this->karmaJetCollectionHandle);
+    // jet collection
+    karma::util::getByTokenOrThrow(event, this->karmaGenJetCollectionToken, this->karmaGenJetCollectionHandle);
 
     // create new AssociationMap (note: need to specify RefProds explicitly here!)
     std::unique_ptr<karma::JetGenJetMap> jetGenJetMap(new karma::JetGenJetMap(
