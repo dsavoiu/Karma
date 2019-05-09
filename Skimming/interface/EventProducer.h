@@ -51,7 +51,11 @@ namespace karma {
     class GlobalCache : public karma::CacheBase {
 
       public:
-        GlobalCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet), isData_(pSet.getParameter<bool>("isData")), hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
+        GlobalCache(const edm::ParameterSet& pSet) :
+            karma::CacheBase(pSet),
+            isData_(pSet.getParameter<bool>("isData")),
+            writeOutTriggerPrescales_(pSet.getParameter<bool>("writeOutTriggerPrescales")),
+            hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
 
             // create the regex objects for matching HLTtrigger names
             const std::vector<std::string>& hltRegexes = pSet_.getParameter<std::vector<std::string>>("hltRegexes");
@@ -63,6 +67,7 @@ namespace karma {
         };
 
         bool isData_;
+        bool writeOutTriggerPrescales_;  // if True, skims will contain trigger path prescales (only if they are non-ambiguous)
         std::string hltProcessName_;  // name of the process that producer the trigger path information
 
         std::vector<boost::regex> hltPathRegexes_;  // list of pre-compiled regular expressions that 'interesting' trigger paths are required to match
@@ -93,14 +98,6 @@ namespace karma {
       public:
         RunCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {};
 
-        /*
-        void initHLTPrescaleProvider(const edm::ParameterSet& hltPrescaleProvider, const edm::EDAnalyzer& parentAnalyzer, edm::ConsumesCollector& consumesCollector) {
-            // create the HLT/L1 prescale provider object
-            hltPrescaleProvider_ = std::unique_ptr<HLTPrescaleProvider>(new HLTPrescaleProvider(hltPrescaleProviderConfigPSet, consumesCollector, parentAnalyzer));
-        }
-        */
-
-        //std::unique_ptr<HLTPrescaleProvider> hltPrescaleProvider_;  // helper class for obtaining trigger (and prescale) information
         std::string hltMenuName_;
         karma::HLTPathInfos hltPathInfos_;  //! information about trigger paths
 

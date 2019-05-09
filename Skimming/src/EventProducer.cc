@@ -27,7 +27,7 @@ karma::EventProducer::EventProducer(const edm::ParameterSet& config, const karma
     // due to CMSSW constraints, need to have one HLTPrescaleProvider per EDProducer instance
     m_hltPrescaleProvider = std::unique_ptr<HLTPrescaleProvider>(
         new HLTPrescaleProvider(
-            m_configPSet.getParameter<edm::ParameterSet>("hltPrescaleProvider"),
+            m_configPSet.getParameter<edm::ParameterSet>("hltConfigAndPrescaleProvider"),
             this->consumesCollector(),
             *this
         )
@@ -207,18 +207,23 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     const size_t numSelectedHLTPaths = runCache()->hltPathInfos_.size();
     outputEvent->hltBits.resize(numSelectedHLTPaths);
-    outputEvent->triggerPathHLTPrescales.resize(numSelectedHLTPaths);
-    outputEvent->triggerPathL1Prescales.resize(numSelectedHLTPaths);
+    if (globalCache()->writeOutTriggerPrescales_) {
+        outputEvent->triggerPathHLTPrescales.resize(numSelectedHLTPaths);
+        outputEvent->triggerPathL1Prescales.resize(numSelectedHLTPaths);
+    }
     for (size_t iPath = 0; iPath < numSelectedHLTPaths; ++iPath) {
         // need the original index of the path in the trigger menu to obtain trigger decision
         const int& triggerIndex = runCache()->hltPathInfos_[iPath].indexInMenu_;
         // need the full trigger name to obtain trigger prescale
         const std::string& triggerName = runCache()->hltPathInfos_[iPath].name_;
-        const std::pair<int, int> l1AndHLTPrescales = m_hltPrescaleProvider->prescaleValues(event, setup, triggerName);
 
         outputEvent->hltBits[iPath] = this->triggerResultsHandle->accept(triggerIndex);
-        outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
-        outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
+
+        if (globalCache()->writeOutTriggerPrescales_) {
+            const std::pair<int, int> l1AndHLTPrescales = m_hltPrescaleProvider->prescaleValues(event, setup, triggerName);
+            outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
+            outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
+        }
     }
 
     // move outputs to event tree

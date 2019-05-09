@@ -17,12 +17,13 @@ def karmaEventProducer(isData):
 
             # -- other configuration
             isData = cms.bool(isData),
+            writeOutTriggerPrescales = cms.bool(False),
 
             # name of the HLT process (for HLTConfigProvider)
             hltProcessName = cms.string("HLT"),
 
-            # HLTPrescaleProvider configuration
-            hltPrescaleProvider = cms.PSet(
+            # HLTPrescaleProvider (similar to HLTConfigProvider) configuration
+            hltConfigAndPrescaleProvider = cms.PSet(
                 l1GtRecordInputTag = cms.InputTag("l1GtTriggerMenuLite"),
                 l1GtReadoutRecordInputTag = cms.InputTag(""),
                 l1GtTriggerMenuLiteInputTag =  cms.InputTag("l1GtTriggerMenuLite"),
