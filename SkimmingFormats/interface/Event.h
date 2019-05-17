@@ -133,8 +133,12 @@ namespace karma {
      */
     class MET : public karma::LV {
       public:
-        double significance = UNDEFINED_DOUBLE;
+        karma::LorentzVector uncorP4;
+
         double sumEt = UNDEFINED_DOUBLE;
+        double uncorSumEt = UNDEFINED_DOUBLE;
+
+        double significance = UNDEFINED_DOUBLE;
 
         double neutralHadronFraction = UNDEFINED_DOUBLE;
         double chargedHadronFraction = UNDEFINED_DOUBLE;
