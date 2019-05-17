@@ -10,9 +10,26 @@
 
 import FWCore.ParameterSet.Config as cms
 
+JET_TAG_LIST_FOR_DATA = [
+    "pfTrackCountingHighEffBJetTags",
+    "pfSecondaryVertexTagInfos",
+    "pfCombinedSecondaryVertexV2BJetTags",
+    "softPFElectronsTagInfos",
+    "softPFMuonsTagInfos",
+    "pfInclusiveSecondaryVertexFinderTagInfos",
+    "pfCombinedMVAV2BJetTags",
+    "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+    "pfSimpleSecondaryVertexHighPurBJetTags",
+    "pfSimpleSecondaryVertexHighEffBJetTags",
+    "pfJetBProbabilityBJetTags",
+    "pfJetProbabilityBJetTags",
+    "pfTrackCountingHighPurBJetTags",
+]
+
 def addJetToolboxSequences(process, isData,
                            jet_algorithm_specs=('ak4', 'ak8'),
                            pu_subtraction_methods=('', 'CHS'),
+                           min_jet_pt=None,
                            do_pu_jet_id=False):
 
     # jet collections obtained with 'JetToolbox' CMSSW module:
@@ -25,15 +42,14 @@ def addJetToolboxSequences(process, isData,
     for _jet_algo_radius in jet_algorithm_specs:
         for _PU_method in pu_subtraction_methods:
             # -- first, make reco::PFJets using the jet toolbox
-            _seq_name = "jetToolbox{}{}".format(_jet_algo_radius, _PU_method)
             jetToolbox(process,
                        _jet_algo_radius,
-                       _seq_name,
+                       "jetToolbox{}{}".format(_jet_algo_radius, _PU_method),
                        'out',
                        miniAOD=True,
                        runOnMC=not isData,
-                       JETCorrPayload="None",  # do *not* correct jets with JEC
                        PUMethod=_PU_method,    # PU subtraction method
+                       bTagDiscriminators=None,  # do not skim btag discriminators
                        addPruning=False,
                        addSoftDrop=False,
                        addPrunedSubjets=False,
@@ -42,7 +58,13 @@ def addJetToolboxSequences(process, isData,
                        addTrimming=False,
                        addFiltering=False,
                        addNsubSubjets=False,
-                       addPUJetID=do_pu_jet_id)
+                       addPUJetID=do_pu_jet_id,
+                       verbosity=2)
+
+            # -- next, configure pT threshold for reco::PFJets
+            if min_jet_pt is not None:
+                _reco_pfjet_module = getattr(process, "{}PFJets{}".format(_jet_algo_radius, _PU_method))
+                _reco_pfjet_module.jetPtMin = min_jet_pt  # doesn't seem to work
 
             # # add PUJetID calculator and evaluator to process
             # if _do_PUJetID:
@@ -53,23 +75,13 @@ def addJetToolboxSequences(process, isData,
             patJetCollectionName = "{}PF{}".format(_jet_algo_radius.upper(), _PU_method)
             assert not hasattr(process, patJetCollectionName)
 
-            _seq_data = cms.Sequence(
-                getattr(process, "pfImpactParameterTagInfos{}".format(patJetCollectionName))*
-                getattr(process, "pfTrackCountingHighEffBJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfSecondaryVertexTagInfos{}".format(patJetCollectionName))*
-                getattr(process, "pfCombinedSecondaryVertexV2BJetTags{}".format(patJetCollectionName))*
-                getattr(process, "softPFElectronsTagInfos{}".format(patJetCollectionName))*
-                getattr(process, "softPFMuonsTagInfos{}".format(patJetCollectionName))*
-                getattr(process, "pfInclusiveSecondaryVertexFinderTagInfos{}".format(patJetCollectionName))*
-                getattr(process, "pfCombinedMVAV2BJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfCombinedInclusiveSecondaryVertexV2BJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfSimpleSecondaryVertexHighPurBJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfSimpleSecondaryVertexHighEffBJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfJetBProbabilityBJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfJetProbabilityBJetTags{}".format(patJetCollectionName))*
-                getattr(process, "pfTrackCountingHighPurBJetTags{}".format(patJetCollectionName))
-            )
-            
+            _seq_data = cms.Sequence()
+            for _tag in JET_TAG_LIST_FOR_DATA:
+                try:
+                    _seq_data *= getattr(process, "{}{}".format(_tag, patJetCollectionName))
+                except AttributeError as _err:
+                    print("[karmaJetToolbox] WARNING: Not adding jet tag '{}' to '{}' jets due to error: {}".format(_tag, patJetCollectionName, _err))
+
             if not isData:
                 _seq_mc = cms.Sequence(
                     getattr(process, "patJetPartons")*
@@ -88,7 +100,19 @@ def addJetToolboxSequences(process, isData,
                     getattr(process, "patJets{}".format(patJetCollectionName))*
                     getattr(process, "selectedPatJets{}".format(patJetCollectionName))
                 )
-            print "[JetToolbox] Add pat::Jet collection '{}'".format(patJetCollectionName)
-            setattr(process, patJetCollectionName, patSequence)
+            if min_jet_pt is not None:
+                _pat_jet_module = getattr(process, "selectedPatJets{}".format(patJetCollectionName))
+                _pat_jet_module.cut = "pt()>{:f}".format(min_jet_pt)
+
+            print "[karmaJetToolbox] Add pat::Jet collection '{}'".format(patJetCollectionName)
             _jet_collection_names.append("selectedPatJets{}".format(patJetCollectionName))
+
+    # cleanup unused modules added by jet toolbox
+    del process.out  # jettoolbox test rootfile
+
+    # associate all tasks on the endpath with the path and remove the endpath
+    for _task in process.endpath._tasks:
+        process.paths['path'].associate(_task)
+    del process.endpath
+
     return _jet_collection_names
