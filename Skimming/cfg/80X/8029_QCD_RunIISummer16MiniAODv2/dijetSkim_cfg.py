@@ -1,6 +1,7 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from Karma.Common.karmaPrelude_cff import *
+from Karma.Common.Tools import KarmaOptions, KarmaProcess
+
 from Karma.Common.Sequences.jetToolbox_cff import addJetToolboxSequences
 from Karma.Common.Sequences.jetEnergyCorrections_cff import undoJetEnergyCorrections
 

@@ -1,4 +1,4 @@
-from Karma.Common.karmaPrelude_cff import *
+from Karma.Common.Tools import KarmaOptions, KarmaProcess
 
 
 # -- override CLI options for test

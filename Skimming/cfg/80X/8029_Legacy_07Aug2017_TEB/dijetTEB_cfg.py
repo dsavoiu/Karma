@@ -1,6 +1,6 @@
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from Karma.Common.karmaPrelude_cff import *
+from Karma.Common.Tools import KarmaOptions, KarmaProcess
 
 
 # -- for testing and debugging

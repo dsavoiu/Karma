@@ -1,24 +1,41 @@
+import os
+
+import FWCore.ParameterSet.Config as cms
+
 import FWCore.PythonUtilities.LumiList as LumiList
 
-from Karma.Common.karmaPrelude_cff import *
+from Karma.Common.Tools import KarmaOptions, KarmaProcess
 
-# -- override CLI options for test
-options.inputFiles="file://{}".format(os.path.realpath("../../data/test_JetHT2016G.root"))
-options.isData=1
-options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-options.edmOut="testEDMSkim_out.root"
-options.maxEvents=100 #10000
-options.dumpPython=1
+# set up and parse command-line options
+options = (
+    KarmaOptions()
+        .setDefault('inputFiles', "file:///storage/9/dsavoiu/test_miniAOD/test_DoubleEG_Run2016G_17Jul2018_MINIAOD_10events.root")
+        .setDefault('isData', True)
+        .setDefault('globalTag', "94X_dataRun2_v10")
+        .setDefault('outputFile', "testEDMSkim_out.root")
+        .setDefault('maxEvents', 100)
+        .setDefault('dumpPython', True)
+).parseArguments()
 
 
-# -- must be called at the beginning
-process = createProcess("DIJET", num_threads=1)
+# create the process
+process = KarmaProcess(
+    "EDMSKIM",
+    input_files=options.inputFiles,
+    max_events=options.maxEvents,
+    global_tag=options.globalTag,
+    edm_out=options.outputFile,
+    num_threads=1
+)
 
-## enable verbose log file output
+# create the main module path
+process.add_path('path')
+
+# enable verbose log file output
 #enableVerboseLogging(process)
 
-# -- configure CMSSW modules
 
+# == configure CMSSW modules ==========================================
 # don't use JetToolbox to recluster jets
 # addJetToolboxSequences(process,
 #                        isData=options.isData,
