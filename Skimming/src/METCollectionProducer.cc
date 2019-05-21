@@ -21,6 +21,12 @@ void karma::METCollectionProducer::produceSingle(const pat::MET& in, karma::MET&
         out.hfHadronFraction =       in.Type6EtFraction();
         out.hfEMFraction =           in.Type7EtFraction();
     }
+
+    // store the different correction levels in one of the transient maps
+    out.transientLVs_["corP4Raw"] = in.corP4(pat::MET::METCorrectionLevel::Raw);
+    out.transientDoubles_["corSumEtRaw"] = in.corSumEt(pat::MET::METCorrectionLevel::Raw);
+    out.transientLVs_["corP4Type1"] = in.corP4(pat::MET::METCorrectionLevel::Type1);
+    out.transientDoubles_["corSumEtType1"] = in.corSumEt(pat::MET::METCorrectionLevel::Type1);
 }
 
 

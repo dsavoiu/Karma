@@ -291,9 +291,36 @@ def configure(process, options):
         write_out=True,
     )
 
+    # -- MET correction levels --------------------------------------------
+
+    # note: not included -> all information is already in karma::MET data format
+
+    ## from Karma.Skimming.METCorrectedLVValueMapProducer_cfi import karmaMETCorrectedLVValueMapProducer
+    ##
+    ## process.add_module(
+    ##     'karmaMETCorrectedLVs',
+    ##     karmaMETCorrectedLVValueMapProducer.clone(
+    ##         inputCollection = cms.InputTag("karmaMETs"),
+    ##     ),
+    ##     on_path='path',
+    ##     write_out=True,
+    ## )
+    ##
+    ## from Karma.Skimming.METCorrectedSumEtValueMapProducer_cfi import karmaMETCorrectedSumEtValueMapProducer
+    ##
+    ## process.add_module(
+    ##     'karmaMETCorrectedSumEts',
+    ##     karmaMETCorrectedSumEtValueMapProducer.clone(
+    ##         inputCollection = cms.InputTag("karmaMETs"),
+    ##     ),
+    ##     on_path='path',
+    ##     write_out=True,
+    ## )
+
     # -- Jets -------------------------------------------------------------
 
     from Karma.Skimming.JetCollectionProducer_cfi import karmaJets
+    from Karma.Skimming.JetCorrectedLVValueMapProducer_cfi import karmaJetCorrectedLVValueMapProducer, karmaJetCorrectedLVValueMapProducerForPuppi
 
     # create "karma::Jet" collections from pat::Jets
     for _jet_collection_name in jet_collection_names:
@@ -304,6 +331,22 @@ def configure(process, options):
             _module_name,
             karmaJets.clone(
                 inputCollection = cms.InputTag("{}WithJetIDUserData".format(_jet_collection_name)),
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
+        if 'Puppi' in _jet_collection_name:
+            _valuemap_producer = karmaJetCorrectedLVValueMapProducerForPuppi
+        else:
+            _valuemap_producer = karmaJetCorrectedLVValueMapProducer
+
+        # add karma modules for producing the correction level value maps
+        _valuemap_module_name = "karma{}{}JECs".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
+        process.add_module(
+            _valuemap_module_name,
+            _valuemap_producer.clone(
+                inputCollection = cms.InputTag(_module_name),
             ),
             on_path='path',
             write_out=True,

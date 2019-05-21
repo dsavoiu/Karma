@@ -20,6 +20,11 @@ void karma::JetCollectionProducer::produceSingle(const pat::Jet& in, karma::Jet&
     out.electronFraction = in.electronEnergyFraction();
     out.hfHadronFraction = in.HFHadronEnergyFraction();
     out.hfEMFraction = in.HFEMEnergyFraction();
+
+    // store the different JEC levels in one of the transient maps
+    for (const std::string& jecLevel : in.availableJECLevels()) {
+        out.transientLVs_[jecLevel] = in.correctedP4(jecLevel);
+    }
 }
 
 
