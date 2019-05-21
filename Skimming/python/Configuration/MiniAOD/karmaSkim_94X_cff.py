@@ -320,6 +320,19 @@ def configure(process, options):
         write_out=True,
     )
 
+    # -- Electron IDs -----------------------------------------------------
+
+    from Karma.Skimming.ElectronIdValueMapProducer_cfi import karmaElectronIdValueMapProducer
+
+    process.add_module(
+        'karmaElectronIds',
+        karmaElectronIdValueMapProducer.clone(
+            inputCollection = cms.InputTag("karmaElectrons")
+        ),
+        on_path='path',
+        write_out=True
+    )
+
     # -- Muons ------------------------------------------------------------
 
     from Karma.Skimming.MuonCollectionProducer_cfi import karmaMuonCollectionProducer
