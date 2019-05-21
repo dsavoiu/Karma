@@ -94,7 +94,6 @@ namespace karma {
 
         const edm::ParameterSet& m_configPSet;
 
-      private:
         // -- handles and tokens
         typename edm::Handle<TInputCollection> inputCollectionHandle_;
         edm::EDGetTokenT<TInputCollection> inputCollectionToken_;

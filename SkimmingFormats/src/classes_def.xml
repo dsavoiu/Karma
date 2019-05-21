@@ -24,7 +24,12 @@
     <class name="karma::HLTPathInfos"/>
     <class name="edm::Wrapper<karma::HLTPathInfos>"/>
 
-    <class name="karma::LV"/>
+    <class name="karma::LV">
+        <field name="transientDoubles_" transient="true" />
+        <field name="transientInts_" transient="true" />
+        <field name="transientBools_" transient="true" />
+        <field name="transientLVs_" transient="true" />
+    </class>
     <class name="edm::Wrapper<karma::LV>"/>
     <class name="karma::LVCollection"/>
     <class name="edm::Wrapper<karma::LVCollection>"/>
@@ -44,7 +49,6 @@
     <class name="edm::Wrapper<karma::Electron>"/>
     <class name="karma::ElectronCollection"/>
     <class name="edm::Wrapper<karma::ElectronCollection>"/>
-
 
     <!-- karma::Particle -->
     <class name="karma::Particle"/>
@@ -97,5 +101,18 @@
     <class name="edm::Wrapper<karma::JetGenJetMap>"/>
     <class name="karma::JetGenJetMaps"/>
     <class name="edm::Wrapper<karma::JetGenJetMaps>"/>
+
+    <!-- edm::ValueMaps -->
+    <class name="edm::ValueMap<karma::LorentzVector>"/>
+    <class name="edm::Wrapper<edm::ValueMap<karma::LorentzVector> >"/>
+
+    <!-- edm::AssociationVectors -->
+    <class pattern="edm::AssociationVector<*>">
+        <field name="transientVector_" transient="true"/>
+    </class>
+    <class pattern="edm::Wrapper<edm::AssociationVector<*>>"/>
+    <class pattern="edm::RefProd<*karma*>"/>
+    <class pattern="std::pair<edm::Ref*>"/>
+    <class pattern="std::vector<std::pair<edm::Ref*>>"/>
 
 </lcgdict>

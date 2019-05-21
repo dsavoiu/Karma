@@ -8,12 +8,13 @@
 
 #include "Defaults.h"
 
-
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 
 namespace karma {
+
     class Event {
       public:
         // -- event metadata
@@ -67,6 +68,12 @@ namespace karma {
 
         // -- kinematics
         karma::LorentzVector p4;
+
+        // transient maps for temporarily storing data while processing
+        std::map<std::string, double> transientDoubles_;
+        std::map<std::string, bool> transientBools_;
+        std::map<std::string, int> transientInts_;
+        std::map<std::string, karma::LorentzVector> transientLVs_;
 
         size_t ptHash() {
             return std::hash<double>()(p4.pt());
@@ -160,6 +167,7 @@ namespace karma {
       public:
         double ecalScale = UNDEFINED_DOUBLE;
         double ecalSmear = UNDEFINED_DOUBLE;
+
     };
     typedef std::vector<karma::Electron> ElectronCollection;
 
