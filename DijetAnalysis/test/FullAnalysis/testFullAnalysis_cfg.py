@@ -1,40 +1,47 @@
-from Karma.Common.karmaPrelude_cff import *
+import os
+
+import FWCore.ParameterSet.Config as cms
+
+from Karma.Common.Tools import KarmaOptions, KarmaProcess
+from Karma.DijetAnalysis.Configuration import dijetAnalysis_94X_cff
 
 
-# -- override CLI options for test
-options.inputFiles="file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/Karma/Skimming/test/FullSkim/testFullSkim_out.root")
-options.isData=1
-options.globalTag="80X_dataRun2_2016LegacyRepro_v4"
-#options.edmOut="testFullAnalysis_out.root"  # no EDM output
-options.maxEvents=-1 #10 #000
-options.dumpPython=1
-options.jecVersion = "Summer16_07Aug2017GH_V11"
+# set up and parse command-line options
+options = (
+    dijetAnalysis_94X_cff.register_options(KarmaOptions())
+        .setDefault('inputFiles', "file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/Karma/Skimming/test/FullSkim/testFullSkim_out.root"))
+        .setDefault('outputFile', "testFullAnalysis_out.root")
+        .setDefault('isData', True)
+        .setDefault('globalTag', "94X_dataRun2_v10")
+        .setDefault('maxEvents', 1000)#.setDefault('maxEvents', -1)
+        .setDefault('dumpPython', True)
+        .setDefault('numThreads', 1)
+        .setDefault('jecVersion', "Summer16_07Aug2017GH_V11")
+        .register('edmOut',
+                  type_=bool,
+                  default=False,
+                  description="(for testing only) Write out EDM file.")
+).parseArguments()
 
 
-# -- must be called at the beginning
-process = createProcess("DIJETANA", num_threads=1)
-
-
-from Karma.DijetAnalysis.dijetAnalysis_cff import DijetAnalysis
-
-# -- configure output ROOT file used by TFileService
-process.TFileService = cms.Service(
-    "TFileService",
-    fileName = cms.string("output.root"),
-    closeFileFast = cms.untracked.bool(True),
+# create the process
+process = KarmaProcess(
+    "DIJETANA",
+    input_files=options.inputFiles,
+    max_events=options.maxEvents,
+    global_tag=options.globalTag,
+    edm_out='.'.join(options.outputFile.split('.')[:-1]) + "_edmOut.root" if options.edmOut else None,
+    num_threads=options.numThreads,
 )
 
-ana = DijetAnalysis(process, is_data=options.isData, jec_version=options.jecVersion)
+process.enable_verbose_logging()  # for testing
 
-ana.configure()
+# configure the process
+dijetAnalysis_94X_cff.configure(process, options)
 
+# dump expanded cmsRun configuration
+if options.dumpPython:
+    process.dump_python('.'.join(options.outputFile.split('.')[:-1]) + '_dump.py', overwrite=True)
 
-
-# -- must be called at the end
-finalizeAndRun(process, outputCommands=['drop *'])
-
-
-## selective writeout based on path decisions
-#process.edmOut.SelectEvents = cms.untracked.PSet(
-#    SelectEvents = cms.vstring('path')
-#)
+# print out configuration before running
+process.print_configuration()
