@@ -219,12 +219,14 @@ namespace {
         edm::Wrapper<karma::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
         karma::JetTriggerObjectsMaps dict_karmaJetTriggerObjectsMaps;
         edm::Wrapper<karma::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
+        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::TriggerObject> > > dict_edmKeyValDijetJetToTriggerObject;
 
         // jet-genJet association map
         karma::JetGenJetMap dict_karmaJetGenJetMap;
         edm::Wrapper<karma::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;
         karma::JetGenJetMaps dict_karmaJetGenJetMaps;
         edm::Wrapper<karma::JetGenJetMaps> dict_edmWrapperDijetJetGenJetMaps;
+        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::LV> > > dict_edmKeyValDijetJetToGenJetLV;
 
         // value maps to LV
         edm::ValueMap<karma::LorentzVector> dict_karmaLVValueMap;

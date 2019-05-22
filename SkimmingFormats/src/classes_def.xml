@@ -115,4 +115,7 @@
     <class pattern="std::pair<edm::Ref*>"/>
     <class pattern="std::vector<std::pair<edm::Ref*>>"/>
 
+    <!-- edm::AssociationMaps -->
+    <class pattern="edm::helpers::KeyVal<*>"/>
+
 </lcgdict>
