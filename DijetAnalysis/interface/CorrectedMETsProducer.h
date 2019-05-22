@@ -50,6 +50,7 @@ namespace dijet {
 
         const edm::ParameterSet& m_configPSet;
         double typeICorrectionMinJetPt_;
+        double typeICorrectionMaxTotalEMFraction_;
 
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;

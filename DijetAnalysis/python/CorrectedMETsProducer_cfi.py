@@ -11,5 +11,6 @@ dijetCorrectedMETsProducer = cms.EDProducer(
 
         # -- other configuration
         typeICorrectionMinJetPt = cms.double(15),
+        typeICorrectionMaxTotalEMFraction = cms.double(0.9),
     )
 )
