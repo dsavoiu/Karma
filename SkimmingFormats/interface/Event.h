@@ -8,6 +8,9 @@
 
 #include "Defaults.h"
 
+// some tools from the EDM data formats
+#include "DataFormats/METReco/interface/CorrMETData.h"
+#include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/Common/interface/ValueMap.h"
@@ -176,24 +179,28 @@ namespace karma {
      */
     class Jet : public karma::LV {
       public:
+        karma::LorentzVector uncorP4;
+
         double area = UNDEFINED_DOUBLE
 
         int nConstituents = -1;
         int nCharged = -1;
+        int nElectrons = -1;
+        int nMuons = -1;
+        int nPhotons = -1;
 
         int hadronFlavor = -999;
         int partonFlavor = -999;
 
         double neutralHadronFraction = UNDEFINED_DOUBLE;
         double chargedHadronFraction = UNDEFINED_DOUBLE;
+        double chargedEMFraction = UNDEFINED_DOUBLE;
+        double neutralEMFraction = UNDEFINED_DOUBLE;
         double muonFraction = UNDEFINED_DOUBLE;
-        double photonFraction = UNDEFINED_DOUBLE;
         double electronFraction = UNDEFINED_DOUBLE;
+        double photonFraction = UNDEFINED_DOUBLE;
         double hfHadronFraction = UNDEFINED_DOUBLE;
         double hfEMFraction = UNDEFINED_DOUBLE;
-
-        // pileup-corrected p4 (JEC L1), needed for Type-I MET correction
-        karma::LorentzVector p4CorrL1;
 
     };
     typedef std::vector<karma::Jet> JetCollection;
@@ -217,6 +224,16 @@ namespace karma {
         double electronFraction = UNDEFINED_DOUBLE;
         double hfHadronFraction = UNDEFINED_DOUBLE;
         double hfEMFraction = UNDEFINED_DOUBLE;
+
+        //! apply met correction and return corrected lorentz vector
+        karma::LorentzVector getCorrectedP4(const CorrMETData& correction) {
+          // copied from 'DataFormats/METReco/interface/CorrMETData.h'
+          double px = uncorP4.Px() + correction.mex;
+          double py = uncorP4.Py() + correction.mey;
+          double pt = sqrt(px*px + py*py);
+          return karma::LorentzVector(ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >(px, py, 0., pt));
+        }
+
     };
     typedef std::vector<karma::MET> METCollection;
 

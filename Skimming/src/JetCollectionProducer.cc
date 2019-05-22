@@ -5,16 +5,23 @@ void karma::JetCollectionProducer::produceSingle(const pat::Jet& in, karma::Jet&
 
     // populate the output object
     out.p4 = in.p4();
+    out.uncorP4 = in.correctedP4("Uncorrected");
+
     out.area = in.jetArea();
 
     out.nConstituents = in.nConstituents();
     out.nCharged = in.chargedMultiplicity();
+    out.nElectrons = in.electronMultiplicity();
+    out.nMuons = in.muonMultiplicity();
+    out.nPhotons = in.photonMultiplicity();
 
     out.hadronFlavor = in.hadronFlavour();
     out.partonFlavor = in.partonFlavour();
 
     out.neutralHadronFraction = in.neutralHadronEnergyFraction();
     out.chargedHadronFraction = in.chargedHadronEnergyFraction();
+    out.chargedEMFraction = in.chargedEmEnergyFraction();
+    out.neutralEMFraction = in.neutralEmEnergyFraction();
     out.muonFraction = in.muonEnergyFraction();
     out.photonFraction = in.photonEnergyFraction();
     out.electronFraction = in.electronEnergyFraction();
