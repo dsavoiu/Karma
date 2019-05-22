@@ -85,17 +85,18 @@ namespace dijet {
         // static method for setting up either a `FactorizedJetCorrector` or a `JetCorrectionUncertainty`
         template<typename TFactorProvider>
         static void setupFactorProvider(TFactorProvider& factorProvider, const karma::Jet& jet) {
-            factorProvider.setJetEta(jet.p4.eta());
-            factorProvider.setJetPt(jet.p4.pt());
-            factorProvider.setJetE(jet.p4.E());
-            factorProvider.setJetPhi(jet.p4.phi());
+            factorProvider.setJetEta(jet.uncorP4.eta());
+            factorProvider.setJetPt(jet.uncorP4.pt());
+            factorProvider.setJetE(jet.uncorP4.E());
+            factorProvider.setJetPhi(jet.uncorP4.phi());
         };
 
         static void setupFactorizedJetCorrector(FactorizedJetCorrector& jetCorrector, const karma::Event& dijetEvent, const karma::Jet& jet) {
             setupFactorProvider(jetCorrector, jet);
             jetCorrector.setJetA(jet.area);
             jetCorrector.setRho(static_cast<float>(dijetEvent.rho));
-            jetCorrector.setNPV(dijetEvent.npvGood);  // TODO: npv?
+            //jetCorrector.setNPV(dijetEvent.npvGood);  // TODO: npv?
+            jetCorrector.setNPV(dijetEvent.npv);
         };
 
         // ----------member data ---------------------------
@@ -104,6 +105,7 @@ namespace dijet {
 
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector;
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector_L1;
+        std::unique_ptr<FactorizedJetCorrector> m_jetCorrector_L1RC;
         std::unique_ptr<JetCorrectionUncertainty> m_jetCorrectionUncertainty;
         double m_jecUncertaintyShift = 0.0;
 
