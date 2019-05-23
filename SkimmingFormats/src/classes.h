@@ -221,6 +221,20 @@ namespace {
         edm::Wrapper<karma::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
         edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::TriggerObject> > > dict_edmKeyValDijetJetToTriggerObject;
 
+        // jet-muon association map
+        karma::JetMuonsMap dict_karmaJetMuonsMap;
+        edm::Wrapper<karma::JetMuonsMap> dict_edmWrapperDijetJetMuonsMap;
+        karma::JetMuonsMaps dict_karmaJetMuonsMaps;
+        edm::Wrapper<karma::JetMuonsMaps> dict_edmWrapperDijetJetMuonsMaps;
+        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::Muon> > > dict_edmKeyValDijetJetToMuon;
+
+        // jet-electron association map
+        karma::JetElectronsMap dict_karmaJetElectronsMap;
+        edm::Wrapper<karma::JetElectronsMap> dict_edmWrapperDijetJetElectronsMap;
+        karma::JetElectronsMaps dict_karmaJetElectronsMaps;
+        edm::Wrapper<karma::JetElectronsMaps> dict_edmWrapperDijetJetElectronsMaps;
+        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::Electron> > > dict_edmKeyValDijetJetToElectron;
+
         // jet-genJet association map
         karma::JetGenJetMap dict_karmaJetGenJetMap;
         edm::Wrapper<karma::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;

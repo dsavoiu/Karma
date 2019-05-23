@@ -110,7 +110,7 @@ namespace dijet {
             karma::JetCollection,
             karma::LVCollection,
             JetLVMatcher,
-            edm::OneToMany<karma::JetCollection, karma::LVCollection>> {
+            edm::OneToOne<karma::JetCollection, karma::LVCollection>> {
 
       public:
         explicit JetLVMatchingProducer(const edm::ParameterSet& config) :
@@ -118,7 +118,7 @@ namespace dijet {
                 karma::JetCollection,
                 karma::LVCollection,
                 JetLVMatcher,
-                edm::OneToMany<karma::JetCollection, karma::LVCollection>>(config, config.getParameter<double>("maxDeltaR")) {};
+                edm::OneToOne<karma::JetCollection, karma::LVCollection>>(config, config.getParameter<double>("maxDeltaR")) {};
         virtual ~JetLVMatchingProducer() {};
 
         // -- pSet descriptions for CMSSW help info

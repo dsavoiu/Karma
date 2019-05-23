@@ -331,6 +331,12 @@ namespace karma {
     typedef edm::AssociationMap<edm::OneToMany<karma::JetCollection, karma::TriggerObjectCollection>> JetTriggerObjectsMap;
     typedef std::vector<karma::JetTriggerObjectsMap> JetTriggerObjectsMaps;
 
+    typedef edm::AssociationMap<edm::OneToMany<karma::JetCollection, karma::MuonCollection>> JetMuonsMap;
+    typedef std::vector<karma::JetMuonsMap> JetMuonsMaps;
+
+    typedef edm::AssociationMap<edm::OneToMany<karma::JetCollection, karma::ElectronCollection>> JetElectronsMap;
+    typedef std::vector<karma::JetElectronsMap> JetElectronsMaps;
+
     typedef edm::AssociationMap<edm::OneToOne<karma::JetCollection, karma::LVCollection>> JetGenJetMap;
     typedef std::vector<karma::JetGenJetMap> JetGenJetMaps;
 }

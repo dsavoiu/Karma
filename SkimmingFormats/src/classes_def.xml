@@ -94,6 +94,22 @@
     <class name="karma::JetTriggerObjectsMaps"/>
     <class name="edm::Wrapper<karma::JetTriggerObjectsMaps>"/>
 
+    <!-- karma::JetMuonsMap -->
+    <class name="karma::JetMuonsMap">
+        <field name="transientMap_" transient="true" />
+    </class>
+    <class name="edm::Wrapper<karma::JetMuonsMap>"/>
+    <class name="karma::JetMuonsMaps"/>
+    <class name="edm::Wrapper<karma::JetMuonsMaps>"/>
+
+    <!-- karma::JetElectronsMap -->
+    <class name="karma::JetElectronsMap">
+        <field name="transientMap_" transient="true" />
+    </class>
+    <class name="edm::Wrapper<karma::JetElectronsMap>"/>
+    <class name="karma::JetElectronsMaps"/>
+    <class name="edm::Wrapper<karma::JetElectronsMaps>"/>
+
     <!-- karma::JetGenJetMap -->
     <class name="karma::JetGenJetMap">
         <field name="transientMap_" transient="true" />

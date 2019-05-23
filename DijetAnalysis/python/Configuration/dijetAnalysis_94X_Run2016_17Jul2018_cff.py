@@ -100,7 +100,7 @@ def init_modules(process, options, jet_algo_name):
 
     # == Jet--Trigger Object association map ==============================
 
-    from Karma.DijetAnalysis.JetTriggerObjectMatchingProducer_cfi import dijetJetTriggerObjectMatchingProducer
+    from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetTriggerObjectMatchingProducer
 
     process.add_module(
         "jetTriggerObjectMap{}".format(jet_algo_name),
@@ -110,17 +110,38 @@ def init_modules(process, options, jet_algo_name):
         )
     )
 
+    # == Jet--Leptons association maps ====================================
+
+    from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetMuonMatchingProducer, dijetJetElectronMatchingProducer
+
+    process.add_module(
+        "jetMuonMap{}".format(jet_algo_name),
+        dijetJetMuonMatchingProducer.clone(
+            primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+            secondaryCollectionSrc = cms.InputTag("karmaMuons"),
+        )
+    )
+
+    process.add_module(
+        "jetElectronMap{}".format(jet_algo_name),
+        dijetJetElectronMatchingProducer.clone(
+            primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+            secondaryCollectionSrc = cms.InputTag("karmalectrons"),
+        )
+    )
+
     # == Jet--GenJet association map (MC only) ============================
 
     if not options.isData:
 
-        from Karma.DijetAnalysis.JetGenJetMatchingProducer_cfi import dijetJetGenJetMatchingProducer
+        from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetGenJetMatchingProducer
 
         process.add_module(
             "jetGenJetMap{}".format(jet_algo_name),
             dijetJetGenJetMatchingProducer.clone(
                 primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
                 secondaryCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
+                maxDeltaR = cms.double(0.4 if 'AK8' in jet_algo_name else 0.2)
             )
         )
 
