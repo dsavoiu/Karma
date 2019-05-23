@@ -13,7 +13,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 
 // -- input data formats
 #include "Karma/DijetAnalysisFormats/interface/Ntuple.h"

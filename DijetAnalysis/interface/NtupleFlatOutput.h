@@ -23,8 +23,8 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 
 // -- base classes for caches
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 
 // -- output data formats
 #include "Karma/DijetAnalysisFormats/interface/Ntuple.h"

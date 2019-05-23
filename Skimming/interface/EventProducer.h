@@ -4,7 +4,7 @@
 #include <memory>
 
 // user include files
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
@@ -23,7 +23,7 @@
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
 // -- base classes for caches
-#include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
 
 // -- output data formats
 #include "Karma/SkimmingFormats/interface/Event.h"

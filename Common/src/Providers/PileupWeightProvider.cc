@@ -1,4 +1,4 @@
-#include "Karma/Common/interface/PileupWeightProvider.h"
+#include "Karma/Common/interface/Providers/PileupWeightProvider.h"
 
 #include "TFile.h"
 

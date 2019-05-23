@@ -1,5 +1,9 @@
 <use name="Karma/SkimmingFormats"/>
 
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PluginManager"/>
+
 <use name="root"/>
 <use name="rootcore"/>
 <use name="yaml-cpp"/>

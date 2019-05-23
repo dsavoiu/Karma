@@ -1,4 +1,4 @@
-#include "Karma/Common/interface/JetIDProvider.h"
+#include "Karma/Common/interface/Providers/JetIDProvider.h"
 
 
 karma::JetIDProvider::JetIDProvider(std::string jetIDSpec, std::string jetIDWorkingPoint) {

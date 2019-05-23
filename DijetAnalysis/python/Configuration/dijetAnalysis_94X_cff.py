@@ -105,9 +105,8 @@ def init_modules(process, options, jet_algo_name):
     process.add_module(
         "jetTriggerObjectMap{}".format(jet_algo_name),
         dijetJetTriggerObjectMatchingProducer.clone(
-            karmaEventSrc = cms.InputTag("karmaEvents"),
-            karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
-            karmaTriggerObjectCollectionSrc = cms.InputTag("karmaTriggerObjects"),
+            primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+            secondaryCollectionSrc = cms.InputTag("karmaTriggerObjects"),
         )
     )
 
@@ -120,9 +119,8 @@ def init_modules(process, options, jet_algo_name):
         process.add_module(
             "jetGenJetMap{}".format(jet_algo_name),
             dijetJetGenJetMatchingProducer.clone(
-                karmaEventSrc = cms.InputTag("karmaEvents"),
-                karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
-                karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
+                primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+                secondaryCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
             )
         )
 

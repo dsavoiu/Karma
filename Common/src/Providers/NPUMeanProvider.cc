@@ -1,4 +1,4 @@
-#include "Karma/Common/interface/NPUMeanProvider.h"
+#include "Karma/Common/interface/Providers/NPUMeanProvider.h"
 
 #include <exception>
 #include <fstream>

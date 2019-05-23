@@ -12,9 +12,9 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
-#include "Karma/Common/interface/JetIDProvider.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
+#include "Karma/Common/interface/Providers/JetIDProvider.h"
 
 // JEC and JER-related objects
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"

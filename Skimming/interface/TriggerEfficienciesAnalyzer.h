@@ -23,8 +23,8 @@
 #include "TH1.h"
 
 // -- common classes
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 
 // -- output data formats
 #include "Karma/SkimmingFormats/interface/Event.h"

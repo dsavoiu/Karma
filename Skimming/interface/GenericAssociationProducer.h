@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 // user include files
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 #include "Karma/SkimmingFormats/interface/Defaults.h"  // for karma::LorentzVector
 #include "FWCore/Utilities/interface/EDMException.h"
 

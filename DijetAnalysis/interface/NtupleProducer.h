@@ -18,13 +18,13 @@
 
 #include <boost/regex.hpp>
 
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
-#include "Karma/Common/interface/TriggerEfficienciesProvider.h"
-#include "Karma/Common/interface/NPUMeanProvider.h"
-#include "Karma/Common/interface/JetIDProvider.h"
-#include "Karma/Common/interface/FlexGridBinProvider.h"
-#include "Karma/Common/interface/PileupWeightProvider.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
+#include "Karma/Common/interface/Providers/TriggerEfficienciesProvider.h"
+#include "Karma/Common/interface/Providers/NPUMeanProvider.h"
+#include "Karma/Common/interface/Providers/JetIDProvider.h"
+#include "Karma/Common/interface/Providers/FlexGridBinProvider.h"
+#include "Karma/Common/interface/Providers/PileupWeightProvider.h"
 
 // -- output data formats
 #include "Karma/DijetAnalysisFormats/interface/Ntuple.h"

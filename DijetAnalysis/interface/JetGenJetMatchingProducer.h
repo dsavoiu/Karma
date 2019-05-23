@@ -15,13 +15,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
-
-// JEC and JER-related objects
-#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "Karma/Common/interface/Producers/GenericMatchingProducer.h"
+#include "Karma/Common/interface/Tools/Matchers.h"
 
 // -- output data formats
 #include "DataFormats/Common/interface/Ref.h"
@@ -38,41 +33,32 @@
 //
 namespace dijet {
 
+    // matcher
+
+    typedef karma::LowestDeltaRMatcher<karma::JetCollection, karma::LVCollection> JetGenJetMatcher;
+
     // -- main producer
 
-    class JetGenJetMatchingProducer : public edm::stream::EDProducer<> {
+    class JetGenJetMatchingProducer :
+        public karma::GenericMatchingProducer<
+            karma::JetCollection,
+            karma::LVCollection,
+            JetGenJetMatcher> {
 
       public:
-        explicit JetGenJetMatchingProducer(const edm::ParameterSet&);
-        ~JetGenJetMatchingProducer();
+        explicit JetGenJetMatchingProducer(const edm::ParameterSet& config) :
+            karma::GenericMatchingProducer<
+                karma::JetCollection,
+                karma::LVCollection,
+                JetGenJetMatcher>(config, config.getParameter<double>("maxDeltaR")) {};
+        virtual ~JetGenJetMatchingProducer() {};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-        // -- "regular" per-Event 'produce' method
-        virtual void produce(edm::Event&, const edm::EventSetup&);
-
-
       private:
 
         // ----------member data ---------------------------
-
-        const edm::ParameterSet& m_configPSet;
-
-        double maxDeltaR_;
-
-        // -- handles and tokens
-        typename edm::Handle<karma::Event> karmaEventHandle;
-        edm::EDGetTokenT<karma::Event> karmaEventToken;
-
-        typename edm::Handle<karma::JetCollection> karmaJetCollectionHandle;
-        edm::EDGetTokenT<karma::JetCollection> karmaJetCollectionToken;
-
-        typename edm::Handle<karma::LVCollection> karmaGenJetCollectionHandle;
-        edm::EDGetTokenT<karma::LVCollection> karmaGenJetCollectionToken;
-
-        //typename edm::Handle<karma::Run> karmaRunHandle;
-        //edm::EDGetTokenT<karma::Run> karmaRunToken;
 
     };
 }  // end namespace

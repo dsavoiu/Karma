@@ -1,4 +1,4 @@
-#include "Karma/Common/interface/TriggerEfficienciesProvider.h"
+#include "Karma/Common/interface/Providers/TriggerEfficienciesProvider.h"
 
 #include "TKey.h"
 

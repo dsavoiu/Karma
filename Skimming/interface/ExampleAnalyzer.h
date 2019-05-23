@@ -5,7 +5,7 @@
 #include <iostream>
 
 // user include files
-#include "Karma/Common/interface/Util.h"
+#include "Karma/Common/interface/EDMTools/Util.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDAnalyzer.h"
@@ -17,7 +17,7 @@
 //#include "FWCore/Utilities/interface/Transition.h"  // CMSSW 9+
 
 // -- base classes for caches
-#include "Karma/Common/interface/Caches.h"
+#include "Karma/Common/interface/EDMTools/Caches.h"
 
 // -- input data formats
 #include "DataFormats/PatCandidates/interface/Jet.h"

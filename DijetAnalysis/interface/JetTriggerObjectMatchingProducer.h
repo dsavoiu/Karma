@@ -15,13 +15,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
-#include "Karma/Common/interface/Caches.h"
-#include "Karma/Common/interface/Util.h"
-
-// JEC and JER-related objects
-#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "Karma/Common/interface/Producers/GenericMatchingProducer.h"
+#include "Karma/Common/interface/Tools/Matchers.h"
 
 // -- output data formats
 #include "DataFormats/Common/interface/Ref.h"
@@ -38,41 +33,34 @@
 //
 namespace dijet {
 
+    // -- matcher
+
+    typedef karma::DeltaRThresholdMatcher<karma::JetCollection, karma::TriggerObjectCollection> JetTriggerObjectMatcher;
+
     // -- main producer
 
-    class JetTriggerObjectMatchingProducer : public edm::stream::EDProducer<> {
+    class JetTriggerObjectMatchingProducer :
+        public karma::GenericMatchingProducer<
+            karma::JetCollection,
+            karma::TriggerObjectCollection,
+            JetTriggerObjectMatcher,
+            edm::OneToMany<karma::JetCollection, karma::TriggerObjectCollection>> {
 
       public:
-        explicit JetTriggerObjectMatchingProducer(const edm::ParameterSet&);
-        ~JetTriggerObjectMatchingProducer();
+        explicit JetTriggerObjectMatchingProducer(const edm::ParameterSet& config) :
+            karma::GenericMatchingProducer<
+                karma::JetCollection,
+                karma::TriggerObjectCollection,
+                JetTriggerObjectMatcher,
+                edm::OneToMany<karma::JetCollection, karma::TriggerObjectCollection>>(config, config.getParameter<double>("maxDeltaR")) {};
+        virtual ~JetTriggerObjectMatchingProducer() {};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-        // -- "regular" per-Event 'produce' method
-        virtual void produce(edm::Event&, const edm::EventSetup&);
-
-
       private:
 
         // ----------member data ---------------------------
-
-        const edm::ParameterSet& m_configPSet;
-
-        double maxDeltaR_;
-
-        // -- handles and tokens
-        typename edm::Handle<karma::Event> karmaEventHandle;
-        edm::EDGetTokenT<karma::Event> karmaEventToken;
-
-        typename edm::Handle<karma::JetCollection> karmaJetCollectionHandle;
-        edm::EDGetTokenT<karma::JetCollection> karmaJetCollectionToken;
-
-        typename edm::Handle<karma::TriggerObjectCollection> karmaTriggerObjectCollectionHandle;
-        edm::EDGetTokenT<karma::TriggerObjectCollection> karmaTriggerObjectCollectionToken;
-
-        typename edm::Handle<karma::Run> karmaRunHandle;
-        edm::EDGetTokenT<karma::Run> karmaRunToken;
-
     };
+
 }  // end namespace
