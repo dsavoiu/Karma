@@ -8,13 +8,13 @@ e.g. 17Jul2018 Re-MiniAOD or the corresponding Monte-Carlo.
 To use:
 
     # import the module
-    from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_cff
+    from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018_cff
 
     # register the options
-    options = karmaSkim_94X_cff.register_options(options)
+    options = karmaSkim_94X_Run2016_17Jul2018_cff.register_options(options)
 
     # configure the process
-    karmaSkim_94X_cff.configure(process)
+    karmaSkim_94X_Run2016_17Jul2018_cff.configure(process)
 
 
 """

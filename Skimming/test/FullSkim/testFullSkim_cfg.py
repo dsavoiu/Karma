@@ -3,12 +3,12 @@ import os
 import FWCore.ParameterSet.Config as cms
 
 from Karma.Common.Tools import KarmaOptions, KarmaProcess
-from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_cff
+from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018_cff
 
 
 # set up and parse command-line options
 options = (
-    karmaSkim_94X_cff.register_options(KarmaOptions())
+    karmaSkim_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
         .setDefault('inputFiles', "file:///storage/9/dsavoiu/test_miniAOD/test_DoubleEG_Run2016G_17Jul2018_MINIAOD.root")
         .setDefault('outputFile', "testFullSkim_out.root")
         .setDefault('isData', True)
@@ -36,7 +36,7 @@ process = KarmaProcess(
 process.enable_verbose_logging()  # for testing
 
 # configure the process
-karmaSkim_94X_cff.configure(process, options)
+karmaSkim_94X_Run2016_17Jul2018_cff.configure(process, options)
 
 # dump expanded cmsRun configuration
 if options.dumpPython:

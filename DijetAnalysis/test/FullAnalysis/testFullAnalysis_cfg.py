@@ -3,12 +3,12 @@ import os
 import FWCore.ParameterSet.Config as cms
 
 from Karma.Common.Tools import KarmaOptions, KarmaProcess
-from Karma.DijetAnalysis.Configuration import dijetAnalysis_94X_cff
+from Karma.DijetAnalysis.Configuration import dijetAnalysis_94X_Run2016_17Jul2018_cff
 
 
 # set up and parse command-line options
 options = (
-    dijetAnalysis_94X_cff.register_options(KarmaOptions())
+    dijetAnalysis_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
         .setDefault('inputFiles', "file://{}/{}".format(os.getenv("CMSSW_BASE"), "src/Karma/Skimming/test/FullSkim/testFullSkim_out.root"))
         .setDefault('outputFile', "testFullAnalysis_out.root")
         .setDefault('isData', True)
@@ -37,7 +37,7 @@ process = KarmaProcess(
 process.enable_verbose_logging()  # for testing
 
 # configure the process
-dijetAnalysis_94X_cff.configure(process, options)
+dijetAnalysis_94X_Run2016_17Jul2018_cff.configure(process, options)
 
 # dump expanded cmsRun configuration
 if options.dumpPython:

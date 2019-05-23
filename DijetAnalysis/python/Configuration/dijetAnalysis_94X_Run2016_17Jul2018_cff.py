@@ -8,13 +8,13 @@ CMSSW 94X (e.g. from 17Jul2018 Re-MiniAOD or the corresponding Monte-Carlo).
 To use:
 
     # import the module
-    from Karma.DijetAnalysis.Configuration import dijetAnalysis_94X_cff
+    from Karma.DijetAnalysis.Configuration import dijetAnalysis_94X_Run2016_17Jul2018_cff
 
     # register the options
-    options = dijetAnalysis_94X_cff.register_options(options)
+    options = dijetAnalysis_94X_Run2016_17Jul2018_cff.register_options(options)
 
     # configure the process
-    dijetAnalysis_94X_cff.configure(process)
+    dijetAnalysis_94X_Run2016_17Jul2018_cff.configure(process)
 
 
 """
