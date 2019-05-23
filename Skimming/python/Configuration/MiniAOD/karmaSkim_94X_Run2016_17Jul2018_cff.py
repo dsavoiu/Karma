@@ -265,6 +265,21 @@ def configure(process, options):
             write_out=False, # don't write out the TriggerResults object
         )
 
+    # -- MC-specific event information ------------------------------------
+
+    if not options.isData:
+
+        from Karma.Skimming.GeneratorQCDInfoProducer_cfi import karmaGeneratorQCDInfoProducer
+
+        process.add_module(
+            'karmaGeneratorQCDInfos',
+            karmaGeneratorQCDInfoProducer.clone(
+                genEventInfoProductSrc = cms.InputTag("generator"),
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
     # -- Trigger Objects --------------------------------------------------
 
     from Karma.Skimming.TriggerObjectCollectionProducer_cfi import karmaTriggerObjectCollectionProducer
@@ -277,6 +292,21 @@ def configure(process, options):
         on_path='path',
         write_out=True,
     )
+
+    # -- Gen-Particles (MC only) ------------------------------------------
+
+    if not options.isData:
+
+        from Karma.Skimming.GenParticleCollectionProducer_cfi import karmaGenParticleCollectionProducer
+
+        process.add_module(
+            'karmaGenParticles',
+            karmaGenParticleCollectionProducer.clone(
+                inputCollection = cms.InputTag("prunedGenParticles"),
+            ),
+            on_path='path',
+            write_out=True,
+        )
 
     # -- MET --------------------------------------------------------------
 
@@ -393,6 +423,30 @@ def configure(process, options):
             _valuemap_module_name,
             _valuemap_producer.clone(
                 inputCollection = cms.InputTag(_module_name),
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
+    # -- Gen-Jets ---------------------------------------------------------
+
+    if not options.isData:
+
+        from Karma.Skimming.GenJetCollectionProducer_cfi import karmaGenJetsAK4, karmaGenJetsAK8
+
+        process.add_module(
+            'karmaGenJetsAK4',
+            karmaGenJetsAK4.clone(
+                inputCollection = cms.InputTag("ak4GenJetsNoNu"),
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
+        process.add_module(
+            'karmaGenJetsAK8',
+            karmaGenJetsAK8.clone(
+                inputCollection = cms.InputTag("ak8GenJetsNoNu"),
             ),
             on_path='path',
             write_out=True,
