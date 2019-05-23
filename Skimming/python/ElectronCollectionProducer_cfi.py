@@ -5,6 +5,7 @@ karmaElectronCollectionProducer = cms.EDProducer(
     "ElectronCollectionProducer",
     cms.PSet(
         inputCollection = cms.InputTag("slimmedElectrons"),
+        produceEcalTrkEnergyCorrections = cms.bool(True),
         electronIds = cms.VPSet(
             cms.PSet(
                 name = cms.string("Summer16-80X-V1"),

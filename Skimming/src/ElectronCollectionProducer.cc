@@ -20,8 +20,10 @@ void karma::ElectronCollectionProducer::produceSingle(const pat::Electron& in, k
     out.photonIso = in.photonIso();
     out.puChargedHadronIso = in.puChargedHadronIso();
 
-    out.ecalScale = in.ecalScale();
-    out.ecalSmear = in.ecalSmear();
+    if (m_produceEcalTrkEnergyCorrections) {
+        out.ecalTrkEnergyPreCorr = in.userFloat("ecalTrkEnergyPreCorr");
+        out.ecalTrkEnergyPostCorr = in.userFloat("ecalTrkEnergyPostCorr");
+    }
 
     // retrieve electron Ids and store in transient map
     for (const auto& electronIdTagAndWorkingPoints : m_electronIdSpecs) {

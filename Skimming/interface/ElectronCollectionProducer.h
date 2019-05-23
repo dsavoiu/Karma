@@ -21,7 +21,8 @@ namespace karma {
 
       public:
         explicit ElectronCollectionProducer(const edm::ParameterSet& config) :
-            karma::CollectionProducerBase<edm::View<pat::Electron>, karma::ElectronCollection>(config) {
+            karma::CollectionProducerBase<edm::View<pat::Electron>, karma::ElectronCollection>(config),
+            m_produceEcalTrkEnergyCorrections(this->m_configPSet.template getParameter<bool>("produceEcalTrkEnergyCorrections")) {
 
             // -- set up electron Ids
             const auto& electronIdSpecs = this->m_configPSet.template getParameter<edm::VParameterSet>("electronIds");
@@ -29,6 +30,7 @@ namespace karma {
                 m_electronIdSpecs[electronIdSpec.getParameter<std::string>("name")] =
                     electronIdSpec.getParameter<std::vector<std::string>>("workingPoints");
             }
+
         };
         ~ElectronCollectionProducer() {};
 
@@ -40,6 +42,9 @@ namespace karma {
     protected:
         // store electron Id specification
         std::map<std::string, std::vector<std::string>> m_electronIdSpecs;
+
+        // if true, fill electron energy correction variables (scale/smearing corrections)
+        bool m_produceEcalTrkEnergyCorrections;
 
     };
 

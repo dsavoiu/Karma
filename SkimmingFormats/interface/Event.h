@@ -168,8 +168,8 @@ namespace karma {
      */
     class Electron : public karma::Lepton {
       public:
-        double ecalScale = UNDEFINED_DOUBLE;
-        double ecalSmear = UNDEFINED_DOUBLE;
+        double ecalTrkEnergyPreCorr = UNDEFINED_DOUBLE;
+        double ecalTrkEnergyPostCorr = UNDEFINED_DOUBLE;
 
     };
     typedef std::vector<karma::Electron> ElectronCollection;
