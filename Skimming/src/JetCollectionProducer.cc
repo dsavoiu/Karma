@@ -32,6 +32,20 @@ void karma::JetCollectionProducer::produceSingle(const pat::Jet& in, karma::Jet&
     for (const std::string& jecLevel : in.availableJECLevels()) {
         out.transientLVs_[jecLevel] = in.correctedP4(jecLevel);
     }
+
+    // write out embedded user data to transient maps
+    for ( const auto& userVarNameAndTransientKey : m_transientBoolKeyForUserInt) {
+        out.transientBools_[userVarNameAndTransientKey.second] =
+            static_cast<bool>(in.userInt(userVarNameAndTransientKey.first));
+    }
+    for ( const auto& userVarNameAndTransientKey : m_transientIntKeyForUserInt) {
+        out.transientInts_[userVarNameAndTransientKey.second] =
+            static_cast<int>(in.userInt(userVarNameAndTransientKey.first));
+    }
+    for ( const auto& userVarNameAndTransientKey : m_transientDoubleKeyForUserFloat) {
+        out.transientDoubles_[userVarNameAndTransientKey.second] =
+            static_cast<double>(in.userFloat(userVarNameAndTransientKey.first));
+    }
 }
 
 

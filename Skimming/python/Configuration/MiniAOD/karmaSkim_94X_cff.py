@@ -157,7 +157,7 @@ def configure(process, options):
             cms.EDProducer("PATJetUserDataEmbedder",
                  src = cms.InputTag(_jet_collection_name),
                  userInts = cms.PSet(
-                    tightIdLepVeto = cms.InputTag(_id_producer_name),
+                    jetIdWinter16TightLepVeto = cms.InputTag(_id_producer_name),
                  ),
             )
         )
@@ -321,6 +321,7 @@ def configure(process, options):
 
     from Karma.Skimming.JetCollectionProducer_cfi import karmaJets
     from Karma.Skimming.JetCorrectedLVValueMapProducer_cfi import karmaJetCorrectedLVValueMapProducer, karmaJetCorrectedLVValueMapProducerForPuppi
+    from Karma.Skimming.JetIdValueMapProducers_cfi import karmaJetIdValueMapProducer, karmaJetPileupIdValueMapProducer, karmaJetPileupIdDiscriminantValueMapProducer
 
     # create "karma::Jet" collections from pat::Jets
     for _jet_collection_name in jet_collection_names:
@@ -335,6 +336,51 @@ def configure(process, options):
             on_path='path',
             write_out=True,
         )
+
+        # write out jet ID information to transients (used to fill value maps)
+        _t = getattr(process, _module_name).transientInformationSpec
+        _t.fromUserIntAsBool = cms.PSet(
+            jetIdWinter16TightLepVeto = cms.string("jetIdWinter16TightLepVeto"),
+        )
+        if 'AK4PFCHS' in _jet_collection_name:
+            _t.fromUserFloat = cms.PSet(
+                pileupJetId = cms.string("AK4PFCHSpileupJetIdEvaluator:fullDiscriminant"),
+            )
+            _t.fromUserInt = cms.PSet(
+                pileupJetId = cms.string("AK4PFCHSpileupJetIdEvaluator:fullId"),
+            )
+
+        # add karma module for producing the Jet ID value map
+        _valuemap_module_name = "karma{}{}JetIds".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
+        process.add_module(
+            _valuemap_module_name,
+            karmaJetIdValueMapProducer.clone(
+                inputCollection = cms.InputTag(_module_name),
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
+        # add karma modules for producing the pileup jet ID value maps (AK4CHS-only)
+        if 'AK4PFCHS' in _jet_collection_name:
+            _valuemap_module_name = "karma{}{}JetPileupIds".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
+            process.add_module(
+                _valuemap_module_name,
+                karmaJetPileupIdValueMapProducer.clone(
+                    inputCollection = cms.InputTag(_module_name),
+                ),
+                on_path='path',
+                write_out=True,
+            )
+            _valuemap_module_name = "karma{}{}JetPileupIdDiscriminants".format(_jet_collection_name[0].upper(), _jet_collection_name[1:])
+            process.add_module(
+                _valuemap_module_name,
+                karmaJetPileupIdDiscriminantValueMapProducer.clone(
+                    inputCollection = cms.InputTag(_module_name),
+                ),
+                on_path='path',
+                write_out=True,
+            )
 
         if 'Puppi' in _jet_collection_name:
             _valuemap_producer = karmaJetCorrectedLVValueMapProducerForPuppi
