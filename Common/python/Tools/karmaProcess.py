@@ -28,12 +28,15 @@ __all__ = ['KarmaProcess']
 
 class KarmaProcess(cms.Process):
 
+    # forbid 'set' access to these attributes
+    _IMMUTABLE_ATTRIBUTES = ('source',)
+
     def __init__(self,
                  name, input_files, num_threads, max_events, global_tag,
                  edm_out=None, report_every=1000, *args, **kwargs):
         super(KarmaProcess, self).__init__(name, *args, **kwargs)
 
-        # create the main path and an output EndPath
+        # create an EndPath (for any output modules)
         self.outputPath = cms.EndPath()
 
         ## set explicit schedule?
@@ -56,9 +59,9 @@ class KarmaProcess(cms.Process):
         )
 
         # set the input files
-        self.source = cms.Source("PoolSource",
+        super(KarmaProcess, self).__setattr__('source', cms.Source("PoolSource",
             fileNames=cms.untracked.vstring(input_files)
-        )
+        ))
 
         # -- print process configuration
         print "\n----- Process configuration -----"
@@ -250,3 +253,8 @@ class KarmaProcess(cms.Process):
 
         with open(filename, 'w') as f:
             f.write(self.dumpPython())
+
+    def __setattr__(self, name, value):
+        if name in self._IMMUTABLE_ATTRIBUTES:
+            raise TypeError("Attempt to set immutable attribute '{}'!".format(name))
+        super(KarmaProcess, self).__setattr__(name, value)
