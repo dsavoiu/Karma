@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 
-from Karma.DijetAnalysis.dijetAnalysisDeployers import DijetAnalysisDeployerGC
+from Karma.Common.Tools.karmaAnalysisDeployers import KarmaAnalysisDeployerGC
 
 
 JEC_VERSION_LOOKUP = {
@@ -17,7 +17,7 @@ JEC_VERSION_LOOKUP = {
 
 if __name__ == "__main__":
 
-    _deployer = DijetAnalysisDeployerGC(
+    _deployer = KarmaAnalysisDeployerGC(
         nick="DijetAna_JetHT_Run2016BCDEFGH-Legacy-07Aug2017-v1_2019-03-18",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/Karma/DijetAnalysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),

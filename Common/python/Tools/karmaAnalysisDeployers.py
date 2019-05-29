@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import argparse
 import glob
 import os
@@ -7,8 +6,8 @@ import time
 import fnmatch
 
 
-class DijetAnalysisDeployerGC(object):
-
+class KarmaAnalysisDeployerGC(object):
+    """Helper class for deploying an analysis on a computing cluster using grid-control."""
     def __init__(self, nick, cmsrun_config, gc_config_base, work_directory, input_files={}, files_per_job=1):
         self._nick = nick
         self._timestamp = time.strftime("%Y-%m-%d_%H-%M")

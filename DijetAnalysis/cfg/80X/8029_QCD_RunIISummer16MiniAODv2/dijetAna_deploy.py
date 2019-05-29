@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 
-from Karma.DijetAnalysis.dijetAnalysisDeployers import DijetAnalysisDeployerGC
+from Karma.Common.Tools.karmaAnalysisDeployers import KarmaAnalysisDeployerGC
 
 
 CROSS_SECTION_LOOKUP = {
@@ -40,7 +40,7 @@ NUMBER_OF_EVENTS_LOOKUP = {
 
 if __name__ == "__main__":
 
-    _deployer = DijetAnalysisDeployerGC(
+    _deployer = KarmaAnalysisDeployerGC(
         nick="DijetAna_QCD_RunIISummer16MiniAODv2_2019-04-02",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/Karma/DijetAnalysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
