@@ -42,6 +42,10 @@ def register_options(options):
                       description=("(deprecated) The output branch 'weightForStitching' "
                                    "will contain this value for each event. Can then be "
                                    "used when stitching together different samples."))
+            .register('edmOut',
+                      type_=bool,
+                      default=False,
+                      description="(for testing only) Write out EDM file.")
     )
 
 def init_modules(process, options, jet_algo_name):

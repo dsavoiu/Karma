@@ -17,10 +17,7 @@ options = (
         .setDefault('dumpPython', True)
         .setDefault('numThreads', 1)
         .setDefault('jecVersion', "Summer16_07Aug2017GH_V11")
-        .register('edmOut',
-                  type_=bool,
-                  default=False,
-                  description="(for testing only) Write out EDM file.")
+        .setDefault('edmOut', False)
 ).parseArguments()
 
 
