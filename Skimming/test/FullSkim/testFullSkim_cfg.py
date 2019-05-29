@@ -9,7 +9,7 @@ from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018
 # set up and parse command-line options
 options = (
     karmaSkim_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
-        .setDefault('inputFiles', "file:///storage/9/dsavoiu/test_miniAOD/test_DoubleEG_Run2016G_17Jul2018_MINIAOD.root")
+        .setDefault('inputFiles', "root://xrootd-cms.infn.it//store/data/Run2016G/JetHT/MINIAOD/17Jul2018-v1/60000/06E6B214-5D91-E811-A1AF-0025905C2CBE.root")
         .setDefault('outputFile', "testFullSkim_out.root")
         .setDefault('isData', True)
         .setDefault('globalTag', "94X_dataRun2_v10")
