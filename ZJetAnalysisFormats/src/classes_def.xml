@@ -1,0 +1,6 @@
+<lcgdict>
+    <class name="zjet::NtupleEntry"/>
+    <class name="edm::Wrapper<zjet::NtupleEntry>"/>
+    <class name="zjet::Ntuple"/>
+    <class name="edm::Wrapper<zjet::Ntuple>"/>
+</lcgdict>
