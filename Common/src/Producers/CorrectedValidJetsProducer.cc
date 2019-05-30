@@ -26,7 +26,9 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
         std::cout << "[CorrectedValidJetsProducer] Loaded JEC file '" <<
                      jec << "_" << jecLevel << "_" << jecAlgoName << ".txt" << "'" << std::endl;
     }
-    m_jetCorrector = std::unique_ptr<FactorizedJetCorrector>(new FactorizedJetCorrector(jecParameters));
+    if (!jecParameters.empty()) {
+        m_jetCorrector = std::unique_ptr<FactorizedJetCorrector>(new FactorizedJetCorrector(jecParameters));
+    }
 
     // set up a separate L1 corrector (needed for type-I MET)
     m_jetCorrector_L1 = std::unique_ptr<FactorizedJetCorrector>(
@@ -87,21 +89,29 @@ void karma::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
         if (globalCache()->jetIDProvider_ && !globalCache()->jetIDProvider_->getJetID(inputJet))
             continue;
 
-        // setup of FactorizedJetCorrector and JetCorrectionUncertainty
-        setupFactorizedJetCorrector(*m_jetCorrector, *this->karmaEventHandle, inputJet);
-        setupFactorizedJetCorrector(*m_jetCorrector_L1, *this->karmaEventHandle, inputJet);
-        setupFactorizedJetCorrector(*m_jetCorrector_L1RC, *this->karmaEventHandle, inputJet);
-        setupFactorProvider(*m_jetCorrectionUncertainty, inputJet);
 
         // copy jet to output
         outputJetCollection->push_back(inputJet);
 
-        // write out L1-corrected p4 explicitly
+        // store L1-corrected p4 in transient map
+        setupFactorizedJetCorrector(*m_jetCorrector_L1, *this->karmaEventHandle, inputJet);
         outputJetCollection->back().transientLVs_["L1"] = outputJetCollection->back().uncorP4 * m_jetCorrector_L1->getCorrection();
+
+        // store L1RC-corrected p4 in transient map
+        setupFactorizedJetCorrector(*m_jetCorrector_L1RC, *this->karmaEventHandle, inputJet);
         outputJetCollection->back().transientLVs_["L1RC"] = outputJetCollection->back().uncorP4 * m_jetCorrector_L1RC->getCorrection();
 
-        // apply correction and uncertainty shift to output jet
-        outputJetCollection->back().p4 = outputJetCollection->back().uncorP4 * m_jetCorrector->getCorrection();
+        // apply correction (if any requested)
+        if (m_jetCorrector) {
+            setupFactorizedJetCorrector(*m_jetCorrector, *this->karmaEventHandle, inputJet);
+            outputJetCollection->back().p4 = outputJetCollection->back().uncorP4 * m_jetCorrector->getCorrection();
+        }
+        else {
+            outputJetCollection->back().p4 = outputJetCollection->back().uncorP4;
+        }
+
+        // apply uncertainty shift to output jet
+        setupFactorProvider(*m_jetCorrectionUncertainty, inputJet);
         outputJetCollection->back().p4 *= (1.0 + m_jecUncertaintyShift * m_jetCorrectionUncertainty->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
 
     }
