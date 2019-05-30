@@ -1,9 +1,9 @@
-#include "Karma/DijetAnalysis/interface/CorrectedMETsProducer.h"
+#include "Karma/Common/interface/Producers/CorrectedMETsProducer.h"
 
 #include "DataFormats/METReco/interface/CorrMETData.h"
 
 // -- constructor
-dijet::CorrectedMETsProducer::CorrectedMETsProducer(const edm::ParameterSet& config) :
+karma::CorrectedMETsProducer::CorrectedMETsProducer(const edm::ParameterSet& config) :
     m_configPSet(config),
     typeICorrectionMinJetPt_(m_configPSet.getParameter<double>("typeICorrectionMinJetPt")),
     typeICorrectionMaxTotalEMFraction_(m_configPSet.getParameter<double>("typeICorrectionMaxTotalEMFraction")) {
@@ -21,13 +21,13 @@ dijet::CorrectedMETsProducer::CorrectedMETsProducer(const edm::ParameterSet& con
 
 
 // -- destructor
-dijet::CorrectedMETsProducer::~CorrectedMETsProducer() {
+karma::CorrectedMETsProducer::~CorrectedMETsProducer() {
 }
 
 
 // -- member functions
 
-void dijet::CorrectedMETsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+void karma::CorrectedMETsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::unique_ptr<karma::METCollection> outputMETCollection(new karma::METCollection());
 
     // -- get object collections for event
@@ -74,7 +74,7 @@ void dijet::CorrectedMETsProducer::produce(edm::Event& event, const edm::EventSe
 }
 
 
-void dijet::CorrectedMETsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::CorrectedMETsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -84,5 +84,5 @@ void dijet::CorrectedMETsProducer::fillDescriptions(edm::ConfigurationDescriptio
 
 
 //define this as a plug-in
-using dijet::CorrectedMETsProducer;
-DEFINE_FWK_MODULE(CorrectedMETsProducer);
+using KarmaCorrectedMETsProducer = karma::CorrectedMETsProducer;
+DEFINE_FWK_MODULE(KarmaCorrectedMETsProducer);

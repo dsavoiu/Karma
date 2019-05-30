@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetJetTriggerObjectMatchingProducer = cms.EDProducer(
-    "JetTriggerObjectMatchingProducer",
+karmaJetTriggerObjectMatchingProducer = cms.EDProducer(
+    "KarmaJetTriggerObjectMatchingProducer",
     cms.PSet(
         # -- input sources
         primaryCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),
@@ -13,8 +13,8 @@ dijetJetTriggerObjectMatchingProducer = cms.EDProducer(
     )
 )
 
-dijetJetMuonMatchingProducer = cms.EDProducer(
-    "JetMuonMatchingProducer",
+karmaJetMuonMatchingProducer = cms.EDProducer(
+    "KarmaJetMuonMatchingProducer",
     cms.PSet(
         # -- input sources
         primaryCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),
@@ -25,8 +25,8 @@ dijetJetMuonMatchingProducer = cms.EDProducer(
     )
 )
 
-dijetJetElectronMatchingProducer = cms.EDProducer(
-    "JetElectronMatchingProducer",
+karmaJetElectronMatchingProducer = cms.EDProducer(
+    "KarmaJetElectronMatchingProducer",
     cms.PSet(
         # -- input sources
         primaryCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),
@@ -37,8 +37,8 @@ dijetJetElectronMatchingProducer = cms.EDProducer(
     )
 )
 
-dijetJetGenJetMatchingProducer = cms.EDProducer(
-    "JetLVMatchingProducer",
+karmaJetGenJetMatchingProducer = cms.EDProducer(
+    "KarmaJetLVMatchingProducer",
     cms.PSet(
         # -- input sources
         primaryCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),

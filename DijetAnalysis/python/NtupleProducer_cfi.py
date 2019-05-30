@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 dijetNtupleProducer = cms.EDProducer(
-    "NtupleProducer",
+    "DijetNtupleProducer",
     cms.PSet(
         # -- input sources
         karmaEventSrc = cms.InputTag("karmaEvents"),

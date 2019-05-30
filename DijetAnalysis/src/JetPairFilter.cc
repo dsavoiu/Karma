@@ -1,7 +1,7 @@
 #include "Karma/DijetAnalysis/interface/JetPairFilter.h"
 
 // -- constructor
-dijet::JetPairFilter::JetPairFilter(const edm::ParameterSet& config) : NtupleFilterBase(config) {
+dijet::JetPairFilter::JetPairFilter(const edm::ParameterSet& config) : NtupleFilterBase<dijet::NtupleEntry>(config) {
     // -- process configuration
 
 }
@@ -28,5 +28,5 @@ bool dijet::JetPairFilter::filterNtupleEntry(const dijet::NtupleEntry& ntupleEnt
 
 
 //define this as a plug-in
-using dijet::JetPairFilter;
-DEFINE_FWK_MODULE(JetPairFilter);
+using DijetJetPairFilter = dijet::JetPairFilter;
+DEFINE_FWK_MODULE(DijetJetPairFilter);

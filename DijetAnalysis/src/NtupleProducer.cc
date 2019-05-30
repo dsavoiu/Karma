@@ -682,7 +682,6 @@ dijet::TriggerBitsets dijet::NtupleProducer::getTriggerBitsetsForLeadingJetPair(
 }
 
 
-
 //define this as a plug-in
-using dijet::NtupleProducer;
-DEFINE_FWK_MODULE(NtupleProducer);
+using DijetNtupleProducer = dijet::NtupleProducer;
+DEFINE_FWK_MODULE(DijetNtupleProducer);

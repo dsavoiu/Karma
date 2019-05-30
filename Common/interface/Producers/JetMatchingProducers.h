@@ -30,7 +30,7 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
     // -- matchers
 

@@ -1,9 +1,9 @@
 // system include files
 
-#include "Karma/DijetAnalysis/interface/JetMatchingProducers.h"
+#include "Karma/Common/interface/Producers/JetMatchingProducers.h"
 
 
-void dijet::JetTriggerObjectMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::JetTriggerObjectMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -13,11 +13,11 @@ void dijet::JetTriggerObjectMatchingProducer::fillDescriptions(edm::Configuratio
 
 
 //define this as a plug-in
-using dijet::JetTriggerObjectMatchingProducer;
-DEFINE_FWK_MODULE(JetTriggerObjectMatchingProducer);
+using KarmaJetTriggerObjectMatchingProducer = karma::JetTriggerObjectMatchingProducer;
+DEFINE_FWK_MODULE(KarmaJetTriggerObjectMatchingProducer);
 
 
-void dijet::JetMuonMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::JetMuonMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -27,11 +27,11 @@ void dijet::JetMuonMatchingProducer::fillDescriptions(edm::ConfigurationDescript
 
 
 //define this as a plug-in
-using dijet::JetMuonMatchingProducer;
-DEFINE_FWK_MODULE(JetMuonMatchingProducer);
+using KarmaJetMuonMatchingProducer = karma::JetMuonMatchingProducer;
+DEFINE_FWK_MODULE(KarmaJetMuonMatchingProducer);
 
 
-void dijet::JetElectronMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::JetElectronMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -41,11 +41,11 @@ void dijet::JetElectronMatchingProducer::fillDescriptions(edm::ConfigurationDesc
 
 
 //define this as a plug-in
-using dijet::JetElectronMatchingProducer;
-DEFINE_FWK_MODULE(JetElectronMatchingProducer);
+using KarmaJetElectronMatchingProducer = karma::JetElectronMatchingProducer;
+DEFINE_FWK_MODULE(KarmaJetElectronMatchingProducer);
 
 
-void dijet::JetLVMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::JetLVMatchingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -55,5 +55,5 @@ void dijet::JetLVMatchingProducer::fillDescriptions(edm::ConfigurationDescriptio
 
 
 //define this as a plug-in
-using dijet::JetLVMatchingProducer;
-DEFINE_FWK_MODULE(JetLVMatchingProducer);
+using KarmaJetLVMatchingProducer = karma::JetLVMatchingProducer;
+DEFINE_FWK_MODULE(KarmaJetLVMatchingProducer);

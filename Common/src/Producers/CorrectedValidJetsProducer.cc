@@ -1,7 +1,7 @@
-#include "Karma/DijetAnalysis/interface/CorrectedValidJetsProducer.h"
+#include "Karma/Common/interface/Producers/CorrectedValidJetsProducer.h"
 
 // -- constructor
-dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::ParameterSet& config, const dijet::CorrectedValidJetsProducerGlobalCache*) : m_configPSet(config) {
+karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::ParameterSet& config, const karma::CorrectedValidJetsProducerGlobalCache*) : m_configPSet(config) {
     // -- register products
     produces<karma::JetCollection>();
 
@@ -56,21 +56,21 @@ dijet::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
 
 
 // -- destructor
-dijet::CorrectedValidJetsProducer::~CorrectedValidJetsProducer() {
+karma::CorrectedValidJetsProducer::~CorrectedValidJetsProducer() {
 }
 
 
 // -- static member functions
 
-/*static*/ std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache> dijet::CorrectedValidJetsProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
+/*static*/ std::unique_ptr<karma::CorrectedValidJetsProducerGlobalCache> karma::CorrectedValidJetsProducer::initializeGlobalCache(const edm::ParameterSet& pSet) {
     // -- create the GlobalCache
-    return std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache>(new dijet::CorrectedValidJetsProducerGlobalCache(pSet));
+    return std::unique_ptr<karma::CorrectedValidJetsProducerGlobalCache>(new karma::CorrectedValidJetsProducerGlobalCache(pSet));
 }
 
 
 // -- member functions
 
-void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+void karma::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::unique_ptr<karma::JetCollection> outputJetCollection(new karma::JetCollection());
 
     // -- get object collections for event
@@ -120,7 +120,7 @@ void dijet::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
 }
 
 
-void dijet::CorrectedValidJetsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void karma::CorrectedValidJetsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     // The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -130,5 +130,5 @@ void dijet::CorrectedValidJetsProducer::fillDescriptions(edm::ConfigurationDescr
 
 
 //define this as a plug-in
-using dijet::CorrectedValidJetsProducer;
-DEFINE_FWK_MODULE(CorrectedValidJetsProducer);
+using KarmaCorrectedValidJetsProducer = karma::CorrectedValidJetsProducer;
+DEFINE_FWK_MODULE(KarmaCorrectedValidJetsProducer);

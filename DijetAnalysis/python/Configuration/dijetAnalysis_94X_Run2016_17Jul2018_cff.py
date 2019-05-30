@@ -53,11 +53,11 @@ def init_modules(process, options, jet_algo_name):
 
     # == JEC-corrected valid jets =========================================
 
-    from Karma.DijetAnalysis.CorrectedValidJetsProducer_cfi import dijetCorrectedValidJetsProducer
+    from Karma.Common.Producers.CorrectedValidJetsProducer_cfi import karmaCorrectedValidJetsProducer
 
     process.add_module(
         "correctedJets{}".format(jet_algo_name),
-        dijetCorrectedValidJetsProducer.clone(
+        karmaCorrectedValidJetsProducer.clone(
             # -- input sources
             karmaEventSrc = cms.InputTag("karmaEvents"),
             karmaJetCollectionSrc = cms.InputTag("karmaSelectedPatJets{}".format(jet_algo_name)),
@@ -84,11 +84,11 @@ def init_modules(process, options, jet_algo_name):
 
     # == Corrected valid METs =============================================
 
-    from Karma.DijetAnalysis.CorrectedMETsProducer_cfi import dijetCorrectedMETsProducer
+    from Karma.Common.Producers.CorrectedMETsProducer_cfi import karmaCorrectedMETsProducer
 
     process.add_module(
         "correctedMETs{}".format(jet_algo_name),
-        dijetCorrectedMETsProducer.clone(
+        karmaCorrectedMETsProducer.clone(
             # -- input sources
             karmaEventSrc = cms.InputTag("karmaEvents"),
             karmaMETCollectionSrc = cms.InputTag("karmaMETs"),
@@ -104,11 +104,11 @@ def init_modules(process, options, jet_algo_name):
 
     # == Jet--Trigger Object association map ==============================
 
-    from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetTriggerObjectMatchingProducer
+    from Karma.Common.Producers.JetMatchingProducers_cfi import karmaJetTriggerObjectMatchingProducer
 
     process.add_module(
         "jetTriggerObjectMap{}".format(jet_algo_name),
-        dijetJetTriggerObjectMatchingProducer.clone(
+        karmaJetTriggerObjectMatchingProducer.clone(
             primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
             secondaryCollectionSrc = cms.InputTag("karmaTriggerObjects"),
         )
@@ -116,11 +116,11 @@ def init_modules(process, options, jet_algo_name):
 
     # == Jet--Leptons association maps ====================================
 
-    from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetMuonMatchingProducer, dijetJetElectronMatchingProducer
+    from Karma.Common.Producers.JetMatchingProducers_cfi import karmaJetMuonMatchingProducer, karmaJetElectronMatchingProducer
 
     process.add_module(
         "jetMuonMap{}".format(jet_algo_name),
-        dijetJetMuonMatchingProducer.clone(
+        karmaJetMuonMatchingProducer.clone(
             primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
             secondaryCollectionSrc = cms.InputTag("karmaMuons"),
         )
@@ -128,7 +128,7 @@ def init_modules(process, options, jet_algo_name):
 
     process.add_module(
         "jetElectronMap{}".format(jet_algo_name),
-        dijetJetElectronMatchingProducer.clone(
+        karmaJetElectronMatchingProducer.clone(
             primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
             secondaryCollectionSrc = cms.InputTag("karmalectrons"),
         )
@@ -138,11 +138,11 @@ def init_modules(process, options, jet_algo_name):
 
     if not options.isData:
 
-        from Karma.DijetAnalysis.JetMatchingProducers_cfi import dijetJetGenJetMatchingProducer
+        from Karma.Common.Producers.JetMatchingProducers_cfi import karmaJetGenJetMatchingProducer
 
         process.add_module(
             "jetGenJetMap{}".format(jet_algo_name),
-            dijetJetGenJetMatchingProducer.clone(
+            karmaJetGenJetMatchingProducer.clone(
                 primaryCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
                 secondaryCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
                 maxDeltaR = cms.double(0.4 if 'AK8' in jet_algo_name else 0.2)
@@ -223,9 +223,9 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
     process.add_module(
         "jetPairFilter{}".format(pipeline_name),
         cms.EDFilter(
-            "JetPairFilter",
+            "DijetJetPairFilter",
             cms.PSet(
-                dijetNtupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
+                ntupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
             )
         )
     )
@@ -236,9 +236,9 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
     ## process.add_module(
     ##     "leadingJetRapidityFilter{}".format(pipeline_name),
     ##     cms.EDFilter(
-    ##         "LeadingJetRapidityFilter",
+    ##         "DijetLeadingJetRapidityFilter",
     ##         cms.PSet(
-    ##             dijetNtupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
+    ##             ntupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
     ##             maxJetAbsRapidity = cms.double(3.0),
     ##         )
     ##     )
@@ -248,9 +248,9 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
     ## process.add_module(
     ##     "leadingJetPtFilter{}".format(pipeline_name),
     ##     cms.EDFilter(
-    ##         "LeadingJetPtFilter",
+    ##         "DijetLeadingJetPtFilter",
     ##         cms.PSet(
-    ##             dijetNtupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
+    ##             ntupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
     ##             minJetPt = cms.double(60),
     ##         )
     ##     )
@@ -260,10 +260,10 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
     process.add_module(
         "pipeline{}".format(pipeline_name),
         cms.EDAnalyzer(
-            "NtupleFlatOutput",
+            "DijetNtupleFlatOutput",
             cms.PSet(
                 isData = cms.bool(options.isData),
-                dijetNtupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
+                ntupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
                 karmaJetTriggerObjectMapSrc = cms.InputTag("jetTriggerObjectMap{}".format(pipeline_name)),
                 treeName = cms.string("Events"),
                 checkForCompleteness = cms.bool(options.checkForCompleteness),

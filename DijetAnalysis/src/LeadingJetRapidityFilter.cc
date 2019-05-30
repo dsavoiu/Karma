@@ -2,7 +2,7 @@
 
 // -- constructor
 dijet::LeadingJetRapidityFilter::LeadingJetRapidityFilter(const edm::ParameterSet& config) :
-    NtupleFilterBase(config),
+    NtupleFilterBase<dijet::NtupleEntry>(config),
     maxJetAbsRapidity_(config.getParameter<double>("maxJetAbsRapidity")) {
     // -- validate configuration
     assert(maxJetAbsRapidity_ >= 0);
@@ -23,5 +23,5 @@ bool dijet::LeadingJetRapidityFilter::filterNtupleEntry(const dijet::NtupleEntry
 
 
 //define this as a plug-in
-using dijet::LeadingJetRapidityFilter;
-DEFINE_FWK_MODULE(LeadingJetRapidityFilter);
+using DijetLeadingJetRapidityFilter = dijet::LeadingJetRapidityFilter;
+DEFINE_FWK_MODULE(DijetLeadingJetRapidityFilter);

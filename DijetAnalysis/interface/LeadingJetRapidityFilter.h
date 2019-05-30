@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Karma/DijetAnalysis/interface/NtupleFilterBase.h"
+#include "Karma/Common/interface/Filters/NtupleFilterBase.h"
+
+#include "Karma/DijetAnalysisFormats/interface/Ntuple.h"
 
 
 namespace dijet {
 
     // -- main filter
 
-    class LeadingJetRapidityFilter : public NtupleFilterBase {
+    class LeadingJetRapidityFilter : public karma::NtupleFilterBase<dijet::NtupleEntry> {
 
       public:
         explicit LeadingJetRapidityFilter(const edm::ParameterSet&);

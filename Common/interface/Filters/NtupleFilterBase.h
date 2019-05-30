@@ -15,24 +15,21 @@
 
 #include "Karma/Common/interface/EDMTools/Util.h"
 
-// -- input data formats
-#include "Karma/DijetAnalysisFormats/interface/Ntuple.h"
-
-
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
 
-    // -- main filter
+    // -- filter template
 
+    template<typename TNtupleEntry>
     class NtupleFilterBase : public edm::stream::EDFilter<> {
 
       public:
         explicit NtupleFilterBase(const edm::ParameterSet& config) : m_configPSet(config) {
             // -- this filter will run on the analysis ntuple
-            dijetNtupleEntryToken = this->template consumes<dijet::NtupleEntry>(
-                m_configPSet.template getParameter<edm::InputTag>("dijetNtupleSrc")
+            ntupleEntryToken = this->template consumes<TNtupleEntry>(
+                m_configPSet.template getParameter<edm::InputTag>("ntupleSrc")
             );
         }
         ~NtupleFilterBase() {};
@@ -49,13 +46,13 @@ namespace dijet {
         // -- 'filter' method, called once per-Event
         virtual bool filter(edm::Event& event, const edm::EventSetup& setup) {
             // -- get object collections for event
-            karma::util::getByTokenOrThrow(event, this->dijetNtupleEntryToken, this->dijetNtupleEntryHandle);
+            karma::util::getByTokenOrThrow(event, this->ntupleEntryToken, this->ntupleEntryHandle);
 
-            return filterNtupleEntry(*dijetNtupleEntryHandle);
+            return filterNtupleEntry(*ntupleEntryHandle);
         };
 
         // ntuple entry filter: to be overridden by user
-        virtual bool filterNtupleEntry(const dijet::NtupleEntry&) = 0;
+        virtual bool filterNtupleEntry(const TNtupleEntry&) = 0;
 
 
       private:
@@ -65,8 +62,8 @@ namespace dijet {
         const edm::ParameterSet& m_configPSet;
 
         // -- handles and tokens
-        typename edm::Handle<dijet::NtupleEntry> dijetNtupleEntryHandle;
-        edm::EDGetTokenT<dijet::NtupleEntry> dijetNtupleEntryToken;
+        typename edm::Handle<TNtupleEntry> ntupleEntryHandle;
+        edm::EDGetTokenT<TNtupleEntry> ntupleEntryToken;
 
     };
 }  // end namespace

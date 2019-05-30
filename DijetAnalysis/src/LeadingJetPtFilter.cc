@@ -2,7 +2,7 @@
 
 // -- constructor
 dijet::LeadingJetPtFilter::LeadingJetPtFilter(const edm::ParameterSet& config) :
-    NtupleFilterBase(config),
+    NtupleFilterBase<dijet::NtupleEntry>(config),
     minJetPt_(config.getParameter<double>("minJetPt")) {
     // -- validate configuration
     assert(minJetPt_ >= 0);
@@ -23,5 +23,5 @@ bool dijet::LeadingJetPtFilter::filterNtupleEntry(const dijet::NtupleEntry& ntup
 
 
 //define this as a plug-in
-using dijet::LeadingJetPtFilter;
-DEFINE_FWK_MODULE(LeadingJetPtFilter);
+using DijetLeadingJetPtFilter = dijet::LeadingJetPtFilter;
+DEFINE_FWK_MODULE(DijetLeadingJetPtFilter);

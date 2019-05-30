@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dijetCorrectedMETsProducer = cms.EDProducer(
-    "CorrectedMETsProducer",
+karmaCorrectedMETsProducer = cms.EDProducer(
+    "KarmaCorrectedMETsProducer",
     cms.PSet(
         # -- input sources
         karmaEventSrc = cms.InputTag("karmaEvents"),
-        karmaMETCollectionSrc = cms.InputTag("karmaCHSMETs"),
+        karmaMETCollectionSrc = cms.InputTag("karmaMETs"),
         karmaCorrectedJetCollectionSrc = cms.InputTag("correctedJets"),
 
         # -- other configuration

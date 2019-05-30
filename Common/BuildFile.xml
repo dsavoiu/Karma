@@ -1,5 +1,7 @@
 <use name="Karma/SkimmingFormats"/>
 
+<use name="CondFormats/JetMETObjects"/>
+
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/PluginManager"/>
@@ -12,6 +14,9 @@
 
 <export>
   <use name="root"/>
+  <use name="rootcore"/>
+  <use name="yaml-cpp"/>
+  <use name="boost"/>
   <lib name="1"/>
 </export>
 

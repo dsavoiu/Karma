@@ -2,7 +2,7 @@
 
 // -- constructor
 dijet::LeadingJetEtaFilter::LeadingJetEtaFilter(const edm::ParameterSet& config) :
-    NtupleFilterBase(config),
+    NtupleFilterBase<dijet::NtupleEntry>(config),
     maxJetAbsEta_(config.getParameter<double>("maxJetAbsEta")) {
     // -- validate configuration
     assert(maxJetAbsEta_ >= 0);
@@ -23,5 +23,5 @@ bool dijet::LeadingJetEtaFilter::filterNtupleEntry(const dijet::NtupleEntry& ntu
 
 
 //define this as a plug-in
-using dijet::LeadingJetEtaFilter;
-DEFINE_FWK_MODULE(LeadingJetEtaFilter);
+using DijetLeadingJetEtaFilter = dijet::LeadingJetEtaFilter;
+DEFINE_FWK_MODULE(DijetLeadingJetEtaFilter);

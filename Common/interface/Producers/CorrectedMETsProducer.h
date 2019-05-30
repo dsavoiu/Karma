@@ -26,7 +26,7 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
     // -- caches
 
     // -- main producer

@@ -33,7 +33,7 @@
 //
 // class declaration
 //
-namespace dijet {
+namespace karma {
     // -- caches
 
     /** Cache containing resources which do not change
@@ -62,16 +62,16 @@ namespace dijet {
     // -- main producer
 
     class CorrectedValidJetsProducer : public edm::stream::EDProducer<
-        edm::GlobalCache<dijet::CorrectedValidJetsProducerGlobalCache>
+        edm::GlobalCache<karma::CorrectedValidJetsProducerGlobalCache>
     > {
 
       public:
-        explicit CorrectedValidJetsProducer(const edm::ParameterSet&, const dijet::CorrectedValidJetsProducerGlobalCache*);
+        explicit CorrectedValidJetsProducer(const edm::ParameterSet&, const karma::CorrectedValidJetsProducerGlobalCache*);
         ~CorrectedValidJetsProducer();
 
         // -- global cache extension
-        static std::unique_ptr<dijet::CorrectedValidJetsProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
-        static void globalEndJob(const dijet::CorrectedValidJetsProducerGlobalCache*) {/* noop */};
+        static std::unique_ptr<karma::CorrectedValidJetsProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
+        static void globalEndJob(const karma::CorrectedValidJetsProducerGlobalCache*) {/* noop */};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
