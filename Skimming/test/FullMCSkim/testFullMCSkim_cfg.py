@@ -3,12 +3,12 @@ import os
 import FWCore.ParameterSet.Config as cms
 
 from Karma.Common.Tools import KarmaOptions, KarmaProcess
-from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018_cff
+from Karma.Skimming.Configuration.MiniAOD import dijetSkim_94X_Run2016_17Jul2018
 
 
 # set up and parse command-line options
 options = (
-    karmaSkim_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
+    dijetSkim_94X_Run2016_17Jul2018.register_options(KarmaOptions())
         .setDefault('inputFiles', "root://xrootd-cms.infn.it//store/mc/RunIISummer16MiniAODv3/QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/110000/7EEC82AC-41DF-E811-899D-0CC47AF973C2.root")
         .setDefault('outputFile', "testFullMCSkim_out.root")
         .setDefault('isData', False)
@@ -35,7 +35,7 @@ process = KarmaProcess(
 process.enable_verbose_logging()  # for testing
 
 # configure the process
-karmaSkim_94X_Run2016_17Jul2018_cff.configure(process, options)
+dijetSkim_94X_Run2016_17Jul2018.configure(process, options)
 
 # dump expanded cmsRun configuration
 if options.dumpPython:

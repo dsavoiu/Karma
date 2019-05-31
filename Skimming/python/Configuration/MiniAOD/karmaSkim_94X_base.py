@@ -1,20 +1,23 @@
 """
-Karma skim config for 94X miniAOD files
-=======================================
+Karma base skim config for 94X miniAOD files
+============================================
 
 This skim config should be used for 2016 samples produced with CMSSW 94X,
-e.g. 17Jul2018 Re-MiniAOD or the corresponding Monte-Carlo.
+e.g. 17Jul2018 Re-MiniAOD or the corresponding Monte Carlo.
+
+This config is meant to be used as a starting point (base) for creating
+other more specific configs.
 
 To use:
 
     # import the module
-    from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018_cff
+    from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_base
 
     # register the options
-    options = karmaSkim_94X_Run2016_17Jul2018_cff.register_options(options)
+    options = karmaSkim_94X_base.register_options(options)
 
     # configure the process
-    karmaSkim_94X_Run2016_17Jul2018_cff.configure(process)
+    karmaSkim_94X_base.configure(process, options)
 
 
 """
@@ -29,9 +32,14 @@ def register_options(options):
                       type_=str,
                       default=None,
                       description="Path to JSON file containing certified runs and luminosity blocks.")
+            .register('hltRegexes',
+                      type_=str,
+                      multiplicity='list',
+                      default=[],
+                      description="Trigger information will only be written out for paths that match one of these regexes.")
             .register('useHLTFilter',
                       type_=bool,
-                      default=True,
+                      default=False,
                       description="If True, only events triggered by a path matching the configured regex will be written out.")
             .register('withPATCollections',
                       type_=bool,
@@ -239,6 +247,16 @@ def configure(process, options):
 
     # == configure Karma modules ==========================================
 
+    # -- preliminary checks
+
+    if options.useHLTFilter and not options.hltRegexes:
+        raise ValueError(
+            "Option 'useHLTFilter' is true, but 'hltRegexes' "
+            "is empty: no events would be written out. Aborting!")
+    elif not options.hltRegexes:
+        print("[karmaSkim] WARNING: Option 'hltRegexes' is empty:"
+              "no trigger information will be written out!")
+
     # -- General Event Information ----------------------------------------
 
     from Karma.Skimming.EventProducer_cfi import karmaEventProducer
@@ -247,6 +265,10 @@ def configure(process, options):
         'karmaEvents',
         karmaEventProducer(isData=options.isData).clone(
             goodPrimaryVerticesSrc = cms.InputTag("goodOfflinePrimaryVertices"),
+            hltProcessName = cms.string("HLT"),
+            # interesting trigger paths must match one of these regexes:
+            hltRegexes = cms.vstring(*options.hltRegexes),
+            #hltRegexes = cms.vstring("HLT_(AK8)?PFJet[0-9]+_v[0-9]+", "HLT_DiPFJetAve[0-9]+_v[0-9]+"),
         ),
         on_path='path',
         write_out=True,

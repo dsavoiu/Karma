@@ -4,7 +4,7 @@ import sys
 
 import FWCore.ParameterSet.Config as cms
 
-from Karma.Skimming.Configuration.MiniAOD import karmaSkim_94X_Run2016_17Jul2018_cff
+from Karma.Skimming.Configuration.MiniAOD import dijetSkim_94X_Run2016_17Jul2018
 from Karma.Common.Tools import KarmaOptions, KarmaProcess
 
 
@@ -12,7 +12,7 @@ from Karma.Common.Tools import KarmaOptions, KarmaProcess
 if not os.getenv("GC_VERSION"):
     # -- *not* running in grid -> simple test
     options = (
-        karmaSkim_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
+        dijetSkim_94X_Run2016_17Jul2018.register_options(KarmaOptions())
             #.setDefault('inputFiles', "file:///storage/9/dsavoiu/test_miniAOD/test_QCD_Pt_600to800_RunIISummer16MiniAOVv3_MINIAOD_10events.root")
             .setDefault('inputFiles', "root://xrootd-cms.infn.it//store/data/Run2016G/JetHT/MINIAOD/17Jul2018-v1/60000/06E6B214-5D91-E811-A1AF-0025905C2CBE.root")
             .setDefault('outputFile', "testFullSkim_out_12events.root")
@@ -28,7 +28,7 @@ if not os.getenv("GC_VERSION"):
 else:
     # -- running on grid node -> "production" config
     options = (
-        karmaSkim_94X_Run2016_17Jul2018_cff.register_options(KarmaOptions())
+        dijetSkim_94X_Run2016_17Jul2018.register_options(KarmaOptions())
             .setDefault('inputFiles', [__FILE_NAMES__])
             .setDefault('outputFile', "output.root")
             .setDefault('isData', __IS_DATA__)
@@ -55,7 +55,7 @@ process = KarmaProcess(
 #process.enable_verbose_logging()  # for testing
 
 # configure the process
-karmaSkim_94X_Run2016_17Jul2018_cff.configure(process, options)
+dijetSkim_94X_Run2016_17Jul2018.configure(process, options)
 
 # dump expanded cmsRun configuration
 if options.dumpPython:
