@@ -121,4 +121,5 @@ class KarmaAnalysisDeployerGC(object):
         os.makedirs(self._workdir)  # create work directory
         self._write_dbs_file(os.path.join(self._workdir, "files.dbs"))
         self._deploy_configs("{}.conf".format(self._nick))
+        print("[KarmaAnalysisDeployer] Analysis deployment area created: {}".format(self._workdir))
 
