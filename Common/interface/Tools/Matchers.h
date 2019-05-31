@@ -18,10 +18,17 @@ namespace karma {
              typename TSecondaryCollection>
     class GenericMatcher {
       public:
+        GenericMatcher(size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            maxMatches_(maxMatches),
+            allowIdenticalIndices_(allowIdenticalIndices) {};
         virtual ~GenericMatcher() {};
 
         virtual std::vector<std::pair<int, int>> match(
             const TPrimaryCollection& primaryCollection, const TSecondaryCollection& secondaryCollection) = 0;
+
+      protected:
+          const size_t maxMatches_;
+          const bool allowIdenticalIndices_;
     };
 
     /**
@@ -36,9 +43,15 @@ namespace karma {
     class LowestMetricMatcher : public GenericMatcher<TPrimaryCollection, TSecondaryCollection> {
 
       public:
-        LowestMetricMatcher(double maxMetricValue) :
+        LowestMetricMatcher(double maxMetricValue, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            GenericMatcher<TPrimaryCollection, TSecondaryCollection>(maxMatches, allowIdenticalIndices),
             maxMetricValue_(maxMetricValue),
             metricFunctor_(MetricFunctor()) {};
+
+        LowestMetricMatcher(const MetricFunctor metricFunctor, double maxMetricValue, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            GenericMatcher<TPrimaryCollection, TSecondaryCollection>(maxMatches, allowIdenticalIndices),
+            maxMetricValue_(maxMetricValue),
+            metricFunctor_(metricFunctor) {};
 
         virtual std::vector<std::pair<int, int>> match(
                 const TPrimaryCollection& primaryCollection, const TSecondaryCollection& secondaryCollection) {
@@ -54,6 +67,12 @@ namespace karma {
                     const auto& primaryElement = primaryCollection.at(iPrimary);
 
                     for (size_t iSecondary = 0; iSecondary < secondaryCollection.size(); ++iSecondary) {
+                        // make this pairing impossible if indices are the same and matching them is not allowed
+                        if ((!this->allowIdenticalIndices_) && (iPrimary == iSecondary)) {
+                            metricMatrix[iPrimary][iSecondary] = std::numeric_limits<double>::quiet_NaN();
+                            continue;
+                        }
+
                         const auto& secondaryElement = secondaryCollection.at(iSecondary);
 
                         const double metricValue = metricFunctor_(secondaryElement.p4, primaryElement.p4);
@@ -98,6 +117,11 @@ namespace karma {
 
                     matchResult.emplace_back(bestMatchPrimaryIndex, bestMatchSecondaryIndex);
 
+                    // return early if we reached the maximum number of allowed matched
+                    if ((this->maxMatches_ > 0) && (matchResult.size() >= this->maxMatches_)) {
+                        return matchResult;
+                    }
+
                     // disallow further matches invoving these indices
                     for (size_t iPrimary = 0; iPrimary < primaryCollection.size(); ++iPrimary) {
                         metricMatrix[iPrimary][bestMatchSecondaryIndex] = std::numeric_limits<double>::quiet_NaN();
@@ -118,7 +142,7 @@ namespace karma {
         const MetricFunctor metricFunctor_;
     };
 
-    
+
     /**
      * MetricThresholdMatcher
      *   - finds matches among all possible pairs of objects in primary and secondary collections
@@ -131,9 +155,14 @@ namespace karma {
     class MetricThresholdMatcher : public GenericMatcher<TPrimaryCollection, TSecondaryCollection> {
 
       public:
-        MetricThresholdMatcher(double maxMetricValue) :
+        MetricThresholdMatcher(double maxMetricValue, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            GenericMatcher<TPrimaryCollection, TSecondaryCollection>(maxMatches, allowIdenticalIndices),
             maxMetricValue_(maxMetricValue),
             metricFunctor_(MetricFunctor()) {};
+        MetricThresholdMatcher(const MetricFunctor metricFunctor, double maxMetricValue, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            GenericMatcher<TPrimaryCollection, TSecondaryCollection>(maxMatches, allowIdenticalIndices),
+            maxMetricValue_(maxMetricValue),
+            metricFunctor_(metricFunctor) {};
 
         virtual std::vector<std::pair<int, int>> match(
                 const TPrimaryCollection& primaryCollection, const TSecondaryCollection& secondaryCollection) {
@@ -146,6 +175,11 @@ namespace karma {
                 for (size_t iPrimary = 0; iPrimary < primaryCollection.size(); ++iPrimary) {
                     for (size_t iSecondary = 0; iSecondary < secondaryCollection.size(); ++iSecondary) {
 
+                        // skip this pairing if indices are the same and matching them is not allowed
+                        if ((!this->allowIdenticalIndices_) && (iPrimary == iSecondary)) {
+                            continue;
+                        }
+
                         double metricValue = metricFunctor_(
                             primaryCollection.at(iPrimary).p4,
                             secondaryCollection.at(iSecondary).p4
@@ -155,6 +189,12 @@ namespace karma {
                         if (metricValue <= maxMetricValue_) {
                             matchResult.emplace_back(iPrimary, iSecondary);
                         }
+
+                        // return early if we reached the maximum number of allowed matched
+                        if ((this->maxMatches_ > 0) && (matchResult.size() >= this->maxMatches_)) {
+                            return matchResult;
+                        }
+
                     } // end for (secondaryElements)
 
                 } // end for (primaryElements)
@@ -171,40 +211,71 @@ namespace karma {
 
     // -- metric functors
 
+    /**
+     * Functor operates on LVs and returns DeltaR
+     */
     struct DeltaRFunctor {
         double operator()(const karma::LorentzVector& v1, const karma::LorentzVector& v2) const {
             return ROOT::Math::VectorUtil::DeltaR(v1, v2);
         }
     };
 
+    /**
+     * Functor operates on LVs and returns the absolute value of the difference
+     * between the invariant mass of the LVs and a reference invariant mass
+     * value. The reference mass is a parameter of the functor.
+     */
+    struct AbsDeltaInvariantMassFunctor {
+        AbsDeltaInvariantMassFunctor(double targetInvariantMass) : targetInvariantMass_(targetInvariantMass) {};
+        double targetInvariantMass_;
+        double operator()(const karma::LorentzVector& v1, const karma::LorentzVector& v2) const {
+            return std::abs(targetInvariantMass_ - ROOT::Math::VectorUtil::InvariantMass(v1, v2));
+        }
+    };
+
     // -- specializations
 
-    template<typename TPrimaryCollection, typename TSecondaryCollection>
+    template<typename TPrimaryCollection, typename TSecondaryCollection = TPrimaryCollection>
     class LowestDeltaRMatcher : public LowestMetricMatcher<
         TPrimaryCollection, TSecondaryCollection,
         DeltaRFunctor> {
 
       public:
 
-        LowestDeltaRMatcher(double maxDeltaR) : 
+        LowestDeltaRMatcher(double maxDeltaR, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
             LowestMetricMatcher<TPrimaryCollection,
                                 TSecondaryCollection,
-                                DeltaRFunctor>(maxDeltaR) {};
+                                DeltaRFunctor>(maxDeltaR, maxMatches, allowIdenticalIndices) {};
 
     };
 
-    template<typename TPrimaryCollection, typename TSecondaryCollection>
+    template<typename TPrimaryCollection, typename TSecondaryCollection = TPrimaryCollection>
     class DeltaRThresholdMatcher : public MetricThresholdMatcher<
         TPrimaryCollection, TSecondaryCollection,
         DeltaRFunctor> {
 
       public:
 
-        DeltaRThresholdMatcher(double maxDeltaR) : 
+        DeltaRThresholdMatcher(double maxDeltaR, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
             MetricThresholdMatcher<TPrimaryCollection,
                                    TSecondaryCollection,
-                                   DeltaRFunctor>(maxDeltaR) {};
+                                   DeltaRFunctor>(maxDeltaR, maxMatches, allowIdenticalIndices) {};
 
     };
+
+    template<typename TPrimaryCollection, typename TSecondaryCollection = TPrimaryCollection>
+    class LowestAbsDeltaInvariantMassMatcher : public LowestMetricMatcher<
+        TPrimaryCollection, TSecondaryCollection,
+        AbsDeltaInvariantMassFunctor> {
+
+      public:
+
+        LowestAbsDeltaInvariantMassMatcher(double targetInvariantMass, double maxDeltaInvariantMass, size_t maxMatches = 0, bool allowIdenticalIndices = true) :
+            LowestMetricMatcher<TPrimaryCollection,
+                                TSecondaryCollection,
+                                AbsDeltaInvariantMassFunctor>(AbsDeltaInvariantMassFunctor(targetInvariantMass), maxDeltaInvariantMass, maxMatches, allowIdenticalIndices) {};
+
+    };
+
 
 }  // end namespace
