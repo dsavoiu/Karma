@@ -62,6 +62,28 @@ def register_options(options):
 def init_modules(process, options, jet_algo_name):
     '''Configure analysis modules and return module sequence'''
 
+    if options.channel == 'mm':
+        from Karma.Common.Producers.ZBosonProducers_cfi import karmaZBosonFromMuonsProducer
+
+        process.add_module(
+            "zBosons",
+            karmaZBosonFromMuonsProducer.clone(
+                karmaLeptonCollectionSrc = cms.InputTag("karmaMuons"),
+                maxDeltaInvariantMass = cms.double(20),
+            )
+        )
+
+    elif options.channel == 'ee':
+        from Karma.Common.Producers.ZBosonProducers_cfi import karmaZBosonFromElectronsProducer
+
+        process.add_module(
+            "zBosons",
+            karmaZBosonFromElectronsProducer.clone(
+                karmaLeptonCollectionSrc = cms.InputTag("karmaElectrons"),
+                maxDeltaInvariantMass = cms.double(20),
+            )
+        )
+
     # == JEC-corrected valid jets =========================================
 
     from Karma.Common.Producers.CorrectedValidJetsProducer_cfi import karmaCorrectedValidJetsProducer
@@ -181,6 +203,8 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
             karmaElectronCollectionSrc = cms.InputTag("karmaElectrons"),
             karmaMuonCollectionSrc = cms.InputTag("karmaMuons"),
 
+            karmaZBosonLVSrc = cms.InputTag("zBosons"),
+
             isData = cms.bool(options.isData),
             channelSpec = cms.string(options.channel),
             weightForStitching = cms.double(options.weightForStitching),
@@ -214,6 +238,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
     )
 
     _pre_ntuple_sequence = cms.Sequence(
+        getattr(process, "zBosons") *
         getattr(process, "correctedJets{}{}".format(jet_algo_name, jet_collection_suffix)) *
         getattr(process, "correctedMETs{}{}".format(jet_algo_name, jet_collection_suffix)))
 

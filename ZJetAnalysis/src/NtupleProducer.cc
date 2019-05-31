@@ -52,6 +52,11 @@ zjet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const zjet
         karmaMuonCollectionToken = consumes<karma::MuonCollection>(m_configPSet.getParameter<edm::InputTag>("karmaMuonCollectionSrc"));
     }
 
+    const auto& zBosonInputTag = m_configPSet.getParameter<edm::InputTag>("karmaZBosonLVSrc");
+    karmaZBosonLVToken = consumes<karma::LV>(zBosonInputTag);
+    karmaZBosonPositiveLeptonLVToken = consumes<karma::LV>(edm::InputTag(zBosonInputTag.label(), "positiveLepton"));
+    karmaZBosonNegativeLeptonLVToken = consumes<karma::LV>(edm::InputTag(zBosonInputTag.label(), "negativeLepton"));
+
     if (!m_isData) {
         karmaGenJetCollectionToken = consumes<karma::LVCollection>(m_configPSet.getParameter<edm::InputTag>("karmaGenJetCollectionSrc"));
         karmaGeneratorQCDInfoToken = consumes<karma::GeneratorQCDInfo>(m_configPSet.getParameter<edm::InputTag>("karmaGeneratorQCDInfoSrc"));
@@ -132,6 +137,10 @@ void zjet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& set
     else if (globalCache()->channel_ == zjet::AnalysisChannel::MM) {
         karma::util::getByTokenOrThrow(event, this->karmaMuonCollectionToken, this->karmaMuonCollectionHandle);
     }
+    // Z Boson
+    karma::util::getByTokenOrThrow(event, this->karmaZBosonLVToken, this->karmaZBosonLVHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaZBosonPositiveLeptonLVToken, this->karmaZBosonPositiveLeptonLVHandle);
+    karma::util::getByTokenOrThrow(event, this->karmaZBosonNegativeLeptonLVToken, this->karmaZBosonNegativeLeptonLVHandle);
 
     if (!m_isData) {
         // QCD generator information
@@ -223,6 +232,23 @@ void zjet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& set
             }
         }
     }
+
+    const auto& zBoson = this->karmaZBosonLVHandle;  // convenience
+    outputNtupleEntry->zPt = zBoson->p4.pt();
+    outputNtupleEntry->zPhi = zBoson->p4.phi();
+    outputNtupleEntry->zEta = zBoson->p4.eta();
+    outputNtupleEntry->zY = zBoson->p4.Rapidity();
+    outputNtupleEntry->zMass = zBoson->p4.M();
+
+    const auto& zPositiveLepton = this->karmaZBosonPositiveLeptonLVHandle;  // convenience
+    outputNtupleEntry->zPositiveLeptonPt = zPositiveLepton->p4.pt();
+    outputNtupleEntry->zPositiveLeptonPhi = zPositiveLepton->p4.phi();
+    outputNtupleEntry->zPositiveLeptonEta = zPositiveLepton->p4.eta();
+
+    const auto& zNegativeLepton = this->karmaZBosonNegativeLeptonLVHandle;  // convenience
+    outputNtupleEntry->zNegativeLeptonPt = zNegativeLepton->p4.pt();
+    outputNtupleEntry->zNegativeLeptonPhi = zNegativeLepton->p4.phi();
+    outputNtupleEntry->zNegativeLeptonEta = zNegativeLepton->p4.eta();
 
     const auto& jets = this->karmaJetCollectionHandle;  // convenience
     // leading jet kinematics

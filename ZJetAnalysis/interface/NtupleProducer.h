@@ -207,6 +207,15 @@ namespace zjet {
         typename edm::Handle<karma::MuonCollection> karmaMuonCollectionHandle;
         edm::EDGetTokenT<karma::MuonCollection> karmaMuonCollectionToken;
 
+        typename edm::Handle<karma::LV> karmaZBosonLVHandle;
+        edm::EDGetTokenT<karma::LV> karmaZBosonLVToken;
+
+        typename edm::Handle<karma::LV> karmaZBosonPositiveLeptonLVHandle;
+        edm::EDGetTokenT<karma::LV> karmaZBosonPositiveLeptonLVToken;
+
+        typename edm::Handle<karma::LV> karmaZBosonNegativeLeptonLVHandle;
+        edm::EDGetTokenT<karma::LV> karmaZBosonNegativeLeptonLVToken;
+
         typename edm::Handle<karma::JetTriggerObjectsMap> karmaJetTriggerObjectsMapHandle;
         edm::EDGetTokenT<karma::JetTriggerObjectsMap> karmaJetTriggerObjectsMapToken;
 

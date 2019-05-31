@@ -26,6 +26,16 @@ namespace zjet {
         double zPhi = UNDEFINED_DOUBLE;
         double zEta = UNDEFINED_DOUBLE;
         double zY = UNDEFINED_DOUBLE;
+        double zMass = UNDEFINED_DOUBLE;
+
+        // Z boson child lepton kinematics
+        double zPositiveLeptonPt = UNDEFINED_DOUBLE;
+        double zPositiveLeptonPhi = UNDEFINED_DOUBLE;
+        double zPositiveLeptonEta = UNDEFINED_DOUBLE;
+
+        double zNegativeLeptonPt = UNDEFINED_DOUBLE;
+        double zNegativeLeptonPhi = UNDEFINED_DOUBLE;
+        double zNegativeLeptonEta = UNDEFINED_DOUBLE;
 
         // lepton kinematics
         double lepton1Pt = UNDEFINED_DOUBLE;

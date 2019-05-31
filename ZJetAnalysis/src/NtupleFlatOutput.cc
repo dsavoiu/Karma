@@ -24,6 +24,15 @@ void zjet::NtupleFlatOutput::setUpTTree(TTree* tree, zjet::NtupleEntry* productF
     ADD_BRANCH(tree, productForFill, zPhi, D);
     ADD_BRANCH(tree, productForFill, zEta, D);
     ADD_BRANCH(tree, productForFill, zY, D);
+    ADD_BRANCH(tree, productForFill, zMass, D);
+
+    ADD_BRANCH(tree, productForFill, zPositiveLeptonPt, D);
+    ADD_BRANCH(tree, productForFill, zPositiveLeptonPhi, D);
+    ADD_BRANCH(tree, productForFill, zPositiveLeptonEta, D);
+
+    ADD_BRANCH(tree, productForFill, zNegativeLeptonPt, D);
+    ADD_BRANCH(tree, productForFill, zNegativeLeptonPhi, D);
+    ADD_BRANCH(tree, productForFill, zNegativeLeptonEta, D);
 
     ADD_BRANCH(tree, productForFill, lepton1Pt, D);
     ADD_BRANCH(tree, productForFill, lepton1Phi, D);
