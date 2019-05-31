@@ -2,3 +2,5 @@
 *.log
 *.root
 *_dump.py
+
+*/python/__init__.py
