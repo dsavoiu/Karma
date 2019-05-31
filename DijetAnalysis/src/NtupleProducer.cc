@@ -36,6 +36,18 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
         std::cout << "Reading nPUMean information from file: " << m_configPSet.getParameter<std::string>("npuMeanFile") << std::endl;
     }
 
+    // load external file to get `pileupWeight` in MC
+    if (!m_isData) {
+        if (!m_configPSet.getParameter<std::string>("pileupWeightFile").empty()) {
+            m_puWeightProvider = std::unique_ptr<karma::PileupWeightProvider>(
+                new karma::PileupWeightProvider(
+                    m_configPSet.getParameter<std::string>("pileupWeightFile"),
+                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+                )
+            );
+        }
+    }
+
     // construct FlexGrid bin finders with final analysis binning
     const auto& flexGridFileDijetPtAve = m_configPSet.getParameter<std::string>("flexGridFileDijetPtAve");
     if (!flexGridFileDijetPtAve.empty()) {
@@ -46,16 +58,6 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
     if (!flexGridFileDijetMass.empty()) {
         m_flexGridBinProviderDijetMass = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(flexGridFileDijetMass));
         std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
-    }
-    else {
-        if (!m_configPSet.getParameter<std::string>("pileupWeightFile").empty()) {
-            m_puWeightProvider = std::unique_ptr<karma::PileupWeightProvider>(
-                new karma::PileupWeightProvider(
-                    m_configPSet.getParameter<std::string>("pileupWeightFile"),
-                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
-                )
-            );
-        }
     }
 
     // -- declare which collections are consumed and create tokens
