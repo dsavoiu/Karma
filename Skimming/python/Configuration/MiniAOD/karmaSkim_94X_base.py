@@ -44,7 +44,11 @@ def register_options(options):
             .register('withPATCollections',
                       type_=bool,
                       default=None,
-                      description="Path to JSON file containing certified runs and luminosity blocks.")
+                      description="If True, collections of PAT objects (including temporary ones) will be written out.")
+            .register('withMETCorrectionLevels',
+                      type_=bool,
+                      default=None,
+                      description="If True, various pre-defined MET correction levels will be written out as edm::ValueMaps.")
     )
 
 def configure(process, options):
@@ -343,31 +347,69 @@ def configure(process, options):
         write_out=True,
     )
 
-    # -- MET correction levels --------------------------------------------
+    # -- MET correction levels (as edm::ValueMaps) ------------------------
 
-    # note: not included -> all information is already in karma::MET data format
+    if options.withMETCorrectionLevels:
 
-    ## from Karma.Skimming.METCorrectedLVValueMapProducer_cfi import karmaMETCorrectedLVValueMapProducer
-    ##
-    ## process.add_module(
-    ##     'karmaMETCorrectedLVs',
-    ##     karmaMETCorrectedLVValueMapProducer.clone(
-    ##         inputCollection = cms.InputTag("karmaMETs"),
-    ##     ),
-    ##     on_path='path',
-    ##     write_out=True,
-    ## )
-    ##
-    ## from Karma.Skimming.METCorrectedSumEtValueMapProducer_cfi import karmaMETCorrectedSumEtValueMapProducer
-    ##
-    ## process.add_module(
-    ##     'karmaMETCorrectedSumEts',
-    ##     karmaMETCorrectedSumEtValueMapProducer.clone(
-    ##         inputCollection = cms.InputTag("karmaMETs"),
-    ##     ),
-    ##     on_path='path',
-    ##     write_out=True,
-    ## )
+        from Karma.Skimming.METCorrectedLVValueMapProducer_cfi import karmaMETCorrectedLVValueMapProducer
+
+        process.add_module(
+            'karmaMETCorrectedLVs',
+            karmaMETCorrectedLVValueMapProducer.clone(
+                inputCollection = cms.InputTag("karmaMETs"),
+                associationSpec = cms.VPSet(
+                    # uncorrected MET
+                    cms.PSet(
+                        name = cms.string("Raw"),
+                        transientMapKey = cms.string("corP4Raw"),
+                    ),
+
+                    # uncorrected MET (from CHS candidates)
+                    cms.PSet(
+                        name = cms.string("RawCHS"),
+                        transientMapKey = cms.string("corP4RawCHS"),
+                    ),
+
+                    # uncorrected MET
+                    cms.PSet(
+                        name = cms.string("Type1"),
+                        transientMapKey = cms.string("corP4Type1"),
+                    ),
+                )
+            ),
+            on_path='path',
+            write_out=True,
+        )
+
+        from Karma.Skimming.METCorrectedSumEtValueMapProducer_cfi import karmaMETCorrectedSumEtValueMapProducer
+
+        process.add_module(
+            'karmaMETCorrectedSumEts',
+            karmaMETCorrectedSumEtValueMapProducer.clone(
+                inputCollection = cms.InputTag("karmaMETs"),
+                associationSpec = cms.VPSet(
+                    # uncorrected MET
+                    cms.PSet(
+                        name = cms.string("Raw"),
+                        transientMapKey = cms.string("corSumEtRaw"),
+                    ),
+
+                    # uncorrected MET (from CHS candidates)
+                    cms.PSet(
+                        name = cms.string("RawCHS"),
+                        transientMapKey = cms.string("corSumEtRawCHS"),
+                    ),
+
+                    # uncorrected MET
+                    cms.PSet(
+                        name = cms.string("Type1"),
+                        transientMapKey = cms.string("corSumEtType1"),
+                    ),
+                )
+            ),
+            on_path='path',
+            write_out=True,
+        )
 
     # -- Jets -------------------------------------------------------------
 

@@ -27,6 +27,8 @@ void karma::METCollectionProducer::produceSingle(const pat::MET& in, karma::MET&
     out.transientDoubles_["corSumEtRaw"] = in.corSumEt(pat::MET::METCorrectionLevel::Raw);
     out.transientLVs_["corP4Type1"] = in.corP4(pat::MET::METCorrectionLevel::Type1);
     out.transientDoubles_["corSumEtType1"] = in.corSumEt(pat::MET::METCorrectionLevel::Type1);
+    out.transientLVs_["corP4RawCHS"] = in.corP4(pat::MET::METCorrectionLevel::RawChs);
+    out.transientDoubles_["corSumEtRawCHS"] = in.corSumEt(pat::MET::METCorrectionLevel::RawChs);
 }
 
 

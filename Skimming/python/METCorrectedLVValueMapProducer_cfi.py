@@ -12,7 +12,13 @@ karmaMETCorrectedLVValueMapProducer = cms.EDProducer(
                 transientMapKey = cms.string("corP4Raw"),
             ),
 
-            # uncorrected MET
+            # uncorrected MET (from CHS candidates)
+            cms.PSet(
+                name = cms.string("RawCHS"),
+                transientMapKey = cms.string("corP4RawCHS"),
+            ),
+
+            # TypeI-corrected MET
             cms.PSet(
                 name = cms.string("Type1"),
                 transientMapKey = cms.string("corP4Type1"),

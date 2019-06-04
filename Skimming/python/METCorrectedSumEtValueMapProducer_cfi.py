@@ -12,6 +12,12 @@ karmaMETCorrectedSumEtValueMapProducer = cms.EDProducer(
                 transientMapKey = cms.string("corSumEtRaw"),
             ),
 
+            # uncorrected MET (from CHS candidates)
+            cms.PSet(
+                name = cms.string("RawCHS"),
+                transientMapKey = cms.string("corP4RawCHS"),
+            ),
+
             # uncorrected MET
             cms.PSet(
                 name = cms.string("Type1"),
