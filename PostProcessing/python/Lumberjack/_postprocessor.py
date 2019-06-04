@@ -135,7 +135,7 @@ class PostProcessor(object):
                 elif _var_y is not None:
                     # Case 2: no var 'z' specified, but var 'y' specified -> 2D histogram/profile requested
                     _y_binning = self._get_quantity_binning(quantity_name=_var_y, split_dict=_split_dict)
-                    _var_z_subdict = self._root_objects[_split_name].setdefault(_var_z, {})  # ensure '_var_z' subdict exists
+                    _var_y_subdict = self._root_objects[_split_name].setdefault(_var_y, {})  # ensure '_var_y' subdict exists
 
                 if _obj_type == self.__class__.ObjectType.histogram:
                     if _var_z is not None:
