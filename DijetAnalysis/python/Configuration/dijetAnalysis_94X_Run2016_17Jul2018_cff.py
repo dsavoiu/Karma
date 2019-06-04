@@ -26,6 +26,10 @@ def register_options(options):
     """Command-Line option flags used by the configuration below."""
     return (
         options
+            .register('jsonFilterFile',
+                      type_=str,
+                      default=None,
+                      description="Path to JSON file containing certified runs and luminosity blocks.")
             .register('jecVersion',
                       type_=str,
                       default=None,
@@ -310,6 +314,10 @@ def configure(process, options):
         fileName = cms.string(options.outputFile),
         closeFileFast = cms.untracked.bool(True),
     )
+
+    # enable the JSON filter (if given)
+    if options.jsonFilterFile:
+        process.enable_json_lumi_filter(options.jsonFilterFile)
 
     # -- init modules
     for _jet_radius in (4, 8):
