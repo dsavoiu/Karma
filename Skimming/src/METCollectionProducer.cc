@@ -4,8 +4,8 @@
 void karma::METCollectionProducer::produceSingle(const pat::MET& in, karma::MET& out, const edm::Event& event, const edm::EventSetup& setup) {
 
     // populate the output object
-    out.p4 =                     in.p4();
-    out.sumEt =                  in.sumEt();
+    out.p4 =                     in.corP4(mainCorrectionLevel_);  // apply the configured main correction level
+    out.sumEt =                  in.corSumEt(mainCorrectionLevel_);
     out.uncorP4 =                in.uncorP4();
     out.uncorSumEt =             in.uncorSumEt();
 
