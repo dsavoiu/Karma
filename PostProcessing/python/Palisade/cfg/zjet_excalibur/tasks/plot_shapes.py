@@ -94,7 +94,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantities,
                             build_expression('mc', "{quantity[name]}")),
                         label=r'Data ({})'.format(_rp['name']), plot_method='errorbar', color=_rp['color'],
                         marker="o", marker_style="full", pad=0)
-                    for _rp in EXPANSIONS['run'] if _rp['name'] in run_periods
+                    for _rp in EXPANSIONS['iov'] if _rp['name'] in run_periods
                 ] + [
                     # MC
                     dict(expression='discard_errors({})'.format(build_expression('mc', "{quantity[name]}")),
@@ -131,7 +131,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantities,
                         'x_scale' : '{quantity[scale]}',
                         'y_label' : 'arb. units',
                         #'y_range' : (1e-3, 1e9),
-                        'axvlines' : ContextValue('quantity[expected_values]'),
+                        'axvlines' : [dict(values=ContextValue('quantity[expected_values]'))],
                         'x_ticklabels' : [],
                         'y_scale' : 'linear',
                         'legend_kwargs': dict(loc='upper right'),
@@ -144,8 +144,8 @@ def get_config(channel, sample_name, jec_name, run_periods, quantities,
                         'x_scale' : '{quantity[scale]}',
                         'y_label' : 'Data/MC',
                         'y_range' : (0.8, 1.2),
-                        'axhlines' : [1.0],
-                        'axvlines' : ContextValue('quantity[expected_values]'),
+                        'axhlines' : [dict(values=[1.0])],
+                        'axvlines' : [dict(values=ContextValue('quantity[expected_values]'))],
                         'y_scale' : 'linear',
                         'legend_kwargs': dict(loc='upper right'),
                     },

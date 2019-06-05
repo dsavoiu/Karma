@@ -116,7 +116,16 @@ QUANTITIES = {
             expression='npumean',
             binning=np.linspace(-0.5, 80.5, 82),
         ),
-    }
+
+    },
+
+    # quantities only available in MC
+    "mc": {
+    },
+
+    # quantities only available in data
+    "data": {
+    },
 }
 
 for _prefix in ("z", "jet1", "jet2", "jet3"):
@@ -233,6 +242,7 @@ SPLITTINGS['iov2016'] = {
     "Run2016BCDEFGH" : dict(run=(272007, 284044+1)),
 
 }
+SPLITTINGS['iov2016BCDEFGH'] = SPLITTINGS['iov2016']
 
 
 # -- alpha binning
@@ -245,7 +255,6 @@ SPLITTINGS['alpha_inclusive'] = dict({
     for _hi in _ALPHA_BIN_EDGES[1:]
 }, **{"alpha_all" : dict()})
 SPLITTINGS['alpha'] = dict(SPLITTINGS['alpha_exclusive'], **SPLITTINGS['alpha_inclusive'])
-
 
 # -- eta binning
 SPLITTINGS['eta_wide'] = dict({

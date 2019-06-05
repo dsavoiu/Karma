@@ -103,7 +103,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
                         expression=build_expression('data', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}", run_period=_rp['name']),
                         label=r'Data ({})'.format(_rp['name']), plot_method='errorbar', color=_rp['color'],
                         marker="o", marker_style="full", pad=0, mask_zero_errors=True)
-                    for _rp in EXPANSIONS['run'] if _rp['name'] in run_periods
+                    for _rp in EXPANSIONS['iov'] if _rp['name'] in run_periods
                 ] + [
                     # MC
                     dict(
@@ -139,7 +139,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
                         'y_label' : '{quantity_pair[y_label]}',
                         'y_range' : ContextValue('quantity_pair[y_profile_range]'),
                         'x_ticklabels' : [],
-                        'axhlines' : ContextValue('quantity_pair[y_expected_values]'),
+                        'axhlines' : [dict(values=ContextValue('quantity_pair[y_expected_values]'))],
                         'y_scale' : 'linear',
                         'legend_kwargs': dict(loc='upper right'),
                     },
@@ -151,7 +151,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
                         'x_scale' : '{quantity_pair[x_scale]}',
                         'y_label' : 'Data/MC',
                         'y_range' : (0.85, 1.15),
-                        'axhlines' : [1.0],
+                        'axhlines' : [dict(values=[1.0])],
                         'y_scale' : 'linear',
                         'legend_kwargs': dict(loc='upper right'),
                     },
@@ -192,8 +192,8 @@ def cli(argument_parser):
     argument_parser.add_argument('--basename-data', help="prefix of ROOT files containing Data histograms", required=True)
     argument_parser.add_argument('--basename-mc', help="prefix of ROOT files containing MC histograms", required=True)
     # optional parameters
-    argument_parser.add_argument('--output-format', help="format string indicating full path to output plot", default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png')
-
+    argument_parser.add_argument('--output-format', help="format string indicating full path to output plot",
+                                 default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png')
 
 def run(args):
 

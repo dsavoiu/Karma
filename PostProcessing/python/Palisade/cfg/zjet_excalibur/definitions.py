@@ -334,3 +334,4 @@ for _expansion in EXPANSIONS['occupancy']:
 
 # merge 'run' expansion for all years (for lookup purposes)
 EXPANSIONS['run'] = EXPANSIONS['run2016'] + EXPANSIONS['run2017'] + EXPANSIONS['run2018']
+EXPANSIONS['iov'] = EXPANSIONS['iov2016'] + EXPANSIONS['iov2017'] + EXPANSIONS['iov2018']

@@ -80,6 +80,9 @@ def get_config(channel, sample_name, jec_name, time_quantity, run_periods, quant
         **{_expansion_key : "{{{0}[name]}}".format(_expansion_key) for _expansion_key in _expansions.keys()}
     )
 
+    if 'iov' in output_format:
+        output_format.replace('iov','run')
+
     return {
         'input_files': _input_files,
         'figures': [
@@ -107,7 +110,7 @@ def get_config(channel, sample_name, jec_name, time_quantity, run_periods, quant
                         'x_label' : '{time_quantity[label]}',
                         'y_label' : '{quantity[label]}',
                         'y_scale' : 'linear',
-                        'y_range' : ContextValue('quantity[uniform_range]'),
+                        'y_range' : ContextValue('quantity[profile_range]'),
                         'legend_kwargs': dict(loc='upper right'),
                         #'axhlines' : [1.0],
                     },
