@@ -222,6 +222,17 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
         )
     )
 
+    from Karma.ZJetAnalysis.NtupleLeadingJetZBackToBackFilter_cfi import zjetNtupleLeadingJetZBackToBackFilter
+
+    # filter events based on Z+Jet back-to-back topology
+    process.add_module(
+        "backToBackFilter{}".format(pipeline_name),
+        cms.EDFilter(
+            "ZJetNtupleLeadingJetZBackToBackFilter",
+            maxDeltaPhi = cms.double(0.34)
+        )
+    )
+
     # analyzer for writing out flat ntuple
     process.add_module(
         "pipeline{}".format(pipeline_name),
@@ -244,6 +255,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
 
     _post_ntuple_sequence = cms.Sequence(
         getattr(process, "ntuple{}".format(pipeline_name)) *
+        getattr(process, "backToBackFilter{}".format(pipeline_name)) *
         getattr(process, "pipeline{}".format(pipeline_name))
     )
 
