@@ -30,6 +30,11 @@ def register_options(options):
                       type_=str,
                       default=None,
                       description="Path to JSON file containing certified runs and luminosity blocks.")
+            .register('useHLTFilter',
+                      type_=bool,
+                      default=False,
+                      description="If True, only events triggered by one of the skimmed paths will be "
+                                  "written out.")
             .register('jecVersion',
                       type_=str,
                       default=None,
@@ -234,6 +239,18 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
         )
     )
 
+    if options.useHLTFilter:
+        # filter ensuring that at least one trigger has fired
+        process.add_module(
+            "ntupleHLTFilter{}".format(pipeline_name),
+            cms.EDFilter(
+                "DijetNtupleHLTFilter",
+                cms.PSet(
+                    ntupleSrc = cms.InputTag("ntuple{}".format(pipeline_name)),
+                )
+            )
+        )
+
     # note: choose to apply these filters in PostProcessing
 
     ## # filter ensuring that the leading jet is within eta
@@ -282,11 +299,14 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
 
     _post_ntuple_sequence = cms.Sequence(
         getattr(process, "ntuple{}".format(pipeline_name)) *
-        getattr(process, "jetPairFilter{}".format(pipeline_name)) *
-        #getattr(process, "leadingJetRapidityFilter{}".format(pipeline_name)) *
-        #getattr(process, "leadingJetPtFilter{}".format(pipeline_name)) *
-        getattr(process, "pipeline{}".format(pipeline_name))
+        getattr(process, "jetPairFilter{}".format(pipeline_name))
     )
+
+    if options.useHLTFilter:
+        _post_ntuple_sequence += getattr(process, "ntupleHLTFilter{}".format(pipeline_name))
+
+    # add flat output analyzer
+    _post_ntuple_sequence += getattr(process, "pipeline{}".format(pipeline_name))
 
     _maybe_mc_specific_sequence = cms.Sequence()
     if not options.isData:
