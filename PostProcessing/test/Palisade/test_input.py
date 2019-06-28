@@ -155,3 +155,62 @@ class TestInputROOTWithFile(unittest.TestCase):
 
         self.assertEqual(_err.exception.args[0], 'triple')
 
+    def test_get_expr_user_defined_function_signatures(self):
+
+        @InputROOT.add_function
+        def divide(dividend, divisor=8):
+            return dividend / divisor
+
+        # subtests for correct application of signatures
+        with self.subTest(test_label="kwarg_default"):
+            self.assertEqual(self._ic.get_expr('divide(16)'), 2)
+        with self.subTest(test_label="kwarg_explicit_as_positional"):
+            self.assertEqual(self._ic.get_expr('divide(16, 2)'), 8)
+        with self.subTest(test_label="kwarg_explicit"):
+            self.assertEqual(self._ic.get_expr('divide(16, divisor=4)'), 4)
+        with self.subTest(test_label="kwarg_and_positional_explicit"):
+            self.assertEqual(self._ic.get_expr('divide(dividend=42, divisor=7)'), 6)
+        with self.subTest(test_label="kwarg_and_positional_explicit_different_order"):
+            self.assertEqual(self._ic.get_expr('divide(divisor=5, dividend=35)'), 7)
+
+        # subtests for exceptions
+        with self.subTest(test_label="too_few_args"):
+            with self.assertRaises(TypeError) as _err:
+                self._ic.get_expr('divide()')
+        with self.subTest(test_label="too_many_args"):
+            with self.assertRaises(TypeError) as _err:
+                self._ic.get_expr('divide(1,2,3)')
+        with self.subTest(test_label="multiple_values_for_kwarg"):
+            with self.assertRaises(TypeError) as _err:
+                self._ic.get_expr('divide(1,2,divisor=3)')
+        with self.subTest(test_label="wrong_kwarg"):
+            with self.assertRaises(TypeError) as _err:
+                self._ic.get_expr('divide(42, bogus_kwarg=30)')
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('divide', None)
+
+    def test_get_expr_user_defined_function_argtypes(self):
+
+        @InputROOT.add_function
+        def get_type(argument):
+            return type(argument)
+
+        # subtests for correct application of signatures
+        with self.subTest(test_label="int"):
+            self.assertTrue(self._ic.get_expr('get_type(16)') is int)
+        with self.subTest(test_label="float"):
+            self.assertTrue(self._ic.get_expr('get_type(13.4)') is float)
+        with self.subTest(test_label="bool"):
+            self.assertTrue(self._ic.get_expr('get_type(True)') is bool)
+            self.assertTrue(self._ic.get_expr('get_type(False)') is bool)
+        with self.subTest(test_label="none"):
+            self.assertTrue(self._ic.get_expr('get_type(None)') is type(None))
+
+        with self.subTest(test_label="unknown_identifier_raise"):
+            with self.assertRaises(ValueError) as _err:
+                self._ic.get_expr('get_type(bogus_identifier)')
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('get_type', None)
+

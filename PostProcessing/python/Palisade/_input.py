@@ -1093,15 +1093,30 @@ class InputROOT(object):
                     return _retlist
                 else:
                     return self.get_expr(_local, allow_locals=False)
-            # if not local is found, treat identifier as string and lookup in ROOT file
-            return self.get(node.id)
+
+            # if no local is found, try a few builtin Python literals
+            elif node.id in ('True', 'False', 'None'):  # restrict subset of supported literals
+                return ast.literal_eval(node.id)  # returns corresponding Python literal from string
+            # if nothing above matched, assume mistyped identifier and give up
+            # NOTE: do *not* assume identifier is a ROOT path. ROOT paths must
+            # be given explicitly as strings.
+            else:
+                raise ValueError("Cannot parse identifier '{}': not a valid Python literal or a registered local variable!".format(node.id))
         elif isinstance(node, ast.Str): # <string> : array column
             # lookup in ROOT file
             return self.get(node.s)
         elif isinstance(node, ast.Num): # <number>
             return node.n
         elif isinstance(node, ast.Call): # node names containing parentheses (interpreted as 'Call' objects)
-            return functions[node.func.id](*map(lambda _arg: self._eval(_arg, operators, functions, allow_locals), node.args))
+            return functions[node.func.id](
+                # pass positional arguments
+                *map(lambda _arg: self._eval(_arg, operators, functions, allow_locals), node.args),
+                # pass keyword arguments
+                **{
+                    _keyword.arg : self._eval(_keyword.value, operators, functions, allow_locals)
+                    for _keyword in node.keywords
+                }
+            )
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
             return operators[type(node.op)](self._eval(node.left, operators, functions, allow_locals), self._eval(node.right, operators, functions, allow_locals))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
