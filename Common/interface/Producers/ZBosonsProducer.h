@@ -28,10 +28,10 @@ namespace karma {
     /** Cache containing resources which do not change
      *  for the entire duration of the analysis job.
      */
-    class ZBosonProducerGlobalCache : public karma::CacheBase {
+    class ZBosonsProducerGlobalCache : public karma::CacheBase {
 
       public:
-        ZBosonProducerGlobalCache(const edm::ParameterSet& pSet) :
+        ZBosonsProducerGlobalCache(const edm::ParameterSet& pSet) :
             karma::CacheBase(pSet),
             maxDeltaInvariantMass_(pSet_.getParameter<double>("maxDeltaInvariantMass")) {
 
@@ -43,18 +43,18 @@ namespace karma {
 
     // -- main producer
     template<typename TLeptonCollection>
-    class ZBosonProducer : public edm::stream::EDProducer<
-        edm::GlobalCache<karma::ZBosonProducerGlobalCache>
+    class ZBosonsProducer : public edm::stream::EDProducer<
+        edm::GlobalCache<karma::ZBosonsProducerGlobalCache>
     > {
 
       public:
-        explicit ZBosonProducer(const edm::ParameterSet& config, const karma::ZBosonProducerGlobalCache* globalCache):
+        explicit ZBosonsProducer(const edm::ParameterSet& config, const karma::ZBosonsProducerGlobalCache* globalCache):
             m_configPSet(config) {
 
             // -- register products
-            produces<karma::LV>();
-            produces<karma::LV>("positiveLepton");
-            produces<karma::LV>("negativeLepton");
+            produces<karma::LVCollection>();
+            produces<karma::LVCollection>("positiveLeptons");
+            produces<karma::LVCollection>("negativeLeptons");
 
             m_matcher = std::unique_ptr<LowestAbsDeltaInvariantMassMatcher<TLeptonCollection>>(
                 new LowestAbsDeltaInvariantMassMatcher<TLeptonCollection>(
@@ -68,14 +68,14 @@ namespace karma {
             // -- declare which collections are consumed and create tokens
             karmaLeptonCollectionToken = consumes<TLeptonCollection>(m_configPSet.getParameter<edm::InputTag>("karmaLeptonCollectionSrc"));
         };
-        virtual ~ZBosonProducer() {};
+        virtual ~ZBosonsProducer() {};
 
         // -- global cache extension
-        static std::unique_ptr<karma::ZBosonProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet) {
+        static std::unique_ptr<karma::ZBosonsProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet) {
             // -- create the GlobalCache
-            return std::unique_ptr<karma::ZBosonProducerGlobalCache>(new karma::ZBosonProducerGlobalCache(pSet));
+            return std::unique_ptr<karma::ZBosonsProducerGlobalCache>(new karma::ZBosonsProducerGlobalCache(pSet));
         };
-        static void globalEndJob(const karma::ZBosonProducerGlobalCache*) {/* noop */};
+        static void globalEndJob(const karma::ZBosonsProducerGlobalCache*) {/* noop */};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -89,9 +89,9 @@ namespace karma {
         // -- "regular" per-Event 'produce' method
         virtual void produce(edm::Event& event, const edm::EventSetup& setup) {
             karma::util::getByTokenOrThrow(event, this->karmaLeptonCollectionToken, this->karmaLeptonCollectionHandle);
-            std::unique_ptr<karma::LV> zBosonLV(new karma::LV());
-            std::unique_ptr<karma::LV> positiveLeptonLV(new karma::LV());
-            std::unique_ptr<karma::LV> negativeLeptonLV(new karma::LV());
+            std::unique_ptr<karma::LVCollection> zBosonLVs(new karma::LVCollection());
+            std::unique_ptr<karma::LVCollection> positiveLeptonLVs(new karma::LVCollection());
+            std::unique_ptr<karma::LVCollection> negativeLeptonLVs(new karma::LVCollection());
 
             // separate leptons into two collections by charge
             TLeptonCollection positiveLeptons;
@@ -118,15 +118,27 @@ namespace karma {
                 positiveLeptons, negativeLeptons
             );
 
-            if (matchingIndexPairs.size() != 0) {
-                assert(matchingIndexPairs.size() == 1);  // should always have at most one matched lepton pair
-                positiveLeptonLV->p4 = positiveLeptons.at(matchingIndexPairs.at(0).first).p4;
-                negativeLeptonLV->p4 = negativeLeptons.at(matchingIndexPairs.at(0).second).p4;
-                zBosonLV->p4 = positiveLeptonLV->p4 + negativeLeptonLV->p4;
+            /// if (matchingIndexPairs.size() != 0) {
+            ///     assert(matchingIndexPairs.size() == 1);  // should always have at most one matched lepton pair
+            ///     positiveLeptonLV->p4 = positiveLeptons.at(matchingIndexPairs.at(0).first).p4;
+            ///     negativeLeptonLV->p4 = negativeLeptons.at(matchingIndexPairs.at(0).second).p4;
+            ///     zBosonLV->p4 = positiveLeptonLV->p4 + negativeLeptonLV->p4;
+            /// }
+
+            for (const auto& matchingIndexPair : matchingIndexPairs) {
+              positiveLeptonLVs->emplace_back();
+              positiveLeptonLVs->back().p4 = positiveLeptons.at(matchingIndexPair.first).p4;
+
+              negativeLeptonLVs->emplace_back();
+              negativeLeptonLVs->back().p4 = negativeLeptons.at(matchingIndexPair.second).p4;
+
+              zBosonLVs->emplace_back();
+              zBosonLVs->back().p4 = positiveLeptonLVs->back().p4 + negativeLeptonLVs->back().p4;
             }
-            event.put(std::move(zBosonLV));
-            event.put(std::move(positiveLeptonLV), "positiveLepton");
-            event.put(std::move(negativeLeptonLV), "negativeLepton");
+
+            event.put(std::move(zBosonLVs));
+            event.put(std::move(positiveLeptonLVs), "positiveLeptons");
+            event.put(std::move(negativeLeptonLVs), "negativeLeptons");
         };
 
 

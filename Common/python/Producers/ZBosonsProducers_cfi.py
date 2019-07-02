@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 
-karmaZBosonFromElectronsProducer = cms.EDProducer(
-    "KarmaZBosonFromElectronsProducer",
+karmaZBosonsFromElectronsProducer = cms.EDProducer(
+    "KarmaZBosonsFromElectronsProducer",
     cms.PSet(
         # -- input sources
         karmaLeptonCollectionSrc = cms.InputTag("karmaElectrons"),
@@ -12,8 +12,8 @@ karmaZBosonFromElectronsProducer = cms.EDProducer(
     )
 )
 
-karmaZBosonFromMuonsProducer = cms.EDProducer(
-    "KarmaZBosonFromMuonsProducer",
+karmaZBosonsFromMuonsProducer = cms.EDProducer(
+    "KarmaZBosonsFromMuonsProducer",
     cms.PSet(
         # -- input sources
         karmaLeptonCollectionSrc = cms.InputTag("karmaMuons"),
