@@ -454,3 +454,39 @@ class TestPlotProcessor(unittest.TestCase):
         _calls_axvline = [call(_val, **dict(PlotProcessor._DEFAULT_LINE_KWARGS, **_axvline_dict)) for _val in _cfg['figures'][0]['pads'][0]['axvlines'][0]['values']]
         mock_axhline.assert_has_calls(_calls_axhline, any_order=True)
         mock_axvline.assert_has_calls(_calls_axvline, any_order=True)
+
+    def test_plot_expression_referencing(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['figures'][0]['subplots'].append({
+            'expression': '"test:h1"',
+        })
+        _cfg['figures'][0]['subplots'].append({
+            'expression': 'expressions[0]',
+        })
+
+        self._run_palisade(config=_cfg)
+
+        with open(self._TEST_FILENAME_YML) as _f:
+            _yml = yaml.load(_f)
+
+        _obj_yml_dicts = [_d for _d in _yml['subplots'] if _d['expression'] == '"test:h1"' or _d['expression'] == 'expressions[0]']
+        assert len(_obj_yml_dicts) == 2  # should be present twice
+        self._assert_yml_equal_to_ref(_obj_yml_dicts[0], self._REF_OBJECTS['h1'])
+        self._assert_yml_equal_to_ref(_obj_yml_dicts[1], self._REF_OBJECTS['h1'])
+
+    def test_plot_expression_circular_reference_raise(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['figures'][0]['subplots'].append({
+            'expression': 'expressions[0]',
+        })
+
+        with self.assertRaises(NameError) as _err:
+            self._run_palisade(config=_cfg)
+
+        #with open(self._TEST_FILENAME_YML) as _f:
+        #    _yml = yaml.load(_f)
+
+        #_obj_yml_dicts = [_d for _d in _yml['subplots'] if _d['expression'] == '"test:h1"' or _d['expression'] == 'expressions[0]']
+        #assert len(_obj_yml_dicts) == 1  # should be present twice
+        #self._assert_yml_equal_to_ref(_obj_yml_dicts[0], self._REF_OBJECTS['h1'])
+        #self._assert_yml_equal_to_ref(_obj_yml_dicts[1], self._REF_OBJECTS['h1'])

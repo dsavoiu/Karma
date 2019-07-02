@@ -208,9 +208,71 @@ class TestInputROOTWithFile(unittest.TestCase):
             self.assertTrue(self._ic.get_expr('get_type(None)') is type(None))
 
         with self.subTest(test_label="unknown_identifier_raise"):
-            with self.assertRaises(ValueError) as _err:
+            with self.assertRaises(NameError) as _err:
                 self._ic.get_expr('get_type(bogus_identifier)')
 
         # remove function to avoid side effects
         InputROOT.functions.pop('get_type', None)
 
+
+    def test_get_expr_local_variables(self):
+
+        with self.subTest(test_label="call_local_variable"):
+            self.assertEqual(self._ic.get_expr('my_local', locals={'my_local': 60}), 60)
+
+        with self.subTest(test_label="call_local_variable_list"):
+            self.assertEqual(self._ic.get_expr('my_local', locals={'my_local': [42, 60, 93]}), [42, 60, 93])
+            self.assertEqual(self._ic.get_expr('my_local[2]', locals={'my_local': [42, 60, 93]}), 93)
+            with self.assertRaises(IndexError) as _err:
+                self._ic.get_expr('my_local[44]', locals={'my_local': [42, 60, 93]})
+
+        with self.subTest(test_label="registered_local_variable_before_creation_raise"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('my_local')
+
+        self._ic.register_local('my_local', 42)
+
+        with self.subTest(test_label="registered_local_variable_value"):
+            self.assertEqual(self._ic.get_expr('my_local'), 42)
+
+        with self.subTest(test_label="registered_local_variable_value_overridden_in_call"):
+            self.assertEqual(self._ic.get_expr('my_local', {'my_local': 93}), 93)
+
+        with self.subTest(test_label="disallow_local_variables_raise"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('my_local', locals=None)
+
+        with self.subTest(test_label="inexistent_local_variable_raise"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('my_bogus_local')
+
+        self._ic.clear_locals()
+
+        with self.subTest(test_label="local_variable_after_deletion_raise"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('my_local')
+
+    def test_get_expr_local_variables_self_referential(self):
+
+        self._ic.register_local('selfref_direct', 'selfref_direct')
+        self._ic.register_local('selfref_list_direct', ['selfref_list_direct[0]', 'selfref_list_direct[1]'])
+        self._ic.register_local('selfref_list_cross', ['selfref_list_cross[1]', 'selfref_list_cross[0]'])
+        self._ic.register_local('selfref_resolvable', ['selfref_resolvable[1]', 42])
+
+        with self.subTest(test_label="selfref_direct"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('selfref_direct')
+
+        with self.subTest(test_label="selfref_list_direct"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('selfref_list_direct[0]')
+                self._ic.get_expr('selfref_list_direct[1]')
+        with self.subTest(test_label="selfref_list_cross"):
+            with self.assertRaises(NameError) as _err:
+                self._ic.get_expr('selfref_list_cross[0]')
+                self._ic.get_expr('selfref_list_cross[1]')
+
+        # this won't work in the current implementation, but is an extreme edge case anyway:
+        #with self.subTest(test_label="selfref_resolvable"):
+        #    self.assertEquals(self._ic.get_expr('selfref_resolvable[0]'), 42)
+        #    self.assertEquals(self._ic.get_expr('selfref_resolvable[1]'), 42)

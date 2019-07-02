@@ -941,7 +941,7 @@ class InputROOT(object):
             _ic.request(_requests)
 
 
-    def get_expr(self, expr, allow_locals=True):
+    def get_expr(self, expr, locals={}):
         """
         Evaluate an expression involving objects retrieved from file(s).
 
@@ -971,20 +971,31 @@ class InputROOT(object):
         :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.add_function`.
 
         All *Python identifiers* used in the expression are interpreted as local
-        variables. They must be declared via
+        variables. A map specifying the values of local variables for this call
+        to `get_expr` can be given via the keyword argument `locals`.
+
+        Alternatively, local variables can be registered for use by all calls to
+        :py:meth`get_expr` by calling
         :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
-        before calling this method.
+        beforehand. Variables given in the `locals` dictionary will take precedence
+        over those defined via :py:meth:`register_local`.
+
+        Local variable lookup can be disabled completely by passing ``locals=None``.
 
         Parameters
         ----------
             expr : `str`
                 valid Python expression
-            allow_locals : `str`, optional
-                interpret all non-function names in `expr` as local variables.
-                These must have been defined via
-                :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
-                before calling this method. If :py:const:`False`, a :py:exc:`NameError`
-                will be raised
+            locals : `dict` or ``None`` (default: ``{}``)
+                mapping of local variable names that may appear in `expr` to values.
+
+                These will override local variable values specified beforehand
+                using :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
+                before calling this method.
+
+                If :py:const:`None`, local variable lookup is disables and a
+                :py:exc:`NameError` will be raised if an identifier is encountered
+                in the expression.
 
         Usage examples:
 
@@ -1018,9 +1029,23 @@ class InputROOT(object):
             can be used.
 
         """
+        _locals = {}
+        if locals is not None:
+            _locals = dict(self._locals, **locals)
+
         expr = expr.strip()   # extraneous spaces otherwise interpreted as indentation
+
         self._request_all_objects_in_expression(expr)
-        return self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions, allow_locals=allow_locals)
+
+        _result = self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions, locals=_locals)
+
+        # raise exceptions unable to be raised during `_eval` for technical reasons
+        # (e.g. due to expressions with self-referencing local variables that would
+        # cause infinite recursion)
+        if isinstance(_result, Exception):
+            raise _result
+
+        return _result
 
     def _request_all_objects_in_expression(self, expr, **other_request_params):
         """Walk through the expression AST and request an object for each string or identifier"""
@@ -1053,7 +1078,7 @@ class InputROOT(object):
         try:
             assert name not in self._locals
         except AssertionError as e:
-            print("[ERROR] Can't set local '{}' to '{}'! It already exists and is: {}".format(name, value, self._locals[name]))
+            print("[ERROR] Cannot register local '{}' with value {}! It already exists and is: {}".format(name, value, self._locals[name]))
             raise e
         self._locals[name] = value
 
@@ -1064,44 +1089,57 @@ class InputROOT(object):
         """
         self._locals = dict()
 
-    def _eval(self, node, operators, functions, allow_locals):
+    def _eval(self, node, operators, functions, locals):
         """Evaluate an AST node"""
-        #print("Call _eval. allow_locals={}".format(allow_locals))
         if node is None:
             return None
-        elif isinstance(node, ast.Name): # <string> : array column
-            # lookup identifiers in local namespace first
-            if node.id in self._locals:
-                _local = self._locals[node.id]
-                if not allow_locals:
-                    return type(_local)()  # "default" construction to get dummy
+        elif isinstance(node, ast.Name):  # <identifier>
+            # lookup identifiers in local namespace
+            if node.id in locals:
+                _local = locals[node.id]
+
+                # if local variable contains a list, evaluate each element by threading 'get_expr' over it
                 if isinstance(_local, list):
                     _retlist = []
                     for _local_el in _local:
-                        #print("trying: {}".format(_local_el))
+                        # non-string elements are simply passed through
+                        if not isinstance(_local_el, str):
+                            _retlist.append(_local_el)
+                            continue
+
+                        # string-valued elements are evaluated
                         try:
-                            _ret_el = self.get_expr(_local_el, allow_locals=False)
-                        except Exception as e:
-                            #print("Failed!")
-                            #print(dir(e.args))
-                            #raise
-                            _retlist.append(123.0)
+                            # NOTE: local variable lookup is disabled when threading
+                            # over lists that were stored in local variables themselves.
+                            # This is done to prevent infinite recursion errors for
+                            # expressions which may reference themselves
+                            _ret_el = self.get_expr(_local_el, locals=None)
+                        except NameError as e:
+                            # one element of the list references a local variable
+                            # -> stop evaluation and return dummy
+                            # use NameError object instead of None to identifiy
+                            # dummy elements unambiguously later
+                            _retlist.append(e)
                         else:
-                            #print("Success!")
+                            # evaluation succeeded
                             _retlist.append(_ret_el)
-                    #return [self.get_expr(_local_el, allow_locals=False) for _local_el in _local]
                     return _retlist
+                # local variables containing strings are parsed
+                elif isinstance(_local, str):
+                    return self.get_expr(_local, locals=None)
+                # all other types are simply passed through
                 else:
-                    return self.get_expr(_local, allow_locals=False)
+                    return _local
 
             # if no local is found, try a few builtin Python literals
             elif node.id in ('True', 'False', 'None'):  # restrict subset of supported literals
                 return ast.literal_eval(node.id)  # returns corresponding Python literal from string
+
             # if nothing above matched, assume mistyped identifier and give up
-            # NOTE: do *not* assume identifier is a ROOT path. ROOT paths must
-            # be given explicitly as strings.
+            # NOTE: do *not* assume identifier is a ROOT file path. ROOT file paths
+            # must be given explicitly as strings.
             else:
-                raise ValueError("Cannot parse identifier '{}': not a valid Python literal or a registered local variable!".format(node.id))
+                raise NameError("Cannot resolve identifier '{}': not a valid Python literal or a registered local variable!".format(node.id))
         elif isinstance(node, ast.Str): # <string> : array column
             # lookup in ROOT file
             return self.get(node.s)
@@ -1110,27 +1148,27 @@ class InputROOT(object):
         elif isinstance(node, ast.Call): # node names containing parentheses (interpreted as 'Call' objects)
             return functions[node.func.id](
                 # pass positional arguments
-                *map(lambda _arg: self._eval(_arg, operators, functions, allow_locals), node.args),
+                *map(lambda _arg: self._eval(_arg, operators, functions, locals), node.args),
                 # pass keyword arguments
                 **{
-                    _keyword.arg : self._eval(_keyword.value, operators, functions, allow_locals)
+                    _keyword.arg : self._eval(_keyword.value, operators, functions, locals)
                     for _keyword in node.keywords
                 }
             )
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
-            return operators[type(node.op)](self._eval(node.left, operators, functions, allow_locals), self._eval(node.right, operators, functions, allow_locals))
+            return operators[type(node.op)](self._eval(node.left, operators, functions, locals), self._eval(node.right, operators, functions, locals))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
-            return operators[type(node.op)](self._eval(node.operand, operators, functions, allow_locals))
+            return operators[type(node.op)](self._eval(node.operand, operators, functions, locals))
         elif isinstance(node, ast.Subscript): # <operator> <operand> e.g., -1
             if isinstance(node.slice, ast.Index): # support subscripting via simple index
-                return self._eval(node.value, operators, functions, allow_locals)[self._eval(node.slice.value, operators, functions, allow_locals)]
+                return self._eval(node.value, operators, functions, locals)[self._eval(node.slice.value, operators, functions, locals)]
             elif isinstance(node.slice, ast.Slice): # support subscripting via slice
-                return self._eval(node.value, operators, functions, allow_locals)[self._eval(node.slice.lower, operators, functions, allow_locals):self._eval(node.slice.upper, operators, functions, allow_locals):self._eval(node.slice.step, operators, functions, allow_locals)]
+                return self._eval(node.value, operators, functions, locals)[self._eval(node.slice.lower, operators, functions, locals):self._eval(node.slice.upper, operators, functions, locals):self._eval(node.slice.step, operators, functions, locals)]
             else:
                 raise TypeError(node)
         elif isinstance(node, ast.Attribute): # <value>.<attr>
-            return getattr(self._eval(node.value, operators, functions, allow_locals), node.attr)
+            return getattr(self._eval(node.value, operators, functions, locals), node.attr)
         elif isinstance(node, ast.List): # list of node names
-            return [self._eval(_el, operators, functions, allow_locals) for _el in node.elts]
+            return [self._eval(_el, operators, functions, locals) for _el in node.elts]
         else:
             raise TypeError(node)
