@@ -12,5 +12,6 @@ karmaCorrectedMETsProducer = cms.EDProducer(
         # -- other configuration
         typeICorrectionMinJetPt = cms.double(15),
         typeICorrectionMaxTotalEMFraction = cms.double(0.9),
+        typeICorrectionJECReferenceLevel = cms.string("L1"),  # alternatively: "L1RC"
     )
 )

@@ -49,8 +49,9 @@ namespace karma {
         // ----------member data ---------------------------
 
         const edm::ParameterSet& m_configPSet;
-        double typeICorrectionMinJetPt_;
-        double typeICorrectionMaxTotalEMFraction_;
+        const double typeICorrectionMinJetPt_;
+        const double typeICorrectionMaxTotalEMFraction_;
+        const std::string typeICorrectionJECReferenceLevel_;
 
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;

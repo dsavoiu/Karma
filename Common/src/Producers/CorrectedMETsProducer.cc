@@ -6,7 +6,8 @@
 karma::CorrectedMETsProducer::CorrectedMETsProducer(const edm::ParameterSet& config) :
     m_configPSet(config),
     typeICorrectionMinJetPt_(m_configPSet.getParameter<double>("typeICorrectionMinJetPt")),
-    typeICorrectionMaxTotalEMFraction_(m_configPSet.getParameter<double>("typeICorrectionMaxTotalEMFraction")) {
+    typeICorrectionMaxTotalEMFraction_(m_configPSet.getParameter<double>("typeICorrectionMaxTotalEMFraction")),
+    typeICorrectionJECReferenceLevel_(m_configPSet.getParameter<std::string>("typeICorrectionJECReferenceLevel")) {
 
     // -- register products
     produces<karma::METCollection>();
@@ -53,10 +54,10 @@ void karma::CorrectedMETsProducer::produce(edm::Event& event, const edm::EventSe
             continue;
 
         // construct Type-I correction from difference in JEC levels
-        metCorrectionTypeI.mex   -= (jet.p4.Px() - jet.transientLVs_.at("L1").Px());
-        metCorrectionTypeI.mey   -= (jet.p4.Py() - jet.transientLVs_.at("L1").Py());
-        metCorrectionTypeI.sumet -= (jet.p4.Pt() - jet.transientLVs_.at("L1").Pt());
-
+        const karma::LorentzVector& jetJECReferenceLV = jet.transientLVs_.at(typeICorrectionJECReferenceLevel_);
+        metCorrectionTypeI.mex   -= (jet.p4.Px() - jetJECReferenceLV.Px());
+        metCorrectionTypeI.mey   -= (jet.p4.Py() - jetJECReferenceLV.Py());
+        metCorrectionTypeI.sumet -= (jet.p4.Pt() - jetJECReferenceLV.Pt());
     }
 
     // -- populate outputs
