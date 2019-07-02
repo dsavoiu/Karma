@@ -1146,9 +1146,22 @@ class InputROOT(object):
         elif isinstance(node, ast.Num): # <number>
             return node.n
         elif isinstance(node, ast.Call): # node names containing parentheses (interpreted as 'Call' objects)
+            # evaluate unpacked positional arguments, if any
+            _starargs_values = []
+            if node.starargs is not None:
+                _starargs_values = self._eval(node.starargs, operators, functions, locals)
+
+            # starred kwargs (**) not supported for the moment
+            if node.kwargs:
+                raise NotImplementedError(
+                    "Unpacking keyword arguments in expressions via "
+                    "** is not supported. Expression was: '{}'".format(
+                        ast.dump(node, annotate_fields=False)))
+
+            # evaluate arguments and call function
             return functions[node.func.id](
                 # pass positional arguments
-                *map(lambda _arg: self._eval(_arg, operators, functions, locals), node.args),
+                *map(lambda _arg: self._eval(_arg, operators, functions, locals), node.args) + _starargs_values,
                 # pass keyword arguments
                 **{
                     _keyword.arg : self._eval(_keyword.value, operators, functions, locals)

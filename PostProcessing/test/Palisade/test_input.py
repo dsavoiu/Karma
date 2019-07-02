@@ -215,6 +215,53 @@ class TestInputROOTWithFile(unittest.TestCase):
         InputROOT.functions.pop('get_type', None)
 
 
+    def test_get_expr_user_defined_function_varargs(self):
+
+        @InputROOT.add_function
+        def get_arg_structure(*args, **kwargs):
+            return dict(args=args, kwargs=kwargs)
+
+        # subtests for correct application of signatures
+        with self.subTest(test_label="no_args"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure()'),
+                dict(args=tuple(), kwargs={})
+            )
+        with self.subTest(test_label="positional_args_only"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure(1, 6, 4)'),
+                dict(args=(1, 6, 4), kwargs={})
+            )
+        with self.subTest(test_label="kwargs_only"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure(key1=3, key2=77)'),
+                dict(args=tuple(), kwargs=dict(key1=3, key2=77))
+            )
+        with self.subTest(test_label="positional_and_kwargs"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure(2, 44, key=92)'),
+                dict(args=(2, 44), kwargs=dict(key=92))
+            )
+
+        with self.subTest(test_label="starred_args_in_expression"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure(*[3, 2])'),
+                dict(args=(3, 2), kwargs=dict())
+            )
+
+        with self.subTest(test_label="args_and_starred_args_in_expression"):
+            self.assertEquals(
+                self._ic.get_expr('get_arg_structure(1, *[2, 3])'),
+                dict(args=(1, 2, 3), kwargs={})
+            )
+
+        with self.subTest(test_label="starred_kwargs_in_expression"):
+            with self.assertRaises(NotImplementedError) as _err:
+                self._ic.get_expr('get_arg_structure(**{"a": 3})')
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('get_arg_structure', None)
+
     def test_get_expr_local_variables(self):
 
         with self.subTest(test_label="call_local_variable"):
