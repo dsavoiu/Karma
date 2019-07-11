@@ -853,7 +853,11 @@ class InputROOT(object):
         """
 
         # determine real (absolute) path for file
-        _file_realpath = os.path.realpath(file_path)
+        if '://' in file_path:
+            # keep URL-like paths as they are
+            _file_realpath = file_path
+        else:
+            _file_realpath = os.path.realpath(file_path)
 
         # register file name (as given) as file nickname
         self._file_nick_to_realpath[file_path] = _file_realpath
