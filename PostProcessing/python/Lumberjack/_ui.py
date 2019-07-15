@@ -9,6 +9,7 @@ import numpy as np
 import os
 import re
 import sys
+import yaml
 #import ROOT
 
 from contextlib import contextmanager
@@ -268,6 +269,12 @@ class LumberjackInterfaceBase(object):
             if os.path.exists(_task_spec['_filename']) and not self._args.overwrite:
                 print("[INFO] Task output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_spec['_filename']))
                 continue
+            # dump task configuration to yml
+            if self._args.dump_yaml:
+                _yaml_dump_filename = ".".join(_task_spec['_filename'].split('.')[:-1]) + "_configdump.yml"
+                #_yaml_dump_filename = "{}_configdump.yml".format(self._args.output_file.split('.', 1)[0])
+                with open(_yaml_dump_filename, 'w') as _f:
+                    yaml.dump(_task_spec, _f, default_flow_style=False)
 
             with log_stdout_to_file(_task_spec['_log_filename']):
                 print("[INFO] Running task '{}'...".format(_task_name))
@@ -533,6 +540,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         _optional_args.add_argument('--dry-run', help="Set up post-processing tasks, but do not execute", action='store_true')
         _optional_args.add_argument('--overwrite', help="Overwrite output file, if it exists.", action='store_true')
         _optional_args.add_argument('--log', help="Whether to output a log file.", action="store_true")
+        _optional_args.add_argument('--dump-yaml', help="Whether to dump the task configuration as a YAML file.", action="store_true")
         _optional_args.add_argument('--progress', help="Whether to show a progress bar.", action="store_true")
 
         # retrieve analysis config (tasks, splittings, quantities, etc.)
