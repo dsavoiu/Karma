@@ -414,6 +414,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     outputNtupleEntry->met = this->karmaMETCollectionHandle->at(0).p4.Pt();
     outputNtupleEntry->sumEt = this->karmaMETCollectionHandle->at(0).sumEt;
+    outputNtupleEntry->metRaw = this->karmaMETCollectionHandle->at(0).uncorP4.Pt();
+    outputNtupleEntry->sumEtRaw = this->karmaMETCollectionHandle->at(0).uncorSumEt;
 
     // move outputs to event tree
     event.put(std::move(outputNtupleEntry));

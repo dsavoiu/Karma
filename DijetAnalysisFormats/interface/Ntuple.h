@@ -61,6 +61,8 @@ namespace dijet {
         // MET
         double met = UNDEFINED_DOUBLE;
         double sumEt = UNDEFINED_DOUBLE;
+        double metRaw = UNDEFINED_DOUBLE;
+        double sumEtRaw = UNDEFINED_DOUBLE;
 
         // trigger results
         unsigned long hltBits;
