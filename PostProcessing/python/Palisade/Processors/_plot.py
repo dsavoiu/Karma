@@ -245,6 +245,12 @@ class PlotProcessor(_ProcessorBase):
         y_ticklabels = dict(
             method='set_yticklabels',
         ),
+        x_ticks = dict(
+            method='set_xticks',
+        ),
+        y_ticks = dict(
+            method='set_yticks',
+        ),
     )
 
     _DEFAULT_LEGEND_KWARGS = dict(
