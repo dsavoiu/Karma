@@ -54,6 +54,12 @@ QUANTITIES = {
             expression='nPUMean',
             binning=np.arange(0, 101)-0.5
         ),
+        # same as nPUMean, but different binning
+        'pileup': Quantity(
+            name='pileup',
+            expression='nPUMean',
+            binning=np.arange(0, 80+1)
+        ),
 
         'metOverSumET': Quantity(
             name='metOverSumET',
@@ -245,6 +251,29 @@ QUANTITIES = {
             expression='abs(jet12yboost)',
             binning=np.arange(0, 3.0 + 0.1, 0.1)
         ),
+        # fine binning in y*/yb
+        'ystar_wide': Quantity(
+            name='ystar_wide',
+            expression='abs(jet12ystar)',
+            binning=np.arange(0, 3.0 + 0.5, 0.5)
+        ),
+        'yboost_wide': Quantity(
+            name='yboost_wide',
+            expression='abs(jet12yboost)',
+            binning=np.arange(0, 3.0 + 0.5, 0.5)
+        ),
+
+        # global index of bin (for unfolding)
+        'binIndexJet12PtAve': Quantity(
+            name='binIndexJet12PtAve',
+            expression='binIndexJet12PtAve',
+            binning=np.arange(-0.5, 300.5+1.0, 1.0)
+        ),
+        'binIndexJet12Mass': Quantity(
+            name='binIndexJet12Mass',
+            expression='binIndexJet12Mass',
+            binning=np.arange(-0.5, 300.5+1.0, 1.0)
+        ),
     },
     'mc': {
         'computedWeightForStitching': Quantity(
@@ -269,18 +298,40 @@ QUANTITIES = {
             binning=_QCD_BINNING_FINE,
         ),
     },
-    'data': {
-        'activeAK4TriggerPathByPtAve': Quantity(
-            name='activeAK4TriggerPathByPtAve',
-            expression='getActiveAK4TriggerPathByPtAve(jet12ptave)',  # defined in '_root_macros.C'
-            binning=np.arange(0, 30)-0.5,
-        ),
-        'assignedTriggerLuminosityWeight': Quantity(
-            name='assignedTriggerLuminosityWeight',
-            expression='getEventLuminosityWeightByPtAve_PFJetTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+    'data_ak4': {
+        #'activeAK4TriggerPathByPtAve': Quantity(
+        #    name='activeAK4TriggerPathByPtAve',
+        #    expression='getActiveAK4TriggerPathByPtAve(jet12ptave)',  # defined in '_root_macros.C'
+        #    binning=np.arange(0, 30)-0.5,
+        #),
+        'ak4EventLuminosityWeightByPtAve_PFJetTriggers': Quantity(
+            name='ak4EventLuminosityWeightByPtAve_PFJetTriggers',
+            expression='getAK4EventLuminosityWeightByPtAve_PFJetTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
             binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
         ),
-    }
+        'ak4EventLuminosityWeightByPtAve_DiPFJetAveTriggers': Quantity(
+            name='ak4EventLuminosityWeightByPtAve_DiPFJetAveTriggers',
+            expression='getAK4EventLuminosityWeightByPtAve_DiPFJetAveTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+    },
+    'data_ak8': {
+        #'activeAK8TriggerPathByPtAve': Quantity(
+        #    name='activeAK8TriggerPathByPtAve',
+        #    expression='getActiveAK8TriggerPathByPtAve(jet12ptave)',  # defined in '_root_macros.C'
+        #    binning=np.arange(0, 30)-0.5,
+        #),
+        'ak8EventLuminosityWeightByPtAve_AK8PFJetTriggers': Quantity(
+            name='ak8EventLuminosityWeightByPtAve_AK8PFJetTriggers',
+            expression='getAK8EventLuminosityWeightByPtAve_AK8PFJetTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+        'ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers': Quantity(
+            name='ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers',
+            expression='getAK8EventLuminosityWeightByPtAve_DiPFJetAveTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+    },
 }
 QUANTITIES['global'].update({
     'jet1eta':          Quantity(name='jet1eta',       expression='jet1eta',       binning=QUANTITIES['global']['jet1y'].binning),
@@ -333,6 +384,32 @@ QUANTITIES['mc'].update({
         expression='jet12MatchedGenJetPairMass',
         binning=QUANTITIES['global']['jet12mass_wide'].binning,
         named_binnings=QUANTITIES['global']['jet12mass_wide'].named_binnings,
+    ),
+
+    'absJet12MatchedGenJetPairYBoost': Quantity(
+        name='absJet12MatchedGenJetPairYBoost',
+        expression='abs(jet12MatchedGenJetPairYBoost)',
+        binning=QUANTITIES['global']['yboost'].binning,
+        named_binnings=QUANTITIES['global']['yboost'].named_binnings,
+    ),
+    'absJet12MatchedGenJetPairYStar': Quantity(
+        name='absJet12MatchedGenJetPairYStar',
+        expression='abs(jet12MatchedGenJetPairYStar)',
+        binning=QUANTITIES['global']['ystar'].binning,
+        named_binnings=QUANTITIES['global']['ystar'].named_binnings,
+    ),
+
+    'absJet12MatchedGenJetPairYBoost_wide': Quantity(
+        name='absJet12MatchedGenJetPairYBoost_wide',
+        expression='abs(jet12MatchedGenJetPairYBoost)',
+        binning=QUANTITIES['global']['yboost_wide'].binning,
+        named_binnings=QUANTITIES['global']['yboost_wide'].named_binnings,
+    ),
+    'absJet12MatchedGenJetPairYStar_wide': Quantity(
+        name='absJet12MatchedGenJetPairYStar_wide',
+        expression='abs(jet12MatchedGenJetPairYStar)',
+        binning=QUANTITIES['global']['ystar_wide'].binning,
+        named_binnings=QUANTITIES['global']['ystar_wide'].named_binnings,
     ),
 })
 
@@ -410,6 +487,8 @@ DEFINES['global'].update({
 
 # defines to be applied for MC samples only
 DEFINES['mc'] = {
+    # product of all weights
+    "totalWeight" : "weightForStitching*generatorWeight*pileupWeight",
     # jet flavor categories
     "Flavor_QQ":  "(abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)",
     "Flavor_QG":  "((abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(jet2PartonFlavor==21))||((abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)&&(jet1PartonFlavor==21))",
@@ -437,6 +516,16 @@ DEFINES['mc'] = {
     "QCDSubprocess_IsDiagonal":  "abs(incomingParton1Flavor)==abs(incomingParton2Flavor)",
 }
 
+DEFINES['data_ak4'] = {
+    # product of all weights
+    "totalWeight_PFJetTriggers" : "ak4EventLuminosityWeightByPtAve_PFJetTriggers",
+    "totalWeight_DiPFJetAveTriggers" : "ak4EventLuminosityWeightByPtAve_DiPFJetAveTriggers",
+}
+DEFINES['data_ak8'] = {
+    # product of all weights
+    "totalWeight_PFJetTriggers" : "ak8EventLuminosityWeightByPtAve_AK8PFJetTriggers",
+    "totalWeight_DiPFJetAveTriggers" : "ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers",
+}
 
 # specification of filters to be applied to data frame
 SELECTIONS = {

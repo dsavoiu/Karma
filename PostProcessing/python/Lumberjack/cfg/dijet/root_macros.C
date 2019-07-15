@@ -24,7 +24,7 @@ double getWeightForStitching(const double& binningValue) {
     else if (binningValue < 1800)   return 2.11851900436166E-06;
     else if (binningValue < 2400)   return 2.82653523110195E-07;
     else if (binningValue < 3200)   return 1.6912726125052E-08;
-    else                            return 0.0;
+    else                            return 4.150765185648461e-10;
 }
 
 #define IDX_HLT_IsoMu24          0
@@ -61,42 +61,55 @@ double getWeightForStitching(const double& binningValue) {
 #define IDX_HLT_DiPFJetAve400   28
 #define IDX_HLT_DiPFJetAve500   29
 
+// -- convenience function
+#define FIRED(TRIGGER_INDEX)    ((hltBits & (1 << TRIGGER_INDEX)) > 0)
+
+// -- active phase space regions
+
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet40         100
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet60         100
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet80         147
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet140        207
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet200        284
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet260        437
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet320        499
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet400        499
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet450        499
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet500        569
+
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet40      100
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet60      100
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet80      147
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet140     243
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet200     284
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet260     437
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet320     437
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet400     499
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet450     569
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet500     569
+
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve40    100
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve60    100
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve80    100
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve140   207
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve200   284
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve260   499
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve320   380
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve400   646
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve500   569
+
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve40    100
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve60    100
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve80    122
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve140   243
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve200   284
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve260   499
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve320   437
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve400   499
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve500   732
+
+
 // -- trigger path luminosity weights
-
-/*
-// -- Run2016G
-#define LUMI_WEIGHT_HLT_PFJet40          1.0e6/48714.091
-#define LUMI_WEIGHT_HLT_PFJet60          1.0e6/123328.102
-#define LUMI_WEIGHT_HLT_PFJet80          1.0e6/369296.644
-#define LUMI_WEIGHT_HLT_PFJet140         1.0e6/3618461.972
-#define LUMI_WEIGHT_HLT_PFJet200         1.0e6/11962959.393
-#define LUMI_WEIGHT_HLT_PFJet260         1.0e6/102345547.894
-#define LUMI_WEIGHT_HLT_PFJet320         1.0e6/310001081.812
-#define LUMI_WEIGHT_HLT_PFJet400         1.0e6/918960478.743
-#define LUMI_WEIGHT_HLT_PFJet450         1.0e6/7544015569.439
-#define LUMI_WEIGHT_HLT_PFJet500         1.0e6/7544015569.439
-
-#define LUMI_WEIGHT_HLT_AK8PFJet40       1.0e6/9742.818
-#define LUMI_WEIGHT_HLT_AK8PFJet60       1.0e6/61664.051
-#define LUMI_WEIGHT_HLT_AK8PFJet80       1.0e6/184648.322
-#define LUMI_WEIGHT_HLT_AK8PFJet140      1.0e6/1809230.986
-#define LUMI_WEIGHT_HLT_AK8PFJet200      1.0e6/11962959.393
-#define LUMI_WEIGHT_HLT_AK8PFJet260      1.0e6/102345547.894
-#define LUMI_WEIGHT_HLT_AK8PFJet320      1.0e6/310001081.812
-#define LUMI_WEIGHT_HLT_AK8PFJet400      1.0e6/918960478.743
-#define LUMI_WEIGHT_HLT_AK8PFJet450      1.0e6/7544015569.439
-#define LUMI_WEIGHT_HLT_AK8PFJet500      1.0e6/7544015569.439
-
-#define LUMI_WEIGHT_HLT_DiPFJetAve40     1.0e6/11311.920
-#define LUMI_WEIGHT_HLT_DiPFJetAve60     1.0e6/350986.611
-#define LUMI_WEIGHT_HLT_DiPFJetAve80     1.0e6/340824.353
-#define LUMI_WEIGHT_HLT_DiPFJetAve140    1.0e6/3618461.972
-#define LUMI_WEIGHT_HLT_DiPFJetAve200    1.0e6/17873786.697
-#define LUMI_WEIGHT_HLT_DiPFJetAve260    1.0e6/107807705.356
-#define LUMI_WEIGHT_HLT_DiPFJetAve320    1.0e6/594238641.781
-#define LUMI_WEIGHT_HLT_DiPFJetAve400    1.0e6/1705794763.427
-#define LUMI_WEIGHT_HLT_DiPFJetAve500    1.0e6/5736356853.437
-*/
 
 // -- Run2016BCDEFGH
 #define LUMI_WEIGHT_HLT_PFJet40       1.0e6/260677.932
@@ -185,16 +198,64 @@ int getActiveDijetTriggerPathByPtAve(const double& ptave) {
 /*
  * Returns the luminosity weight for an event based on trigger decisions and reco. jet pt average
  */
-double getEventLuminosityWeightByPtAve_PFJetTriggers(const double& ptave, const unsigned long& hltBits) {
+double getAK4EventLuminosityWeightByPtAve_PFJetTriggers(const double& ptave, const unsigned long& hltBits) {
 
-    if      ((499 <= ptave)                  && ((hltBits & (1 << IDX_HLT_PFJet450)) > 0)) return LUMI_WEIGHT_HLT_PFJet450 ;
-    else if ((437 <= ptave) && (ptave < 499) && ((hltBits & (1 << IDX_HLT_PFJet400)) > 0)) return LUMI_WEIGHT_HLT_PFJet400 ;
-    else if ((380 <= ptave) && (ptave < 437) && ((hltBits & (1 << IDX_HLT_PFJet320)) > 0)) return LUMI_WEIGHT_HLT_PFJet320 ;
-    else if ((329 <= ptave) && (ptave < 380) && ((hltBits & (1 << IDX_HLT_PFJet260)) > 0)) return LUMI_WEIGHT_HLT_PFJet260 ;
-    else if ((284 <= ptave) && (ptave < 329) && ((hltBits & (1 << IDX_HLT_PFJet200)) > 0)) return LUMI_WEIGHT_HLT_PFJet200 ;
-    else if ((174 <= ptave) && (ptave < 284) && ((hltBits & (1 << IDX_HLT_PFJet140)) > 0)) return LUMI_WEIGHT_HLT_PFJet140 ;
-    else if ((147 <= ptave) && (ptave < 174) && ((hltBits & (1 << IDX_HLT_PFJet80 )) > 0)) return LUMI_WEIGHT_HLT_PFJet80  ;
-    else if ((100 <= ptave) && (ptave < 147) && ((hltBits & (1 << IDX_HLT_PFJet60 )) > 0)) return LUMI_WEIGHT_HLT_PFJet60  ;
-    else                                                                                   return 0.0;
+    if      (PTAVE_THRESHOLD_AK4_HLT_PFJet450 <= ptave) return FIRED(IDX_HLT_PFJet450) ? LUMI_WEIGHT_HLT_PFJet450 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet400 <= ptave) return FIRED(IDX_HLT_PFJet400) ? LUMI_WEIGHT_HLT_PFJet400 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet320 <= ptave) return FIRED(IDX_HLT_PFJet320) ? LUMI_WEIGHT_HLT_PFJet320 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet260 <= ptave) return FIRED(IDX_HLT_PFJet260) ? LUMI_WEIGHT_HLT_PFJet260 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet200 <= ptave) return FIRED(IDX_HLT_PFJet200) ? LUMI_WEIGHT_HLT_PFJet200 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet140 <= ptave) return FIRED(IDX_HLT_PFJet140) ? LUMI_WEIGHT_HLT_PFJet140 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet80  <= ptave) return FIRED(IDX_HLT_PFJet80 ) ? LUMI_WEIGHT_HLT_PFJet80  : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_PFJet60  <= ptave) return FIRED(IDX_HLT_PFJet60 ) ? LUMI_WEIGHT_HLT_PFJet60  : 0.0;
+    else                                                return 0.0;
+}
 
+/*
+ * Returns the luminosity weight for an event based on trigger decisions and reco. jet pt average
+ */
+double getAK8EventLuminosityWeightByPtAve_AK8PFJetTriggers(const double& ptave, const unsigned long& hltBits) {
+
+    if      (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet450 <= ptave) return FIRED(IDX_HLT_AK8PFJet450) ? LUMI_WEIGHT_HLT_AK8PFJet450 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet400 <= ptave) return FIRED(IDX_HLT_AK8PFJet400) ? LUMI_WEIGHT_HLT_AK8PFJet400 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet320 <= ptave) return FIRED(IDX_HLT_AK8PFJet320) ? LUMI_WEIGHT_HLT_AK8PFJet320 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet260 <= ptave) return FIRED(IDX_HLT_AK8PFJet260) ? LUMI_WEIGHT_HLT_AK8PFJet260 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet200 <= ptave) return FIRED(IDX_HLT_AK8PFJet200) ? LUMI_WEIGHT_HLT_AK8PFJet200 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet140 <= ptave) return FIRED(IDX_HLT_AK8PFJet140) ? LUMI_WEIGHT_HLT_AK8PFJet140 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet80  <= ptave) return FIRED(IDX_HLT_AK8PFJet80 ) ? LUMI_WEIGHT_HLT_AK8PFJet80  : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_AK8PFJet60  <= ptave) return FIRED(IDX_HLT_AK8PFJet60 ) ? LUMI_WEIGHT_HLT_AK8PFJet60  : 0.0;
+    else                                                   return 0.0;
+
+}
+
+/*
+ * Returns the luminosity weight for an event based on trigger decisions and reco. jet pt average
+ */
+double getAK4EventLuminosityWeightByPtAve_DiPFJetAveTriggers(const double& ptave, const unsigned long& hltBits) {
+
+    if      (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve500 <= ptave) return FIRED(IDX_HLT_DiPFJetAve500) ? LUMI_WEIGHT_HLT_DiPFJetAve500 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve400 <= ptave) return FIRED(IDX_HLT_DiPFJetAve400) ? LUMI_WEIGHT_HLT_DiPFJetAve400 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve320 <= ptave) return FIRED(IDX_HLT_DiPFJetAve320) ? LUMI_WEIGHT_HLT_DiPFJetAve320 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve260 <= ptave) return FIRED(IDX_HLT_DiPFJetAve260) ? LUMI_WEIGHT_HLT_DiPFJetAve260 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve200 <= ptave) return FIRED(IDX_HLT_DiPFJetAve200) ? LUMI_WEIGHT_HLT_DiPFJetAve200 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve140 <= ptave) return FIRED(IDX_HLT_DiPFJetAve140) ? LUMI_WEIGHT_HLT_DiPFJetAve140 : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve80  <= ptave) return FIRED(IDX_HLT_DiPFJetAve80 ) ? LUMI_WEIGHT_HLT_DiPFJetAve80  : 0.0;
+    else if (PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve60  <= ptave) return FIRED(IDX_HLT_DiPFJetAve60 ) ? LUMI_WEIGHT_HLT_DiPFJetAve60  : 0.0;
+    else                                                     return 0.0;
+}
+
+/*
+ * Returns the luminosity weight for an event based on trigger decisions and reco. jet pt average
+ */
+double getAK8EventLuminosityWeightByPtAve_DiPFJetAveTriggers(const double& ptave, const unsigned long& hltBits) {
+
+    if      (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve500 <= ptave) return FIRED(IDX_HLT_DiPFJetAve500) ? LUMI_WEIGHT_HLT_DiPFJetAve500 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve400 <= ptave) return FIRED(IDX_HLT_DiPFJetAve400) ? LUMI_WEIGHT_HLT_DiPFJetAve400 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve320 <= ptave) return FIRED(IDX_HLT_DiPFJetAve320) ? LUMI_WEIGHT_HLT_DiPFJetAve320 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve260 <= ptave) return FIRED(IDX_HLT_DiPFJetAve260) ? LUMI_WEIGHT_HLT_DiPFJetAve260 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve200 <= ptave) return FIRED(IDX_HLT_DiPFJetAve200) ? LUMI_WEIGHT_HLT_DiPFJetAve200 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve140 <= ptave) return FIRED(IDX_HLT_DiPFJetAve140) ? LUMI_WEIGHT_HLT_DiPFJetAve140 : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve80  <= ptave) return FIRED(IDX_HLT_DiPFJetAve80 ) ? LUMI_WEIGHT_HLT_DiPFJetAve80  : 0.0;
+    else if (PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve60  <= ptave) return FIRED(IDX_HLT_DiPFJetAve60 ) ? LUMI_WEIGHT_HLT_DiPFJetAve60  : 0.0;
+    else                                                     return 0.0;
 }
