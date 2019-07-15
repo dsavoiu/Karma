@@ -163,9 +163,13 @@ def _plot_as_step(ax, *args, **kwargs):
     _xerr_dn = np.asarray(_xerr_dn)
     _xerr_up = np.asarray(_xerr_up)
 
-    # replicate each point three times (left edge, center, right edge)
-    _x = np.vstack([_x, _x, _x]).T.flatten()
-    _y = np.vstack([_y, _y, _y]).T.flatten()
+    # replicate each point five times -> bin anchors
+    #  1 +       + 5
+    #    |       |
+    #    +---+---+
+    #  2     3     4
+    _x = np.vstack([_x, _x, _x, _x, _x]).T.flatten()
+    _y = np.vstack([_y, _y, _y, _y, _y]).T.flatten()
 
     # stop processing y errors if they are zero
     if np.allclose(_yerr, 0):
@@ -175,25 +179,28 @@ def _plot_as_step(ax, *args, **kwargs):
     if _yerr is not None:
         if _show_yerr_as == 'band':
             # error band: shade across entire bin width
-            _yerr_dn = np.vstack([_yerr_dn, _yerr_dn, _yerr_dn]).T.flatten()
-            _yerr_up = np.vstack([_yerr_up, _yerr_up, _yerr_up]).T.flatten()
+            _yerr_dn = np.vstack([_zeros, _yerr_dn, _yerr_dn, _yerr_dn, _zeros]).T.flatten()
+            _yerr_up = np.vstack([_zeros, _yerr_up, _yerr_up, _yerr_up, _zeros]).T.flatten()
         else:
             # errorbars: only show on central point
-            _yerr_dn = np.vstack([_zeros, _yerr_dn, _zeros]).T.flatten()
-            _yerr_up = np.vstack([_zeros, _yerr_up, _zeros]).T.flatten()
+            _yerr_dn = np.vstack([_zeros, _zeros, _yerr_dn, _zeros]).T.flatten()
+            _yerr_up = np.vstack([_zeros, _zeros, _yerr_up, _zeros]).T.flatten()
         _yerr = [_yerr_dn, _yerr_up]
 
     # shift left and right replicas in x by xerr
-    _x += np.vstack([-_xerr_dn, _zeros, _xerr_up]).T.flatten()
+    _x += np.vstack([-_xerr_dn, -_xerr_dn, _zeros, _xerr_up, _xerr_up]).T.flatten()
 
     if _show_yerr_as == 'errorbar' or _show_yerr_as is None:
         return ax.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
     elif _show_yerr_as == 'band':
+        _band_alpha = kwargs.pop('band_alpha', 0.5)
         _capsize = kwargs.pop('capsize', None)
         _markeredgecolor = kwargs.pop('markeredgecolor', None)
+        if _yerr is None:
+            _yerr = 0, 0
         return (
             ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, **kwargs),
-            ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=0.5)))
+            ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=_band_alpha, linewidth=0)))
 
 
 class PlotProcessor(_ProcessorBase):
