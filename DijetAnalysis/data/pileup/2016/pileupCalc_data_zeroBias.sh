@@ -4,4 +4,4 @@ pileupCalc.py -i ../../json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions1
     --minBiasXsec 69200 \
     --maxPileupBin 80 \
     --numPileupBins 80 \
-    nPUMean_data.root
+    nPUMean_data_zeroBias.root

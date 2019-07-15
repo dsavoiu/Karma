@@ -209,7 +209,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
 
             isData = cms.bool(options.isData),
             weightForStitching = cms.double(options.weightForStitching),
-            npuMeanFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_data.txt".format(
+            npuMeanFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_data_zeroBias.txt".format(
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
@@ -220,7 +220,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
             flexGridFileDijetMass = cms.string(
                 "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_mass.yml".format(os.getenv('CMSSW_BASE'))),
 
-            pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio.root".format(
+            pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_zeroBias.root".format(
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
