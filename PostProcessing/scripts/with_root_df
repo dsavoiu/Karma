@@ -1,5 +1,6 @@
-echo "Sourcing master ROOT stack... [/cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc62-opt/setup.sh]..."
-source /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc62-opt/setup.sh
+_root_source_path="/cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc7-opt/setup.sh"
+echo "Sourcing master ROOT stack... [$_root_source_path]..."
+source $_root_source_path
 PYTHONPATH=$CMSSW_BASE/python:$PYTHONPATH  # needed for some reason
 
 $@
