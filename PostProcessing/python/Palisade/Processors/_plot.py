@@ -298,6 +298,23 @@ class PlotProcessor(_ProcessorBase):
 
         return _seen_label_handles, _seen_labels
 
+    @staticmethod
+    def _sort_legend_handles_labels(handles, labels, stack_labels=None):
+        '''sort handles and labels, reversing the order of those that are part of a stack'''
+        # if no stacks or a stack with a single label, don't sort
+        if stack_labels is None or len(stack_labels) <= 1:
+            return handles, labels
+
+        # temporarily cast to array to use numpy indexing
+        _hs, _ls = np.asarray(handles), np.asarray(labels)
+        _criterion = np.vectorize(lambda label: label in stack_labels)
+
+        # reverse sublist selected by criterion
+        _ls[_criterion(_ls)] = _ls[_criterion(_ls)][::-1]
+        _hs[_criterion(_ls)] = _hs[_criterion(_ls)][::-1]
+
+        # return as lists
+        return list(_hs), list(_ls)
 
     # -- actions
 
@@ -380,6 +397,7 @@ class PlotProcessor(_ProcessorBase):
             _pad_config = _pad_configs[_pad_id]
             _ax = _pad_config['axes']
             _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
+            _stack_labels = _pad_config.setdefault('stack_labels', [])
             _bin_labels = _pad_config.setdefault('bin_labels', {})
             _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
 
@@ -480,6 +498,10 @@ class PlotProcessor(_ProcessorBase):
             _y_bottom = 0
             if _stack_name is not None:
                 _y_bottom = _stack_bottoms.setdefault(_stack_name, 0.0)  # actually 'get' with default
+                # keep track of stack labels in order to reverse the legend order later
+                _stack_label = _kwargs.get('label', None)
+                if _stack_label is not None:
+                    _stack_labels.append(_stack_label)
 
             # different methods handle information differently
             if _plot_method_name == 'bar':
@@ -657,6 +679,9 @@ class PlotProcessor(_ProcessorBase):
 
             # obtain legend handles and labels
             _hs, _ls = _ax.get_legend_handles_labels()
+
+            # re-sort, reversing the order of labels that are part of a stack
+            _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_pad_config.get("stack_labels", None))
 
             # merge legend entries with identical labels
             _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)
