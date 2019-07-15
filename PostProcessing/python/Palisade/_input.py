@@ -518,9 +518,12 @@ class _ROOTObjectFunctions(object):
         """Normalize `tobject` to the integral over `tobject_ref`."""
 
         _new_tobject = asrootpy(tobject.Clone())
-        _factor = float(tobject_ref.integral()) / float(tobject.integral())
+        if tobject.integral():
+            _factor = float(tobject_ref.integral()) / float(tobject.integral())
 
-        return _new_tobject * _factor
+            return _new_tobject * _factor
+        else:
+            return _new_tobject
 
     @staticmethod
     def cumulate(tobject):
