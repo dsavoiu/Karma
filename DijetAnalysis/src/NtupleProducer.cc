@@ -46,6 +46,15 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
                 )
             );
         }
+        // can provide an alternative pileup weight file
+        if (!m_configPSet.getParameter<std::string>("pileupWeightFileAlt").empty()) {
+            m_puWeightProviderAlt = std::unique_ptr<karma::PileupWeightProvider>(
+                new karma::PileupWeightProvider(
+                    m_configPSet.getParameter<std::string>("pileupWeightFileAlt"),
+                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+                )
+            );
+        }
     }
 
     // construct FlexGrid bin finders with final analysis binning
@@ -179,6 +188,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->nPUMean = this->karmaEventHandle->nPUTrue;
         if (m_puWeightProvider) {
             outputNtupleEntry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+        }
+        if (m_puWeightProviderAlt) {
+            outputNtupleEntry->pileupWeightAlt = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleEntry->nPUMean);
         }
     }
 

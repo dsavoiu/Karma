@@ -22,6 +22,7 @@ dijetNtupleProducer = cms.EDProducer(
         minBiasCrossSection = cms.double(69.2),  # in mb
 
         pileupWeightFile = cms.string("nPUMean_ratio.root"),
+        pileupWeightFileAlt = cms.string("nPUMean_ratio_alternative.root"),
         pileupWeightHistogramName = cms.string("pileup"),
 
         weightForStitching = cms.double(1.0),

@@ -106,6 +106,7 @@ namespace dijet {
         double generatorWeightProduct = 1.0;
         double weightForStitching = 1.0;
         double pileupWeight =  1.0;
+        double pileupWeightAlt =  1.0;
 
         // binning values
         double binningValue = UNDEFINED_DOUBLE;

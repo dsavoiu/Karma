@@ -224,6 +224,10 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
+            pileupWeightFileAlt = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_zeroBias.root".format(
+                os.getenv('CMSSW_BASE'),
+                YEAR="2016",
+            ),
             pileupWeightHistogramName = "pileup",
         )
     )

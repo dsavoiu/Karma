@@ -348,6 +348,16 @@ QUANTITIES['global'].update({
     'jet2eta':          Quantity(name='jet2eta',       expression='jet2eta',       binning=QUANTITIES['global']['jet1eta'].binning),
 })
 QUANTITIES['mc'].update({
+    'pileupWeight': Quantity(
+        name='pileupWeight',
+        expression='pileupWeight',
+        binning=np.linspace(0, 2, 100),
+    ),
+    'pileupWeightAlt': Quantity(
+        name='pileupWeightAlt',
+        expression='pileupWeightAlt',
+        binning=np.linspace(0, 2, 100),
+    ),
     'jet1MatchedGenJetPt_narrow': Quantity(
         name='jet1MatchedGenJetPt_narrow',
         expression='jet1MatchedGenJetPt',
@@ -489,6 +499,8 @@ DEFINES['global'].update({
 DEFINES['mc'] = {
     # product of all weights
     "totalWeight" : "weightForStitching*generatorWeight*pileupWeight",
+    "totalWeight_altPUWeight" : "weightForStitching*generatorWeight*pileupWeightAlt",
+    "totalWeight_noPUWeight" : "weightForStitching*generatorWeight",
     # jet flavor categories
     "Flavor_QQ":  "(abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)",
     "Flavor_QG":  "((abs(jet1PartonFlavor)>0)&&(abs(jet1PartonFlavor)<=5)&&(jet2PartonFlavor==21))||((abs(jet2PartonFlavor)>0)&&(abs(jet2PartonFlavor)<=5)&&(jet1PartonFlavor==21))",
