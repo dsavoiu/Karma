@@ -220,7 +220,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
             flexGridFileDijetMass = cms.string(
                 "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_mass.yml".format(os.getenv('CMSSW_BASE'))),
 
-            pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_zeroBias.root".format(
+            pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_jetHT.root".format(
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
