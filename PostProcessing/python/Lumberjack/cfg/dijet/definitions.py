@@ -536,7 +536,7 @@ SELECTIONS = {
     'recoJetPhaseSpace' : [
         # kinematics of leading jets
         "jet1pt > 100",
-        "jet2pt > 100",
+        "jet2pt > 50",
         "abs(jet1y) < 3.0",
         "abs(jet2y) < 3.0",
     ],
@@ -544,14 +544,27 @@ SELECTIONS = {
         # met/sumet cut (for background rejection)
         "metOverSumET < 0.3",
     ],
+    'stitchingOutliersVeto' : [
+        # prevent outliers in QCD MC
+        'binningValue>=jet1pt/2.5'
+    ],
     'npvGoodFilter' : [
-        # met/sumet cut (for background rejection)
+        # at least one good primary vertex
         "npvGood > 0",
+    ],
+    'hltFilter' : [
+        # at least one interesting trigger fired
+        "hltBits > 0",
+    ],
+    'jetId' : [
+        # both leading jets passed the Jet ID
+        "jet1id > 0",
+        "jet2id > 0",
     ],
     'genJetPhaseSpace' : [
         # kinematics of leading gen jets
         "genjet1pt > 100",
-        "genjet2pt > 100",
+        "genjet2pt > 50",
         "abs(genjet1y) < 3.0",
         "abs(genjet2y) < 3.0",
     ],
@@ -593,7 +606,7 @@ SPLITTINGS = {
         'YB_15_20_YS_05_10' : dict(yboost=(1.5, 2.0), ystar=(0.5, 1.0)),
         'YB_20_25_YS_00_05' : dict(yboost=(2.0, 2.5), ystar=(0.0, 0.5)),
     },
-    # by AK4 single-jet trigger path (with overlap)
+    # numerator/denominator selections for AK4 single-jet trigger efficiency
     'trigger_efficiencies_ak4' : {
         'all'  : dict(),
         'HLT_PFJet40_Ref'  : dict(HLT_IsoMu24=1),
@@ -618,7 +631,7 @@ SPLITTINGS = {
         'HLT_PFJet450_Num' : dict(HLT_PFJet400_Jet1Match=1, HLT_PFJet450_Jet1PtPassThresholdsHLT=1, HLT_PFJet450_Jet1PtPassThresholdsL1=1),
         'HLT_PFJet500_Num' : dict(HLT_PFJet450_Jet1Match=1, HLT_PFJet500_Jet1PtPassThresholdsHLT=1, HLT_PFJet500_Jet1PtPassThresholdsL1=1),
     },
-    # by AK8 single-jet trigger path (with overlap)
+    # numerator/denominator selections for AK8 single-jet trigger efficiency
     'trigger_efficiencies_ak8' : {
         'all'  : dict(),
         'HLT_AK8PFJet40_Ref'  : dict(HLT_IsoMu24=1),
@@ -643,7 +656,7 @@ SPLITTINGS = {
         'HLT_AK8PFJet450_Num' : dict(HLT_AK8PFJet400_Jet1Match=1, HLT_AK8PFJet450_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet450_Jet1PtPassThresholdsL1=1),
         'HLT_AK8PFJet500_Num' : dict(HLT_AK8PFJet450_Jet1Match=1, HLT_AK8PFJet500_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet500_Jet1PtPassThresholdsL1=1),
     },
-    # by AK8 single-jet trigger path (with overlap)
+    # numerator/denominator selections for dijet trigger efficiency (AK4-only)
     'trigger_efficiencies_dijet' : {
         'all'  : dict(),
         'HLT_DiPFJetAve40_Ref'  : dict(HLT_IsoMu24=1),
@@ -665,6 +678,79 @@ SPLITTINGS = {
         'HLT_DiPFJetAve320_Num' : dict(HLT_DiPFJetAve260_Jet12Match=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsL1=1),
         'HLT_DiPFJetAve400_Num' : dict(HLT_DiPFJetAve320_Jet12Match=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsL1=1),
         'HLT_DiPFJetAve500_Num' : dict(HLT_DiPFJetAve400_Jet12Match=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsL1=1),
+    },
+    # numerator/denominator selections for AK4 single-jet trigger efficiency
+    'trigger_efficiencies_ak4_nomatch' : {
+        'all'  : dict(),
+        'HLT_PFJet40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_PFJet60_Ref'  : dict(HLT_PFJet40=1 ),
+        'HLT_PFJet80_Ref'  : dict(HLT_PFJet60=1 ),
+        'HLT_PFJet140_Ref' : dict(HLT_PFJet80=1 ),
+        'HLT_PFJet200_Ref' : dict(HLT_PFJet140=1),
+        'HLT_PFJet260_Ref' : dict(HLT_PFJet200=1),
+        'HLT_PFJet320_Ref' : dict(HLT_PFJet260=1),
+        'HLT_PFJet400_Ref' : dict(HLT_PFJet320=1),
+        'HLT_PFJet450_Ref' : dict(HLT_PFJet400=1),
+        'HLT_PFJet500_Ref' : dict(HLT_PFJet450=1),
+
+        'HLT_PFJet40_Num'  : dict(HLT_IsoMu24=1,  HLT_PFJet40=1),
+        'HLT_PFJet60_Num'  : dict(HLT_PFJet40=1,  HLT_PFJet60_Jet1PtPassThresholdsHLT=1),
+        'HLT_PFJet80_Num'  : dict(HLT_PFJet60=1,  HLT_PFJet80_Jet1PtPassThresholdsHLT=1,  HLT_PFJet80_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet140_Num' : dict(HLT_PFJet80=1,  HLT_PFJet140_Jet1PtPassThresholdsHLT=1, HLT_PFJet140_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet200_Num' : dict(HLT_PFJet140=1, HLT_PFJet200_Jet1PtPassThresholdsHLT=1, HLT_PFJet200_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet260_Num' : dict(HLT_PFJet200=1, HLT_PFJet260_Jet1PtPassThresholdsHLT=1, HLT_PFJet260_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet320_Num' : dict(HLT_PFJet260=1, HLT_PFJet320_Jet1PtPassThresholdsHLT=1, HLT_PFJet320_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet400_Num' : dict(HLT_PFJet320=1, HLT_PFJet400_Jet1PtPassThresholdsHLT=1, HLT_PFJet400_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet450_Num' : dict(HLT_PFJet400=1, HLT_PFJet450_Jet1PtPassThresholdsHLT=1, HLT_PFJet450_Jet1PtPassThresholdsL1=1),
+        'HLT_PFJet500_Num' : dict(HLT_PFJet450=1, HLT_PFJet500_Jet1PtPassThresholdsHLT=1, HLT_PFJet500_Jet1PtPassThresholdsL1=1),
+    },
+    # numerator/denominator selections for AK8 single-jet trigger efficiency
+    'trigger_efficiencies_ak8_nomatch' : {
+        'all'  : dict(),
+        'HLT_AK8PFJet40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_AK8PFJet60_Ref'  : dict(HLT_AK8PFJet40=1),
+        'HLT_AK8PFJet80_Ref'  : dict(HLT_AK8PFJet60=1),
+        'HLT_AK8PFJet140_Ref' : dict(HLT_AK8PFJet80=1),
+        'HLT_AK8PFJet200_Ref' : dict(HLT_AK8PFJet140=1),
+        'HLT_AK8PFJet260_Ref' : dict(HLT_AK8PFJet200=1),
+        'HLT_AK8PFJet320_Ref' : dict(HLT_AK8PFJet260=1),
+        'HLT_AK8PFJet400_Ref' : dict(HLT_AK8PFJet320=1),
+        'HLT_AK8PFJet450_Ref' : dict(HLT_AK8PFJet400=1),
+        'HLT_AK8PFJet500_Ref' : dict(HLT_AK8PFJet450=1),
+
+        'HLT_AK8PFJet40_Num'  : dict(HLT_IsoMu24=1,     HLT_AK8PFJet40=1),
+        'HLT_AK8PFJet60_Num'  : dict(HLT_AK8PFJet40=1,  HLT_AK8PFJet60_Jet1PtPassThresholdsHLT=1),
+        'HLT_AK8PFJet80_Num'  : dict(HLT_AK8PFJet60=1,  HLT_AK8PFJet80_Jet1PtPassThresholdsHLT=1,  HLT_AK8PFJet80_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet140_Num' : dict(HLT_AK8PFJet80=1,  HLT_AK8PFJet140_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet140_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet200_Num' : dict(HLT_AK8PFJet140=1, HLT_AK8PFJet200_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet200_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet260_Num' : dict(HLT_AK8PFJet200=1, HLT_AK8PFJet260_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet260_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet320_Num' : dict(HLT_AK8PFJet260=1, HLT_AK8PFJet320_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet320_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet400_Num' : dict(HLT_AK8PFJet320=1, HLT_AK8PFJet400_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet400_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet450_Num' : dict(HLT_AK8PFJet400=1, HLT_AK8PFJet450_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet450_Jet1PtPassThresholdsL1=1),
+        'HLT_AK8PFJet500_Num' : dict(HLT_AK8PFJet450=1, HLT_AK8PFJet500_Jet1PtPassThresholdsHLT=1, HLT_AK8PFJet500_Jet1PtPassThresholdsL1=1),
+    },
+    # numerator/denominator selections for dijet trigger efficiency (AK4-only)
+    'trigger_efficiencies_dijet_nomatch' : {
+        'all'  : dict(),
+        'HLT_DiPFJetAve40_Ref'  : dict(HLT_IsoMu24=1),
+        'HLT_DiPFJetAve60_Ref'  : dict(HLT_DiPFJetAve40=1),
+        'HLT_DiPFJetAve80_Ref'  : dict(HLT_DiPFJetAve60=1),
+        'HLT_DiPFJetAve140_Ref' : dict(HLT_DiPFJetAve80=1),
+        'HLT_DiPFJetAve200_Ref' : dict(HLT_DiPFJetAve140=1),
+        'HLT_DiPFJetAve260_Ref' : dict(HLT_DiPFJetAve200=1),
+        'HLT_DiPFJetAve320_Ref' : dict(HLT_DiPFJetAve260=1),
+        'HLT_DiPFJetAve400_Ref' : dict(HLT_DiPFJetAve320=1),
+        'HLT_DiPFJetAve500_Ref' : dict(HLT_DiPFJetAve400=1),
+
+        'HLT_DiPFJetAve40_Num'  : dict(HLT_IsoMu24=1,       HLT_DiPFJetAve40=1),
+        'HLT_DiPFJetAve60_Num'  : dict(HLT_DiPFJetAve40=1,  HLT_DiPFJetAve60_Jet12PtAvePassThresholdsHLT=1),
+        'HLT_DiPFJetAve80_Num'  : dict(HLT_DiPFJetAve60=1,  HLT_DiPFJetAve80_Jet12PtAvePassThresholdsHLT=1),
+        'HLT_DiPFJetAve140_Num' : dict(HLT_DiPFJetAve80=1,  HLT_DiPFJetAve140_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve140_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve200_Num' : dict(HLT_DiPFJetAve140=1, HLT_DiPFJetAve200_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve200_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve260_Num' : dict(HLT_DiPFJetAve200=1, HLT_DiPFJetAve260_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve260_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve320_Num' : dict(HLT_DiPFJetAve260=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve320_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve400_Num' : dict(HLT_DiPFJetAve320=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve400_Jet12PtAvePassThresholdsL1=1),
+        'HLT_DiPFJetAve500_Num' : dict(HLT_DiPFJetAve400=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsHLT=1, HLT_DiPFJetAve500_Jet12PtAvePassThresholdsL1=1),
     },
     # by AK4 single-jet trigger path (with overlap)
     'triggers_ak4' : {
@@ -738,6 +824,7 @@ SPLITTINGS = {
     },
     # by MC subsample
     'mc_subsamples' : {
+        "QCD_Pt_3200toInf"  : dict(weightForStitching=( 2E-10 , 8E-09 )),
         "QCD_Pt_2400to3200" : dict(weightForStitching=( 8E-09 , 7E-08 )),
         "QCD_Pt_1800to2400" : dict(weightForStitching=( 7E-08 , 8E-07 )),
         "QCD_Pt_1400to1800" : dict(weightForStitching=( 8E-07 , 3E-06 )),
@@ -755,273 +842,3 @@ SPLITTINGS = {
         "stitched"          : dict(),
     }
 }
-
-TASKS = {
-
-    # -- DATA --
-
-    "Count" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ["count"],
-    },
-
-    "EventYield" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : (
-            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-            + ["metOverSumET", "jet1phi", "count"]
-        ),
-    },
-
-    "TriggerEfficienciesAK4" : {
-        "splittings": ["ybys_narrow", "trigger_efficiencies_ak4"],
-        "histograms" : (
-            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-        ),
-    },
-
-    "TriggerEfficienciesAK8" : {
-        "splittings": ["ybys_narrow", "trigger_efficiencies_ak8"],
-        "histograms" : (
-            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-        ),
-    },
-
-    "TriggerEfficienciesDijet" : {
-        "splittings": ["ybys_narrow", "trigger_efficiencies_dijet"],
-        "histograms" : (
-            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
-        ),
-    },
-
-    "Occupancy" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ([
-            "{}:{}_{}".format(_q2, _qbasename, _qbinning)
-            for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
-            for _q2 in ['jet1eta', 'jet2eta', 'yboost', 'ystar']
-        ] + [
-            "{}_{}:{}".format(_qbasename, _qbinning, _q2)
-            for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
-            for _q2 in ['jet1eta', 'jet2eta', 'yboost', 'ystar']
-        ] + [
-            "{}:{}".format(_qx, _qy)
-            for (_qx, _qy) in zip(
-                ['jet1eta', 'jet2eta', 'jet1eta', 'jet2eta', 'jet1y', 'absjet1y', 'ystar',  "jet1pt_wide", "jet1pt_narrow"],
-                ['jet1phi', 'jet2phi', 'jet1y',   'jet2y'  , 'jet2y', 'absjet2y', 'yboost', "jet2pt_wide", "jet2pt_narrow"]
-            )
-        ] + [
-            "{}:{}".format(_qx, _qy)
-            for (_qx, _qy) in zip(
-                ['jet1phi', 'jet2phi', 'jet1y',   'jet2y'  , 'jet2y', 'absjet2y', 'yboost', "jet2pt_wide", "jet2pt_narrow"],
-                ['jet1eta', 'jet2eta', 'jet1eta', 'jet2eta', 'jet1y', 'absjet1y', 'ystar',  "jet1pt_wide", "jet1pt_narrow"]
-            )
-        ]),
-    },
-
-    "MainShapes" : {
-        "splittings": ["ybys_narrow",],
-        "histograms" : [
-            "{}{}".format(_qn, _ws)
-            for (_qn, _ws) in itertools.product(
-                ["jet12ptave_wide", "jet12mass_wide"],
-                ["", "@assignedTriggerLuminosityWeight"]
-            )
-        ],
-    },
-
-    "AllShapes" : {
-        "splittings": ["ybys_narrow",],
-        "histograms" : [
-            "{}{}".format(_qn, _ws)
-            for (_qn, _ws) in itertools.product(
-                list(QUANTITIES['global']) + list(QUANTITIES['data']),  # all quantities
-                ["", "@assignedTriggerLuminosityWeight"]
-            )
-        ],
-    },
-
-    "AllShapes_AK4Triggers" : {
-        "splittings": ["ybys_narrow", "triggers_ak4"],
-        "histograms" : [
-            "{}{}".format(_qn, _ws)
-            for (_qn, _ws) in itertools.product(
-                list(QUANTITIES['global']) + list(QUANTITIES['data']),  # all quantities
-                [""]
-            )
-        ],
-    },
-
-    "PileupShapes" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ['npv', 'nPUMean']
-    },
-
-    "PFEnergyFractions" : {
-        "splittings": ["ybys_narrow"],
-        "profiles" : ([
-            "{}_{}:jet1{}Fraction".format(_qbasename, _qbinning, _q_pf_frac)
-            for (_qbasename, _qbinning, _q_pf_frac) in itertools.product(
-                ['jet1pt', 'jet12ptave', 'jet12mass'],
-                ['wide', 'narrow'],
-                ['NeutralHadron', 'ChargedHadron', 'Muon', 'Photon', 'Electron', 'HFHadron', 'HFEM']
-            )
-        ]),
-        "histograms" : ([
-            "{}_{}:jet1{}Fraction".format(_qbasename, _qbinning, _q_pf_frac)
-            for (_qbasename, _qbinning, _q_pf_frac) in itertools.product(
-                ['jet1pt', 'jet12ptave', 'jet12mass'],
-                ['wide', 'narrow'],
-                ['NeutralHadron', 'ChargedHadron', 'Muon', 'Photon', 'Electron', 'HFHadron', 'HFEM']
-            )
-        ] + [
-            "jet1{}Fraction".format(_q_pf_frac)
-            for _q_pf_frac in ['NeutralHadron', 'ChargedHadron', 'Muon', 'Photon', 'Electron', 'HFHadron', 'HFEM']
-        ]),
-    },
-
-    # -- MC --
-
-    "AllShapesMC" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ["{}{}".format(_qn, _qweight)
-            for _qn, _qweight in itertools.product(
-              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
-              ["", "@generatorWeight"],
-            )
-        ],
-    },
-    "AllShapesMCBinned" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ["{}{}".format(_qn, _qweight)
-            for _qn, _qweight in itertools.product(
-              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
-              ["", "@computedWeightForStitching"],
-            )
-        ],
-    },
-
-    "MainShapesMCBinned" : {
-        "splittings": ["ybys_narrow",],
-        "histograms" : [
-            "{}{}".format(_qn, _ws)
-            for (_qn, _ws) in itertools.product(
-                ["jet12ptave_wide", "jet12mass_wide"],
-                ["", "@computedWeightForStitching"],
-            )
-        ],
-    },
-
-    "PileupShapesMC" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : ['npv@generatorWeight', 'nPUMean@generatorWeight', 'nPU@generatorWeight']
-    },
-
-    "EventYieldMC" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : (
-            [
-                "{}_{}{}".format(_qbasename, _qbinning, _qweight)
-                for (_qbasename, _qbinning, _qweight) in itertools.product(
-                    ['jet1pt', 'jet12ptave', 'jet12mass', 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                    ['wide', 'narrow'],
-                    ["", "@generatorWeight"]
-                )
-            ] + [
-                "{}{}".format(_qbasename, _qweight)
-                for (_qbasename, _qweight) in itertools.product(
-                    ['metOverSumET', 'jet1phi', 'count'],
-                    ["", "@generatorWeight"]
-                )
-            ]
-        ),
-    },
-
-    "JetResponse" : {
-        "splittings": ["ybys_narrow"],
-        "histograms" : [
-            "{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(
-                ['jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                ['wide', 'narrow']
-            )
-        ] + [
-            "{}_{}:{}_{}".format(_q1, _qbinning1, _q2, _qbinning2)
-            for ((_q1, _q2), (_qbinning1, _qbinning2)) in itertools.product(
-                zip(
-                    ['jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                    ['jet12ptave',                  'jet12mass'                 ],
-                ),
-                zip(
-                    ['wide'],
-                    ['wide'],
-                )
-            )
-        ],
-        "profiles" : [
-            "{}_{}:{}_{}".format(_q1, _qbinning1, _q2, _qbinning2)
-            for ((_q1, _q2), (_qbinning1, _qbinning2)) in itertools.product(
-                zip(
-                    ['jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                    ['jet12ptave',                  'jet12mass'                 ],
-                ),
-                zip(
-                    ['wide'],
-                    ['wide'],
-                )
-            )
-        ],
-    },
-
-    "Flavors" : {
-        "splittings": ["ybys_narrow", "flavors"],
-        "histograms" : ([
-            "{}_{}".format(_qbasename, _qbinning)
-            for (_qbasename, _qbinning) in itertools.product(
-                ['jet1pt', 'jet12ptave', 'jet12mass'],
-                ['wide', 'narrow'],
-            )
-        ]),
-    },
-
-    "QCDSubprocesses" : {
-        "splittings": ["ybys_narrow", "qcd_subprocesses"],
-        "histograms" : ([
-            "{}_{}".format(_qbasename, _qbinning)
-            for (_qbasename, _qbinning) in itertools.product(
-                #['jet12ptave'],
-                #['narrow'],
-                ['jet1pt', 'jet12ptave', 'jet12mass',
-                 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                ['wide', 'narrow'],
-            )
-        ]),
-    },
-
-    "QCDSubprocesses_SubsampleWeighted" : {
-        "splittings": ["ybys_narrow", "qcd_subprocesses"],
-        "histograms" : ([
-            "{}_{}@weightForStitching".format(_qbasename, _qbinning)
-            for (_qbasename, _qbinning) in itertools.product(
-                ['jet1pt', 'jet12ptave', 'jet12mass',
-                 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
-                ['wide', 'narrow'],
-            )
-        ]),
-    },
-}
-
-TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
-TASKS['PFEnergyFractionsMC'] = dict(TASKS['PFEnergyFractions'], splittings=["ybys_narrow"])
-
-TASKS['Occupancy_AK4PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak4"])
-TASKS['Occupancy_AK8PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak8"])
-TASKS['Occupancy_DiPFJetAveTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_dijet"])
-
-TASKS['EventYield_AK4PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak4"])
-TASKS['EventYield_AK8PFJetTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_ak8"])
-TASKS['EventYield_DiPFJetAveTriggers'] = dict(TASKS['EventYield'], splittings=["ybys_narrow", "triggers_dijet"])
-
-TASKS['EventYieldMC_Subsamples'] = dict(TASKS['EventYieldMC'], splittings=["ybys_narrow", "mc_subsamples"])
-
-TASKS['Flavors_Subsamples'] = dict(TASKS['Flavors'], splittings=["ybys_narrow", "mc_subsamples", "flavors"])
-TASKS['QCDSubprocesses_Subsamples'] = dict(TASKS['QCDSubprocesses'], splittings=["ybys_narrow@4", "mc_subsamples", "qcd_subprocesses"])

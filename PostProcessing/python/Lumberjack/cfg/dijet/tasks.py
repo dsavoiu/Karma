@@ -15,6 +15,17 @@ TASKS = {
         "histograms" : ["count"],
     },
 
+    "CrossSection" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ["{}_{}{}".format(_qn, _qs, _qweight)
+            for _qn, _qs, _qweight in itertools.product(
+              ["jet12ptave", "jet12mass"],
+              ["wide", "narrow"],
+              ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"],
+            )
+        ],
+    },
+
     "EventYield" : {
         "splittings": ["ybys_narrow"],
         "histograms" : (
@@ -44,27 +55,39 @@ TASKS = {
         ),
     },
 
+    "TriggerEfficienciesNoMatchAK4" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_ak4_nomatch"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
+
+    "TriggerEfficienciesNoMatchAK8" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_ak8_nomatch"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
+
+    "TriggerEfficienciesNoMatchDijet" : {
+        "splittings": ["ybys_narrow", "trigger_efficiencies_dijet_nomatch"],
+        "histograms" : (
+            ["{}_{}".format(_qbasename, _qbinning) for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])]
+        ),
+    },
+
     "Occupancy" : {
         "splittings": ["ybys_narrow"],
         "histograms" : ([
-            "{}:{}_{}".format(_q2, _qbasename, _qbinning)
-            for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
-            for _q2 in ['jet1eta', 'jet2eta', 'yboost', 'ystar']
-        ] + [
-            "{}_{}:{}".format(_qbasename, _qbinning, _q2)
-            for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
-            for _q2 in ['jet1eta', 'jet2eta', 'yboost', 'ystar']
+            "{}_{}:{}".format(_qbasename, _qbinning, _qy)
+            #for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide', 'narrow'])
+            for (_qbasename, _qbinning) in itertools.product(['jet1pt', 'jet12ptave', 'jet12mass'], ['wide'])
+            for _qy in ['jet1eta', 'jet2eta', 'jet1y', 'jet2y', 'yboost', 'ystar', 'absjet1y', 'absjet2y']
         ] + [
             "{}:{}".format(_qx, _qy)
             for (_qx, _qy) in zip(
-                ['jet1eta', 'jet2eta', 'jet1eta', 'jet2eta', 'jet1y', 'absjet1y', 'ystar',  "jet1pt_wide", "jet1pt_narrow"],
-                ['jet1phi', 'jet2phi', 'jet1y',   'jet2y'  , 'jet2y', 'absjet2y', 'yboost', "jet2pt_wide", "jet2pt_narrow"]
-            )
-        ] + [
-            "{}:{}".format(_qx, _qy)
-            for (_qx, _qy) in zip(
-                ['jet1phi', 'jet2phi', 'jet1y',   'jet2y'  , 'jet2y', 'absjet2y', 'yboost', "jet2pt_wide", "jet2pt_narrow"],
-                ['jet1eta', 'jet2eta', 'jet1eta', 'jet2eta', 'jet1y', 'absjet1y', 'ystar',  "jet1pt_wide", "jet1pt_narrow"]
+                ['jet1eta', 'jet2eta', 'jet1y',   'jet2y',   'jet1eta', 'jet2eta', 'jet1y', 'absjet1y', 'ystar',  "jet1pt_wide", "jet1pt_narrow"],
+                ['jet1phi', 'jet2phi', 'jet1phi', 'jet2phi', 'jet1y',   'jet2y'  , 'jet2y', 'absjet2y', 'yboost', "jet2pt_wide", "jet2pt_narrow"]
             )
         ]),
     },
@@ -75,20 +98,66 @@ TASKS = {
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
                 ["jet12ptave_wide", "jet12mass_wide"],
-                ["", "@assignedTriggerLuminosityWeight"]
+                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
             )
         ],
     },
 
-    "AllShapes" : {
+    "METStudy_AK4" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}:metOverSumET{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                QUANTITIES['global'].keys() + QUANTITIES['data_ak4'].keys(),  # all quantities
+                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+            )
+        ],
+    },
+
+    "METStudy_AK8" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}:metOverSumET{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                QUANTITIES['global'].keys() + QUANTITIES['data_ak8'].keys(),  # all quantities
+                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+            )
+        ],
+    },
+
+    "AllShapes_AK4" : {
         "splittings": ["ybys_narrow",],
         "histograms" : [
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
-                list(QUANTITIES['global']) + list(QUANTITIES['data']),  # all quantities
-                ["", "@assignedTriggerLuminosityWeight"]
+                QUANTITIES['global'].keys() + QUANTITIES['data_ak4'].keys(),  # all quantities
+                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
             )
         ],
+    },
+
+    "AllShapes_AK8" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                QUANTITIES['global'].keys() + QUANTITIES['data_ak8'].keys(),  # all quantities
+                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+            )
+        ],
+    },
+
+    "AllShapes2D_AK4" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}:{}{}".format(_qx, _qy, _ws)
+            for (_qx, _qy) in itertools.product(
+                ['jet1y', 'jet1pt_wide', 'ystar', 'yboost', "jet12ptave_wide", "jet12mass_wide", "npv", "npvGood", "nPUMean"],
+                QUANTITIES['global'].keys() + QUANTITIES['data_ak4'].keys()
+            )
+            for _ws in ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+            if _qx != _qy
+        ]
     },
 
     "PileupShapes" : {
@@ -121,32 +190,69 @@ TASKS = {
 
     # -- MC --
 
-    "AllShapesMC" : {
+    "CrossSectionMC" : {
         "splittings": ["ybys_narrow"],
-        "histograms" : ["{}{}".format(_qn, _qweight)
-            for _qn, _qweight in itertools.product(
-              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
-              ["", "@generatorWeight"],
+        "histograms" : ["{}_{}{}".format(_qn, _qs, _qweight)
+            for _qn, _qs, _qweight in itertools.product(
+              ["jet12ptave", "jet12mass"],
+              ["wide", "narrow"],
+              ["", "@computedWeightForStitching", "@totalWeight"],
             )
         ],
     },
-    "AllShapesMCBinned" : {
+
+    "CrossSectionMCBinned" : {
         "splittings": ["ybys_narrow"],
-        "histograms" : ["{}{}".format(_qn, _qweight)
-            for _qn, _qweight in itertools.product(
-              list(QUANTITIES['global']) + list(QUANTITIES['mc']),
+        "histograms" : ["{}_{}{}".format(_qn, _qs, _qweight)
+            for _qn, _qs, _qweight in itertools.product(
+              ["jet12ptave", "jet12mass"],
+              ["wide", "narrow"],
               ["", "@computedWeightForStitching"],
             )
         ],
     },
 
-    "MainShapesMCBinned" : {
+    "METStudyMCBinned" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}:metOverSumET{}".format(_qn, _ws)
+            for (_qn, _ws) in itertools.product(
+                QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),  # all quantities
+                ["", "@computedWeightForStitching"]
+            )
+        ],
+    },
+
+    "AllShapesMC" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : ["{}{}".format(_qn, _qweight)
+            for _qn, _qweight in itertools.product(
+              QUANTITIES['global'].keys() + QUANTITIES['mc'].keys(),
+              ["", "@totalWeight"],
+            )
+        ],
+    },
+
+    "AllShapes2DMC" : {
+        "splittings": ["ybys_narrow",],
+        "histograms" : [
+            "{}:{}{}".format(_qx, _qy, _ws)
+            for (_qx, _qy) in itertools.product(
+                ['jet1y', 'jet1pt_wide', 'ystar', 'yboost', "jet12ptave_wide", "jet12mass_wide", "npv", "npvGood", "nPUMean"],
+                QUANTITIES['global'].keys() + QUANTITIES['mc'].keys()
+            )
+            for _ws in ("", "@totalWeight")
+            if _qx != _qy
+        ]
+    },
+
+    "MainShapesMC" : {
         "splittings": ["ybys_narrow",],
         "histograms" : [
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
                 ["jet12ptave_wide", "jet12mass_wide"],
-                ["", "@computedWeightForStitching"],
+                ["", "@totalWeight"],
             )
         ],
     },
@@ -211,6 +317,30 @@ TASKS = {
         ],
     },
 
+    "JetResponseYBYS" : {
+        "splittings": ["ybys_narrow"],
+        "histograms" : [
+            "{}{}:{}{}".format(_q1, _qbinning, _q2, _qbinning)
+            for ((_q1, _q2), _qbinning) in itertools.product(
+                zip(
+                    ['absJet12MatchedGenJetPairYBoost', 'absJet12MatchedGenJetPairYStar'],
+                    ['yboost',                          'ystar'                      ],
+                ),
+                ['', '_wide'],
+            )
+        ],
+        "profiles" : [
+            "{}{}:{}{}".format(_q1, _qbinning, _q2, _qbinning)
+            for ((_q1, _q2), _qbinning) in itertools.product(
+                zip(
+                    ['absJet12MatchedGenJetPairYBoost', 'absJet12MatchedGenJetPairYStar'],
+                    ['yboost',                          'ystar'                      ],
+                ),
+                ['', '_wide'],
+            )
+        ],
+    },
+
     "Flavors" : {
         "splittings": ["ybys_narrow", "flavors"],
         "histograms" : ([
@@ -236,20 +366,27 @@ TASKS = {
         ]),
     },
 
-    "QCDSubprocesses_SubsampleWeighted" : {
+    "QCDSubprocessesMCBinned" : {
         "splittings": ["ybys_narrow", "qcd_subprocesses"],
         "histograms" : ([
-            "{}_{}@weightForStitching".format(_qbasename, _qbinning)
+            "{}_{}@computedWeightForStitching".format(_qbasename, _qbinning)
             for (_qbasename, _qbinning) in itertools.product(
-                ['jet1pt', 'jet12ptave', 'jet12mass',
-                 'jet1MatchedGenJetPt', 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
+                ['jet12ptave', 'jet12mass',
+                 'jet12MatchedGenJetPairPtAve', 'jet12MatchedGenJetPairMass'],
                 ['wide', 'narrow'],
+            )
+        ] + [
+            "{}{}@computedWeightForStitching".format(_qbasename, _qbinning)
+            for (_qbasename, _qbinning) in itertools.product(
+                ['yboost', 'ystar',
+                 'jet12MatchedGenJetPairYBoost', 'jet12MatchedGenJetPairYStar'],
+                ['_wide', ''],
             )
         ]),
     },
 }
 
-TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
+#TASKS['OccupancyMC'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow"])
 TASKS['PFEnergyFractionsMC'] = dict(TASKS['PFEnergyFractions'], splittings=["ybys_narrow"])
 
 TASKS['Occupancy_AK4PFJetTriggers'] = dict(TASKS['Occupancy'], splittings=["ybys_narrow", "triggers_ak4"])
