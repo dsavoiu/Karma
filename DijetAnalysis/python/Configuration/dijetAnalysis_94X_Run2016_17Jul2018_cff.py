@@ -39,6 +39,18 @@ def register_options(options):
                       type_=str,
                       default=None,
                       description="Tag of JEC version to use for e.g. JEC uncertainties.")
+            .register('jetIDSpec',
+                      type_=str,
+                      default=None,
+                      description="Version of Jet ID to use (e.g. '2016').")
+            .register('jetIDWorkingPoint',
+                      type_=str,
+                      default=None,
+                      description="Working point of Jet ID to use (e.g. 'TightLepVeto').")
+            .register('useObjectBasedJetID',
+                      type_=bool,
+                      default=False,
+                      description="If True, only jets passing the ID specified via 'jetIDSpec' and `jetIDWorkingPoint` will be considered valid.")
             .register('checkForCompleteness',
                       type_=bool,
                       default=False,
@@ -85,9 +97,9 @@ def init_modules(process, options, jet_algo_name):
             ),
             jecUncertaintyShift = cms.double(0.0),
 
-            #jetIDSpec = cms.string("2016"),   # use "None" for no object-based JetID
-            #jetIDWorkingPoint = cms.string("TightLepVeto"),
-            jetIDSpec = cms.string("None"),   # use "None" for no object-based JetID
+            # jet ID (for object-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
+            jetIDSpec = cms.string(options.jetIDSpec if options.useObjectBasedJetID else "None"),
+            jetIDWorkingPoint = cms.string(options.jetIDWorkingPoint or "None"),
         )
     )
 
@@ -229,6 +241,10 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
                 YEAR="2016",
             ),
             pileupWeightHistogramName = "pileup",
+
+            # jet ID (for event-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
+            jetIDSpec = cms.string(options.jetIDSpec or "None"),
+            jetIDWorkingPoint = cms.string(options.jetIDWorkingPoint or "None"),
         )
     )
 
