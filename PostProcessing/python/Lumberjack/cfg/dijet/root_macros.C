@@ -66,8 +66,8 @@ double getWeightForStitching(const double& binningValue) {
 
 // -- active phase space regions
 
-#define PTAVE_THRESHOLD_AK4_HLT_PFJet40         100
-#define PTAVE_THRESHOLD_AK4_HLT_PFJet60         100
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet40          75
+#define PTAVE_THRESHOLD_AK4_HLT_PFJet60          75
 #define PTAVE_THRESHOLD_AK4_HLT_PFJet80         147
 #define PTAVE_THRESHOLD_AK4_HLT_PFJet140        207
 #define PTAVE_THRESHOLD_AK4_HLT_PFJet200        284
@@ -77,8 +77,8 @@ double getWeightForStitching(const double& binningValue) {
 #define PTAVE_THRESHOLD_AK4_HLT_PFJet450        499
 #define PTAVE_THRESHOLD_AK4_HLT_PFJet500        569
 
-#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet40      100
-#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet60      100
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet40       75
+#define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet60       75
 #define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet80      147
 #define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet140     243
 #define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet200     284
@@ -88,8 +88,8 @@ double getWeightForStitching(const double& binningValue) {
 #define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet450     569
 #define PTAVE_THRESHOLD_AK8_HLT_AK8PFJet500     569
 
-#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve40    100
-#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve60    100
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve40     75
+#define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve60     75
 #define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve80    100
 #define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve140   207
 #define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve200   284
@@ -98,8 +98,8 @@ double getWeightForStitching(const double& binningValue) {
 #define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve400   646
 #define PTAVE_THRESHOLD_AK4_HLT_DiPFJetAve500   569
 
-#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve40    100
-#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve60    100
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve40     75
+#define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve60     75
 #define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve80    122
 #define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve140   243
 #define PTAVE_THRESHOLD_AK8_HLT_DiPFJetAve200   284
@@ -157,7 +157,7 @@ int getActiveAK4TriggerPathByPtAve(const double& ptave) {
     else if ((284 <= ptave) && (ptave < 329)) return IDX_HLT_PFJet200 ;
     else if ((174 <= ptave) && (ptave < 284)) return IDX_HLT_PFJet140 ;
     else if ((147 <= ptave) && (ptave < 174)) return IDX_HLT_PFJet80  ;
-    else if ((100 <= ptave) && (ptave < 147)) return IDX_HLT_PFJet60  ;
+    else if (( 75 <= ptave) && (ptave < 147)) return IDX_HLT_PFJet60  ;
     else                                      return 0;
 
 }
@@ -190,7 +190,7 @@ int getActiveDijetTriggerPathByPtAve(const double& ptave) {
     else if ((284 <= ptave) && (ptave < 329)) return IDX_HLT_DiPFJetAve200 ;
     else if ((174 <= ptave) && (ptave < 284)) return IDX_HLT_DiPFJetAve140 ;
     else if ((147 <= ptave) && (ptave < 174)) return IDX_HLT_DiPFJetAve80  ;
-    else if ((100 <= ptave) && (ptave < 147)) return IDX_HLT_DiPFJetAve60  ;
+    else if (( 75 <= ptave) && (ptave < 147)) return IDX_HLT_DiPFJetAve60  ;
     else                                      return 0;
 
 }
