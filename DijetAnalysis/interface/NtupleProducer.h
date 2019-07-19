@@ -37,7 +37,6 @@
 //~ // for karma::JetTriggerObjectMap type
 //~ #include "Karma/DijetAnalysis/interface/JetTriggerObjectMatchingProducer.h"
 
-
 //
 // class declaration
 //
@@ -107,7 +106,75 @@ namespace dijet {
                 );
             }
 
+            // construct FlexGrid objects with final analysis binning and bin-by-bin metadata
+            const auto& flexGridFileDijetPtAve = pSet.getParameter<std::string>("flexGridFileDijetPtAve");
+            if (!flexGridFileDijetPtAve.empty()) {
+                std::cout << "Reading FlexGrid binning information (pT average) from file: " << flexGridFileDijetPtAve << std::endl;
+                flexGridDijetPtAverage_ = std::unique_ptr<FlexGrid>(new FlexGrid(flexGridFileDijetPtAve));
+                // assign active trigger path for each bin based on trigger turnon information
+                assignActiveTriggerPathIndices(flexGridDijetPtAverage_->_rootFlexNode);
+            }
+            const auto& flexGridFileDijetMass = pSet.getParameter<std::string>("flexGridFileDijetMass");
+            if (!flexGridFileDijetMass.empty()) {
+                std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
+                flexGridDijetDijetMass_ = std::unique_ptr<FlexGrid>(new FlexGrid(flexGridFileDijetMass));
+                // assign active trigger path for each bin based on trigger turnon information
+                assignActiveTriggerPathIndices(flexGridDijetDijetMass_->_rootFlexNode);
+            }
+
         };
+
+        /*
+         * Helper function: go through a FlexNode and use 'bins', 'triggers', and 'turnon'
+         * information to assign an active trigger path (index) to each bin.
+         *
+         * For every FlexNode that is a leaf (no further substructure):
+         * Reads in  the active trigger information given via the bin metadata keys "triggers"
+         * and "turnons" and creates a metadata key "activeTriggerPathIndex" that contains
+         * the index of the active trigger path.
+         */
+        inline void assignActiveTriggerPathIndices(FlexNode& node) {
+            if (node.hasSubstructure()) {
+                // recurse through the FlexGrid until reaching a node without substructure
+                for (auto& subnode : node.getSubstructure()) {
+                    assignActiveTriggerPathIndices(subnode);
+                }
+            }
+            else {
+                // node without substructure -> "unpack" 'triggers' and 'turnons' metadata keys
+                // to obtain bin-by-bin active trigger path indices
+                auto& metadata = node.getMetadata();
+                std::vector<double> turnons = metadata["turnons"].as<std::vector<double>>();
+                std::vector<std::string> triggers = metadata["triggers"].as<std::vector<std::string>>();
+                std::vector<int> trigerIndices;
+
+                // determine the index of the triggers in the analysis config
+                for (const auto& triggerName : triggers) {
+                    const auto& it = std::find(hltPaths_.begin(), hltPaths_.end(), triggerName);
+                    if (it == triggers.end()) {
+                        trigerIndices.emplace_back(-1);
+                    }
+                    else {
+                        trigerIndices.emplace_back(std::distance(hltPaths_.begin(), it));
+                    }
+                }
+
+                // go through bins, incrementing active trigger path when threshold is reached
+                int currentActiveTrigger = -1;
+                size_t idxTrigger = 0;
+                const auto& binEdges = node.getBins();
+                for (size_t i = 0; i < binEdges.size() - 1; ++i) {
+
+                    // increment trigger index to highest-threshold fully efficient path
+                    while (turnons[idxTrigger] <= binEdges[i] && idxTrigger < turnons.size()) {
+                        currentActiveTrigger = idxTrigger++;  // keep path before last increment active
+                    }
+
+                    metadata["activeTriggerPath"].push_back((currentActiveTrigger < 0) ? "None" : triggers[currentActiveTrigger]);
+                    metadata["activeTriggerPathIndex"].push_back((currentActiveTrigger < 0) ? -1 : trigerIndices[currentActiveTrigger]);
+                }
+            }
+        }
 
         const boost::regex hltVersionPattern_;
         std::vector<std::string> hltPaths_;
@@ -119,6 +186,9 @@ namespace dijet {
 
         std::unique_ptr<karma::TriggerEfficienciesProvider> triggerEfficienciesProvider_;  // not used (yet?)
         std::unique_ptr<karma::JetIDProvider> jetIDProvider_;
+
+        std::unique_ptr<FlexGrid> flexGridDijetPtAverage_;
+        std::unique_ptr<FlexGrid> flexGridDijetDijetMass_;
 
     };
 

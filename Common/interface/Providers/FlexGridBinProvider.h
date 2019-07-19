@@ -21,12 +21,17 @@ class FlexNode {
             throw std::runtime_error("Mandatory key 'bins' not provided!");
         }
         bins_ = node["bins"].as<std::vector<double>>();
+        // read in substructure
         if (node["substructure"]) {
             int i = 0;
             for (const auto& subnode : node["substructure"]) {
                 substructure_.emplace_back(subnode);
                 ++i;
             }
+        }
+        // read in optional metadata
+        if (node["metadata"]) {
+          metadata_ = node["metadata"];
         }
     };
 
@@ -48,6 +53,9 @@ class FlexNode {
     /** Get child nodes */
     std::vector<FlexNode>& getSubstructure() { return substructure_; }
 
+    /** Get node metadata */
+    YAML::Node& getMetadata() const { return metadata_; }
+
     /** Get child node with given index */
     const FlexNode& getSubnode(int idx) const { return substructure_.at(idx); }
 
@@ -64,6 +72,7 @@ class FlexNode {
 
     std::vector<double> bins_;
     std::vector<FlexNode> substructure_;
+    mutable YAML::Node metadata_;
     std::vector<int> globalBinIndices_;
 };
 
@@ -132,10 +141,56 @@ class FlexGrid {
         }
     }
 
+    /** Given a `FlexNode`, bin `values` successively and retrieve metadata for key 'key' */
+    static YAML::Node _findBinMetadata(const FlexNode& node, const std::string& key, std::vector<double>::const_iterator val, const std::vector<double>::const_iterator& values_end) {
+
+        const auto& bins = node.getBins();  // convenience
+
+        auto nextIter = std::upper_bound(bins.begin(), bins.end(), (*val));
+        if ((nextIter == bins.begin()) || (nextIter == bins.end())) {
+            throw std::out_of_range("Failed to retrieve bin metadata: bin values out of bounds!");
+        }
+        else {
+            const int nextIdx = std::distance(bins.begin(), nextIter) - 1;
+            // need successor to check if value iterator matches bin structure
+            auto nextVal = std::next(val);
+
+            if (node.hasSubstructure()) {
+                if (nextVal == values_end) {
+                    throw std::runtime_error("Insufficient number of values");
+                }
+                return FlexGrid::_findBinMetadata(node.getSubnode(nextIdx), key, nextVal, values_end);
+            }
+            else {
+                if (nextVal != values_end) {
+                    throw std::runtime_error("Number of values exceeds number of defined binning levels");
+                }
+                const YAML::Node& binMetadataNode = node.getMetadata()[key];
+                if (binMetadataNode.IsNull()) {
+                    throw std::runtime_error("Failed to retrieve bin metadata: key '" + key + "' not found");
+                }
+                else if (!binMetadataNode.IsSequence()) {
+                    throw std::runtime_error("Failed to retrieve bin metadata: key '" + key + "' not a sequence");
+                }
+                if (binMetadataNode.size() != bins.size() - 1) {
+                    throw std::runtime_error(
+                      "Failed to retrieve bin metadata: size of metadata vector for key "
+                      "'" + key + "' does not match bin structure!");
+                }
+                return binMetadataNode[nextIdx];
+            }
+        }
+    }
+
   public:
     /** Find global index of bin which corresponds to sequence of `values` */
     int findIndex(const std::vector<double>& values) const {
         return FlexGrid::_findIndex(_rootFlexNode, values.begin(), values.end());
+    }
+
+    /** Find metadata entry under key 'key' for bin which corresponds to sequence of `values` */
+    YAML::Node findBinMetadata(const std::string& key, const std::vector<double>& values) const {
+        return FlexGrid::_findBinMetadata(_rootFlexNode, key, values.begin(), values.end());
     }
 
     FlexNode _rootFlexNode;
@@ -146,12 +201,19 @@ namespace karma {
     class FlexGridBinProvider {
       public:
 
-        explicit FlexGridBinProvider(const std::string& yamlFile) : 
+        explicit FlexGridBinProvider(const FlexGrid& flexGrid) : _flexGrid(std::unique_ptr<FlexGrid>(new FlexGrid(flexGrid))) {};
+        explicit FlexGridBinProvider(const std::string& yamlFile) :
             _flexGrid(new FlexGrid(yamlFile)) {};
         ~FlexGridBinProvider() {};
 
+        FlexGrid& getFlexGrid() { return *_flexGrid; };
+
         int getFlexGridBin(const std::vector<double>& values) {
             return _flexGrid->findIndex(values);
+        };
+
+        YAML::Node getFlexGridBinMetadata(const std::string& key, const std::vector<double>& values) {
+            return _flexGrid->findBinMetadata(key, values);
         };
 
       private:

@@ -1,8 +1,10 @@
 // system include files
 #include <iostream>
 #include <bitset>
+#include <exception>
 
 #include "Karma/DijetAnalysis/interface/NtupleProducer.h"
+
 
 
 // -- constructor
@@ -57,16 +59,13 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
         }
     }
 
-    // construct FlexGrid bin finders with final analysis binning
-    const auto& flexGridFileDijetPtAve = m_configPSet.getParameter<std::string>("flexGridFileDijetPtAve");
-    if (!flexGridFileDijetPtAve.empty()) {
-        m_flexGridBinProviderDijetPtAve = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(flexGridFileDijetPtAve));
-        std::cout << "Reading FlexGrid binning information (pT average) from file: " << flexGridFileDijetPtAve << std::endl;
+
+    // -- construct FlexGrid bin finders with final analysis binning
+    if (globalCache->flexGridDijetPtAverage_) {
+        m_flexGridBinProviderDijetPtAve = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(*globalCache->flexGridDijetPtAverage_));
     }
-    const auto& flexGridFileDijetMass = m_configPSet.getParameter<std::string>("flexGridFileDijetMass");
-    if (!flexGridFileDijetMass.empty()) {
-        m_flexGridBinProviderDijetMass = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(flexGridFileDijetMass));
-        std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
+    if (globalCache->flexGridDijetDijetMass_) {
+        m_flexGridBinProviderDijetMass = std::unique_ptr<karma::FlexGridBinProvider>(new karma::FlexGridBinProvider(*globalCache->flexGridDijetDijetMass_));
     }
 
     // -- declare which collections are consumed and create tokens
@@ -124,7 +123,7 @@ dijet::NtupleProducer::~NtupleProducer() {
         for (size_t iRequestedPath = 0; iRequestedPath < globalCache->hltPaths_.size(); ++iRequestedPath) {
             ///std::cout << "[Check iRequestedPath " << iRequestedPath << "] " << globalCache->hltPaths_[iRequestedPath] << std::endl;
             if (runCache->triggerPathsUnversionedNames_[iPath] == globalCache->hltPaths_[iRequestedPath]) {
-                std::cout << " -> matched! " << iPath << " = " << iRequestedPath << std::endl;
+                ///std::cout << " -> matched! " << iPath << " = " << iRequestedPath << std::endl;
                 runCache->triggerPathsIndicesInConfig_[iPath] = iRequestedPath;
                 break;
             }
@@ -388,11 +387,27 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->binIndexJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBin({
                     absYStar, absYBoost, outputNtupleEntry->jet12ptave
                 });
+                try {
+                    outputNtupleEntry->indexActiveTriggerPathJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBinMetadata("activeTriggerPathIndex", {
+                        absYStar, absYBoost, outputNtupleEntry->jet12ptave
+                    }).as<int>();
+                }
+                catch (const std::out_of_range& err) {
+                    // do nothing (leave at default value)
+                }
             }
             if (m_flexGridBinProviderDijetMass) {
                 outputNtupleEntry->binIndexJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBin({
                     absYStar, absYBoost, outputNtupleEntry->jet12mass
                 });
+                try {
+                    outputNtupleEntry->indexActiveTriggerPathJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBinMetadata("activeTriggerPathIndex", {
+                        absYStar, absYBoost, outputNtupleEntry->jet12mass
+                    }).as<int>();
+                }
+                catch (const std::out_of_range& err) {
+                    // do nothing (leave at default value)
+                }
             }
 
             // leading jet pair bitsets

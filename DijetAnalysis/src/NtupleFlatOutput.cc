@@ -35,6 +35,8 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, jet12yboost, D);
     ADD_BRANCH(tree, productForFill, binIndexJet12PtAve, I);
     ADD_BRANCH(tree, productForFill, binIndexJet12Mass, I);
+    ADD_BRANCH(tree, productForFill, indexActiveTriggerPathJet12PtAve, I);
+    ADD_BRANCH(tree, productForFill, indexActiveTriggerPathJet12Mass, I);
     ADD_BRANCH(tree, productForFill, met, D);
     ADD_BRANCH(tree, productForFill, sumEt, D);
     ADD_BRANCH(tree, productForFill, metRaw, D);
