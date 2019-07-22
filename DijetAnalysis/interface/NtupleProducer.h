@@ -112,14 +112,14 @@ namespace dijet {
                 std::cout << "Reading FlexGrid binning information (pT average) from file: " << flexGridFileDijetPtAve << std::endl;
                 flexGridDijetPtAverage_ = std::unique_ptr<FlexGrid>(new FlexGrid(flexGridFileDijetPtAve));
                 // assign active trigger path for each bin based on trigger turnon information
-                assignActiveTriggerPathIndices(flexGridDijetPtAverage_->_rootFlexNode);
+                assignActiveTriggerPathIndices(flexGridDijetPtAverage_->_rootFlexNode, "DiPFJetAveTriggers");
             }
             const auto& flexGridFileDijetMass = pSet.getParameter<std::string>("flexGridFileDijetMass");
             if (!flexGridFileDijetMass.empty()) {
                 std::cout << "Reading FlexGrid binning information (dijet mass) from file: " << flexGridFileDijetMass << std::endl;
                 flexGridDijetDijetMass_ = std::unique_ptr<FlexGrid>(new FlexGrid(flexGridFileDijetMass));
                 // assign active trigger path for each bin based on trigger turnon information
-                assignActiveTriggerPathIndices(flexGridDijetDijetMass_->_rootFlexNode);
+                assignActiveTriggerPathIndices(flexGridDijetDijetMass_->_rootFlexNode, "DiPFJetAveTriggers");
             }
 
         };
@@ -128,24 +128,24 @@ namespace dijet {
          * Helper function: go through a FlexNode and use 'bins', 'triggers', and 'turnon'
          * information to assign an active trigger path (index) to each bin.
          *
-         * For every FlexNode that is a leaf (no further substructure):
-         * Reads in  the active trigger information given via the bin metadata keys "triggers"
-         * and "turnons" and creates a metadata key "activeTriggerPathIndex" that contains
-         * the index of the active trigger path.
+         * For every FlexNode that is a leaf (no further substructure), read in the active
+         * trigger information given in the metadata subkey <metadataSubkey> under the keys
+         * "triggers" and "turnons" and create a metadata key "activeTriggerPathIndex" that
+         * contains the index of the active trigger path.
          */
-        inline void assignActiveTriggerPathIndices(FlexNode& node) {
+        inline void assignActiveTriggerPathIndices(FlexNode& node, const std::string& metadataSubkey) {
             if (node.hasSubstructure()) {
                 // recurse through the FlexGrid until reaching a node without substructure
                 for (auto& subnode : node.getSubstructure()) {
-                    assignActiveTriggerPathIndices(subnode);
+                    assignActiveTriggerPathIndices(subnode, metadataSubkey);
                 }
             }
             else {
                 // node without substructure -> "unpack" 'triggers' and 'turnons' metadata keys
                 // to obtain bin-by-bin active trigger path indices
                 auto& metadata = node.getMetadata();
-                std::vector<double> turnons = metadata["turnons"].as<std::vector<double>>();
-                std::vector<std::string> triggers = metadata["triggers"].as<std::vector<std::string>>();
+                std::vector<double> turnons = metadata[metadataSubkey]["turnons"].as<std::vector<double>>();
+                std::vector<std::string> triggers = metadata[metadataSubkey]["triggers"].as<std::vector<std::string>>();
                 std::vector<int> trigerIndices;
 
                 // determine the index of the triggers in the analysis config
@@ -170,8 +170,7 @@ namespace dijet {
                         currentActiveTrigger = idxTrigger++;  // keep path before last increment active
                     }
 
-                    metadata["activeTriggerPath"].push_back((currentActiveTrigger < 0) ? "None" : triggers[currentActiveTrigger]);
-                    metadata["activeTriggerPathIndex"].push_back((currentActiveTrigger < 0) ? -1 : trigerIndices[currentActiveTrigger]);
+                    metadata[metadataSubkey]["activeTriggerPathIndex"].push_back((currentActiveTrigger < 0) ? -1 : trigerIndices[currentActiveTrigger]);
                 }
             }
         }

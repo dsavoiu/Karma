@@ -388,7 +388,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     absYStar, absYBoost, outputNtupleEntry->jet12ptave
                 });
                 try {
-                    outputNtupleEntry->indexActiveTriggerPathJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBinMetadata("activeTriggerPathIndex", {
+                    outputNtupleEntry->indexActiveTriggerPathJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12ptave
                     }).as<int>();
                 }
@@ -401,7 +401,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     absYStar, absYBoost, outputNtupleEntry->jet12mass
                 });
                 try {
-                    outputNtupleEntry->indexActiveTriggerPathJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBinMetadata("activeTriggerPathIndex", {
+                    outputNtupleEntry->indexActiveTriggerPathJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12mass
                     }).as<int>();
                 }
