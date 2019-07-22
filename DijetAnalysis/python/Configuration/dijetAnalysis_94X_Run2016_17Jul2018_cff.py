@@ -228,9 +228,9 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jet_collectio
 
             # YAML files specifying analysis binning
             flexGridFileDijetPtAve = cms.string(
-                "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_ptave.yml".format(os.getenv('CMSSW_BASE'))),
+                "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_ptave_{}.yml".format(os.getenv('CMSSW_BASE'), jet_algo_name)),
             flexGridFileDijetMass = cms.string(
-                "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_mass.yml".format(os.getenv('CMSSW_BASE'))),
+                "{}/src/Karma/DijetAnalysis/data/binning/flexgrid_ys_yb_mass_{}.yml".format(os.getenv('CMSSW_BASE'), jet_algo_name)),
 
             pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_jetHT.root".format(
                 os.getenv('CMSSW_BASE'),
