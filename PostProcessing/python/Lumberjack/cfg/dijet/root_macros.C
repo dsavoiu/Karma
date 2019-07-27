@@ -146,6 +146,56 @@ double getWeightForStitching(const double& binningValue) {
 
 
 /*
+ * Returns true if active trigger fired, false if not
+ */
+bool activeTriggerFired(const int& indexActiveTrigger, const unsigned long& hltBits) {
+    return ((indexActiveTrigger > 0) && FIRED(indexActiveTrigger));
+}
+
+/*
+ * Luminosity weight for events triggered by active trigger in region
+ */
+double getActiveTriggerLuminosityWeight(const int& indexActiveTrigger, const unsigned long& hltBits) {
+
+    if ((indexActiveTrigger < 0) || !FIRED(indexActiveTrigger)) return 0.0;
+
+    if      (indexActiveTrigger == IDX_HLT_PFJet40      ) return LUMI_WEIGHT_HLT_PFJet40       ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet60      ) return LUMI_WEIGHT_HLT_PFJet60       ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet80      ) return LUMI_WEIGHT_HLT_PFJet80       ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet140     ) return LUMI_WEIGHT_HLT_PFJet140      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet200     ) return LUMI_WEIGHT_HLT_PFJet200      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet260     ) return LUMI_WEIGHT_HLT_PFJet260      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet320     ) return LUMI_WEIGHT_HLT_PFJet320      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet400     ) return LUMI_WEIGHT_HLT_PFJet400      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet450     ) return LUMI_WEIGHT_HLT_PFJet450      ;
+    else if (indexActiveTrigger == IDX_HLT_PFJet500     ) return LUMI_WEIGHT_HLT_PFJet500      ;
+
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet40   ) return LUMI_WEIGHT_HLT_AK8PFJet40    ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet60   ) return LUMI_WEIGHT_HLT_AK8PFJet60    ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet80   ) return LUMI_WEIGHT_HLT_AK8PFJet80    ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet140  ) return LUMI_WEIGHT_HLT_AK8PFJet140   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet200  ) return LUMI_WEIGHT_HLT_AK8PFJet200   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet260  ) return LUMI_WEIGHT_HLT_AK8PFJet260   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet320  ) return LUMI_WEIGHT_HLT_AK8PFJet320   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet400  ) return LUMI_WEIGHT_HLT_AK8PFJet400   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet450  ) return LUMI_WEIGHT_HLT_AK8PFJet450   ;
+    else if (indexActiveTrigger == IDX_HLT_AK8PFJet500  ) return LUMI_WEIGHT_HLT_AK8PFJet500   ;
+
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve40 ) return LUMI_WEIGHT_HLT_DiPFJetAve40  ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve60 ) return LUMI_WEIGHT_HLT_DiPFJetAve60  ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve80 ) return LUMI_WEIGHT_HLT_DiPFJetAve80  ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve140) return LUMI_WEIGHT_HLT_DiPFJetAve140 ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve200) return LUMI_WEIGHT_HLT_DiPFJetAve200 ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve260) return LUMI_WEIGHT_HLT_DiPFJetAve260 ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve320) return LUMI_WEIGHT_HLT_DiPFJetAve320 ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve400) return LUMI_WEIGHT_HLT_DiPFJetAve400 ;
+    else if (indexActiveTrigger == IDX_HLT_DiPFJetAve500) return LUMI_WEIGHT_HLT_DiPFJetAve500 ;
+
+    else return 0.0;
+}
+
+
+/*
  * Returns the luminosity weight for a trigger path determined based on reco. jet pt average
  */
 int getActiveAK4TriggerPathByPtAve(const double& ptave) {

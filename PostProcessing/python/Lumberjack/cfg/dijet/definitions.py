@@ -314,6 +314,16 @@ QUANTITIES = {
             expression='getAK4EventLuminosityWeightByPtAve_DiPFJetAveTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
             binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
         ),
+        'activeTriggerLuminosityWeightByPtAve': Quantity(
+            name='activeTriggerLuminosityWeightByPtAve',
+            expression='getActiveTriggerLuminosityWeight(indexActiveTriggerPathJet12PtAve, hltBits)',  # defined in 'root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+        'activeTriggerLuminosityWeightByDijetMass': Quantity(
+            name='activeTriggerLuminosityWeightByDijetMass',
+            expression='getActiveTriggerLuminosityWeight(indexActiveTriggerPathJet12Mass, hltBits)',  # defined in 'root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
     },
     'data_ak8': {
         #'activeAK8TriggerPathByPtAve': Quantity(
@@ -329,6 +339,16 @@ QUANTITIES = {
         'ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers': Quantity(
             name='ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers',
             expression='getAK8EventLuminosityWeightByPtAve_DiPFJetAveTriggers(jet12ptave, hltBits)',  # defined in '_root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+        'activeTriggerLuminosityWeightByPtAve': Quantity(
+            name='activeTriggerLuminosityWeightByPtAve',
+            expression='getActiveTriggerLuminosityWeight(indexActiveTriggerPathJet12PtAve, hltBits)',  # defined in 'root_macros.C'
+            binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
+        ),
+        'activeTriggerLuminosityWeightByDijetMass': Quantity(
+            name='activeTriggerLuminosityWeightByDijetMass',
+            expression='getActiveTriggerLuminosityWeight(indexActiveTriggerPathJet12Mass, hltBits)',  # defined in 'root_macros.C'
             binning=[6.65E-05, 0.0006105, 0.002157, 0.0064985, 0.046681, 0.179976, 1.4921055, 5.408151, 10.808753],
         ),
     },
@@ -530,13 +550,23 @@ DEFINES['mc'] = {
 
 DEFINES['data_ak4'] = {
     # product of all weights
+    "activeTriggerByPtAveFired" : "activeTriggerFired(indexActiveTriggerPathJet12PtAve, hltBits)",
+    "activeTriggerByDijetMassFired" : "activeTriggerFired(indexActiveTriggerPathJet12Mass, hltBits)",
+
     "totalWeight_PFJetTriggers" : "ak4EventLuminosityWeightByPtAve_PFJetTriggers",
     "totalWeight_DiPFJetAveTriggers" : "ak4EventLuminosityWeightByPtAve_DiPFJetAveTriggers",
+    "totalWeight_activeTriggerByPtAve": "activeTriggerLuminosityWeightByPtAve",
+    "totalWeight_activeTriggerByDijetMass": "activeTriggerLuminosityWeightByDijetMass",
 }
 DEFINES['data_ak8'] = {
     # product of all weights
+    "activeTriggerByPtAveFired" : "activeTriggerFired(indexActiveTriggerPathJet12PtAve, hltBits)",
+    "activeTriggerByDijetMassFired" : "activeTriggerFired(indexActiveTriggerPathJet12Mass, hltBits)",
+
     "totalWeight_PFJetTriggers" : "ak8EventLuminosityWeightByPtAve_AK8PFJetTriggers",
     "totalWeight_DiPFJetAveTriggers" : "ak8EventLuminosityWeightByPtAve_DiPFJetAveTriggers",
+    "totalWeight_activeTriggerByPtAve": "activeTriggerLuminosityWeightByPtAve",
+    "totalWeight_activeTriggerByDijetMass": "activeTriggerLuminosityWeightByDijetMass",
 }
 
 # specification of filters to be applied to data frame
