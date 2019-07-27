@@ -110,7 +110,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [                372,                756,                  1361,             2008,       2572, 2915, 3306,       4244]
+        turnons:  [372,              756,              1361,              2008,              2572,              2915,              3306,              4244]
 - bins: [0, 0.5]
   name: yboost
   substructure:
@@ -120,4 +120,4 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320]
-        turnons:  [                          539,                            1361,             2008,             2915,             4244, 4805]
+        turnons:  [539,              1361,             2008,              2915,              4244,              4805]
