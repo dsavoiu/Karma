@@ -238,8 +238,18 @@ class _ROOTObjectFunctions(object):
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
 
         for _bin_proxy in _new_tobject:
-            if _bin_proxy.value < min_value:
-                _bin_proxy.value, _bin_proxy.error = 0, 0
+            if hasattr(_bin_proxy, 'value'):
+                # for TH1D etc.
+                if _bin_proxy.value < min_value:
+                    _bin_proxy.value, _bin_proxy.error = 0, 0
+            else:
+                # for TGraph etc.
+                if _bin_proxy.y.value < min_value:
+                    _bin_proxy.y.value = 0
+                    _bin_proxy.y.error_hi = 0
+                    # 'low' error setter has a bug in rootpy. workaround:
+                    _bin_proxy.graph_.SetPointEYlow(_bin_proxy.idx_, 0)
+
 
         return _new_tobject
 
@@ -265,7 +275,14 @@ class _ROOTObjectFunctions(object):
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
 
         for _bin_proxy in _new_tobject:
-            _bin_proxy.error = 0
+            if hasattr(_bin_proxy, 'y'):
+                # for TGraph etc.
+                _bin_proxy.y.error_hi = 0
+                # 'low' error setter has a bug in rootpy. workaround:
+                _bin_proxy.graph_.SetPointEYlow(_bin_proxy.idx_, 0)
+            else:
+                # for TH1D etc.
+                _bin_proxy.error = 0
 
         return _new_tobject
 
@@ -344,7 +361,9 @@ class _ROOTObjectFunctions(object):
                 # for TGraph etc.
                 if _bin_proxy.y < _bin_proxy_ref.y:
                     _bin_proxy.y.value = 0
-                    _bin_proxy.y.error_hi, _bin_proxy.y.error_lo = 0, 0
+                    _bin_proxy.y.error_hi = 0
+                    # 'low' error setter has a bug in rootpy. workaround:
+                    _bin_proxy.graph_.SetPointEYlow(_bin_proxy.idx_, 0)
 
         # cleanup
         _new_tobject_ref.Delete()
