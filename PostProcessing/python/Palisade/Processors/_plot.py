@@ -183,8 +183,8 @@ def _plot_as_step(ax, *args, **kwargs):
             _yerr_up = np.vstack([_zeros, _yerr_up, _yerr_up, _yerr_up, _zeros]).T.flatten()
         else:
             # errorbars: only show on central point
-            _yerr_dn = np.vstack([_zeros, _zeros, _yerr_dn, _zeros]).T.flatten()
-            _yerr_up = np.vstack([_zeros, _zeros, _yerr_up, _zeros]).T.flatten()
+            _yerr_dn = np.vstack([_zeros, _zeros, _yerr_dn, _zeros, _zeros]).T.flatten()
+            _yerr_up = np.vstack([_zeros, _zeros, _yerr_up, _zeros, _zeros]).T.flatten()
         _yerr = [_yerr_dn, _yerr_up]
 
     # shift left and right replicas in x by xerr
