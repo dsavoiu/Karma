@@ -106,7 +106,7 @@ class LumberjackInterfaceBase(object):
         _f = ROOT.TFile(self._args.input_file, "READ")
         _tree = _f.Get(self._args.tree)
         if not isinstance(_tree, ROOT.TTree):
-            print("[ERROR] Input file does not contain TTree '{}'".format(self._args.input_file))
+            print("[ERROR] Input file does not contain TTree '{}'".format(self._args.tree))
             exit(1)
         self._df_size = _tree.GetEntries()
         _f.Close()
