@@ -190,6 +190,17 @@ def _plot_as_step(ax, *args, **kwargs):
     # shift left and right replicas in x by xerr
     _x += np.vstack([-_xerr_dn, -_xerr_dn, _zeros, _xerr_up, _xerr_up]).T.flatten()
 
+    # obtain indices of points with a binning discontinuity
+    _bin_edge_discontinuous_at = (np.flatnonzero(_x[0::5][1:] != _x[4::5][:-1]) + 1)*5
+
+    # prevent diagonal connections across bin discontinuities
+    if len(_bin_edge_discontinuous_at):
+        _x = np.insert(_x, _bin_edge_discontinuous_at, [np.nan])
+        _y = np.insert(_y, _bin_edge_discontinuous_at, [np.nan])
+        if _yerr is not None:
+            _yerr = np.insert(_yerr, _bin_edge_discontinuous_at, [np.nan], axis=1)
+
+    # do actual plotting
     if _show_yerr_as == 'errorbar' or _show_yerr_as is None:
         return ax.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
     elif _show_yerr_as == 'band':
