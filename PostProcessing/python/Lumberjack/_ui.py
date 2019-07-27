@@ -495,15 +495,22 @@ class LumberjackCLI(LumberjackInterfaceBase):
 
     def _get_args_config(self):
         '''parse CLI arguments and retrieve analysis config'''
-        import importlib
         import pkgutil
 
         import Karma.PostProcessing.Lumberjack.cfg as cfg_module
 
-        # retrieve a list of available configuration modules for Lumberjack
-        _available_analysis_configs = [
-            _name for _, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
-        ]
+        # retrieve available analysis configuration modules for Lumberjack
+        _available_analysis_configs = {
+            _name : _importer
+            for _importer, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
+        }
+
+        # retrieve external analysis configuration modules for Lumberjack
+        _external_path_list = (os.getenv('LUMBERJACK_CONFIGPATH') or "").split(':')
+        _available_analysis_configs.update({
+            _name: _importer
+            for _importer, _name, _ in pkgutil.iter_modules(_external_path_list)
+        })
 
         # -- pre-parser: read only the '--analysis'/'-a' flag
         _pre_parser = argparse.ArgumentParser(
@@ -511,7 +518,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         )
         _pre_parser.add_argument(
             '-a', '--analysis', metavar='ANALYSIS_NAME', type=str,
-            choices=_available_analysis_configs,
+            choices=_available_analysis_configs.keys(),
             nargs='?')
 
         _analysis_name = _pre_parser.parse_known_args()[0].analysis
@@ -528,7 +535,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
             '-a', '--analysis', metavar='ANALYSIS_NAME', type=str,
             help="Name of the analysis configuration to load (must have a configuration module under 'Lumberjack/cfg/ANALYSIS_NAME')",
             required=True,
-            choices=_available_analysis_configs)
+            choices=_available_analysis_configs.keys())
         _required_args.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
         _required_args.add_argument('--selections', metavar='SELECTION', help='Specification of event selection cuts', nargs='+')
 
@@ -545,7 +552,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
 
         # retrieve analysis config (tasks, splittings, quantities, etc.)
         if _analysis_name is not None:
-            _analysis_config = importlib.import_module("{}.{}".format(cfg_module.__name__, _analysis_name))
+            _analysis_config = _available_analysis_configs[_analysis_name].find_module(_analysis_name).load_module(_analysis_name)
             for _required_config_key in ('TASKS', 'SPLITTINGS', 'QUANTITIES'):
                 try:
                     getattr(_analysis_config, _required_config_key)

@@ -33,11 +33,18 @@ class PalisadeCLI(object):
             import pkgutil
             import Karma.PostProcessing.Palisade.cfg as cfg_module
 
-            # retrieve available analysis configuration modules for Palisade
+            # retrieve built-in analysis configuration modules for Palisade
             _available_analysis_modules = {
                 _name : _importer.find_module(_name).load_module(_name)
                 for _importer, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
             }
+
+            # retrieve a list of external configuration modules for Palisade
+            _external_path_list = (os.getenv('PALISADE_CONFIGPATH') or "").split(':')
+            _available_analysis_modules.update({
+                _name: _importer.find_module(_name).load_module(_name)
+                for _importer, _name, _ in pkgutil.iter_modules(_external_path_list)
+            })
 
             if namespace.TASK is None:
                 if namespace.ANALYSIS is None or namespace.ANALYSIS not in sorted(_available_analysis_modules.keys()):
@@ -89,7 +96,6 @@ class PalisadeCLI(object):
 
     def _get_cli_args_and_task(self):
         '''parse CLI arguments'''
-        import importlib
         import pkgutil
         import sys
 
@@ -100,6 +106,13 @@ class PalisadeCLI(object):
             _name : _importer.find_module(_name).load_module(_name)
             for _importer, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
         }
+
+        # retrieve a list of external configuration modules for Palisade
+        _external_path_list = (os.getenv('PALISADE_CONFIGPATH') or "").split(':')
+        _available_analysis_modules.update({
+            _name: _importer.find_module(_name).load_module(_name)
+            for _importer, _name, _ in pkgutil.iter_modules(_external_path_list)
+        })
 
         # -- pre-parser: read only the first positional arguments (=subcommands)
         _pre_parser = argparse.ArgumentParser(add_help=False)
