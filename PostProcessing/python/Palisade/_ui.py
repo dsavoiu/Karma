@@ -34,34 +34,34 @@ class PalisadeCLI(object):
             import Karma.PostProcessing.Palisade.cfg as cfg_module
 
             # retrieve built-in analysis configuration modules for Palisade
-            _available_analysis_modules = {
-                _name : _importer.find_module(_name).load_module(_name)
+            _available_analysis_configs = {
+                _name : _importer
                 for _importer, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
             }
 
             # retrieve a list of external configuration modules for Palisade
             _external_path_list = (os.getenv('PALISADE_CONFIGPATH') or "").split(':')
-            _available_analysis_modules.update({
-                _name: _importer.find_module(_name).load_module(_name)
+            _available_analysis_configs.update({
+                _name: _importer
                 for _importer, _name, _ in pkgutil.iter_modules(_external_path_list)
             })
 
             if namespace.TASK is None:
-                if namespace.ANALYSIS is None or namespace.ANALYSIS not in sorted(_available_analysis_modules.keys()):
+                if namespace.ANALYSIS is None or namespace.ANALYSIS not in sorted(_available_analysis_configs.keys()):
                     # populate ANALYSIS choices
                     for _a in parser._actions:
                         if _a.dest == 'ANALYSIS':
-                            _a.choices = sorted(_available_analysis_modules.keys())
+                            _a.choices = sorted(_available_analysis_configs.keys())
                             _a.help += " Choices: {%(choices)s}"
                             break
                 else:
-                    if namespace.ANALYSIS not in sorted(_available_analysis_modules.keys()):
+                    if namespace.ANALYSIS not in sorted(_available_analysis_configs.keys()):
                         return _is_incomplete
 
                     # retrieve tasks for analysis
                     _available_tasks = {
                         _name : _importer.find_module(_name).load_module(_name)
-                        for _importer, _name, _ in pkgutil.iter_modules(_available_analysis_modules[namespace.ANALYSIS].tasks.__path__)
+                        for _importer, _name, _ in pkgutil.iter_modules(_available_analysis_configs[namespace.ANALYSIS].find_module(namespace.ANALYSIS).load_module(namespace.ANALYSIS).tasks.__path__)
                     }
 
                     for _a in parser._actions:
@@ -102,15 +102,15 @@ class PalisadeCLI(object):
         import Karma.PostProcessing.Palisade.cfg as cfg_module
 
         # retrieve available analysis configuration modules for Palisade
-        _available_analysis_modules = {
-            _name : _importer.find_module(_name).load_module(_name)
+        _available_analysis_configs = {
+            _name : _importer
             for _importer, _name, _ in pkgutil.iter_modules(cfg_module.__path__)
         }
 
         # retrieve a list of external configuration modules for Palisade
         _external_path_list = (os.getenv('PALISADE_CONFIGPATH') or "").split(':')
-        _available_analysis_modules.update({
-            _name: _importer.find_module(_name).load_module(_name)
+        _available_analysis_configs.update({
+            _name: _importer
             for _importer, _name, _ in pkgutil.iter_modules(_external_path_list)
         })
 
@@ -130,7 +130,7 @@ class PalisadeCLI(object):
             'ANALYSIS', metavar='ANALYSIS',
             help="the analysis to which the Palisade task belongs.",
             type=str,
-            choices=sorted(_available_analysis_modules.keys())
+            choices=sorted(_available_analysis_configs.keys())
         )
         _task_action = _pre_parsers['task'].add_argument(
             'TASK', metavar='TASK',
@@ -157,20 +157,20 @@ class PalisadeCLI(object):
         elif _pre_args.subparser_name == 'task':
 
             # -- check for analysis
-            if _pre_args.ANALYSIS not in _available_analysis_modules:
+            if _pre_args.ANALYSIS not in _available_analysis_configs:
                 _pre_parsers['task'].print_help()
                 raise ValueError("Unknown analysis '{}'!".format(_pre_args.ANALYSIS))
 
             # check if 'tasks' submodule exists
-            if not hasattr(_available_analysis_modules[_pre_args.ANALYSIS], 'tasks'):
+            if not hasattr(_available_analysis_configs[_pre_args.ANALYSIS].find_module(_pre_args.ANALYSIS).load_module(_pre_args.ANALYSIS), 'tasks'):
                 raise ValueError("Analysis '{}' has no 'tasks' submodule (looked in "
                                  "{})".format(_pre_args.ANALYSIS,
-                                              _available_analysis_modules[_pre_args.ANALYSIS].__path__))
+                                              _available_analysis_configs[_pre_args.ANALYSIS].find_module(_pre_args.ANALYSIS).load_module(_pre_args.ANALYSIS).__path__))
 
             # retrieve tasks for analysis
             _available_tasks = {
                 _name : _importer.find_module(_name).load_module(_name)
-                for _importer, _name, _ in pkgutil.iter_modules(_available_analysis_modules[_pre_args.ANALYSIS].tasks.__path__)
+                for _importer, _name, _ in pkgutil.iter_modules(_available_analysis_configs[_pre_args.ANALYSIS].find_module(_pre_args.ANALYSIS).load_module(_pre_args.ANALYSIS).tasks.__path__)
             }
 
             _task_action.choices = sorted(_available_tasks.keys())
