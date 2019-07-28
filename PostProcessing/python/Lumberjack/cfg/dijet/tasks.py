@@ -131,7 +131,7 @@ TASKS = {
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
                 QUANTITIES['global'].keys() + QUANTITIES['data_ak4'].keys(),  # all quantities
-                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+                ["", "@totalWeight_activeTriggerByPtAve", "@totalWeight_activeTriggerByDijetMass"]
             )
         ],
     },
@@ -142,7 +142,7 @@ TASKS = {
             "{}{}".format(_qn, _ws)
             for (_qn, _ws) in itertools.product(
                 QUANTITIES['global'].keys() + QUANTITIES['data_ak8'].keys(),  # all quantities
-                ["", "@totalWeight_PFJetTriggers", "@totalWeight_DiPFJetAveTriggers"]
+                ["", "@totalWeight_activeTriggerByPtAve", "@totalWeight_activeTriggerByDijetMass"]
             )
         ],
     },
