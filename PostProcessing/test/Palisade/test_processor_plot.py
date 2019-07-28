@@ -342,14 +342,14 @@ class TestPlotProcessor(unittest.TestCase):
                 for _call in mock_errorbar.mock_calls:
                     _, _args, _kwargs = _call
                     self.assertEqual(len(_args), 2)  # both 'x' and 'y' supplied
-                    np.testing.assert_array_equal(_args[0][1:-1:3], _ref_x)
-                    np.testing.assert_array_equal(_args[1][1:-1:3], _ref_y)
+                    np.testing.assert_array_equal(_args[0][2:-1:5], _ref_x)
+                    np.testing.assert_array_equal(_args[1][2:-1:5], _ref_y)
                     self.assertIn('yerr', _kwargs)   # 'yerr' supplied
                     if _ref_yerr is None:
                         self.assertIs(_kwargs['yerr'], None)
                     else:
-                        np.testing.assert_array_equal(_kwargs['yerr'][0][1:-1:3], _ref_yerr[0])
-                        np.testing.assert_array_equal(_kwargs['yerr'][1][1:-1:3], _ref_yerr[1])
+                        np.testing.assert_array_equal(_kwargs['yerr'][0][2:-1:5], _ref_yerr[0])
+                        np.testing.assert_array_equal(_kwargs['yerr'][1][2:-1:5], _ref_yerr[1])
 
                 if _show_yerr_as == 'band':
                     # recover 'yerr' (was None for testing 'errorbar' call)
@@ -358,9 +358,9 @@ class TestPlotProcessor(unittest.TestCase):
                     for _call in mock_fill_between.mock_calls:
                         _, _args, _kwargs = _call
                         self.assertEqual(len(_args), 3)  # 'x', 'y_lo' and 'y_hi' all supplied
-                        np.testing.assert_array_equal(_args[0][1:-1:3], _ref_x)
-                        np.testing.assert_array_equal(_args[1][1:-1:3], _ref_y-_ref_yerr[0])
-                        np.testing.assert_array_equal(_args[2][1:-1:3], _ref_y+_ref_yerr[1])
+                        np.testing.assert_array_equal(_args[0][2:-1:5], _ref_x)
+                        np.testing.assert_array_equal(_args[1][2:-1:5], _ref_y-_ref_yerr[0])
+                        np.testing.assert_array_equal(_args[2][2:-1:5], _ref_y+_ref_yerr[1])
 
     def test_plot_method_pcolormesh_default(self):
         _cfg = deepcopy(self.BASE_CFG)
