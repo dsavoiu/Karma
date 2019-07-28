@@ -204,7 +204,7 @@ class _ROOTObjectFunctions(object):
 
     @staticmethod
     def diagonal(th2d):
-        """Apply ProjectionX() operation."""
+        """Return a TH1D containing the main diagonal of an input TH2D."""
 
         if hasattr(th2d, 'ProjectionX'):
             _new_tobject = asrootpy(th2d.ProjectionX(uuid.uuid4().get_hex()))
@@ -238,17 +238,17 @@ class _ROOTObjectFunctions(object):
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
 
         for _bin_proxy in _new_tobject:
-            if hasattr(_bin_proxy, 'value'):
-                # for TH1D etc.
-                if _bin_proxy.value < min_value:
-                    _bin_proxy.value, _bin_proxy.error = 0, 0
-            else:
+            if hasattr(_bin_proxy, 'graph_'):
                 # for TGraph etc.
                 if _bin_proxy.y.value < min_value:
                     _bin_proxy.y.value = 0
                     _bin_proxy.y.error_hi = 0
                     # 'low' error setter has a bug in rootpy. workaround:
                     _bin_proxy.graph_.SetPointEYlow(_bin_proxy.idx_, 0)
+            else:
+                # for TH1D etc.
+                if _bin_proxy.value < min_value:
+                    _bin_proxy.value, _bin_proxy.error = 0, 0
 
 
         return _new_tobject
@@ -275,7 +275,7 @@ class _ROOTObjectFunctions(object):
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
 
         for _bin_proxy in _new_tobject:
-            if hasattr(_bin_proxy, 'y'):
+            if hasattr(_bin_proxy, 'graph_'):
                 # for TGraph etc.
                 _bin_proxy.y.error_hi = 0
                 # 'low' error setter has a bug in rootpy. workaround:
@@ -353,17 +353,17 @@ class _ROOTObjectFunctions(object):
         _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref, "e")
 
         for _bin_proxy, _bin_proxy_ref in zip(_new_tobject, _new_tobject_ref):
-            if hasattr(_bin_proxy, 'value'):
-                # for TH1D etc.
-                if _bin_proxy.value < _bin_proxy_ref.value:
-                    _bin_proxy.value, _bin_proxy.error = 0, 0
-            else:
+            if hasattr(_bin_proxy, 'graph_'):
                 # for TGraph etc.
                 if _bin_proxy.y < _bin_proxy_ref.y:
                     _bin_proxy.y.value = 0
                     _bin_proxy.y.error_hi = 0
                     # 'low' error setter has a bug in rootpy. workaround:
                     _bin_proxy.graph_.SetPointEYlow(_bin_proxy.idx_, 0)
+            else:
+                # for TH1D etc.
+                if _bin_proxy.value < _bin_proxy_ref.value:
+                    _bin_proxy.value, _bin_proxy.error = 0, 0
 
         # cleanup
         _new_tobject_ref.Delete()
