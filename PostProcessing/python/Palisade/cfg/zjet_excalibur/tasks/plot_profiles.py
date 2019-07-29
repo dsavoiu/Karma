@@ -13,10 +13,13 @@ def build_expression(source_type, quantity_x, quantity_y, run_period=None):
     '''convenience function for putting together paths in input ROOT file'''
     source_type = source_type.strip().lower()
     assert source_type in ('data', 'mc')
-    if source_type == 'data':
-        return '"{0}_{{corr_level[{0}]}}:{1}/{{eta[name]}}/{y}/p_{x}_weight"'.format(source_type, run_period, x=quantity_x, y=quantity_y)
-    elif source_type == 'mc':
-        return '"{0}_{{corr_level[{0}]}}:MC/{{eta[name]}}/{y}/p_{x}_weight"'.format(source_type, x=quantity_x, y=quantity_y)
+
+    _top_splitting_name = run_period if source_type == 'data' else 'MC'
+
+    return '"{0}_{{corr_level[{0}]}}:{1}/{{split[name]}}/{y}/p_{x}_weight"'.format(
+        source_type, _top_splitting_name,
+        x=quantity_x, y=quantity_y)
+
 
 
 LOOKUP_MC_CORR_LEVEL = {
@@ -32,7 +35,7 @@ for _q in EXPANSIONS['quantity']:
     LOOKUP_QUANTITY_EXPANSION[_q['name']] = _q
 
 
-def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
+def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, split_quantity,
                corr_levels,
                basename_data,
                basename_mc,
@@ -65,10 +68,6 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
     # -- expansions
     _expansions = {
         'corr_level' : _corr_level_dicts,
-        'eta' : [
-            dict(name=_k, label=r"${}\leq|\eta^{{\mathrm{{jet1}}}}|<{}$".format(_v['absjet1eta'][0], _v['absjet1eta'][1]))
-            for _k, _v in SPLITTINGS['eta_wide_barrel'].iteritems()
-        ],
         'quantity_pair' : [
             dict(
                 {   'y_'+_k : _v
@@ -82,6 +81,18 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
             for _qx, _qy in quantity_pairs
         ]
     }
+
+    if split_quantity == 'eta':
+        _expansions.update({'split' : [
+            dict(name=_k, label=r"${}\leq|\eta^{{\mathrm{{jet1}}}}|<{}$".format(_v['absjet1eta'][0], _v['absjet1eta'][1]))
+            for _k, _v in SPLITTINGS['eta_wide_barrel'].iteritems()]})
+    elif split_quantity == 'zpt':
+        _expansions.update({'split' : [
+            dict(name=_k, label=r"${}\leq p_{{\mathrm{{T}}}}^{{\mathrm{{Z}}}}/\mathrm{{GeV}}<{}$".format(_v['zpt'][0], _v['zpt'][1]))
+            for _k, _v in SPLITTINGS['zpt'].iteritems()]})
+    else:
+        print('[ERROR] Expansions not implemented for split quantity {}!'.format(split_quantity))
+
 
     # append '[name]' to format keys that correspond to above expansion keys
     output_format = output_format.format(
@@ -170,7 +181,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs,
                             size=12,
                         )),
                     dict(xy=(.04, 1.0 - .35*0.75), text="$\\alpha<0.3$", transform='axes'),
-                    dict(xy=(.04, 1.0 - .45*0.75), text="{eta[label]}", transform='axes'),
+                    dict(xy=(.04, 1.0 - .45*0.75), text="{split[label]}", transform='axes'),
                 ],
                 'upper_label' : jec_name,
             },
@@ -191,9 +202,10 @@ def cli(argument_parser):
     argument_parser.add_argument('-q', '--quantity-pairs', help="pairs of quantities to plot. Format: '{x_quantity}:{y_quantity}'", nargs='+', metavar="QUANTITY_PAIR")
     argument_parser.add_argument('--basename-data', help="prefix of ROOT files containing Data histograms", required=True)
     argument_parser.add_argument('--basename-mc', help="prefix of ROOT files containing MC histograms", required=True)
+    argument_parser.add_argument('--split-quantity', help='split quantity, eta or zpt', required=True, choices=['eta', 'zpt'])
     # optional parameters
     argument_parser.add_argument('--output-format', help="format string indicating full path to output plot",
-                                 default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png')
+                                 default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}.png')
 
 def run(args):
 
@@ -219,6 +231,7 @@ def run(args):
             corr_levels=args.corr_levels,
             run_periods=args.run_periods,
             quantity_pairs=_quantity_pairs,
+            split_quantity=args.split_quantity,
             basename_data=args.basename_data,
             basename_mc=args.basename_mc,
             output_format=args.output_format)
