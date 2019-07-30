@@ -115,6 +115,39 @@ and copy the object found inside the input ROOT file ``/path/to/input_file.root`
 under the path ``path/to/input_object`` to the output file under the output file
 ``path/to/my_output_object``.
 
+The task dictionary given under `tasks` can contain the following keys:
+
+.. table::
+    :widths: 20, 80
+
+    +------------------------+-------------------------------------------------------------------------+
+    | Key                    | Description                                                             |
+    +========================+=========================================================================+
+    | *Mandatory keys*:                                                                                |
+    +------------------------+-------------------------------------------------------------------------+
+    | **filename**           | name of the output file to which the output object will be written. Can |
+    |                        | contain *placeholders* for context-sensitive replacement (see           |
+    |                        | :ref:`below <user-guide-palisade-expansions>` for more information).    |
+    +------------------------+-------------------------------------------------------------------------+
+    | **expression**         | a string which contains a Python expression returning the object to be  |
+    |                        | written to the file. (see :ref:`below <user-guide-palisade-expressions>`|
+    |                        | for more information on expressions)                                    |
+    +------------------------+-------------------------------------------------------------------------+
+    | **output_path**        | path to the output object inside the output ROOT file.                  |
+    |                        |                                                                         |
+    +------------------------+-------------------------------------------------------------------------+
+    | *Optional keys*:                                                                                 |
+    +------------------------+-------------------------------------------------------------------------+
+    | **x_label**            | the label to use for the *x* axis. If not given or ``None``, the        |
+    |                        | label used in the object returned by `expression` will be kept.         |
+    +------------------------+-------------------------------------------------------------------------+
+    | **y_label**            | the label to use for the *y* axis. If not given or ``None``, the        |
+    |                        | label used in the object returned by `expression` will be kept.         |
+    +------------------------+-------------------------------------------------------------------------+
+    | **title**              | the title to use for the output ROOT object. If not given or ``None``,  |
+    |                        | the title of the object returned by `expression` will be kept.          |
+    +------------------------+-------------------------------------------------------------------------+
+
 The above configuration will only copy a single object to the output
 ROOT file. If multiple objects should be copied in a single processor
 run, additional dictionaries can be added to the ``tasks`` list

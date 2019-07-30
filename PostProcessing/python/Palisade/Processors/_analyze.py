@@ -3,6 +3,7 @@ from __future__ import print_function
 import math
 import os
 import ROOT
+import six
 
 from copy import deepcopy
 
@@ -44,6 +45,17 @@ class AnalyzeProcessor(_ProcessorBase):
     SUBKEYS_FOR_CONTEXT_REPLACING = ["subtasks"]
     CONFIG_KEY_FOR_CONTEXTS = "expansions"
 
+    _CONFIG_KEYS_ROOT_OBJECT_METHODS = dict(
+        x_label = dict(
+            method='SetXTitle'
+        ),
+        y_label = dict(
+            method='SetYTitle'
+        ),
+        title = dict(
+            method='SetTitle'
+        ),
+    )
 
     def __init__(self, config, output_folder):
         super(AnalyzeProcessor, self).__init__(config, output_folder)
@@ -87,6 +99,12 @@ class AnalyzeProcessor(_ProcessorBase):
                 ROOT.gROOT.cd()
                 _plot_object = asrootpy(self._input_controller.get_expr(_expression).Clone(_basename))
 
+                # ROOT object customization (e.g. axis labels)
+                for _prop_name, _meth_dict in six.iteritems(self._CONFIG_KEYS_ROOT_OBJECT_METHODS):
+                    _prop_val = _subtask_config.get(_prop_name, None)
+                    if _prop_val is not None:
+                        getattr(_plot_object, _meth_dict['method'])(_prop_val)
+
                 try:
                     _dir = _tfile.GetDirectory(_dirname)
                 except DoesNotExist:
@@ -113,4 +131,3 @@ class AnalyzeProcessor(_ProcessorBase):
     # -- register action slots
 
     _ACTIONS = [_request, _process, _close_files]
-

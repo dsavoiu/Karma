@@ -101,6 +101,25 @@ class TestAnalyzeProcessor(unittest.TestCase):
 
                 self._assert_rootpy_hist_equal(_obj_ref, _obj_test)
 
+    def test_copy_objects_with_customizations(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['tasks'][0]['subtasks'].append({
+            'expression': '"test:h1"',
+            'output_path': "h1Customized",
+            'x_label': "X_LABEL",
+            'y_label': "Y_LABEL",
+            'title': "TITLE",
+        })
+
+        self._run_palisade(config=_cfg)
+
+        _obj_ref = self._REF_OBJECTS['h1']
+        _obj_test = self._IC.get_expr('"test:{}"'.format('h1Customized'))
+        self.assertEqual(_obj_test.GetXaxis().GetTitle(), "X_LABEL")
+        self.assertEqual(_obj_test.GetYaxis().GetTitle(), "Y_LABEL")
+        self.assertEqual(_obj_test.GetTitle(), "TITLE")
+        return _obj_test
+
     def test_copy_objects_with_expansions(self):
         _cfg = deepcopy(self.BASE_CFG)
         _cfg['tasks'][0]['subtasks'].append({
@@ -165,4 +184,3 @@ class TestAnalyzeProcessor(unittest.TestCase):
         #        _obj_test = self._IC.get_expr('"test:{}"'.format(_result_name))
 
         #        self._assert_rootpy_hist_equal(_obj_ref, _obj_test)
-
