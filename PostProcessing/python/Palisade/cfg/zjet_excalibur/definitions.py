@@ -40,6 +40,7 @@ _LOOKUP_PROFILE_RANGE = {
     'zmass' :       (90, 96),
     'mpf' :         (0.6, 1.4),
     'ptbalance' :   (0.6, 1.4),
+    'alpha' :       (0.0, 0.3),
     'jet1pt' :      (5, 1000),
     'jet2pt' :      (5, 200),
     'jet3pt' :      (5, 100),
@@ -282,6 +283,13 @@ EXPANSIONS = {
 _QUANTITY_LABELS = {
     'mpf' : 'MPF',
     'ptbalance' : '$p_{\\mathrm{T}}$ balance',
+    'alpha' : '$\\alpha$ (=$p_{\\mathrm{T}}^{\\mathrm{jet2}}/p_{\\mathrm{T}}^{\\mathrm{Z}}$)',
+    'jet12DeltaR' : '$\\Delta R(\mathrm{jet1}, \mathrm{jet2})$',
+    'zJet1DeltaR' : '$\\Delta R(\\mathrm{jet1}, \\mathrm{Z})$',
+    'jet12DeltaPhi' : '$\\Delta \\phi(\\mathrm{jet1}, \\mathrm{jet2})$',
+    'zJet1DeltaPhi' : '$\\Delta \\phi(\\mathrm{jet1}, \\mathrm{Z})$',
+    'jet12DeltaEta' : '$\\Delta \\eta(\\mathrm{jet1}, \\mathrm{jet2})$',
+    'zJet1DeltaEta' : '$\\Delta \\eta(\\mathrm{jet1}, \\mathrm{Z})$',
     'met' : '$E_{\\mathrm{T}}^{\\mathrm{miss.}}}$ / GeV',
     'metphi' : '$\\phi (E_{\\mathrm{T}}^{\\mathrm{miss.}})$',
     #'npumean' : '$\\langle n_{\\mathrm{PU}} \\rangle$',
@@ -310,6 +318,9 @@ for _o in ('Z', 'jet1', 'jet2', 'jet3'):
         # log scale x axis on all pt plots
         if _p == 'pt':
             _QUANTITY_SCALES[_o.lower()+_p] = 'log'
+
+
+    _QUANTITY_LABELS["abs{}eta".format(_o.lower())] =  "$|{}|$".format(_QUANTITY_LABELS[_o.lower()+"eta"][1:-1])
 
 # build basic `quantity` expansion from Lumberjack config
 EXPANSIONS['quantity'] = [

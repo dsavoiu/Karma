@@ -89,10 +89,15 @@ QUANTITIES = {
             expression='jet1pt/zpt',
             binning=np.linspace(0, 2, 50),
         ),
+        'alpha_equidistant': Quantity(
+            name='alpha_equidistant',
+            expression='jet2pt/zpt',
+            binning=np.linspace(0, 1.0, 50),
+        ),
         'alpha': Quantity(
             name='alpha',
             expression='jet2pt/zpt',
-            binning=np.linspace(0, 1.0, 50),
+            binning=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4],
         ),
 
         # pileup quantities
@@ -115,6 +120,39 @@ QUANTITIES = {
             name='npumean',
             expression='npumean',
             binning=np.linspace(-0.5, 80.5, 82),
+        ),
+
+        # derived jet quantities
+        'zJet1DeltaPhi': Quantity(
+            name='zJet1DeltaPhi',
+            expression='TMath::Pi() - fabs(fmod(fabs(zphi-jet1phi), 2*TMath::Pi()) - TMath::Pi())',
+            binning=np.linspace(0, np.pi, 31),
+        ),
+        'zJet1DeltaEta': Quantity(
+            name='zJet1DeltaEta',
+            expression='abs(zeta-jet1eta)',
+            binning=np.linspace(0, 10, 51),
+        ),
+        'zJet1DeltaR': Quantity(
+            name='zJet1DeltaR',
+            expression='TMath::Sqrt(TMath::Sq(TMath::Pi() - fabs(fmod(fabs(zphi-jet1phi), 2*TMath::Pi()) - TMath::Pi())) + TMath::Sq(abs(zeta-jet1eta)))',
+            binning=np.linspace(0, 7, 51),
+        ),
+
+        'jet12DeltaPhi': Quantity(
+            name='jet12DeltaPhi',
+            expression='TMath::Pi() - fabs(fmod(fabs(jet1phi-jet2phi), 2*TMath::Pi()) - TMath::Pi())',
+            binning=np.linspace(0, np.pi, 31),
+        ),
+        'jet12DeltaEta': Quantity(
+            name='jet12DeltaEta',
+            expression='abs(jet1eta-jet2eta)',
+            binning=np.linspace(0, 10, 51),
+        ),
+        'jet12DeltaR': Quantity(
+            name='jet12DeltaR',
+            expression='TMath::Sqrt(TMath::Sq(TMath::Pi() - fabs(fmod(fabs(jet1phi-jet2phi), 2*TMath::Pi()) - TMath::Pi())) + TMath::Sq(abs(jet1eta-jet2eta)))',
+            binning=np.linspace(0, 7, 51),
         ),
 
     },
@@ -207,6 +245,7 @@ SPLITTINGS = {
         "Run2018B" : dict(run=(316998, 319312+1)),
         "Run2018C" : dict(run=(319313, 320393+1)),
         "Run2018D" : dict(run=(320394, 325273+1)),
+        "Run2018ABC" : dict(run=(315252, 320393+1)),
         "Run2018ABCD" : dict(run=(315252, 325273+1)),
     },
     'run2018ABC' : {
