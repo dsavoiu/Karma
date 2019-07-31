@@ -2,5 +2,6 @@
 *.log
 *.root
 *_dump.py
+*_configdump.yml
 
 */python/__init__.py

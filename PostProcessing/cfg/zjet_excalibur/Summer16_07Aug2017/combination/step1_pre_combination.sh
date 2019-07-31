@@ -3,13 +3,13 @@
 # use a version of ROOT that has RDataFrames
 source `which with_root_df`
 
-# -- 2016
+# import common configuration for sample
+source ../common.sh
 
-# -- step1: use Lumberjack to create ROOT files containing shapes from Excalibur TTrees
+
+# -- step1: use Lumberjack to create "pre-combination" files from Excalibur TTrees
 # Note: if these already exist, they are skipped, unless `--overwrite` flag is passed
 
-# directory containing Excalibur TTree files
-SAMPLE_DIR="/portal/ekpbms3/home/tfesenbecker/excalibur_work/merged"
 
 for _ch in "mm" "ee"; do
     INFILE_DATA="${SAMPLE_DIR}/data16_${_ch}_BCDEFGH_07Aug2017.root"
@@ -17,33 +17,30 @@ for _ch in "mm" "ee"; do
 
     # -- MC
     for _corr_level in "L1L2L3"; do
-        OUTPUT_FILE_SUFFIX="Z${_ch}_07Aug2017_Summer16_JECV11_${_corr_level}"
-        echo $INFILE_MC
+        OUTPUT_FILE_SUFFIX="Z${_ch}_${SAMPLE_NAME}_L1L2L3"
 
         lumberjack.py -a zjet_excalibur -i "$INFILE_MC" \
-            --selection "zpt" "alpha" \
-            --tree "basiccuts_${_corr_level}/ntuple" \
+            --tree "basiccuts_L1L2L3/ntuple" \
             --input-type mc \
-            -j10 \
+            -j20 \
             --log --progress \
             $@ \
-            task Extrapolation_MC \
+            task Combination_RunMC \
             --output-file-suffix "$OUTPUT_FILE_SUFFIX"
     done
 
     # -- DATA
 
     for _corr_level in "L1L2L3" "L1L2Res" "L1L2L3Res"; do
-        OUTPUT_FILE_SUFFIX="Z${_ch}_07Aug2017_Summer16_JECV11_${_corr_level}"
+        OUTPUT_FILE_SUFFIX="Z${_ch}_${SAMPLE_NAME}_${_corr_level}"
 
         lumberjack.py -a zjet_excalibur -i "$INFILE_DATA" \
-            --selection "zpt" "alpha" \
             --tree "basiccuts_${_corr_level}/ntuple" \
             --input-type data \
-            -j10 \
+            -j20 \
             --log --progress \
             $@ \
-            task Extrapolation_IOV2016 \
+            task Combination_IOV2016 \
             --output-file-suffix "$OUTPUT_FILE_SUFFIX"
     done
 

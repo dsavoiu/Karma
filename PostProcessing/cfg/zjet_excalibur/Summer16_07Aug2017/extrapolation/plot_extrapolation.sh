@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 
-palisade.py task zjet_excalibur plot_profiles \
-    --basename-mc 'Extrapolation_MC' \
-    --basename-data 'Extrapolation_IOV2016' \
-    --jec Summer16_JECV11 \
-    --sample 07Aug2017 \
-    --corr-levels "L1L2L3" \
-    --quantity-pairs  alpha:zmass \
-    --run-periods IOV2016{BCD,EFearly, FlateGH} \
+# import common configuration for sample
+source ../common.sh
+
+
+palisade.py task zjet_excalibur plot_extrapolation \
+    --basename-mc 'Extrapolation_RunMC_EtaBins_ZPtBins' \
+    --basename-data 'Extrapolation_IOV2016_EtaBins_ZPtBins' \
+    --jec "${SAMPLE_JECV_NAME}" \
+    --sample "${SAMPLE_BASE_NAME}" \
+    --corr-levels "L1L2L3" "L1L2L3Res" "L1L2Res" \
+    --split-quantity "eta" \
+    --quantity-pairs  alpha:{mpf,ptbalance} alpha:jet12Delta{Eta,Phi,R} \
+    --run-periods $SAMPLE_IOVS \
     --channel "mm" "ee" \
     --output-dir "plots" \
-    --output-format 'Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png'
-
-
-# alpha:{z,jet1,jet2,jet3}{pt,eta,phi}
-#,met,metphi,mpf,ptbalance,rho,npumean,npv
+    --output-format 'Extrapolation/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}.png'
