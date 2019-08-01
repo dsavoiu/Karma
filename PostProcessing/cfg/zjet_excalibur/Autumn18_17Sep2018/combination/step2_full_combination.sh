@@ -1,24 +1,18 @@
 #!/bin/bash
 
+# import common configuration for sample
+source ../common.sh
+
+
 # -- step 2: run Palisade to combine the "pre-combination" files to the full
 # combination files for submission to JEC
 
 palisade.py task zjet_excalibur combination \
-    --basename-data 'CombinationData2018ABC' \
-    --basename-mc 'CombinationMC' \
-    --jec Autumn18_JECV5 \
-    --sample 17Sep2018 \
-    --corr-levels "L1L2Res" \
-    --run-periods Run2018{A,B,C,ABC} \
-    --channel "mm" "ee" \
-    --output-dir full_combination
-
-palisade.py task zjet_excalibur combination \
-    --basename-data 'CombinationData2018ABCD' \
-    --basename-mc 'CombinationMC' \
-    --jec Autumn18_JECV5 \
-    --sample 17Sep2018 \
-    --corr-levels "L1L2L3" \
-    --run-periods Run2018{A,B,C,D,ABCD} \
+    --basename-data 'Combination_IOV2018' \
+    --basename-mc 'Combination_RunMC' \
+    --jec "${SAMPLE_JECV_NAME}" \
+    --sample "${SAMPLE_BASE_NAME}" \
+    --corr-levels "L1L2L3" "L1L2Res" \
+    --run-periods $SAMPLE_IOVS $SAMPLE_IOV_WHOLEYEAR Run2018ABC \
     --channel "mm" "ee" \
     --output-dir full_combination

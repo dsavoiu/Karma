@@ -1,29 +1,33 @@
 #!/bin/bash
 
+# import common configuration for sample
+source ../common.sh
+
+
 # -- step 2: run Palisade to create profile plots
 
-# -- correction level 'L1L2L3' available for all runs periods (A--D)
 palisade.py task zjet_excalibur plot_profiles \
-    --basename-mc 'Shape_MC' \
-    --basename-data 'Shape_Run2018ABCD' \
-    --jec Autumn18_JECV5 \
-    --sample 17Sep2018 \
-    --corr-levels "L1L2L3" \
-    --quantity-pairs zpt:{jet1,jet2}pt zpt:{zmass,met,mpf,ptbalance} \
-    --run-periods Run2018{A,B,C,D} \
+    --basename-mc 'ProfileZPt_RunMC_EtaBins' \
+    --basename-data 'ProfileZPt_IOV2018_EtaBins' \
+    --jec "${SAMPLE_JECV_NAME}" \
+    --sample "${SAMPLE_BASE_NAME}" \
+    --corr-levels "L1L2L3" "L1L2Res" \
+    --split-quantity "eta" \
+    --quantity-pairs zpt:{jet1,jet2}pt zpt:{zmass,met,mpf,ptbalance,alpha,jet12DeltaR} \
+    --run-periods $SAMPLE_IOVS $SAMPLE_IOV_WHOLEYEAR \
     --channel "mm" "ee" \
     --output-dir "plots" \
-    --output-format 'Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png'
-
+    --output-format 'Profiles/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}.png'
 
 palisade.py task zjet_excalibur plot_profiles \
-    --basename-mc 'Shape_MC' \
-    --basename-data 'Shape_Run2018ABC' \
-    --jec Autumn18_JECV5 \
-    --sample 17Sep2018 \
-    --corr-levels "L1L2Res" \
-    --quantity-pairs zpt:{jet1,jet2}pt zpt:{zmass,met,mpf,ptbalance} \
-    --run-periods Run2018{A,B,C} \
+    --basename-mc 'ProfileEta_RunMC_ZPtBins' \
+    --basename-data 'ProfileEta_IOV2018_ZPtBins' \
+    --jec "${SAMPLE_JECV_NAME}" \
+    --sample "${SAMPLE_BASE_NAME}" \
+    --corr-levels "L1L2L3" "L1L2Res" \
+    --split-quantity "zpt" \
+    --quantity-pairs absjet1eta:{jet1,jet2}pt absjet1eta:{zmass,met,mpf,ptbalance,alpha,jet12DeltaR} \
+    --run-periods $SAMPLE_IOVS $SAMPLE_IOV_WHOLEYEAR \
     --channel "mm" "ee" \
     --output-dir "plots" \
-    --output-format 'Profiles/{jec}/{sample}/{corr_level}/{channel}/{eta}/{quantity_pair}.png'
+    --output-format 'Profiles/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}.png'
