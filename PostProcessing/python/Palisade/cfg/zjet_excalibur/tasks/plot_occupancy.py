@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import numpy as np
 import datetime
 import itertools
 
@@ -8,18 +9,49 @@ from Karma.PostProcessing.Lumberjack.cfg.zjet_excalibur import SPLITTINGS, QUANT
 from Karma.PostProcessing.Palisade.cfg.zjet_excalibur import EXPANSIONS
 
 from matplotlib.font_manager import FontProperties
+import matplotlib.colors as colors
+
+
+class MidpointNormalize(colors.Normalize):
+    """
+    Colormap normalization for ensuring that the midpoint of the colormap is mapped to a particular value.
+    """
+    def __init__(self, midpoint, **kwargs):
+        self._midpoint = midpoint
+        super(MidpointNormalize, self).__init__(**kwargs)
+
+    def __call__(self, value, clip=None):
+        _absmax = max(abs(self.vmin or 0.0), abs(self.vmax or 0.0))
+        x, y = [-_absmax, self._midpoint, _absmax], [0, 0.5, 1]
+        return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
+
 
 def build_expression(source_type, quantity_x, quantity_y, run_period=None):
     '''convenience function for putting together paths in input ROOT file'''
     source_type = source_type.strip().lower()
-    assert source_type in ('data', 'mc')
+    assert source_type in ('data', 'mc', 'ratio', 'diff', 'asymm')
+
+    if source_type == 'ratio':
+        return "({0})/normalize_to_ref({1}, {0})".format(
+            build_expression('data', quantity_x, quantity_y, run_period=run_period),
+            build_expression('mc', quantity_x, quantity_y, run_period=run_period),
+        )
+    elif source_type == 'diff':
+        return "(normalize_to_ref({0}, {1}) - {1})/({1})".format(
+            build_expression('data', quantity_x, quantity_y, run_period=run_period),
+            build_expression('mc', quantity_x, quantity_y, run_period=run_period),
+        )
+    elif source_type == 'asymm':
+        return "(normalize_to_ref({0}, {1}) - {1})/(normalize_to_ref({0}, {1}) + {1})".format(
+            build_expression('data', quantity_x, quantity_y, run_period=run_period),
+            build_expression('mc', quantity_x, quantity_y, run_period=run_period),
+        )
 
     _top_splitting_name = run_period if source_type == 'data' else 'MC'
 
-    return '"{0}_{{corr_level[{0}]}}:{1}/{{split[name]}}/{y}/p_{x}_weight"'.format(
+    return '"{0}_{{corr_level[{0}]}}:{1}/{{split[name]}}/{y}/h2d_{x}_weight"'.format(
         source_type, _top_splitting_name,
         x=quantity_x, y=quantity_y)
-
 
 
 LOOKUP_MC_CORR_LEVEL = {
@@ -37,6 +69,7 @@ for _q in EXPANSIONS['quantity']:
 
 def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, split_quantity,
                corr_levels,
+               source_types,
                basename_data,
                basename_mc,
                output_format):
@@ -56,7 +89,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
         )
 
         _corr_level_dicts.append(
-            dict(name=_cl, data=_cl, mc=_cl_for_mc)
+            dict(name=_cl, data=_cl, mc=_cl_for_mc, ratio=_cl, diff=_cl, asymm=_cl)
         )
 
     # raise exception if specified x or y quantities are unknown
@@ -68,6 +101,8 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
     # -- expansions
     _expansions = {
         'corr_level' : _corr_level_dicts,
+        'run_period' : [_rp for _rp in EXPANSIONS['iov'] if _rp['name'] in run_periods],
+        'source' : [dict(name='{source}')],  # dummy expansion to pass through source type
         'quantity_pair' : [
             dict(
                 {   'y_'+_k : _v
@@ -84,12 +119,17 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
 
     if split_quantity == 'eta':
         _expansions.update({'split' : [
-            dict(name=_k, label=r"${}\leq|\eta^{{\mathrm{{jet1}}}}|<{}$".format(_v['absjet1eta'][0], _v['absjet1eta'][1]))
+            dict(name=_k+'/zpt_gt_30', label=r"${}\leq|\eta^{{\mathrm{{jet1}}}}|<{}$".format(_v['absjet1eta'][0], _v['absjet1eta'][1]))
             for _k, _v in SPLITTINGS['eta_wide_barrel'].iteritems()]})
     elif split_quantity == 'zpt':
         _expansions.update({'split' : [
-            dict(name=_k, label=r"${}\leq p_{{\mathrm{{T}}}}^{{\mathrm{{Z}}}}/\mathrm{{GeV}}<{}$".format(_v['zpt'][0], _v['zpt'][1]))
+            dict(name='absEta_0000_1300/'+_k, label=r"${}\leq p_{{\mathrm{{T}}}}^{{\mathrm{{Z}}}}/\mathrm{{GeV}}<{}$".format(_v['zpt'][0], _v['zpt'][1]))
             for _k, _v in SPLITTINGS['zpt'].iteritems()]})
+    elif split_quantity is None:
+        _expansions['split'] = [
+            dict(name='absEta_0000_1300/zpt_gt_30', label=r"$p_{{\mathrm{{T}}}}^{{\mathrm{{Z}}}}\geq30 \mathrm{{GeV}}$, $|\eta^{{\mathrm{{jet1}}}}|<1.3$"),
+            dict(name='absEta_all/zpt_gt_30', label=r"$p_{{\mathrm{{T}}}}^{{\mathrm{{Z}}}}\geq30 \mathrm{{GeV}}$"),
+        ]
     else:
         print('[ERROR] Expansions not implemented for split quantity {}!'.format(split_quantity))
 
@@ -107,33 +147,25 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
         'input_files': _input_files,
         'figures': [
             {
-                'filename' : output_format,
+                'filename' : output_format.replace('{source[name]}', _source_type),
                 'subplots' : [
-                    # Data
                     dict(
-                        expression=build_expression('data', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}", run_period=_rp['name']),
-                        label=r'Data ({})'.format(_rp['name']), plot_method='errorbar', color=_rp['color'],
-                        marker="o", marker_style="full", pad=0, mask_zero_errors=True)
-                    for _rp in EXPANSIONS['iov'] if _rp['name'] in run_periods
-                ] + [
-                    # MC
-                    dict(
-                        expression=build_expression('mc', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}"),
-                        label=r'MC', plot_method='errorbar', color="k", pad=0, zorder=-99, mask_zero_errors=True)
-                ] + [
-                    # Ratio Data/MC
-                    dict(expression="h({})/h({})".format(
-                            build_expression('data', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}", run_period=_rp['name']),
-                            build_expression('mc', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}")),
-                         label=None, plot_method='errorbar', color=_rp['color'],
-                         marker='o', marker_style="full", pad=1, mask_zero_errors=True)
-                     for _rp in EXPANSIONS['iov'] if _rp['name'] in run_periods
-                ] + [
-                    # Ratio MC/MC (for displaying errors)
-                    dict(expression="h({})/discard_errors(h({}))".format(
-                            build_expression('mc', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}"),
-                            build_expression('mc', "{quantity_pair[x_name]}", "{quantity_pair[y_name]}")),
-                         label=None, plot_method='step', show_yerr_as='band', color='lightgray', pad=1, zorder=-99)
+                        expression=build_expression(_source_type, "{quantity_pair[x_name]}", "{quantity_pair[y_name]}",
+                            run_period='{run_period[name]}'),
+                        plot_method='pcolormesh',
+                        cmap='RdBu' if _source_type in ('ratio', 'diff', 'asymm') else 'viridis',
+                        norm=(
+                            MidpointNormalize(midpoint=1.0) if _source_type == 'ratio' else
+                            MidpointNormalize(midpoint=0.0) if _source_type == 'diff' else None),
+                        vmin=(
+                            0  if _source_type == 'ratio' else
+                            -1 if _source_type == 'asymm' else
+                            -1 if _source_type == 'diff' else None),
+                        vmax=(
+                            2  if _source_type == 'ratio' else
+                            1  if _source_type == 'asymm' else
+                            1  if _source_type == 'diff' else None),
+                    )
                 ],
                 'pad_spec' : {
                     'right': 0.95,
@@ -142,30 +174,20 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
                     'hspace': 0.075,
                 },
                 'pads': [
-                    # top pad
                     {
-                        'height_share' : 3,
-                        'x_range' : ContextValue('quantity_pair[x_range]'),
-                        'x_scale' : '{quantity_pair[x_scale]}',
-                        'y_label' : '{quantity_pair[y_label]}',
-                        'y_range' : ContextValue('quantity_pair[y_profile_range]'),
-                        'x_ticklabels' : [],
-                        'axhlines' : [dict(values=ContextValue('quantity_pair[y_expected_values]'))],
-                        'y_scale' : 'linear',
-                        'legend_kwargs': dict(loc='upper right'),
-                    },
-                    # ratio pad
-                    {
-                        'height_share' : 1,
                         'x_label' : '{quantity_pair[x_label]}',
                         'x_range' : ContextValue('quantity_pair[x_range]'),
                         'x_scale' : '{quantity_pair[x_scale]}',
-                        'y_label' : 'Data/MC',
-                        'y_range' : (0.85, 1.15),
-                        'axhlines' : [dict(values=[1.0])],
+                        'y_label' : '{quantity_pair[y_label]}',
+                        'y_range' : ContextValue('quantity_pair[y_range]'),
                         'y_scale' : 'linear',
+                        'z_label' : 'Data/MC' if _source_type == 'ratio' else
+                                    '(Data-MC)/MC' if _source_type == 'diff' else 
+                                    '(Data-MC)/(Data+MC)' if _source_type == 'asymm' else 'arb. units',
+                        'z_labelpad' : 25,
+                        'axhlines' : [dict(values=ContextValue('quantity_pair[y_expected_values]'))],
                         'legend_kwargs': dict(loc='upper right'),
-                    },
+                    }
                 ],
                 'texts' : [
                     dict(xy=(.04, 1.0 - .15*0.75), text=LOOKUP_CHANNEL_LABEL.get(channel, channel), transform='axes',
@@ -174,7 +196,7 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
                             family='Nimbus Sans',
                             size=12,
                         )),
-                    dict(xy=(.04, 1.0 - .25*0.75), text="{corr_level[data]}", transform='axes',
+                    dict(xy=(.04, 1.0 - .25*0.75), text="{corr_level["+_source_type+"]}", transform='axes',
                         fontproperties=FontProperties(
                             weight='bold',
                             family='Nimbus Sans',
@@ -184,7 +206,8 @@ def get_config(channel, sample_name, jec_name, run_periods, quantity_pairs, spli
                     dict(xy=(.04, 1.0 - .45*0.75), text="{split[label]}", transform='axes'),
                 ],
                 'upper_label' : jec_name,
-            },
+            }
+            for _source_type in source_types
         ],
         'expansions' : _expansions
     }
@@ -202,10 +225,11 @@ def cli(argument_parser):
     argument_parser.add_argument('-q', '--quantity-pairs', help="pairs of quantities to plot. Format: '{x_quantity}:{y_quantity}'", nargs='+', metavar="QUANTITY_PAIR")
     argument_parser.add_argument('--basename-data', help="prefix of ROOT files containing Data histograms", required=True)
     argument_parser.add_argument('--basename-mc', help="prefix of ROOT files containing MC histograms", required=True)
-    argument_parser.add_argument('--split-quantity', help='split quantity, eta or zpt', required=True, choices=['eta', 'zpt'])
     # optional parameters
+    argument_parser.add_argument('--source-types', help="sources to use for plots", nargs='+', default=['data', 'mc', 'asymm'], choices=('data', 'mc', 'diff', 'asymm'))
+    argument_parser.add_argument('--split-quantity', help='split quantity, eta or zpt', choices=['eta', 'zpt'], default=None)
     argument_parser.add_argument('--output-format', help="format string indicating full path to output plot",
-                                 default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}.png')
+                                 default='Profiles/{jec}/{sample}/{corr_level}/{channel}/{split}/{quantity_pair}_{source}.png')
 
 def run(args):
 
@@ -232,6 +256,7 @@ def run(args):
             run_periods=args.run_periods,
             quantity_pairs=_quantity_pairs,
             split_quantity=args.split_quantity,
+            source_types=args.source_types,
             basename_data=args.basename_data,
             basename_mc=args.basename_mc,
             output_format=args.output_format)
