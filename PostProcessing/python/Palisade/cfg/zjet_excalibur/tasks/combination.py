@@ -95,7 +95,10 @@ def get_config(channel, sample_name, jec_name, run_periods,
                 ] + [
                     # profiles vs npumean
                     {
-                        'expression': build_expression(source_type='data', quantity_path=_qn+'/p_npumean_weight'),
+                        'expression': 'double_profile({x}, {y})'.format(
+                            x=build_expression(source_type='data', quantity_path='npumean/p_npumean_weight'),
+                            y=build_expression(source_type='data', quantity_path=_qn+'/p_npumean_weight'),
+                        ),
                         'output_path': '{run_period[name]}/Data_'+_qn+'_vs_npumean_CHS_{alpha[label]}_{eta[label]}_{corr_level[name]}'
                     }
                     for _qn in ["rho", "npv"]
@@ -121,7 +124,10 @@ def get_config(channel, sample_name, jec_name, run_periods,
                 ] + [
                     # profiles vs npumean (MC)
                     {
-                        'expression': build_expression(source_type='mc', quantity_path=_qn+'/p_npumean_weight'),
+                        'expression': 'double_profile({x}, {y})'.format(
+                            x=build_expression(source_type='mc', quantity_path='npumean/p_npumean_weight'),
+                            y=build_expression(source_type='mc', quantity_path=_qn+'/p_npumean_weight'),
+                        ),
                         'output_path': '{run_period[name]}/MC_'+_qn+'_vs_npumean_CHS_{alpha[label]}_{eta[label]}_{corr_level[name]}'
                     }
                     for _qn in ["rho", "npv"]
