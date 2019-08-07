@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import six
 import subprocess
 import sys
 
@@ -19,7 +18,7 @@ class CustomDevelopCommand(develop):
         _final_symlink_path_split = final_symlink_path.split('/')
 
         _cumulated_paths = ''
-        for _i in range(len(_final_symlink_path_split)-1):
+        for _i in range(len(_final_symlink_path_split)):
             _cumulated_path = os.path.join(*_final_symlink_path_split[:_i+1])
             # create directory
             if not os.path.exists(_cumulated_path):
@@ -38,13 +37,18 @@ class CustomDevelopCommand(develop):
         self._ensure_standalone_package_path('Karma/PostProcessing')
         # call super
         develop.run(self)
+        # 'touch' final __init__ file to ensure it exists
+        _final_initfile_path = 'Karma/PostProcessing/__init__.py'
+        if not os.path.exists(_final_initfile_path):
+            open(_final_initfile_path, 'a').close()
+
 
 
 def get_version():
     '''try to determine version via git'''
     try:
         # is git available?
-        subprocess.call('git status', stdout=subprocess.PIPE)
+        subprocess.call(['git', 'status'], stdout=subprocess.PIPE)
     except IOError:
         # 'git' not available
         version = "dev"
@@ -78,9 +82,9 @@ def get_requirements():
         'unittest2',
     ]
 
-    if six.PY2:
+    if sys.version_info[0] == 2:
         _basic_requirements += ['enum']
-    elif six.PY3:
+    elif sys.version_info[0] == 3:
         _basic_requirements += []
 
     return _basic_requirements
