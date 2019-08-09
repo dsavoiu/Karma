@@ -65,7 +65,7 @@ def log_stdout_to_file(filename):
 
 class LumberjackInterfaceBase(object):
 
-    RE_SPLITTING_KEY_SPEC = re.compile(r"([^[]]*)(\[(.*)\])?")
+    RE_SPLITTING_KEY_SPEC = re.compile(r"([^[\]]*)(\[(.*)\])?")
 
     def __init__(self, **kwargs):
         # retrieve runner arguments and analysis config
