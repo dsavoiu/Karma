@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import os
 import ROOT
+import re
 import time
 
 from array import array
@@ -113,12 +114,12 @@ class PostProcessor(object):
 
             _split_dict = dict([_path_element.split(':', 1) for _path_element in _split_name.split('/')])
 
-            for _obj_type, _vars_xyz, _weight in self._specs:
+            for _obj_type, _vars_xyz, _weight, _option_string in self._specs:
                 _var_x, _var_y, _var_z = _vars_xyz
 
                 _var_string_for_title = '_'.join([_v for _v in _vars_xyz if _v is not None])
-                _name_suffix = '_'.join([_s for _s in (_var_x, _weight) if _s is not None])
-                _title = '_'.join([_s for _s in (_var_string_for_title, _weight, _split_name) if _s is not None])
+                _name_suffix = '_'.join([_s for _s in (_var_x, _weight, _option_string) if _s is not None])
+                _title = '_'.join([_s for _s in (_var_string_for_title, _weight, _option_string, _split_name) if _s is not None])
 
                 # -- determing binnings in 'x' (and 'y' and 'z', if specified)
 
@@ -173,7 +174,9 @@ class PostProcessor(object):
                         _obj_name = 'p2d_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile2DModel(_obj_name, _title,
                             len(_x_binning)-1, array('f', _x_binning),
-                            len(_y_binning)-1, array('f', _y_binning))
+                            len(_y_binning)-1, array('f', _y_binning),
+                            # profiles may have build options
+                            _option_string or "")
                         if _weight is None:
                             self._root_objects[_split_name][_var_z][_var_y][_obj_name] = _split_df.Profile2D(_obj_model, _var_x, _var_y, _var_z)
                         else:
@@ -181,7 +184,9 @@ class PostProcessor(object):
                     else:
                         _obj_name = 'p_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile1DModel(_obj_name, _title,
-                            len(_x_binning)-1, array('f', _x_binning))
+                            len(_x_binning)-1, array('f', _x_binning),
+                            # profiles may have build options
+                            _option_string or "")
                         if _weight is None:
                             self._root_objects[_split_name][_var_y][_obj_name] = _split_df.Profile1D(_obj_model, _var_x, _var_y)
                         else:
@@ -206,14 +211,17 @@ class PostProcessor(object):
             else:
                 _x, _y, _z = (_hspec, None, None)
 
-            self._specs.append((self.__class__.ObjectType.histogram, (_x, _y, _z), _weight_spec))
+            self._specs.append((self.__class__.ObjectType.histogram, (_x, _y, _z), _weight_spec, None))
 
     def add_profiles(self, profile_specs):
         for _pspec in profile_specs:
-            # determine weights
-            _weight_spec = None
-            if '@' in _pspec:
-                _pspec, _weight_spec = _pspec.split('@', 1)
+            # determine weights and build options
+            _pseudo_pspec = _pspec + '@!'
+            _pspec, _weight_spec, _option_string = re.split('[@!]', _pseudo_pspec)[:3]
+
+            # switch weight and option if given in reverse order
+            if _pseudo_pspec.find('@') > _pseudo_pspec.find('!'):
+                _weight_spec, _option_string = _option_string, _weight_spec
 
             # determine xy pairs
             assert ':' in _pspec
@@ -224,7 +232,7 @@ class PostProcessor(object):
                 # only x and y provided -> set 'z' to None
                 _x, _y, _z = _pspec.split(':', 1) + [None]
 
-            self._specs.append((self.__class__.ObjectType.profile, (_x, _y, _z), _weight_spec))
+            self._specs.append((self.__class__.ObjectType.profile, (_x, _y, _z), _weight_spec or None, _option_string or None))
 
     @staticmethod
     def _write_output_recursively(object_or_dict, output_file, output_path):
