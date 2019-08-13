@@ -1209,5 +1209,7 @@ class InputROOT(object):
             return getattr(self._eval(node.value, operators, functions, locals), node.attr)
         elif isinstance(node, ast.List): # list of node names
             return [self._eval(_el, operators, functions, locals) for _el in node.elts]
+        elif isinstance(node, ast.Tuple): # tuple of node names
+            return tuple(self._eval(_el, operators, functions, locals) for _el in node.elts)
         else:
             raise TypeError(node)
