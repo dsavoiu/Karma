@@ -114,10 +114,10 @@ class PostProcessor(object):
 
             _split_dict = dict([_path_element.split(':', 1) for _path_element in _split_name.split('/')])
 
-            for _obj_type, _vars_xyz, _weight, _option_string in self._specs:
-                _var_x, _var_y, _var_z = _vars_xyz
+            for _obj_type, _vars_xyzt, _weight, _option_string in self._specs:
+                _var_x, _var_y, _var_z, _var_t = _vars_xyzt
 
-                _var_string_for_title = '_'.join([_v for _v in _vars_xyz if _v is not None])
+                _var_string_for_title = '_'.join([_v for _v in _vars_xyzt if _v is not None])
                 _name_suffix = '_'.join([_s for _s in (_var_x, _weight, _option_string) if _s is not None])
                 _title = '_'.join([_s for _s in (_var_string_for_title, _weight, _option_string, _split_name) if _s is not None])
 
@@ -125,8 +125,19 @@ class PostProcessor(object):
 
                 _x_binning = self._get_quantity_binning(quantity_name=_var_x, split_dict=_split_dict)
 
-                if _var_z is not None:
-                    # Case 1: var 'z' specified -> 3D histogram/2D profile requested
+                if _var_t is not None:
+                    # Case 1: var 't' specified -> 3D profile requested
+                    assert(_var_z is not None)  # cannot have 't' without 'z'
+                    assert(_var_y is not None)  # cannot have 'z' without 'y'
+                    _y_binning = self._get_quantity_binning(quantity_name=_var_y, split_dict=_split_dict)
+                    _z_binning = self._get_quantity_binning(quantity_name=_var_z, split_dict=_split_dict)
+                    _t_binning = self._get_quantity_binning(quantity_name=_var_t, split_dict=_split_dict)
+
+                    _var_t_subdict = self._root_objects[_split_name].setdefault(_var_t, {})  # ensure '_var_t' subdict exists
+                    _var_z_subdict = _var_t_subdict.setdefault(_var_z, {})  # ensure '_var_z' subdict exists
+                    _var_y_subdict = _var_z_subdict.setdefault(_var_y, {})  # ensure '_var_y' subdict exists
+                elif _var_z is not None:
+                    # Case 2: var 'z' specified -> 3D histogram/2D profile requested
                     assert(_var_y is not None)  # cannot have 'z' without 'y'
                     _y_binning = self._get_quantity_binning(quantity_name=_var_y, split_dict=_split_dict)
                     _z_binning = self._get_quantity_binning(quantity_name=_var_z, split_dict=_split_dict)
@@ -134,12 +145,14 @@ class PostProcessor(object):
                     _var_z_subdict = self._root_objects[_split_name].setdefault(_var_z, {})  # ensure '_var_z' subdict exists
                     _var_y_subdict = _var_z_subdict.setdefault(_var_y, {})  # ensure '_var_y' subdict exists
                 elif _var_y is not None:
-                    # Case 2: no var 'z' specified, but var 'y' specified -> 2D histogram/profile requested
+                    # Case 3: no var 'z' specified, but var 'y' specified -> 2D histogram/profile requested
                     _y_binning = self._get_quantity_binning(quantity_name=_var_y, split_dict=_split_dict)
                     _var_y_subdict = self._root_objects[_split_name].setdefault(_var_y, {})  # ensure '_var_y' subdict exists
 
                 if _obj_type == self.__class__.ObjectType.histogram:
-                    if _var_z is not None:
+                    if _var_t is not None:
+                        raise ValueError("4D histogram requested ({}), but this is not supported!".format(_vars_xyzt))
+                    elif _var_z is not None:
                         # implied -> _var_y is also not `None`
                         _obj_name = 'h3d_' + _name_suffix
                         _obj_model = ROOT.RDF.TH3DModel(_obj_name, _title,
@@ -170,7 +183,19 @@ class PostProcessor(object):
 
                 elif _obj_type == self.__class__.ObjectType.profile:
                     assert _var_y is not None
-                    if _var_z is not None:
+                    if _var_t is not None:
+                        _obj_name = 'p3d_' + _name_suffix
+                        _obj_model = ROOT.RDF.TProfile3DModel(_obj_name, _title,
+                            len(_x_binning)-1, array('f', _x_binning),
+                            len(_y_binning)-1, array('f', _y_binning),
+                            len(_z_binning)-1, array('f', _z_binning),
+                            # profiles may have build options
+                            _option_string or "")
+                        if _weight is None:
+                            self._root_objects[_split_name][_var_t][_var_z][_var_y][_obj_name] = _split_df.Profile3D(_obj_model, _var_x, _var_y, _var_z, _var_t)
+                        else:
+                            self._root_objects[_split_name][_var_t][_var_z][_var_y][_obj_name] = _split_df.Profile3D(_obj_model, _var_x, _var_y, _var_z, _var_t, _weight)
+                    elif _var_z is not None:
                         _obj_name = 'p2d_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile2DModel(_obj_name, _title,
                             len(_x_binning)-1, array('f', _x_binning),
@@ -202,16 +227,13 @@ class PostProcessor(object):
 
             # determine xy pairs
             if ':' in _hspec:
-                try:
-                    # x, y *and* z provided
-                    _x, _y, _z = _hspec.split(':', 2)
-                except ValueError:
-                    # only x and y provided -> set 'z' to None
-                    _x, _y, _z = _hspec.split(':', 1) + [None]
+                _xyzt = _pspec.split(':', 3)
+                _xyzt += [None] * (4 - len(_xyzt))  # pad with 'None' up to length 4
+                _x, _y, _z, _t = _xyzt
             else:
-                _x, _y, _z = (_hspec, None, None)
+                _x, _y, _z, _t = (_hspec, None, None, None)
 
-            self._specs.append((self.__class__.ObjectType.histogram, (_x, _y, _z), _weight_spec, None))
+            self._specs.append((self.__class__.ObjectType.histogram, (_x, _y, _z, _t), _weight_spec, None))
 
     def add_profiles(self, profile_specs):
         for _pspec in profile_specs:
@@ -223,16 +245,13 @@ class PostProcessor(object):
             if _pseudo_pspec.find('@') > _pseudo_pspec.find('!'):
                 _weight_spec, _option_string = _option_string, _weight_spec
 
-            # determine xy pairs
+            # determine xy[z[t]] pairs
             assert ':' in _pspec
-            try:
-                # x, y *and* z provided
-                _x, _y, _z = _pspec.split(':', 2)
-            except ValueError:
-                # only x and y provided -> set 'z' to None
-                _x, _y, _z = _pspec.split(':', 1) + [None]
+            _xyzt = _pspec.split(':', 3)
+            _xyzt += [None] * (4 - len(_xyzt))  # pad with 'None' up to length 4
+            _x, _y, _z, _t = _xyzt
 
-            self._specs.append((self.__class__.ObjectType.profile, (_x, _y, _z), _weight_spec or None, _option_string or None))
+            self._specs.append((self.__class__.ObjectType.profile, (_x, _y, _z, _t), _weight_spec or None, _option_string or None))
 
     @staticmethod
     def _write_output_recursively(object_or_dict, output_file, output_path):
