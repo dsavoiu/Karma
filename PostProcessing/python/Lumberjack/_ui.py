@@ -86,8 +86,6 @@ class LumberjackInterfaceBase(object):
         except AttributeError:
             ROOT_DF_CLASS = ROOT.ROOT.Experimental.TDataFrame
 
-        ROOT_MACROS = self._config.ROOT_MACROS
-
         # -- enable multithreading
         if int(self._args.jobs) > 1:
             print("[INFO] Enabling multithreading with {} threads...".format(self._args.jobs))
@@ -116,9 +114,24 @@ class LumberjackInterfaceBase(object):
         print("[INFO] Sample type: {}".format(self._args.input_type))
         self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
 
-        print("[INFO] Defining ROOT macros...")
+        # -- add ROOT include paths
+        if hasattr(self._config, 'ROOT_INCLUDE_PATHS'):
+            print("[INFO] Adding include paths to ROOT interpreter:")
+            for _path in self._config.ROOT_INCLUDE_PATHS:
+                print("    {}".format(_path))
+                ROOT.gInterpreter.AddIncludePath('-I"{}"'.format(_path))
 
-        ROOT.gInterpreter.Declare(ROOT_MACROS)
+        # -- load external libraries in ROOT
+        if hasattr(self._config, 'ROOT_LOAD_EXTERNAL_LIBRARIES'):
+            print("[INFO] Loading external libraries in ROOT interpreter:")
+            for _so_path in self._config.ROOT_LOAD_EXTERNAL_LIBRARIES:
+                print("    {}".format(_so_path))
+                ROOT.gInterpreter.Load(_so_path)
+
+        # -- execute ROOT macro code in interpreter
+        if hasattr(self._config, 'ROOT_MACROS'):
+            print("[INFO] Defining ROOT macros...")
+            ROOT.gInterpreter.Declare(self._config.ROOT_MACROS)
 
     def _prepare_data_frame(self):
 
