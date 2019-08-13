@@ -92,6 +92,8 @@ class LumberjackInterfaceBase(object):
         if int(self._args.jobs) > 1:
             print("[INFO] Enabling multithreading with {} threads...".format(self._args.jobs))
             ROOT.ROOT.EnableImplicitMT(int(self._args.jobs))
+        else:
+            ROOT.ROOT.DisableImplicitMT()  # exlicitly disable multithreading
 
         # -- set up data frame
         print("[INFO] Setting up data frame...")
