@@ -768,6 +768,12 @@ class PlotProcessor(_ProcessorBase):
                 _transform = _ax.transAxes
             elif _transform == 'data':
                 _transform = _ax.transData
+            elif _transform == 'figure':
+                _transform = _ax.get_figure().transFigure
+            elif _transform == 'display':
+                _transform = None  # == identity transformation
+            elif callable(_transform):
+                _transform =  _transform(_ax)
             else:
                 raise ValueError("Unknown coordinate transform specification '{}': expected e.g. 'axes' or 'data'".format(_transform))
 
