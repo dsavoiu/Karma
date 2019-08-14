@@ -15,7 +15,7 @@ import matplotlib.patheffects as PathEffects
 import numpy as np
 
 from matplotlib.gridspec import GridSpec
-from matplotlib.ticker import LogFormatter
+from matplotlib.ticker import LogFormatterSciNotation
 from matplotlib.colors import LogNorm, Normalize, colorConverter
 
 from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, F1
@@ -27,7 +27,7 @@ from .._colormaps import viridis
 
 from ._base import ContextValue, LiteralString, _ProcessorBase, _make_directory
 
-__all__ = ['DijetLogFormatterSciNotation', 'PlotProcessor']
+__all__ = ['LogFormatterSciNotationForceSublabels', 'PlotProcessor']
 
 
 plt.register_cmap(name='viridis', cmap=viridis)
@@ -52,76 +52,14 @@ def is_close_to_int(x):
         return False
     return abs(x - round(x)) < 1e-10
 
-class DijetLogFormatterSciNotation(LogFormatter):
-
-    def __call__(self, x, pos=None):
-        """
-        Return the format for tick value *x*.
-
-        The position *pos* is ignored.
-        """
-        usetex = mpl.rcParams['text.usetex']
-        min_exp = 0 #mpl.rcParams['axes.formatter.min_exponent']
-
-        if x == 0:  # Symlog
-            if usetex:
-                return '$0$'
-            else:
-                return '$%s$' % _mathdefault('0')
-
-        sign_string = '-' if x < 0 else ''
-        x = abs(x)
-        b = self._base
-
-        # only label the decades
-        fx = math.log(x) / math.log(b)
-        is_x_decade = is_close_to_int(fx)
-        exponent = np.round(fx) if is_x_decade else np.floor(fx)
-        coeff = np.round(x / b ** exponent)
-        if is_x_decade:
-            fx = round(fx)
-
-        if self.labelOnlyBase and not is_x_decade:
-            return ''
-        if self._sublabels is not None and coeff not in self._sublabels:
-            return ''
-
-        # use string formatting of the base if it is not an integer
-        if b % 1 == 0.0:
-            base = '%d' % b
-        else:
-            base = '%s' % b
-
-        if np.abs(fx) < min_exp:
-            if usetex:
-                return r'${0}{1:g}$'.format(sign_string, x)
-            else:
-                return '${0}$'.format(_mathdefault(
-                    '{0}{1:g}'.format(sign_string, x)))
-        elif not is_x_decade:
-            return self._non_decade_format(sign_string, base, fx, usetex)
-        elif usetex:
-            return r'$%s%s^{%d}$' % (sign_string, base, fx)
-        else:
-            return '$%s$' % _mathdefault('%s%s^{%d}' % (sign_string, base, fx))
-
-    def _non_decade_format(self, sign_string, base, fx, usetex):
-        'Return string for non-decade locations'
-        b = float(base)
-        exponent = math.floor(fx)
-        coeff = b ** fx / b ** exponent
-        if is_close_to_int(coeff):
-            coeff = round(coeff)
-        if usetex:
-            return (r'$%s%g\times%s^{%d}$') % \
-                                        (sign_string, coeff, base, exponent)
-        else:
-            return ('$%s$' % _mathdefault(r'%s%g\times%s^{%d}' %
-                                        (sign_string, coeff, base, exponent)))
+class LogFormatterSciNotationForceSublabels(LogFormatterSciNotation):
+    """Variant of LogFormatterSciNotation that always displays labels at
+    certain non-decade positions. Needed because parent class may hide these
+    labels based on axis spacing."""
 
     def set_locs(self, *args, **kwargs):
         '''override sublabels'''
-        _ret = super(DijetLogFormatterSciNotation, self).set_locs(*args, **kwargs)
+        _ret = super(LogFormatterSciNotationForceSublabels, self).set_locs(*args, **kwargs)
 
         # override locations
         _locs = kwargs.pop("locs", None)
@@ -705,18 +643,17 @@ class PlotProcessor(_ProcessorBase):
             # handle log x-axis formatting (only if 'x_ticklabels' is not given as [])
             if _pad_config.get('x_scale', None) == 'log' and _pad_config.get('x_ticklabels', True):
                 _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-                _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
+                _formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False)
                 _ax.xaxis.set_minor_formatter(_formatter)
                 _formatter.set_locs(locs=_log_decade_ticklabels)
 
-
+            # NOTE: do not force labeling of minor ticks in log-scaled y axes
             ## handle log y-axis formatting (only if 'y_ticklabels' is not given as [])
             #if _pad_config.get('y_scale', None) == 'log' and _pad_config.get('y_ticklabels', True):
             #    _log_decade_ticklabels = _pad_config.get('y_log_decade_ticklabels', {1.0, 5.0})
-            #    _formatter = DijetLogFormatterSciNotation(base=10.0, labelOnlyBase=False)
-            #    _formatter.set_locs(locs=_log_decade_ticklabels)
-            #
+            #    _formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False)
             #    _ax.yaxis.set_minor_formatter(_formatter)
+            #    _formatter.set_locs(locs=_log_decade_ticklabels)
 
             # draw bin labels instead of numeric labels at ticks
             for _axis in "xyz":
