@@ -436,6 +436,9 @@ class LumberjackInterfaceBase(object):
         QUANTITIES = self._config.QUANTITIES
         TASKS = self._config.TASKS
 
+        # -- get output directory
+        _output_dir = self._args.output_dir or ""
+
         # -- determine output filename suffix
         _suffix = self._args.output_file_suffix
         if _suffix is None:
@@ -450,8 +453,8 @@ class LumberjackInterfaceBase(object):
 
 
             # add task to queue
-            _task_spec['_filename'] = "{}_{}.root".format(_task_name, _suffix)
-            _task_spec['_log_filename'] = "{}_{}.log".format(_task_name, _suffix) if self._args.log else None
+            _task_spec['_filename'] = os.path.join(_output_dir, "{}_{}.root".format(_task_name, _suffix))
+            _task_spec['_log_filename'] = os.path.join(_output_dir, "{}_{}.log".format(_task_name, _suffix)) if self._args.log else None
             _task_spec['_quantities'] = dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {}))
             _tasks.append((_task_name, _task_spec))
 
@@ -593,6 +596,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         _parsers['task'] = _subparsers.add_parser('task', help='Perform a pre-defined task')
         _parsers['task'].add_argument('TASK_NAME', type=str, help='Name of task(s) to perform. Choices: {%(choices)s}', nargs='+', choices=TASKS, metavar='TASK')
         #_parsers['task'].add_argument('--input-type', metavar='TYPE', type=str, help='Sample type Choices: {%(choices)s}', choices=_allowed_input_types, required=True)
+        _parsers['task'].add_argument('--output-dir', help="Directory in which to place output file(s). If none is provided, the file is placed in the current directory.", default=None)
         _parsers['task'].add_argument('--output-file-suffix', help="Suffix to append to output filename(s). If none is provided, the current date is used instead.", default=None)
 
         # subcommand 'freestyle' for manually specifying histograms and profiles
