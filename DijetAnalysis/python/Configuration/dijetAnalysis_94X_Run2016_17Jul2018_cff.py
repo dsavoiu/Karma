@@ -192,15 +192,19 @@ def init_modules(process, options, jet_algo_name):
         process.add_module(
             "jetTriggerObjectMap{}{}".format(jet_algo_name, _suffix),
             getattr(process, "jetTriggerObjectMap{}".format(jet_algo_name)).clone(
-                karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                primaryCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                secondaryCollectionSrc = cms.InputTag("karmaTriggerObjects"),
             )
         )
 
         if not options.isData:
+
             process.add_module(
                 "jetGenJetMap{}{}".format(jet_algo_name, _suffix),
-                getattr(process, "jetGenJetMap{}".format(jet_algo_name)).clone(
-                    karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                karmaJetGenJetMatchingProducer.clone(
+                    primaryCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _suffix)),
+                    secondaryCollectionSrc = cms.InputTag("karmaGenJets{}".format(jet_algo_name[:3])),
+                    maxDeltaR = cms.double(0.4 if 'AK8' in jet_algo_name else 0.2)
                 )
             )
 
