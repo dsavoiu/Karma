@@ -391,7 +391,7 @@ class PlotProcessor(_ProcessorBase):
 
             # mask all points with erorrs set to zero
             _mze = _kwargs.pop('mask_zero_errors', False)
-            if _mze:
+            if _mze and len(_plot_data['yerr']) != 0:
                 _mask = np.all((_plot_data['yerr'] != 0), axis=1)
                 _plot_data = {
                     _key : np.compress(_mask, _value, axis=0)
