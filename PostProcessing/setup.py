@@ -48,17 +48,21 @@ def get_version():
     '''try to determine version via git'''
     try:
         # is git available?
-        subprocess.call('git status', shell=True, stdout=subprocess.PIPE)
-    except IOError:
+        subprocess.call('git', shell=False, stdout=subprocess.PIPE)
+    except OSError:
         # 'git' not available
-        version = "dev"
+        return "dev"
+
+    try:
+        # in git repo?
+        subprocess.check_output('git status', shell=True)
     except subprocess.CalledProcessError:
         # not a 'git' repo
         version = "dev"
     else:
-        # 'git' found -> get release from git
+        # git repo found -> get release from git
 
-        # is 'git describe' working
+        # is 'git describe' working>
         try:
             # git describe working -> use output
             version = subprocess.check_output('git describe', shell=True).strip().decode()
