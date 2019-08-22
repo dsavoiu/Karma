@@ -715,29 +715,20 @@ class PlotProcessor(_ProcessorBase):
             _pad_id = _text_config.pop('pad', 0)
             _ax = _pad_configs[_pad_id]['axes']
 
+            # handle deprecated keyword 'transform'
+            if 'transform' in _text_config:
+                raise ValueError(
+                    "Keyword 'transform' is deprecated. Use keywords "
+                    "'xycoords' and 'textcoords' to specify a coordinate "
+                    "system.")
+
             # retrieve coordinates and text
-            _x, _y = _text_config.pop('xy')
+            _xy = _text_config.pop('xy')
             _s = _text_config.pop('text')
 
-            # lookup transform by string
-            _transform = _text_config.pop('transform', None)
-            if _transform is None or _transform == 'axes':
-                _transform = _ax.transAxes
-            elif _transform == 'data':
-                _transform = _ax.transData
-            elif _transform == 'figure':
-                _transform = _ax.get_figure().transFigure
-            elif _transform == 'display':
-                _transform = None  # == identity transformation
-            elif callable(_transform):
-                _transform =  _transform(_ax)
-            else:
-                raise ValueError("Unknown coordinate transform specification '{}': expected e.g. 'axes' or 'data'".format(_transform))
-
-            # draw text
+            # draw annotation
             _text_config.setdefault('ha', 'left')
-            _ax.text(_x, _y, _s,
-                transform=_transform,
+            _ax.annotate(_s, _xy,
                 **_text_config
             )
 

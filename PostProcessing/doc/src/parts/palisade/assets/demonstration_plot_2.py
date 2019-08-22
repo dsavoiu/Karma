@@ -89,7 +89,7 @@ cfg = {
           {
             'text': "$50$%",
             'xy': (6, 0.55),
-            'transform': 'data',
+            'xycoords': 'data',
             'fontsize': 20,
             'pad': 1,
           },

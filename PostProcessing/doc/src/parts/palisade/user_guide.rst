@@ -851,12 +851,21 @@ details, consult the *matplotlib* documentation.
 
 .. _user-guide-palisade-texts:
 
-Adding text to plots
---------------------
+Adding text annotations to plots
+--------------------------------
 
-For adding text annotations to figures, the ``texts`` configuration
-key is provided. It contains a list of dictionaries, each of which specifies
-a unit of text to be displayed on the plot, along with the position.
+An annotation is a piece of text that refers to a particular position in the figure.
+Annotations can be added to plots via the ``texts`` configuration key. It contains a
+list of dictionaries, each of which specifies an annotation to be displayed on the plot.
+
+At the very least, an annotation consists of a string **text** and a position **xy** at
+which it should appear in the image. The annotation can optionally be placed at a different
+position by additionally specifying the keyword **xytext**. This is typically accompanied by
+an arrow pointing from the annotation to the point *xy*.
+
+The following table contains a summary of keywords
+These and other aspects of the annotation can be controlled via a number of optional keywords,
+which are available
 
 
 .. table::
@@ -870,14 +879,64 @@ a unit of text to be displayed on the plot, along with the position.
     | **text**                 | string containing the text to be shown. Can contain     |              |
     |                          | math formatted as LaTeX between dollar signs (``$``).   |              |
     +--------------------------+---------------------------------------------------------+--------------+
-    | **xy**                   | tuple indicating the text coordinates.                  |              |
+    | **xy**                   | tuple indicating the coordinates of the point which     |              |
+    |                          | should be annotated. This is also the position of the   |              |
+    |                          | annotation text, unless it is overridden via the        |              |
+    |                          | optional keyword **xytext**.                            |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | *Optional keys*:                                                                                  |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | **annotation_clip**      | bool. If ``True``, the annotation will only be drawn if | ``None``     |
+    |                          | it appears inside the axes/pad. If ``False``, it is     |              |
+    |                          | always drawn. If ``None``, the annotation will only be  |              |
+    |                          | drawn when it appeaes inside the ased and **xycoords**  |              |
+    |                          | is ``data``.                                            |              |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | **arrowprops**           | dictionary containing the properties of an arrow to     | ``None``,    |
+    |                          | draw between **xy** and **xytext**. (see the            | i.e. no arrow|
+    |                          | `matplotlib documentation`__ for more details)          | is drawn     |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | **textcoords**           | string. Indicates how to interpret coordinates given in | same as      |
+    |                          | ``xytext``.                                             | **xycoords** |
+    |                          |                                                         |              |
+    |                          | Can take any of the values that **xycoords** can as     |              |
+    |                          | well as the following strings: ``'offset points'``,     |              |
+    |                          | ``'offset pixels'``.                                    |              |
+    |                          |                                                         |              |
+    |                          | It is also possible to pass a tuple of two of the above |              |
+    |                          | types to indicate different coordinates for the *x* and |              |
+    |                          | *y* axes.                                               |              |
+    |                          |                                                         |              |
+    |                          | Consult the `matplotlib documentation`__ for more       |              |
+    |                          | details about the meaning of the above specifications.  |              |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | **xycoords**             | string. Indicates how to interpret coordinates given in | ``data``     |
+    |                          | ``xy``.                                                 |              |
+    |                          |                                                         |              |
+    |                          | Can be one of the following strings: ``'data'``,        |              |
+    |                          | ``'axes fraction'``, ``'axes points'``,                 |              |
+    |                          | ``'axes pixels'``, ``'figure fraction'``,               |              |
+    |                          | ``'figure points'``, ``'figure pixels'`` or ``'polar'``.|              |
+    |                          |                                                         |              |
+    |                          | Can also be a callable/function or a *matplotlib*       |              |
+    |                          | ``Transform`` object.                                   |              |
+    |                          |                                                         |              |
+    |                          | It is also possible to pass a tuple of two of the above |              |
+    |                          | types to indicate different coordinates for the *x* and |              |
+    |                          | *y* axes.                                               |              |
+    |                          |                                                         |              |
+    |                          | Consult the `matplotlib documentation`__ for more       |              |
+    |                          | details about the meaning of the above specifications.  |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | **pad**                  | index of the pad in **pads** in which the text will     | ``0``        |
     |                          | be plotted                                              |              |
     +--------------------------+---------------------------------------------------------+--------------+
-    | **transform**            | string. Indicates how to interpret coordinates given in | ``axes``     |
+    | **transform**            | .. warning::                                            | ``axes``     |
+    |                          |     This keyword is deprecated. Use ``xycoords`` and    |              |
+    |                          |     ``textcoords`` to indicate how to interpret         |              |
+    |                          |     coordinates given in ``xy`` and ``xytext``.         |              |
+    |                          |                                                         |              |
+    |                          | string. Indicates how to interpret coordinates given in |              |
     |                          | ``xy``. Can be either ``axes`` or ``data``.             |              |
     |                          |                                                         |              |
     |                          | If ``axes``, the x/y coordinates are interpreted as a   |              |
@@ -887,13 +946,16 @@ a unit of text to be displayed on the plot, along with the position.
     |                          | If ``data``, the x/y coordinates are interpreted        |              |
     |                          | relative to the values indicated on the axes.           |              |
     +--------------------------+---------------------------------------------------------+--------------+
+    | **xytext**               | tuple indicating the coordinates of the annotation text | same as      |
+    |                          | (if different fron *xy*)                                | **xy**       |
+    +--------------------------+---------------------------------------------------------+--------------+
     | **color**, **fontsize**, | *all other keyword arguments are passed to the*         | *...*        |
-    | **linestyle**, **...**   | ``text`` *method in* matplotlib. (see the               |              |
+    | **linestyle**, **...**   | ``annotate`` *method in* matplotlib. (see the           |              |
     |                          | `matplotlib documentation`__                            |              |
     |                          | for more details)                                       |              |
     +--------------------------+---------------------------------------------------------+--------------+
 
-__ https://matplotlib.org/api/text_api.html#matplotlib.text.Text
+__ https://matplotlib.org/api/text_api.html#matplotlib.text.Annotation
 
 .. note::
   Context-sensitive replacement (see

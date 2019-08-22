@@ -79,7 +79,7 @@ cfg = {
         {
           'text': 'Pad coordinates $(1/2, 1/2)$',
           'xy': (.5, .5),
-          'transform': 'axes',  # default: 'xy' are fraction of pad dimensions
+          'xycoords': 'axes fraction',  # default: 'xy' are fraction of pad dimensions
           # matplotlib keywords
           'ha': 'center',  # align text horizontally
           'va': 'center'   # align text vertically
@@ -87,7 +87,7 @@ cfg = {
         {
           'text': 'Data coordinates $(6, 10)$',
           'xy': (6, 10),
-          'transform': 'data',  # 'xy' are data coordinates
+          'xycoords': 'data',  # 'xy' are data coordinates
           # matplotlib keywords
           'ha': 'center',
           'va': 'center'
@@ -95,7 +95,7 @@ cfg = {
         {
           'text': 'Expectation: $0.0$',
           'xy': (6, 500),
-          'transform': 'data',
+          'xycoords': 'data',
           'pad': 1,  # put this text in lower pad
           # matplotlib keywords
           'color': 'gray'
