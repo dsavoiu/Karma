@@ -48,7 +48,7 @@ def get_version():
     '''try to determine version via git'''
     try:
         # is git available?
-        subprocess.call(['git', 'status'], stdout=subprocess.PIPE)
+        subprocess.call('git status', shell=True, stdout=subprocess.PIPE)
     except IOError:
         # 'git' not available
         version = "dev"
@@ -61,10 +61,10 @@ def get_version():
         # is 'git describe' working
         try:
             # git describe working -> use output
-            version = subprocess.check_output(['git', 'describe']).strip().decode()
+            version = subprocess.check_output('git describe', shell=True).strip().decode()
         except subprocess.CalledProcessError:
             # git describe not working -> use commit hash
-            version = 'git-' + subprocess.check_output(['git', 'log', '-1', '--format=%h']).strip().decode()
+            version = 'git-' + subprocess.check_output('git log -1 --format=%h', shell=True).strip().decode()
 
     return version
 
