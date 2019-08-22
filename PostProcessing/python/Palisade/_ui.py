@@ -9,6 +9,7 @@ import numpy as np
 import os
 import re
 import sys
+import warnings
 
 from contextlib import contextmanager
 from tqdm import tqdm
@@ -215,6 +216,9 @@ class PalisadeCLI(object):
     # -- public API
 
     def run(self):
+
+        # show deprecation warnings by default
+        warnings.simplefilter('default', DeprecationWarning)
 
         if self._task_module is None:
             raise NotImplemented

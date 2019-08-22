@@ -93,10 +93,17 @@ cfg = {
             'fontsize': 20,
             'pad': 1,
           },
+          # upper plot label (need to escape braces with `LiteralString`)
+          {
+            'text' : LiteralString(r"upper label with math: $\phi={\left(1\pm\sqrt{5}\right)}/{2}$"),
+            'xy': (1, 1),
+            'xycoords': 'axes fraction',
+            'xytext': (0, 5),
+            'textcoords': 'offset points',
+            'pad': 0
+          }
       ],
 
-      # upper plot label (need to escape braces with `LiteralString`)
-      'upper_label' : LiteralString(r"upper label with math: $\phi={\left(1\pm\sqrt{5}\right)}/{2}$"),
     }
   ],
 

@@ -4,6 +4,7 @@ import colorsys  # for rgb_to_hls
 import math
 import os
 import six
+import warnings
 import yaml
 
 from copy import deepcopy
@@ -738,12 +739,20 @@ class PlotProcessor(_ProcessorBase):
         # handle figure label ("upper_label")
         _upper_label = config.pop('upper_label', None)
         if _upper_label is not None:
+
+            # keyword is deprecated
+            warnings.warn(
+                "Keyword `upper_label` is deprecated and will be removed in "
+                "the future. Replace it with the following equivalent annotation under "
+                "`texts`: dict(text='...', xy=(1, 1), xycoords='axes fraction', xytext=(0, 5), "
+                "textcoords='offset points', ha='right', pad=0).", DeprecationWarning)
+
             # place above topmost `Axes`
-            _ax_top = _pad_configs[0]['axes']
-            _ax_top.text(1.0, 1.015,
-                _upper_label,
+            _pad_configs[0]['axes'].annotate(_upper_label, xy=(1, 1),
+                xycoords='axes fraction',
+                xytext=(0, 5),
+                textcoords='offset points',
                 ha='right',
-                transform=_ax_top.transAxes
             )
 
 
