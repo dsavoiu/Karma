@@ -71,6 +71,25 @@ class LogFormatterSciNotationForceSublabels(LogFormatterSciNotation):
         return _ret
 
 
+def _plot_with_error_band(ax, *args, **kwargs):
+    """display data as line. If `yerr` is given, an `y` +/- `yerr` error band is also drawn.
+    You can use custom `_band_kwargs` to format the error band."""
+
+    kwargs.pop('xerr', None)
+    _yerr = kwargs.pop('yerr', None)
+    _x = np.asarray(args[0])
+    _y = np.asarray(args[1])
+
+    # kwargs delegated to mpl fill_between
+    _band_kwargs = kwargs.pop('band_kwargs', None) or dict()
+    if _yerr is None:
+        return ax.plot(*args, **kwargs)
+    else:
+        return (ax.plot(*args, **kwargs),
+                ax.fill_between(_x, _y - _yerr[0], _y + _yerr[1], **dict(dict(kwargs, alpha=0.5, linewidth=0),
+                                                                         **_band_kwargs)))
+
+
 def _plot_as_step(ax, *args, **kwargs):
     """display data as horizontal bars with given by `x` +/- `xerr`. `y` error bars are also drawn."""
     assert len(args) == 2
@@ -164,7 +183,8 @@ class PlotProcessor(_ProcessorBase):
     CONFIG_KEY_FOR_CONTEXTS = "expansions"
 
     _EXTERNAL_PLOT_METHODS = dict(
-        step = _plot_as_step
+        step = _plot_as_step,
+        plot = _plot_with_error_band
     )
 
     _PC_KEYS_MPL_AXES_METHODS = dict(
