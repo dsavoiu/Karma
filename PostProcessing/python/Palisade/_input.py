@@ -1063,7 +1063,10 @@ class InputROOT(object):
 
         self._request_all_objects_in_expression(expr)
 
-        _result = self._eval(node=ast.parse(expr, mode='eval').body, operators=self.operators, functions=self.functions, locals=_locals)
+        _result = self._eval(node=ast.parse(expr, mode='eval').body,
+                             ctx=dict(operators=self.operators,
+                                      functions=self.functions,
+                                      locals=_locals))
 
         # raise exceptions unable to be raised during `_eval` for technical reasons
         # (e.g. due to expressions with self-referencing local variables that would
@@ -1115,14 +1118,14 @@ class InputROOT(object):
         """
         self._locals = dict()
 
-    def _eval(self, node, operators, functions, locals):
+    def _eval(self, node, ctx):
         """Evaluate an AST node"""
         if node is None:
             return None
         elif isinstance(node, ast.Name):  # <identifier>
             # lookup identifiers in local namespace
-            if node.id in locals:
-                _local = locals[node.id]
+            if node.id in ctx['locals']:
+                _local = ctx['locals'][node.id]
 
                 # if local variable contains a list, evaluate each element by threading 'get_expr' over it
                 if isinstance(_local, list):
@@ -1175,7 +1178,7 @@ class InputROOT(object):
             # evaluate unpacked positional arguments, if any
             _starargs_values = []
             if node.starargs is not None:
-                _starargs_values = self._eval(node.starargs, operators, functions, locals)
+                _starargs_values = self._eval(node.starargs, ctx)
 
             # starred kwargs (**) not supported for the moment
             if node.kwargs:
@@ -1187,29 +1190,29 @@ class InputROOT(object):
             # evaluate arguments and call function
             return functions[node.func.id](
                 # pass positional arguments
-                *map(lambda _arg: self._eval(_arg, operators, functions, locals), node.args) + _starargs_values,
+                *map(lambda _arg: self._eval(_arg, ctx), node.args) + _starargs_values,
                 # pass keyword arguments
                 **{
-                    _keyword.arg : self._eval(_keyword.value, operators, functions, locals)
+                    _keyword.arg : self._eval(_keyword.value, ctx)
                     for _keyword in node.keywords
                 }
             )
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
-            return operators[type(node.op)](self._eval(node.left, operators, functions, locals), self._eval(node.right, operators, functions, locals))
+            return ctx['operators'][type(node.op)](self._eval(node.left, ctx), self._eval(node.right, ctx))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
-            return operators[type(node.op)](self._eval(node.operand, operators, functions, locals))
+            return ctx['operators'][type(node.op)](self._eval(node.operand, ctx))
         elif isinstance(node, ast.Subscript): # <operator> <operand> e.g., -1
             if isinstance(node.slice, ast.Index): # support subscripting via simple index
-                return self._eval(node.value, operators, functions, locals)[self._eval(node.slice.value, operators, functions, locals)]
+                return self._eval(node.value, ctx)[self._eval(node.slice.value, ctx)]
             elif isinstance(node.slice, ast.Slice): # support subscripting via slice
-                return self._eval(node.value, operators, functions, locals)[self._eval(node.slice.lower, operators, functions, locals):self._eval(node.slice.upper, operators, functions, locals):self._eval(node.slice.step, operators, functions, locals)]
+                return self._eval(node.value, ctx)[self._eval(node.slice.lower, ctx):self._eval(node.slice.upper, ctx):self._eval(node.slice.step, ctx)]
             else:
                 raise TypeError(node)
         elif isinstance(node, ast.Attribute): # <value>.<attr>
-            return getattr(self._eval(node.value, operators, functions, locals), node.attr)
+            return getattr(self._eval(node.value, ctx), node.attr)
         elif isinstance(node, ast.List): # list of node names
-            return [self._eval(_el, operators, functions, locals) for _el in node.elts]
+            return [self._eval(_el, ctx) for _el in node.elts]
         elif isinstance(node, ast.Tuple): # tuple of node names
-            return tuple(self._eval(_el, operators, functions, locals) for _el in node.elts)
+            return tuple(self._eval(_el, ctx) for _el in node.elts)
         else:
             raise TypeError(node)
