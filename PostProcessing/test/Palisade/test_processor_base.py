@@ -12,9 +12,9 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
-from Karma.PostProcessing.Palisade import ContextValue, LiteralString
+from Karma.PostProcessing.Palisade import ContextValue, String, LiteralString
 from Karma.PostProcessing.Palisade.Processors._base import _ProcessorBase, ConfigurationError
-#from Karma.PostProcessing.Palisade.Processors._base import _ProcessorBase
+from Karma.PostProcessing.Palisade._lazy import String
 
 
 _RESULTS = []
@@ -48,7 +48,7 @@ class TestProcessorBase(unittest.TestCase):
             dict(),
         ],
         'expansions': {
-            'namespace': [dict(key=42)],
+            'namespace': [dict(key=42, meta_key='key')],
         },
     }
 
@@ -128,13 +128,15 @@ class TestProcessorBase(unittest.TestCase):
         _cfg = deepcopy(self.BASE_CFG)
         _cfg['templates'][0].update({
             'replace_under_here': {
-                'literal_string': LiteralString('{namespace[key]}'),
+                'literal_string': String('{namespace[key]}'),
+                'literal_string_deprecated': LiteralString('{namespace[key]}'),
             }
         })
 
         _results = self._run_palisade(config=_cfg)
         self.assertEqual(len(_results), 1)
         self.assertEqual(_results[0]['replace_under_here']['literal_string'], '{namespace[key]}')
+        self.assertEqual(_results[0]['replace_under_here']['literal_string_deprecated'], '{namespace[key]}')
 
     def test_replace_context_nested_dict(self):
         _cfg = deepcopy(self.BASE_CFG)
@@ -222,6 +224,18 @@ class TestProcessorBase(unittest.TestCase):
         self.assertEqual(len(_results), 1)
         self.assertEqual(_results[0]['replace_this_as_well'], str(self.BASE_CFG['expansions']['namespace'][0]['key']))
 
+    def test_context_string_inexistent_key_raise(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': '{namespace[inexistent_key]}',
+            }
+        })
+
+        with self.assertRaises(ConfigurationError) as _err:
+            _results = self._run_palisade(config=_cfg)
+        self.assertIn("'inexistent_key'", _err.exception.args[0])
+
     def test_replace_context_string_top_level_key(self):
         _cfg = deepcopy(self.BASE_CFG)
         _cfg['templates'][0].update({
@@ -232,7 +246,7 @@ class TestProcessorBase(unittest.TestCase):
         self.assertEqual(len(_results), 1)
         self.assertEqual(_results[0]['replace_this_as_well'], self.BASE_CFG['expansions']['namespace'][0]['key'])
 
-    def test_context_value_unsupported_syntax(self):
+    def test_context_value_unsupported_syntax_raise(self):
         _cfg = deepcopy(self.BASE_CFG)
         _cfg['templates'][0].update({
             'replace_under_here': {
@@ -242,3 +256,63 @@ class TestProcessorBase(unittest.TestCase):
 
         with self.assertRaises(ConfigurationError):
             _results = self._run_palisade(config=_cfg)
+
+    def test_context_value_inexistent_key_raise(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': ContextValue('namespace[inexistent_key]'),
+            }
+        })
+
+        with self.assertRaises(ConfigurationError) as _err:
+            _results = self._run_palisade(config=_cfg)
+        self.assertIn("'inexistent_key'", _err.exception.args[0])
+
+    def test_replace_context_value_lazy_arithmetic(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': ContextValue('namespace[key]') * 2,
+            }
+        })
+
+        _results = self._run_palisade(config=_cfg)
+        self.assertEqual(len(_results), 1)
+        self.assertEqual(_results[0]['replace_under_here']['context_value'], self.BASE_CFG['expansions']['namespace'][0]['key'] * 2)
+
+    def test_replace_context_value_lazy_arithmetic_2(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': ContextValue('namespace[key]') * ContextValue('namespace[key]'),
+            }
+        })
+
+        _results = self._run_palisade(config=_cfg)
+        self.assertEqual(len(_results), 1)
+        self.assertEqual(_results[0]['replace_under_here']['context_value'], self.BASE_CFG['expansions']['namespace'][0]['key'] ** 2)
+
+    def test_replace_context_value_lazy_format_string(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': String("{0}{0}").format(ContextValue('namespace[key]')),
+            }
+        })
+
+        _results = self._run_palisade(config=_cfg)
+        self.assertEqual(len(_results), 1)
+        self.assertEqual(_results[0]['replace_under_here']['context_value'], str(self.BASE_CFG['expansions']['namespace'][0]['key']) * 2)
+
+    def test_replace_context_value_lazy_meta_key(self):
+        _cfg = deepcopy(self.BASE_CFG)
+        _cfg['templates'][0].update({
+            'replace_under_here': {
+                'context_value': ContextValue(String("namespace[{}]").format(ContextValue('namespace[meta_key]'))),
+            }
+        })
+
+        _results = self._run_palisade(config=_cfg)
+        self.assertEqual(len(_results), 1)
+        self.assertEqual(_results[0]['replace_under_here']['context_value'], self.BASE_CFG['expansions']['namespace'][0]['key'])

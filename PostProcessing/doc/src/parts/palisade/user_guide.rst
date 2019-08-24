@@ -267,7 +267,7 @@ Placeholders
 ------------
 
 There are two ways to indicate that the values of task parameters should
-be taken from the current expansion context: *placeholders* is strings
+be taken from the current expansion context: *placeholders* in strings
 and the :py:class:`~Palisade.ContextValue` configuration helper class.
 
 A *placeholder* is any part of a string between curly braces (``{}``).
@@ -281,9 +281,9 @@ string interpolation using :py:func:`format`.
     *Placeholder* replacement is performed on **all** strings inside
     a task definition. To avoid interpreting curly braces as placeholder
     syntax, they can be escaped by doubling them. Alternatively, the
-    string can be wrapped in the special class
-    :py:class:`~Palisade.LiteralString`,
-    which will disable placeholder replacement for that string.
+    string can be wrapped in the configuration helper class
+    :py:class:`~Palisade.String`, which will disable placeholder
+    replacement for that string.
 
 Another way to indicate that the value of a task parameter should be
 taken from the current expansion context is by using the configuration
@@ -305,6 +305,97 @@ contexts.
     a value **of the same type** as :py:const:`context[key]`, while
     the latter will always attempt to coerce that value to a string,
     regardless of the type of :py:const:`context[key]`.
+
+Advanced use of ``ContextValue``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The value of a context-sensitive task parameter does not necessarily
+have to be set using a single :py:class:`~Palisade.ContextValue` object,
+but can also be an expression involving several :py:class:`~Palisade.ContextValue`
+objects. Expressions can involve arithmetic or string formatting operations
+and will stay unevaluated until the :py:class:`~Palisade.ContextValue`
+objects are resolved.
+
+.. note::
+
+    When using :py:class:`~Palisade.ContextValue` in an expression,
+    *placeholder* replacement is disabled and all strings involved
+    are considered **literal** strings. To perform placeholder,
+    replacement in this case, :py:class:`~Palisade.ContextValue`
+    has to be used consistently.
+
+:py:class:`~Palisade.ContextValue` objects directly support all basic
+arithmetic operations (``+``, ``-``, ``*``, ``/``, ``//``), as well as
+logical operations (``and``, ``or``, ``xor``). These can be chained an
+arbitrary number of times. For example, the following configuration entry
+will be replaced by three times the sum of the values corresponding to
+`key_1` and `key_2` in the namespace `values`:
+
+.. code:: python
+
+    'result' : 3 * (ContextValue('values[key_1]') + ContextValue('values[key_2]'))
+
+The above will resolve correctly as long as the corresponding values support the
+addition and multiplication operations. If the values are incompatible, an error will
+be raised at runtime when the context values are resolved.
+
+:py:class:`~Palisade.ContextValue` objects may also be used as replacement values
+in a formatted string. For this, the string needs to be wrapped inside the
+:py:class:`~Palisade.String` configuration helper class, which provides a
+:py:meth:`~Palisade.String.format` method analogous to Python's built-in
+``str.format()``.
+
+.. code:: python
+
+    'result' : String("The value for 'key_1' is: {}").format(ContextValue('values[key_1]'))
+
+It is even possible to use context-sensitive formatted strings as keys for other context value
+lookups. Assuming the key ``meta_key`` maps to the string ``'key_1'``, the following
+configurations would yield the same result:
+
+.. code:: python
+
+    'result' : ContextValue(String("values[{}]").format(ContextValue('values[meta_key]')))
+
+    'result' : ContextValue('values[key_1]')
+
+Expressions involving :py:class:`~Palisade.ContextValue` objects can represent arbitrarily
+complicated evaluation-time control flows thanks to a series of configuration helper objects
+like :py:class:`~Palisade.If` and :py:class:`~Palisade.Try`.
+
+.. code:: python
+
+    # choose between two keys depending on the value of a third key
+    'result' : If(ContextValue('values[a_key_available]'), ContextValue('values[a_key]'), ContextValue('values[other_key]'))
+
+    # choose a key if it is available, falling back to another key if it does not exist
+    'result' : Try(ContextValue('values[possibly_missing_key]'), KeyError, ContextValue('values[alternative_key]'))
+
+Context-dependent access to analysis-level objects is provided by the :py:class:`~Palisade.InputValue`
+configuration helper class. At evaluation time, it will be replaced by an arbitrary expression involving
+analysis-level objects (see below for more information on these expressions). This is particularly useful
+when annotating plots, since it provides a way to display information extracted from analysis-level objects.
+
+.. note::
+
+    While many Python syntax elements will work seamlessly with ``ContextValue``, some
+    in particular do not. Some examples of these incompatible elements are listed here.
+    along with suggested workarounds.
+
+    * the **ternary operator** (i.e. ``value if condition else other``). If this
+      is needed, use the ``If`` configuration helper instead.
+
+    * the `in` operator. If this is needed, use the ``ContextValue.__contains__``
+      special method instead. Note that the logic is reversed with respect to ``in``.
+
+    * passing ``ContextValue`` expressions to ``str.format``. As noted above, wrap the
+      string in the configuration helper class :py:class:`~Palisade.String` to do
+      context-dependent string formatting.
+
+    * comparisons with multiple operators. Statements like ``a < val <= b`` where ``val``
+      is a ``ContextValue`` will not work as expected and *will not raise an exception*.
+      As a workaround, replace by an expression using single comparisons, i.e.
+      ``(a < val) and (val <= b)``.
 
 
 Multidimensional expansions
@@ -574,7 +665,7 @@ Each figure dictionary must contain the following keys:
     |                        | automatically by *matplotlib* based on the filename extension.          |
     |                        |                                                                         |
     |                        | .. note::                                                               |
-    |                        |     Writing out the same image in different formats is not directly.    |
+    |                        |     Writing out the same image in different formats is not directly     |
     |                        |     supported, although it can be achieved by using a *placeholder*     |
     |                        |     in place of a file extension and putting all desired extensions     |
     |                        |     inside an *expansion namespace*.                                    |
@@ -865,7 +956,7 @@ an arrow pointing from the annotation to the point *xy*.
 
 The following table contains a summary of keywords
 These and other aspects of the annotation can be controlled via a number of optional keywords,
-which are available
+which are summarized in the table below:
 
 
 .. table::
@@ -894,7 +985,7 @@ which are available
     +--------------------------+---------------------------------------------------------+--------------+
     | **arrowprops**           | dictionary containing the properties of an arrow to     | ``None``,    |
     |                          | draw between **xy** and **xytext**. (see the            | i.e. no arrow|
-    |                          | `matplotlib documentation`__ for more details)          | is drawn     |
+    |                          | `matplotlib documentation`_ for more details)           | is drawn     |
     +--------------------------+---------------------------------------------------------+--------------+
     | **textcoords**           | string. Indicates how to interpret coordinates given in | same as      |
     |                          | ``xytext``.                                             | **xycoords** |
@@ -907,7 +998,7 @@ which are available
     |                          | types to indicate different coordinates for the *x* and |              |
     |                          | *y* axes.                                               |              |
     |                          |                                                         |              |
-    |                          | Consult the `matplotlib documentation`__ for more       |              |
+    |                          | Consult the `matplotlib documentation`_ for more        |              |
     |                          | details about the meaning of the above specifications.  |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | **xycoords**             | string. Indicates how to interpret coordinates given in | ``data``     |
@@ -925,7 +1016,7 @@ which are available
     |                          | types to indicate different coordinates for the *x* and |              |
     |                          | *y* axes.                                               |              |
     |                          |                                                         |              |
-    |                          | Consult the `matplotlib documentation`__ for more       |              |
+    |                          | Consult the `matplotlib documentation`_ for more        |              |
     |                          | details about the meaning of the above specifications.  |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | **pad**                  | index of the pad in **pads** in which the text will     | ``0``        |
@@ -951,20 +1042,18 @@ which are available
     +--------------------------+---------------------------------------------------------+--------------+
     | **color**, **fontsize**, | *all other keyword arguments are passed to the*         | *...*        |
     | **linestyle**, **...**   | ``annotate`` *method in* matplotlib. (see the           |              |
-    |                          | `matplotlib documentation`__                            |              |
-    |                          | for more details)                                       |              |
+    |                          | `matplotlib documentation`_ for more details)           |              |
     +--------------------------+---------------------------------------------------------+--------------+
 
-__ https://matplotlib.org/api/text_api.html#matplotlib.text.Annotation
+.. _matplotlib documentation: https://matplotlib.org/api/text_api.html#matplotlib.text.Annotation
 
 .. note::
   Context-sensitive replacement (see
   :ref:`above <user-guide-palisade-expansions>`) is also performed for the
-  ``texts`` configuration dictionary.
+  ``texts`` configuration dictionary. To display information extracted from analysis-level
+  objects in a text annotation, use the :py:class:`~Palisade.InputValue` configuration
+  helper class.
 
-.. note::
-  The ``texts`` key cannot be used for representing information
-  extracted *from analysis-level objects*, which is not (yet) supported.
 
 Examples
 --------

@@ -5,6 +5,7 @@ import ast
 import itertools
 import os
 import six
+import warnings
 
 from copy import deepcopy
 from tqdm import tqdm
@@ -12,6 +13,7 @@ from tqdm import tqdm
 import numpy as np
 
 from .._input import InputROOT
+from .._lazy import LazyNodeBase, lazify, String
 from .._colormaps import viridis
 
 __all__ = ['ContextValue', 'LiteralString', 'InputValue']
@@ -26,7 +28,6 @@ def _make_directory(dir_path):
         else:
             raise
 
-
 def product_dict(**kwargs):
     """Cartesian product of iterables in dictionary"""
     _keys = kwargs.keys()
@@ -38,19 +39,14 @@ class ConfigurationError(Exception):
     pass
 
 
-class ConfigurationEntry(object):
-    __metaclass__ = abc.ABCMeta
+class ContextValue(LazyNodeBase):
+    """Configuration object. Is replaced by the value corresponding to the specification `spec`
+    dispatched over the current context."""
 
-    @abc.abstractmethod
-    def get(self, context):
-        raise NotImplementedError
+    _fields = ('spec',)
 
-
-class ContextValue(ConfigurationEntry):
-    """Configuration object. Is replaced by the value corresponding to the `key` in the current context."""
-    __slots__ = ['path']
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, spec):
+        LazyNodeBase.__init__(self, spec)
 
     @staticmethod
     def _eval(node, context):
@@ -58,15 +54,10 @@ class ContextValue(ConfigurationEntry):
         if isinstance(node, ast.Str): # <string> : simple lookup
             return context[node.s]
 
-        elif isinstance(node, ast.Name): # <identifies> : same treatment as string
+        elif isinstance(node, ast.Name): # <identifier> : same treatment as string
             return context[node.id]
 
         elif isinstance(node, ast.Subscript):  # <left>[<right>]
-            # expr = 'asmz_fit_value[ERRORS_LABEL=="exp+np+pdf"]'
-            # node.value = {_ast.Name}
-            # node.value.id = '<left>'
-            # node.slice.value = {_ast.Str}
-            # node.slice.value.s = {str} '<right>'
 
             _lnode = node.value
             _rnode = node.slice.value
@@ -75,32 +66,54 @@ class ContextValue(ConfigurationEntry):
             return ContextValue._eval(_rnode, _inner_ctx)
 
         else:
-            raise ConfigurationError("Cannot interpret context node: {}".format(node))
+            raise TypeError(type(node).__name__)
 
-    def get(self, context):
-        return self._eval(ast.parse(self.path, mode='eval').body, context)
+    def eval(self, context):
+        # interpret path using AST and dispatch with context
+        _spec = self._spec.eval(context)
+        try:
+            return self._eval(ast.parse(_spec, mode='eval').body, context)
+        except KeyError as e:
+            raise ConfigurationError("Key '{}' not found when dispatching expression '{}' over context: {}".format(e.args[0], _spec, context))
+        except TypeError as e:
+            raise ConfigurationError("Unsupported node type '{}' encountered in expression '{}'.".format(e.args[0], _spec))
 
 
-class InputValue(ConfigurationEntry):
-    """Configuration object. It is replaced by an object retrieved by an input controller."""
-    __slots__ = ['expression']
+
+class InputValue(LazyNodeBase):
+    """Configuration object. It is replaced by an the result of evaluating
+    `expression` as an expression involving input file objects. The expression
+    is dispatched over the current expansion context.
+
+    See :py:meth:`~Palisade.InputROOT.get_expr` for more information about
+    input expressions.
+
+    .. note::
+        The context must provide an input controller (e.g. :py:class:`~Palisade.InputROOT`)
+        under the key ``_input_controller``."""
+
+    _fields = ('expression',)
 
     def __init__(self, expression):
-        self.expression = expression
+        LazyNodeBase.__init__(self, expression)
 
-    def get(self, context):
-        _expr = self.expression.format(**context)
+    def eval(self, context):
+        _expr = self._expression.eval().format(**context)
         return context['_input_controller'].get_expr(_expr)
 
 
-class LiteralString(ConfigurationEntry):
-    """Configuration object. Used for strings containing curly braces to avoid context substitution."""
-    __slots__ = ['s']
-    def __init__(self, string):
-        self.s = string
+# deprecated: keep for backwards compatibility
+class LiteralString(String):
+    def __init__(self, s):
+        """Deprecated. Equivalent to :py:class:`~Palisade.String`."""
 
-    def get(self, context):
-        return self.s
+        # issue DeprecationWarning
+        warnings.warn(
+            "Class `LiteralString` is deprecated and will be removed in "
+            "the future. Use the equivalent `String` class as a drop-in "
+            "replacement.", DeprecationWarning)
+
+        String.__init__(self, s)
 
 
 class _ProcessorBase(object):
@@ -130,7 +143,7 @@ class _ProcessorBase(object):
 
     @staticmethod
     def _resolve_context(var, context):
-        '''recursively replace string templates and `ConfigurationEntry` with contextual values'''
+        '''recursively replace string templates and ``LazyNodeBase`` with contextual values'''
         if isinstance(var, dict):
             # thread over dictionaries
             for _k, _v in six.iteritems(var):
@@ -141,10 +154,13 @@ class _ProcessorBase(object):
                 var[_idx] = _ProcessorBase._resolve_context(_v, context)
         elif isinstance(var, str):
             # replace within string using 'format'
-            return var.format(**context)
-        elif isinstance(var, ConfigurationEntry):
-            # 'ConfigValue' etc. -> get directly from context dict
-            return var.get(context)
+            try:
+                return var.format(**context)
+            except KeyError as e:
+                raise ConfigurationError("Key '{}' not found when dispatching expression '{}' over context: {}".format(e.args[0], var, context))
+
+        elif isinstance(var, LazyNodeBase):
+            return var.eval(context)
         else:
             # direct passthrough: no replacement
             pass
@@ -160,8 +176,8 @@ class _ProcessorBase(object):
             for _k, _v in six.iteritems(_config):
                 if isinstance(_v, str):
                     _config[_k] = _v.format(**context)
-                elif isinstance(_v, ConfigurationEntry):
-                    _config[_k] = _v.get(context)
+                elif isinstance(_v, LazyNodeBase):
+                    _config[_k] = _v.eval(context)
 
             # replace context only in children of specific subkeys
             for _subkey_for_context_replacing in self.SUBKEYS_FOR_CONTEXT_REPLACING:
