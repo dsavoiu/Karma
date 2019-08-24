@@ -14,7 +14,7 @@ import numpy as np
 from .._input import InputROOT
 from .._colormaps import viridis
 
-__all__ = ['ContextValue', 'LiteralString']
+__all__ = ['ContextValue', 'LiteralString', 'InputValue']
 
 
 def _make_directory(dir_path):
@@ -79,6 +79,18 @@ class ContextValue(ConfigurationEntry):
 
     def get(self, context):
         return self._eval(ast.parse(self.path, mode='eval').body, context)
+
+
+class InputValue(ConfigurationEntry):
+    """Configuration object. It is replaced by an object retrieved by an input controller."""
+    __slots__ = ['expression']
+
+    def __init__(self, expression):
+        self.expression = expression
+
+    def get(self, context):
+        _expr = self.expression.format(**context)
+        return context['_input_controller'].get_expr(_expr)
 
 
 class LiteralString(ConfigurationEntry):

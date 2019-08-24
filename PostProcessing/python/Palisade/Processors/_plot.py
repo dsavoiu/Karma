@@ -241,6 +241,10 @@ class PlotProcessor(_ProcessorBase):
         self._figures = {}
         self._global_request_params = self._config.get("global_request_params", {})
 
+        # introduce pseudo-context for accessing input file content
+        self._config[self.CONFIG_KEY_FOR_CONTEXTS].update(
+            _input_controller=[self._input_controller]
+        )
 
     # -- helper methods
 

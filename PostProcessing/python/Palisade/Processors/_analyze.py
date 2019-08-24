@@ -66,6 +66,11 @@ class AnalyzeProcessor(_ProcessorBase):
         self._global_request_params = self._config.get("global_request_params", {})
         self._files = {}
 
+        # introduce pseudo-context for accessing input file content
+        self._config[self.CONFIG_KEY_FOR_CONTEXTS].update(
+            _input_controller=[self._input_controller]
+        )
+
     def _get_file(self, filename):
         if filename not in self._files:
             _fullpath = os.path.join(self._output_folder, filename)
