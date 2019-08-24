@@ -117,6 +117,9 @@ class TestInputROOTWithFile(unittest.TestCase):
         self.assertIsInstance(self._ic.get_expr('"test:h1"'), _Hist)
         self.assertIsInstance(self._ic.get_expr('"test:h2"'), _Hist)
 
+    def test_get_expr_simple_string(self):
+        self.assertEquals(self._ic.get_expr('str("test:h1")'), "test:h1")
+
     def test_get_expr_histogram_binary_op(self):
         for _symbol, _op in [('+', op.add), ('*', op.mul)]:
             with self.subTest(operation=_symbol):
@@ -127,6 +130,8 @@ class TestInputROOTWithFile(unittest.TestCase):
                     self.assertEqual(_bin_1.value, _bin_2.value)
                     self.assertEqual(_bin_1.error, _bin_2.error)
 
+    def test_get_expr_binary_op_noinput(self):
+        self.assertEquals(self._ic.get_expr('no_input("test:h1"+"_"+"test:h2")'), "test:h1_test:h2")
 
     def test_get_expr_user_defined_function(self):
 
@@ -153,7 +158,7 @@ class TestInputROOTWithFile(unittest.TestCase):
             # evaluate expr and compute reference reult
             self._ic.get_expr('triple("test:h1")')
 
-        self.assertEqual(_err.exception.args[0], 'triple')
+        self.assertIn("'triple'", _err.exception.args[0])
 
     def test_get_expr_user_defined_function_signatures(self):
 

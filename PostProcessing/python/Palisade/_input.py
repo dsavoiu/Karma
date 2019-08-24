@@ -841,9 +841,13 @@ class InputROOT(object):
         if name is None and function is not None:
             name = function.__name__
 
+        if name in cls.special_functions:
+            raise ValueError("Cannot add user-defined ROOT function with name "
+                "'{}': name is reserved for internal use only!".format(name))
+
         if not override and name in cls.functions:
             raise ValueError("Cannot add user-defined ROOT function with name "
-                "'{}': it already exists and `override` not explicitly allowed!".format(function))
+                "'{}': it already exists and `override` not explicitly allowed!".format(name))
 
         def _decorator(f):
             # add user-specified function to mapping
@@ -1066,7 +1070,8 @@ class InputROOT(object):
         _result = self._eval(node=ast.parse(expr, mode='eval').body,
                              ctx=dict(operators=self.operators,
                                       functions=self.functions,
-                                      locals=_locals))
+                                      locals=_locals,
+                                      input=True))
 
         # raise exceptions unable to be raised during `_eval` for technical reasons
         # (e.g. due to expressions with self-referencing local variables that would
@@ -1170,11 +1175,42 @@ class InputROOT(object):
             else:
                 raise NameError("Cannot resolve identifier '{}': not a valid Python literal or a registered local variable!".format(node.id))
         elif isinstance(node, ast.Str): # <string> : array column
-            # lookup in ROOT file
-            return self.get(node.s)
+            if ctx['input']:
+                # lookup in ROOT file
+                return self.get(node.s)
+            else:
+                # return string as-is
+                return node.s
         elif isinstance(node, ast.Num): # <number>
             return node.n
         elif isinstance(node, ast.Call): # node names containing parentheses (interpreted as 'Call' objects)
+            # -- determine function to call
+
+            # function handle is a simple identifier
+            if isinstance(node.func, ast.Name):
+
+                # handle special functions
+                if node.func.id in self.special_functions:
+                    _spec_func_spec = self.special_functions[node.func.id]
+                    # callable for special function (default to no-op)
+                    _callable = _spec_func_spec.get('func', lambda x: x)
+                    # modify avaluation context for special function
+                    ctx = dict(ctx, **_spec_func_spec.get('ctx', {}))
+
+                # call a registered input function
+                else:
+                    try:
+                        _callable = ctx['functions'][node.func.id]
+                    except KeyError as e:
+                        raise ValueError(
+                            "Cannot call input function '{}': no such "
+                            "function!".format(node.func.id))
+
+            # function handle is an expression
+            else:
+                # evaluate 'func' as any other node
+                _callable = self._eval(node.func, ctx)
+
             # evaluate unpacked positional arguments, if any
             _starargs_values = []
             if node.starargs is not None:
@@ -1187,16 +1223,15 @@ class InputROOT(object):
                     "** is not supported. Expression was: '{}'".format(
                         ast.dump(node, annotate_fields=False)))
 
-            # evaluate arguments and call function
-            return functions[node.func.id](
-                # pass positional arguments
-                *map(lambda _arg: self._eval(_arg, ctx), node.args) + _starargs_values,
-                # pass keyword arguments
-                **{
-                    _keyword.arg : self._eval(_keyword.value, ctx)
-                    for _keyword in node.keywords
-                }
-            )
+            # evaluate arguments
+            _args = map(lambda _arg: self._eval(_arg, ctx), node.args) + _starargs_values
+            _kwargs = {
+                _keyword.arg : self._eval(_keyword.value, ctx)
+                for _keyword in node.keywords
+            }
+
+            # call function
+            return _callable(*_args, **_kwargs)
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
             return ctx['operators'][type(node.op)](self._eval(node.left, ctx), self._eval(node.right, ctx))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
@@ -1216,3 +1251,16 @@ class InputROOT(object):
             return tuple(self._eval(_el, ctx) for _el in node.elts)
         else:
             raise TypeError(node)
+
+    # functions with special meanings/side effects
+    # when encountered in expressions, these functions can change the
+    # behavior of the evaluation of descendant nodes or access functionality
+    # of the InputROOT object itself
+    special_functions = {
+        # enable ROOT input when evaluating descendant nodes
+        'input':    dict(ctx=dict(input=True)),
+        # disable ROOT input when evaluating descendant nodes
+        'no_input': dict(ctx=dict(input=False)),
+        # get argument as string (i.e. without ROOT input)
+        'str':      dict(func=str, ctx=dict(input=False)),
+    }
