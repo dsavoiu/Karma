@@ -130,6 +130,12 @@ class TestInputROOTWithFile(unittest.TestCase):
                     self.assertEqual(_bin_1.value, _bin_2.value)
                     self.assertEqual(_bin_1.error, _bin_2.error)
 
+    def test_get_expr_histogram_attribute(self):
+        self.assertEquals(
+            self._ic.get_expr('"test:h1".GetNbinsX()'),
+            self._ic.get_expr('"test:h1"').GetNbinsX()
+        )
+
     def test_get_expr_binary_op_noinput(self):
         self.assertEquals(self._ic.get_expr('no_input("test:h1"+"_"+"test:h2")'), "test:h1_test:h2")
 
@@ -266,6 +272,119 @@ class TestInputROOTWithFile(unittest.TestCase):
 
         # remove function to avoid side effects
         InputROOT.functions.pop('get_arg_structure', None)
+
+    def test_get_expr_user_defined_function_memoized(self):
+
+        # helper callable with call counter
+        class FuncWithCounter:
+            def __init__(self, func):
+                self._f = func
+                self.__name__ = func.__name__
+                self._call_count = 0
+
+            def __call__(self, *args):
+                self._call_count += 1
+                return self._f(*args)
+
+        # define two equivalend call-counted functions
+        @FuncWithCounter
+        def triple(tobject):
+            return 3 * tobject
+
+        @FuncWithCounter
+        def triple_memoized(tobject):
+            return 3 * tobject
+
+        # add a memoized and a non-memoized version
+        InputROOT.add_function(function=triple_memoized, memoize=True)
+        InputROOT.add_function(function=triple, memoize=False)
+
+        # get expression multiple times
+        _result_direct = 3 * self._ic.get_expr('"test:h1"')
+        for _i in range(7):
+            _result_expr_memoized = self._ic.get_expr('triple_memoized("test:h1")')
+            _result_expr = self._ic.get_expr('triple("test:h1")')
+
+        # compare results with both functions to reference
+        for _bin_1, _bin_2 in zip(_result_expr, _result_direct):
+            self.assertEqual(_bin_1.value, _bin_2.value)
+            self.assertEqual(_bin_1.error, _bin_2.error)
+        for _bin_1, _bin_2 in zip(_result_expr_memoized, _result_direct):
+            self.assertEqual(_bin_1.value, _bin_2.value)
+            self.assertEqual(_bin_1.error, _bin_2.error)
+
+        # ensure memoized version has only been called once
+        assert triple._call_count == 7
+        assert triple_memoized._call_count == 1
+
+        # remove function and clear the cache to avoid side effects
+        InputROOT.functions.pop('triple', None)
+        InputROOT.functions.pop('triple_memoized', None)
+        InputROOT.clear_cache()
+
+    def test_get_expr_user_defined_function_memoized_clear_cache(self):
+
+        # helper callable with call counter
+        class FuncWithCounter:
+            def __init__(self, func):
+                self._f = func
+                self.__name__ = func.__name__
+                self._call_count = 0
+
+            def __call__(self, *args):
+                self._call_count += 1
+                return self._f(*args)
+
+        @FuncWithCounter
+        def triple_memoized(tobject):
+            return 3 * tobject
+
+        # add the memoized function
+        InputROOT.add_function(function=triple_memoized, memoize=True)
+
+        # get expression multiple times, clearing the cache in-between
+        for _i in range(7):
+            _result_expr_memoized = self._ic.get_expr('triple_memoized("test:h1")')
+            InputROOT.clear_cache()
+
+        # ensure memoized version has only been called once
+        assert triple_memoized._call_count == 7
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('triple_memoized', None)
+
+    def test_get_expr_user_defined_function_memoized_iterable_arguments(self):
+
+        # add a custom function: scale hist by a factor 3
+        @InputROOT.add_function(memoize=True)
+        def how_many(iterable_args):
+            try:
+                return len(iterable_args.keys())
+            except AttributeError:
+                return len(iterable_args)
+
+        # evaluate expr and compute reference reult
+        self.assertEqual(self._ic.get_expr('how_many(["test:h1", "test:h1", "test:h1"])'), 3)
+        self.assertEqual(self._ic.get_expr('how_many(("test:h1", "test:h1", "test:h1"))'), 3)
+        self.assertEqual(self._ic.get_expr('how_many({"a": "test:h1", "b": "test:h1", "c": "test:h1"})'), 3)
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('how_many', None)
+
+    def test_get_expr_user_defined_function_memoized_variable_arguments(self):
+
+        # add a custom function: scale hist by a factor 3
+        @InputROOT.add_function(memoize=True)
+        def how_many(*args, **kwargs):
+            return len(kwargs) + len(args)
+
+        # evaluate expr and compute reference reult
+        self.assertEqual(self._ic.get_expr('how_many("test:h1", "test:h1", "test:h1")'), 3)
+        self.assertEqual(self._ic.get_expr('how_many(a="test:h1", b="test:h1", c="test:h1")'), 3)
+        self.assertEqual(self._ic.get_expr('how_many("test:h1", "test:h1", c="test:h1")'), 3)
+
+        # remove function to avoid side effects
+        InputROOT.functions.pop('how_many', None)
 
     def test_get_expr_local_variables(self):
 

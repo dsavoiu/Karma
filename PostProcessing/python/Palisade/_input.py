@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import ast
-import collections
+import functools
 import ROOT
 import numpy as np
 import operator as op
@@ -18,10 +18,74 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
+if six.PY2:
+    from collections import Mapping
+elif six.PY3:
+    from collections.abc import Mapping
+
 import scipy.stats as stats
 
 
 __all__ = ['InputROOTFile', 'InputROOT']
+
+
+class HashableMap(Mapping):
+    """A hashable, immutable mapping type.
+
+    The arguments to ``HashableMap`` are processed the same way as those to ``dict``.
+    Both the keys and the values contained in the map must be hashable.
+
+    An exception are `lists`, which are converted to `tuple` in order  to make them
+    hashable.
+
+    Two `HashableMap` instances with identical keys and values are guaranteed to be
+    identical. "Identical" in this context means having the same hash.
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        self._d = dict(*args, **kwargs)
+
+        # validate values
+        for key, value in six.iteritems(self._d):
+            # check hashability
+            try:
+                hash(value)
+            except TypeError:
+                # attempt to wrap non-hashable types
+                if isinstance(value, list) or isinstance(value, tuple):
+                    value = tuple(enumerate(value))
+                elif isinstance(value, dict):
+                    value = tuple(six.iteritems(value))
+                else:
+                    raise
+
+                self._d[key] = HashableMap(value)
+
+        self._hash = None  # computed on request
+
+    def __iter__(self):
+        return iter(self._d)
+
+    def __len__(self):
+        return len(self._d)
+
+    def __getitem__(self, key):
+        return self._d[key]
+
+    def __hash__(self):
+        # compute hash if not available
+        if self._hash is None:
+            # hash computed from hashes of keys and values
+            self._hash = 0
+            for key, value in self.iteritems():
+                self._hash ^= hash(key)
+                self._hash ^= hash(value)
+
+        return self._hash
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, self._d)
 
 
 class _ROOTObjectFunctions(object):
@@ -721,6 +785,9 @@ class InputROOT(object):
         }
     )
 
+    # class-level cache for storing memoized function results
+    _cache = {}
+
     def __init__(self, files_spec=None):
         """
         Parameters
@@ -778,7 +845,7 @@ class InputROOT(object):
         return _file_nickname, _object_path_in_file
 
     @classmethod
-    def add_function(cls, function=None, name=None, override=False):
+    def add_function(cls, function=None, name=None, override=False, memoize=False):
         '''Register a user-defined input function. Can also be used as a decorator.
 
         .. note::
@@ -794,6 +861,11 @@ class InputROOT(object):
                 function name. If not given, taken from ``function.__name__``
             override : `bool`, optional
                 if ``True``, allow existing functions to be overridden (*default*: ``False``)
+            memoize : `bool`, optional
+                if ``True``, store function result in a cache on first call. For every
+                subsequent call with identical arguments, the result will be retrieved
+                from the cache instead of evaluating the function again.
+                (*default*: ``False``)
 
         Usage examples:
 
@@ -849,10 +921,41 @@ class InputROOT(object):
             raise ValueError("Cannot add user-defined ROOT function with name "
                 "'{}': it already exists and `override` not explicitly allowed!".format(name))
 
-        def _decorator(f):
-            # add user-specified function to mapping
-            cls.functions[name or f.__name__] = f
-            return f
+
+        if memoize:
+            def memoize(f):
+                @functools.wraps(f)
+                def _memoized_function(*args, **kwargs):
+                    # compute unique hash key for the argument structure
+                    key = HashableMap(func=f, args=args, kwargs=kwargs)
+
+                    # look up in cache
+                    if key in cls._cache:
+                        # return if found
+                        return cls._cache[key]
+
+                    # compute and store if not found
+                    _result = f(*args, **kwargs)
+                    cls._cache[key] = _result
+
+                    return _result
+
+                return _memoized_function
+
+            def _decorator(f):
+                # replace 'f' with a version enabling memoization of results
+                f = memoize(f)
+
+                # add memoized function to mapping
+                cls.functions[name or f.__name__] = f
+
+                return f
+        else:
+            def _decorator(f):
+                # add user-specified function to mapping
+                cls.functions[name or f.__name__] = f
+
+                return f
 
         if function is not None:
             # default decorator call, i.e. '@InputROOT.add_function'
@@ -1251,6 +1354,10 @@ class InputROOT(object):
             return tuple(self._eval(_el, ctx) for _el in node.elts)
         else:
             raise TypeError(node)
+
+    @classmethod
+    def clear_cache(cls):
+        cls._cache = {}
 
     # functions with special meanings/side effects
     # when encountered in expressions, these functions can change the
