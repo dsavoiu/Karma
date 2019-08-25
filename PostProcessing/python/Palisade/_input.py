@@ -319,7 +319,8 @@ class _ROOTObjectFunctions(object):
 
     @staticmethod
     def threshold(tobject, min_value):
-        """returns a histogram like tobject with bins set to zero if the fall below the miminum value and to one if not. Errors are always set to zero"""
+        """returns a histogram like tobject with bins set to zero if they fall
+        below the miminum value and to one if not. Errors are always set to zero"""
 
         # project preserving errors
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
@@ -413,6 +414,8 @@ class _ROOTObjectFunctions(object):
     def mask_if_less(tobject, tobject_ref):
         """set `tobject` bins and their errors to zero if their content is less than the value in `tobject_ref`"""
 
+        assert len(tobject) == len(tobject_ref)
+
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject, "e")
         _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref, "e")
 
@@ -465,7 +468,10 @@ class _ROOTObjectFunctions(object):
 
     @staticmethod
     def threshold_by_ref(tobject, tobject_ref):
-        """set `tobject` bins to zero if their content is less than the value in `tobject_ref`, and to 1 otherwise. Result bin errors are always set to zero."""
+        """set `tobject` bins to zero if their content is less than the value in `tobject_ref`, and to 1 otherwise.
+        Result bin errors are always set to zero."""
+
+        assert len(tobject) == len(tobject_ref)
 
         _new_tobject = _ROOTObjectFunctions._project_or_clone(tobject)
         _new_tobject_ref = _ROOTObjectFunctions._project_or_clone(tobject_ref)
@@ -660,10 +666,12 @@ class InputROOTFile(object):
 
     Usage example:
 
-        m = InputROOTFile('/path/to/rootfile.root')
+    .. code:: python
 
-        m.request(dict(object_path='MyDirectory/myObject'))
-        my_object = m.get('MyDirectory/myObject')
+       m = InputROOTFile('/path/to/rootfile.root')
+
+       m.request(dict(object_path='MyDirectory/myObject'))
+       my_object = m.get('MyDirectory/myObject')
     """
 
     def __init__(self, filename):
@@ -870,35 +878,35 @@ class InputROOT(object):
         Usage examples:
 
 
-            * as a simple decorator:
+        * as a simple decorator:
 
-            .. code:: python
+          .. code:: python
 
-                @InputROOT.add_function
-                def my_function(rootpy_object):
-                    ...
+             @InputROOT.add_function
+             def my_function(rootpy_object):
+                 ...
 
-            * to override a function that has already been registered:
+        * to override a function that has already been registered:
 
-            .. code:: python
+          .. code:: python
 
-                @InputROOT.add_function(override=True)
-                def my_function(rootpy_object):
-                    ...
+             @InputROOT.add_function(override=True)
+             def my_function(rootpy_object):
+                 ...
 
-            * to register a function under a different name:
+        * to register a function under a different name:
 
-            .. code:: python
+          .. code:: python
 
-                @InputROOT.add_function(name='short_name')
-                def very_long_fuction_name_we_do_not_want_to_use_in_expressions(rootpy_object):
-                    ...
+             @InputROOT.add_function(name='short_name')
+             def very_long_fuction_name_we_do_not_want_to_use_in_expressions(rootpy_object):
+                     ...
 
-            * as a method:
+        * as a method:
 
-            .. code:: python
+          .. code:: python
 
-                InputROOT.add_function(my_function)
+             InputROOT.add_function(my_function)
 
         .. note::
 
@@ -1049,8 +1057,8 @@ class InputROOT(object):
 
         The following requests behave identically:
 
-            * :py:data:`dict(file_nickname='file0', object_path="directory/object")`
-            * :py:data:`dict(object_spec="file0:directory/object")`
+        * :py:data:`dict(file_nickname='file0', object_path="directory/object")`
+        * :py:data:`dict(object_spec="file0:directory/object")`
 
         """
         _delegations = {}
@@ -1079,36 +1087,35 @@ class InputROOT(object):
         Evaluate an expression involving objects retrieved from file(s).
 
         The string given must be a valid Python expression.
-        All strings contained in the expression are interpreted as
+
+        Strings contained in the expression are interpreted as
         specifications of objects in files (see
         :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.get`
         for the object specification syntax).
         Before the expression is evaluated, all strings are replaced
         by the objects they refer to.
 
-        .. note::
-            Currently there is no straightforward way of having
-            *literal strings* in expressions (e.g. as arguments to functions),
-            since all of them are interpreted as object specifications
-            indiscriminately.
-            If absolutely needed, registering a string-valued local
-            variable via
-            :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
-            could be used to overcome this limitation.
-
-        .. todo::
-            Fix this.
+        To interpret a string as a *literal string* (i.e. not referring
+        to an object in a file), it must be wrapped inside the special
+        function ``str``.
 
         Any *functions* called in the expression must have been defined
         beforehand using
         :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.add_function`.
+        There are a number of special functions, which behave as follows:
+
+        * ``str``: interpret a string as a *literal string*
+        * ``no_input``: interpret *all* strings encountered anywhere
+          inside the function call as literal strings
+        * ``input``: interpret *all* strings encountered anywhere
+          inside the function call as specifications of objects in files
 
         All *Python identifiers* used in the expression are interpreted as local
         variables. A map specifying the values of local variables for this call
         to `get_expr` can be given via the keyword argument `locals`.
 
         Alternatively, local variables can be registered for use by all calls to
-        :py:meth`get_expr` by calling
+        :py:meth:`get_expr` by calling
         :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
         beforehand. Variables given in the `locals` dictionary will take precedence
         over those defined via :py:meth:`register_local`.
@@ -1126,7 +1133,7 @@ class InputROOT(object):
                 using :py:meth:`~DijetAnalysis.PostProcessing.Palisade.InputROOT.register_local`
                 before calling this method.
 
-                If :py:const:`None`, local variable lookup is disables and a
+                If :py:const:`None`, local variable lookup is disabled and a
                 :py:exc:`NameError` will be raised if an identifier is encountered
                 in the expression.
 
@@ -1305,7 +1312,7 @@ class InputROOT(object):
                     try:
                         _callable = ctx['functions'][node.func.id]
                     except KeyError as e:
-                        raise ValueError(
+                        raise KeyError(
                             "Cannot call input function '{}': no such "
                             "function!".format(node.func.id))
 
