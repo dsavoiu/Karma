@@ -12,7 +12,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [249, 306, 539, 641, 887, 1029, 1187, 1556]
+        turnons:  [200, 306, 449, 641, 756, 887, 1187, 1361]
 
     # YB_05_10_YS_00_05
   - bins: [249, 306, 372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3306, 3754, 4244, 5994]
@@ -20,7 +20,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [249, 306, 539, 756, 887, 1029, 1187, 1556]
+        turnons:  [249, 306, 449, 641, 756, 887, 1187, 1361]
 
     # YB_10_15_YS_00_05
   - bins: [249, 306, 372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3754]
@@ -28,7 +28,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [249, 306, 539, 641, 887, 1029, 1187, 1556]
+        turnons:  [249, 306, 449, 641, 756, 887, 1187, 1361]
 
     # YB_15_20_YS_00_05
   - bins: [249, 306, 372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2572]
@@ -36,7 +36,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [249, 306, 539, 756, 887, 1029, 1187, 1556]
+        turnons:  [200, 306, 449, 641, 756, 887, 1187, 1361]
 
     # YB_20_25_YS_00_05
   - bins: [249, 306, 372, 449, 539, 641, 756, 887, 1029, 1187, 1556]
@@ -44,7 +44,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400]
-        turnons:  [249, 372, 641, 756, 1029, 1029, 1187]
+        turnons:  [249, 306, 539, 641, 887, 1029, 1187]
 
 - bins: [0, 0.5, 1.0, 1.5, 2.0]
   name: yboost
@@ -56,7 +56,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [306, 449, 641, 887, 1361, 1361, 1556, 2008]
+        turnons:  [306, 372, 641, 887, 1029, 1361, 1556, 1769]
 
     # YB_05_10_YS_05_10
   - bins: [372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3306, 3754, 4244, 5994]
@@ -64,7 +64,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [372, 449, 641, 887, 1187, 1361, 1556, 2008]
+        turnons:  [306, 372, 641, 756, 1029, 1187, 1556, 1769]
 
     # YB_10_15_YS_05_10
   - bins: [372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3754]
@@ -72,7 +72,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [306, 449, 641, 887, 1187, 1361, 1556, 2008]
+        turnons:  [306, 372, 641, 887, 1029, 1361, 1556, 1769]
 
     # YB_15_20_YS_05_10
   - bins: [372, 449, 539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2572]
@@ -80,7 +80,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [372, 449, 887, -1, 1361, 1556, 1769, 2008]
+        turnons:  [372, 449, 756, 887, 1361, 1361, 1769, 2008]
 
 - bins: [0, 0.5, 1.0, 1.5]
   name: yboost
@@ -92,7 +92,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [449, 641, 1187, 1361, 2008, 2008, 2572, 2915]
+        turnons:  [449, 539, 887, 1187, 1556, 2008, 2273, 2572]
 
     # YB_05_10_YS_10_15
   - bins: [539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3306, 3754, 4244, 5994]
@@ -100,7 +100,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [539, 641, 1029, 1361, 2008, 2008, 2572, 2915]
+        turnons:  [449, 641, 887, 1361, 1556, 2008, 2273, 2572]
 
     # YB_10_15_YS_10_15
   - bins: [539, 641, 756, 887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3754]
@@ -108,7 +108,7 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [539, 756, 1361, 1769, 2008, 2572, 2572, 2915]
+        turnons:  [539, 641, 1187, 1556, 1769, 2008, 2572, 2915]
 
 - bins: [0, 0.5, 1.0]
   name: yboost
@@ -120,15 +120,16 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
-        turnons:  [756, 1029, 1769, 2273, 2915, 3306, 3754, 4805]
+        turnons:  [641, 887, 1361, 2008, 2572, 2915, 3754, 4244]
 
     # YB_05_10_YS_15_20
   - bins: [887, 1029, 1187, 1361, 1556, 1769, 2008, 2273, 2572, 2915, 3306, 3754, 4244, 5994]
     name: jet12mass
     metadata:
       DiPFJetAveTriggers:
-        triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400]
-        turnons:  [887, 1187, 1769, 2273, 3306, 3306, 3754]
+        triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260, HLT_DiPFJetAve320, HLT_DiPFJetAve400, HLT_DiPFJetAve500]
+        turnons:  [756, 1029, 1769, 2273, 3306, 3306, 3754, 4244]
+
 - bins: [0, 0.5]
   name: yboost
   substructure:
@@ -139,4 +140,4 @@ substructure:
     metadata:
       DiPFJetAveTriggers:
         triggers: [HLT_DiPFJetAve60, HLT_DiPFJetAve80, HLT_DiPFJetAve140, HLT_DiPFJetAve200, HLT_DiPFJetAve260]
-        turnons:  [1361, 2273, 2572, 3306, 4244]
+        turnons:  [1187, 1769, 2572, 3306, 4244]
