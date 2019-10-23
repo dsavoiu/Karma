@@ -227,7 +227,7 @@ class PostProcessor(object):
 
             # determine xy pairs
             if ':' in _hspec:
-                _xyzt = _pspec.split(':', 3)
+                _xyzt = _hspec.split(':', 3)
                 _xyzt += [None] * (4 - len(_xyzt))  # pad with 'None' up to length 4
                 _x, _y, _z, _t = _xyzt
             else:

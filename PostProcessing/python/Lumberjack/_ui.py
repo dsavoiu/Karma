@@ -287,7 +287,10 @@ class LumberjackInterfaceBase(object):
             # dump task configuration to yml
             if self._args.dump_yaml:
                 _yaml_dump_filename = ".".join(_task_spec['_filename'].split('.')[:-1]) + "_configdump.yml"
-                #_yaml_dump_filename = "{}_configdump.yml".format(self._args.output_file.split('.', 1)[0])
+                # create output directory if it does not exist
+                _out_dir = os.path.dirname(_yaml_dump_filename)
+                if _out_dir and not os.path.exists(_out_dir):
+                    os.mkdir(_out_dir)
                 with open(_yaml_dump_filename, 'w') as _f:
                     yaml.dump(_task_spec, _f, default_flow_style=False)
 
