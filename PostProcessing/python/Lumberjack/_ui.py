@@ -55,6 +55,10 @@ def log_stdout_to_file(filename):
     if filename is None:
         yield
     else:
+        _out_dir = os.path.dirname(filename)
+        if _out_dir and not os.path.exists(_out_dir):
+            os.mkdir(_out_dir)
+
         _old_stdout = sys.stdout
         with open(filename, 'w') as _log:
             sys.stdout = StreamDup([sys.stdout, _log])
