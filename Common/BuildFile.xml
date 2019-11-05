@@ -1,6 +1,7 @@
 <use name="Karma/SkimmingFormats"/>
 
 <use name="CondFormats/JetMETObjects"/>
+<use name="JetMETCorrections/Modules"/>
 
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
