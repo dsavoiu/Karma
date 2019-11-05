@@ -14,6 +14,7 @@ dijetNtupleProducer = cms.EDProducer(
         karmaGenParticleCollectionSrc = cms.InputTag("karmaGenParticles"),
         karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets"),
         karmaJetTriggerObjectMapSrc = cms.InputTag("karmaJetTriggerObjectMaps"),
+        karmaJetGenJetMapSrc = cms.InputTag("karmaJetTriggerObjectMaps"),
 
         # -- other configuration
 

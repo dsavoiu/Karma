@@ -124,6 +124,11 @@ void karma::SmearedJetsProducer::produce(edm::Event& event, const edm::EventSetu
         }
         else {
             // matched gen jet invalid for JER -> use STOCHASTIC smearing
+
+            // ensure a new value is generated and not just returned from the cache
+            // (needed in order not to break replay)
+            // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEDMRandomNumberGeneratorService#Replay
+            CLHEP::RandGaussT::setFlag(false);
             outputJetCollection->back().p4 *= (
                 1 + (
                     CLHEP::RandGaussT::shoot(&rngEngine, 0, resolution) *
