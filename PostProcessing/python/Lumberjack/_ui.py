@@ -146,7 +146,7 @@ class LumberjackInterfaceBase(object):
         SELECTIONS = self._config.SELECTIONS
 
         # -- limit the number of processed events
-        if self._args.num_events >= 0:
+        if int(self._args.num_events) >= 0:
             print("[INFO] Limiting number of processed events to: ".format(self._args.num_events))
             self._df_bare = self._df_bare.Range(0, int(self._args.num_events))
             self._df_size = min(self._df_size, int(self._args.num_events))
@@ -288,13 +288,15 @@ class LumberjackInterfaceBase(object):
             if os.path.exists(_task_spec['_filename']) and not self._args.overwrite:
                 print("[INFO] Task output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_spec['_filename']))
                 continue
+
+            # create output directory if it does not exist
+            _out_dir = os.path.dirname(_task_spec['_filename'])
+            if _out_dir and not os.path.exists(_out_dir):
+                os.mkdir(_out_dir)
+
             # dump task configuration to yml
             if self._args.dump_yaml:
                 _yaml_dump_filename = ".".join(_task_spec['_filename'].split('.')[:-1]) + "_configdump.yml"
-                # create output directory if it does not exist
-                _out_dir = os.path.dirname(_yaml_dump_filename)
-                if _out_dir and not os.path.exists(_out_dir):
-                    os.mkdir(_out_dir)
                 with open(_yaml_dump_filename, 'w') as _f:
                     yaml.dump(_task_spec, _f, default_flow_style=False)
 
