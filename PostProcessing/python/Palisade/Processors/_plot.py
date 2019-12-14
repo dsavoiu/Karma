@@ -287,6 +287,9 @@ class PlotProcessor(_ProcessorBase):
         _ls[_criterion(_ls)] = _ls[_criterion(_ls)][::-1]
         _hs[_criterion(_ls)] = _hs[_criterion(_ls)][::-1]
 
+        # cast back to artist container (artist container)
+        _hs = map(tuple, _hs)
+
         # return as lists
         return list(_hs), list(_ls)
 
@@ -655,7 +658,8 @@ class PlotProcessor(_ProcessorBase):
             _hs, _ls = _ax.get_legend_handles_labels()
 
             # re-sort, reversing the order of labels that are part of a stack
-            _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_pad_config.get("stack_labels", None))
+            if _pad_config.get("legend_reverse_stack_order", True):
+                _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_pad_config.get("stack_labels", None))
 
             # merge legend entries with identical labels
             _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)

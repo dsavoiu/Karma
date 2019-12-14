@@ -851,57 +851,62 @@ optional keys:
 .. table::
     :widths: 20, 80
 
-    +-------------------+----------------------------------------------------------+
-    | Key               | Description                                              |
-    +===================+==========================================================+
-    | **axvlines**,     | list of floats (or *dictionaries*) specifying the values |
-    | **axhlines**      | at which to draw vertical or horizontal lines that       |
-    |                   | traverse the entire pad.                                 |
-    |                   |                                                          |
-    |                   | If *dictionaries* are given instead of floats,           |
-    |                   | they must each contain a list of floats under the key    |
-    |                   | ``values``. Any other keywords are passed to the         |
-    |                   | ``axvline`` or ``axhline`` methods of                    |
-    |                   | the current pad's :py:class:`matplotlib.Axes` object and |
-    |                   | can be used to customize the line color, style, etc.     |
-    |                   |                                                          |
-    |                   | For example, the following can be used for drawing two   |
-    |                   | thick red lines horizontal lines at *y*\ =0 and *y*\ =1: |
-    |                   |                                                          |
-    |                   | .. code:: python                                         |
-    |                   |                                                          |
-    |                   |     'axhlines' : [                                       |
-    |                   |       {                                                  |
-    |                   |         'values' : [0, 1],                               |
-    |                   |         'linewidth' : 5,                                 |
-    |                   |         'color' : 'red'                                  |
-    |                   |       }                                                  |
-    |                   |     ]                                                    |
-    +-------------------+----------------------------------------------------------+
-    | **height_share**  | float indicating the share of the total plot height.     |
-    |                   | The pad will take up a fraction of the plot height       |
-    |                   | corresponding to the ratio of this value to the sum of   |
-    |                   | the **height_share** values of all pads.                 |
-    +-------------------+----------------------------------------------------------+
-    | **legend_kwargs** | a dictionary with keywords to be passed to               |
-    |                   | *matplotlib*'s :py:func:`legend` call (see the           |
-    |                   | *matplotlib* documentation for more details)             |
-    +-------------------+----------------------------------------------------------+
-    | **x_label**,      | string to use as axis label. Can contain LaTeX-formatted |
-    | **y_label**,      | math between dollar signs (``$``). In plots of 2D        |
-    | **z_label**       | objects, the **z_label** refers to the colorbar label.   |
-    +-------------------+----------------------------------------------------------+
-    | **x_range**,      | tuple for specifying the lower and upper plot bounds     |
-    | **y_range**,      | the respective axis, or ``None`` for automatic bounds.   |
-    | **z_range**       | In plots of 2D objects, the **z_range** refers to the    |
-    |                   | colorbar range.                                          |
-    +-------------------+----------------------------------------------------------+
-    | **x_scale**,      | scale to use for the axis. Can be either ``linear``      |
-    | **y_scale**,      | (*default*) or ``log``. In plots of 2D objects, the      |
-    | **z_scale**       | **z_scale** refers to the scaling used for the colorbar. |
-    +-------------------+----------------------------------------------------------+
-    | **z_labelpad**    | offset to add between the **z_label** and the colorbar   |
-    +-------------------+----------------------------------------------------------+
+    +---------------------------------+----------------------------------------------------------+
+    | Key                             | Description                                              |
+    +=================================+==========================================================+
+    | **axvlines**,                   | list of floats (or *dictionaries*) specifying the values |
+    | **axhlines**                    | at which to draw vertical or horizontal lines that       |
+    |                                 | traverse the entire pad.                                 |
+    |                                 |                                                          |
+    |                                 | If *dictionaries* are given instead of floats,           |
+    |                                 | they must each contain a list of floats under the key    |
+    |                                 | ``values``. Any other keywords are passed to the         |
+    |                                 | ``axvline`` or ``axhline`` methods of                    |
+    |                                 | the current pad's :py:class:`matplotlib.Axes` object and |
+    |                                 | can be used to customize the line color, style, etc.     |
+    |                                 |                                                          |
+    |                                 | For example, the following can be used for drawing two   |
+    |                                 | thick red lines horizontal lines at *y*\ =0 and *y*\ =1: |
+    |                                 |                                                          |
+    |                                 | .. code:: python                                         |
+    |                                 |                                                          |
+    |                                 |     'axhlines' : [                                       |
+    |                                 |       {                                                  |
+    |                                 |         'values' : [0, 1],                               |
+    |                                 |         'linewidth' : 5,                                 |
+    |                                 |         'color' : 'red'                                  |
+    |                                 |       }                                                  |
+    |                                 |     ]                                                    |
+    +---------------------------------+----------------------------------------------------------+
+    | **height_share**                | float indicating the share of the total plot height.     |
+    |                                 | The pad will take up a fraction of the plot height       |
+    |                                 | corresponding to the ratio of this value to the sum of   |
+    |                                 | the **height_share** values of all pads.                 |
+    +---------------------------------+----------------------------------------------------------+
+    | **legend_kwargs**               | a dictionary with keywords to be passed to               |
+    |                                 | *matplotlib*'s :py:func:`legend` call (see the           |
+    |                                 | *matplotlib* documentation for more details)             |
+    +---------------------------------+----------------------------------------------------------+
+    | **legend_reverse_stack_order**  | bool. If ``True`` (default), the order of the legend     |
+    |                                 | entries for subplots that belong to a stack will be      |
+    |                                 | reversed. This is done so that the visual order of the   |
+    |                                 | legend entries corresponds to that of the stack.         |
+    +---------------------------------+----------------------------------------------------------+
+    | **x_label**,                    | string to use as axis label. Can contain LaTeX-formatted |
+    | **y_label**,                    | math between dollar signs (``$``). In plots of 2D        |
+    | **z_label**                     | objects, the **z_label** refers to the colorbar label.   |
+    +---------------------------------+----------------------------------------------------------+
+    | **x_range**,                    | tuple for specifying the lower and upper plot bounds     |
+    | **y_range**,                    | the respective axis, or ``None`` for automatic bounds.   |
+    | **z_range**                     | In plots of 2D objects, the **z_range** refers to the    |
+    |                                 | colorbar range.                                          |
+    +---------------------------------+----------------------------------------------------------+
+    | **x_scale**,                    | scale to use for the axis. Can be either ``linear``      |
+    | **y_scale**,                    | (*default*) or ``log``. In plots of 2D objects, the      |
+    | **z_scale**                     | **z_scale** refers to the scaling used for the colorbar. |
+    +---------------------------------+----------------------------------------------------------+
+    | **z_labelpad**                  | offset to add between the **z_label** and the colorbar   |
+    +---------------------------------+----------------------------------------------------------+
 
 .. note::
   Context-sensitive replacement (see
