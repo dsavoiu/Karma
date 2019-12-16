@@ -46,10 +46,10 @@ def addJetToolboxSequences(process, isData,
                        _jet_algo_radius,
                        "jetToolbox{}{}".format(_jet_algo_radius, _PU_method),
                        'out',
-                       miniAOD=True,
+                       dataTier='miniAOD',
                        runOnMC=not isData,
                        PUMethod=_PU_method,    # PU subtraction method
-                       bTagDiscriminators=None,  # do not skim btag discriminators
+                       #bTagDiscriminators=[],  # do not skim btag discriminators
                        addPruning=False,
                        addSoftDrop=False,
                        addPrunedSubjets=False,
