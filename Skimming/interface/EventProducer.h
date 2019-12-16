@@ -55,7 +55,8 @@ namespace karma {
             karma::CacheBase(pSet),
             isData_(pSet.getParameter<bool>("isData")),
             writeOutTriggerPrescales_(pSet.getParameter<bool>("writeOutTriggerPrescales")),
-            hltProcessName_(pSet.getParameter<std::string>("hltProcessName")) {
+            hltProcessName_(pSet.getParameter<std::string>("hltProcessName")),
+            metFilterNames_(pSet.getParameter<std::vector<std::string>>("metFilterNames")) {
 
             // create the regex objects for matching HLTtrigger names
             const std::vector<std::string>& hltRegexes = pSet_.getParameter<std::vector<std::string>>("hltRegexes");
@@ -64,15 +65,20 @@ namespace karma {
                 hltPathRegexes_.push_back(boost::regex(regexString, boost::regex::icase | boost::regex::extended));
             }
 
+            metFilterTriggerResultsProcessName_ = pSet.getParameter<edm::InputTag>("metFiltersSrc").process();
+
         };
 
         bool isData_;
         bool writeOutTriggerPrescales_;  // if True, skims will contain trigger path prescales (only if they are non-ambiguous)
-        std::string hltProcessName_;  // name of the process that producer the trigger path information
+        std::string hltProcessName_;  // name of the process that produced the trigger path information
+        std::string metFilterTriggerResultsProcessName_;  // name of the process that produced the MET filter bits
 
         std::vector<boost::regex> hltPathRegexes_;  // list of pre-compiled regular expressions that 'interesting' trigger paths are required to match
+        std::vector<std::string> metFilterNames_;  // list of MET filter names that should be written out
 
-        mutable HLTConfigProvider hltConfigProvider_;  // helper object to obtain HLT configuration (default-constructed)
+        // helper objects to obtain metadata from TriggerResults products (default-constructed)
+        mutable HLTConfigProvider hltConfigProvider_;  // HLT configuration
 
     };
 
@@ -100,6 +106,7 @@ namespace karma {
 
         std::string hltMenuName_;
         karma::HLTPathInfos hltPathInfos_;  //! information about trigger paths
+        std::vector<int> metFilterIndices_;  //! index of MET filter trigger bits for MET filters in GlobalCache::metFilterNames_
 
     };
 
@@ -167,6 +174,9 @@ namespace karma {
 
         typename edm::Handle<edm::TriggerResults> triggerResultsHandle;
         edm::EDGetTokenT<edm::TriggerResults> triggerResultsToken;
+
+        typename edm::Handle<edm::TriggerResults> metFiltersHandle;
+        edm::EDGetTokenT<edm::TriggerResults> metFiltersToken;
 
         //typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
         //edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken;

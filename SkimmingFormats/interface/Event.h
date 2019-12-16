@@ -32,6 +32,9 @@ namespace karma {
         // -- trigger decisions
         std::vector<bool> hltBits;
 
+        // -- met filter bits
+        std::vector<bool> metFilterBits;
+
         // it's easier to store these once per event rather than once per lumi-section
         std::vector<int> triggerPathHLTPrescales;
         std::vector<int> triggerPathL1Prescales;

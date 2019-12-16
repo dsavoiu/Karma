@@ -31,5 +31,34 @@ def karmaEventProducer(isData):
 
             # interesting trigger paths must match one of these regexes:
             hltRegexes = cms.vstring("HLT_(AK8)?PFJet[0-9]+_v[0-9]+", "HLT_DiPFJetAve[0-9]+_v[0-9]+"),
+
+            metFiltersSrc = cms.InputTag("TriggerResults", "", "RECO"),
+            metFilterNames = cms.vstring(
+                'Flag_METFilters',
+                'Flag_HBHENoiseFilter',
+                'Flag_HBHENoiseIsoFilter',
+                'Flag_CSCTightHaloFilter',
+                'Flag_CSCTightHaloTrkMuUnvetoFilter',
+                'Flag_CSCTightHalo2015Filter',
+                'Flag_globalTightHalo2016Filter',
+                'Flag_globalSuperTightHalo2016Filter',
+                'Flag_HcalStripHaloFilter',
+                'Flag_hcalLaserEventFilter',
+                'Flag_EcalDeadCellTriggerPrimitiveFilter',
+                'Flag_EcalDeadCellBoundaryEnergyFilter',
+                'Flag_goodVertices',
+                'Flag_eeBadScFilter',
+                'Flag_ecalLaserCorrFilter',
+                'Flag_trkPOGFilters',
+                'Flag_chargedHadronTrackResolutionFilter',
+                'Flag_muonBadTrackFilter',
+                'Flag_BadChargedCandidateFilter',
+                'Flag_BadPFMuonFilter',
+                'Flag_BadChargedCandidateSummer16Filter',
+                'Flag_BadPFMuonSummer16Filter',
+                'Flag_trkPOG_manystripclus53X',
+                'Flag_trkPOG_toomanystripclus53X',
+                'Flag_trkPOG_logErrorTooManyClusters',
+            )
         )
     )

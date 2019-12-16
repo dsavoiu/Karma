@@ -7,6 +7,10 @@
 
 #include "Karma/Skimming/interface/EventProducer.h"
 
+#include "FWCore/Utilities/interface/Exception.h"
+#include "FWCore/Utilities/interface/EDMException.h"
+
+
 // -- constructor
 karma::EventProducer::EventProducer(const edm::ParameterSet& config, const karma::GlobalCache* globalCache) : m_configPSet(config) {
     // -- register products
@@ -20,6 +24,7 @@ karma::EventProducer::EventProducer(const edm::ParameterSet& config, const karma
     pileupDensityToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("pileupDensitySrc"));
     pileupSummaryInfosToken = consumes<edm::View<PileupSummaryInfo>>(m_configPSet.getParameter<edm::InputTag>("pileupSummaryInfoSrc"));
     triggerResultsToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("triggerResultsSrc"));
+    metFiltersToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("metFiltersSrc"));
     //triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesSrc"));
     primaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("primaryVerticesSrc"));
     goodPrimaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("goodPrimaryVerticesSrc"));
@@ -117,6 +122,39 @@ karma::EventProducer::~EventProducer() {
         }
     }
 
+    // -- get MET filter information
+    //    (i.e. matching flag names and the indices indicating
+    //    their position in the MET filter TriggerResults)
+
+    const auto& triggerNames = karma::util::getModuleParameterFromHistory<std::vector<std::string>>(
+        run, globalCache->metFilterTriggerResultsProcessName_, "@trigger_paths", "@trigger_paths");
+
+    std::cout << "Selected MET filters:" << std::endl;
+    for (const auto& metFilterName : globalCache->metFilterNames_) {
+        const auto& it = std::find(
+            triggerNames.begin(),
+            triggerNames.end(),
+            metFilterName
+        );
+
+        // throw if MET filter not found for a requested label!
+        if (it == triggerNames.end()) {
+            edm::Exception exception(edm::errors::NotFound);
+            exception
+                << "Cannot find MET filter for name '" << metFilterName << "' in specified "
+                << "TriggerResults object for process '" << globalCache->metFilterTriggerResultsProcessName_
+                << "'!";
+            throw exception;
+        }
+
+        // retrieve index
+        int index = std::distance(triggerNames.begin(), it);
+        runCache->metFilterIndices_.emplace_back(index);
+
+        std::cout << "  name:  " << metFilterName << std::endl;
+        std::cout << "  index: " << index << std::endl;
+    }
+
     return runCache;
 }
 
@@ -171,6 +209,8 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     karma::util::getByTokenOrThrow(event, this->pileupDensityToken, this->pileupDensityHandle);
     // trigger results and prescales
     karma::util::getByTokenOrThrow(event, this->triggerResultsToken, this->triggerResultsHandle);
+    // MET filters
+    karma::util::getByTokenOrThrow(event, this->metFiltersToken, this->metFiltersHandle);
     //karma::util::getByTokenOrThrow(event, this->triggerPrescalesToken, this->triggerPrescalesHandle);
     // primary vertices
     karma::util::getByTokenOrThrow(event, this->primaryVerticesToken, this->primaryVerticesHandle);
@@ -224,6 +264,14 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
             outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
             outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
         }
+    }
+
+    // retrieve met filter results
+    const size_t numMETFilterFlags = runCache()->metFilterIndices_.size();
+    outputEvent->metFilterBits.resize(numMETFilterFlags);
+    for (size_t iFlag = 0; iFlag < numMETFilterFlags; ++iFlag) {
+        // possibly remap indices to correspond to config order
+        outputEvent->metFilterBits[iFlag] = this->metFiltersHandle->accept(runCache()->metFilterIndices_[iFlag]);
     }
 
     // move outputs to event tree
