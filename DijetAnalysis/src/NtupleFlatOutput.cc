@@ -42,6 +42,7 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, metRaw, D);
     ADD_BRANCH(tree, productForFill, sumEtRaw, D);
     ADD_BRANCH(tree, productForFill, hltBits, L);
+    ADD_BRANCH(tree, productForFill, metFilterBits, L);
     ADD_BRANCH(tree, productForFill, hltJet1Match, L);
     ADD_BRANCH(tree, productForFill, hltJet2Match, L);
     ADD_BRANCH(tree, productForFill, hltJet12Match, L);

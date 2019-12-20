@@ -79,5 +79,33 @@ dijetNtupleProducer = cms.EDProducer(
 
         jetIDSpec = cms.string("2016"),
         jetIDWorkingPoint = cms.string("TightLepVeto"),
+
+        metFilterNames = cms.vstring(
+            'Flag_goodVertices',
+            'Flag_globalSuperTightHalo2016Filter',
+            'Flag_HBHENoiseFilter',
+            'Flag_HBHENoiseIsoFilter',
+            'Flag_EcalDeadCellTriggerPrimitiveFilter',
+            'Flag_BadPFMuonFilter',
+            'Flag_eeBadScFilter',
+            #'Flag_CSCTightHaloFilter',
+            #'Flag_CSCTightHaloTrkMuUnvetoFilter',
+            #'Flag_CSCTightHalo2015Filter',
+            #'Flag_globalTightHalo2016Filter',
+            #'Flag_HcalStripHaloFilter',
+            #'Flag_hcalLaserEventFilter',
+            #'Flag_EcalDeadCellBoundaryEnergyFilter',
+            #'Flag_ecalLaserCorrFilter',
+            #'Flag_trkPOGFilters',
+            #'Flag_chargedHadronTrackResolutionFilter',
+            #'Flag_muonBadTrackFilter',
+            #'Flag_BadChargedCandidateFilter',
+            #'Flag_BadChargedCandidateSummer16Filter',
+            #'Flag_BadPFMuonSummer16Filter',
+            #'Flag_trkPOG_manystripclus53X',
+            #'Flag_trkPOG_toomanystripclus53X',
+            #'Flag_trkPOG_logErrorTooManyClusters',
+            #'Flag_METFilters',
+        ),
     )
 )

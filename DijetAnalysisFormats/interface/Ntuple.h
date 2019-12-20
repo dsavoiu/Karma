@@ -80,6 +80,9 @@ namespace dijet {
         unsigned long hltJet12PtAvePassThresholdsL1;
         unsigned long hltJet12PtAvePassThresholdsHLT;
 
+        // MET filter bits
+        unsigned long metFilterBits;
+
         /// // HLT objects
         /// double jet1HLTpt = UNDEFINED_DOUBLE;
         /// unsigned int jet1HLTNumMatchedTriggerObjects = 0;

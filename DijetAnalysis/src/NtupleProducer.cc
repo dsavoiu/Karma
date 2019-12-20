@@ -6,7 +6,6 @@
 #include "Karma/DijetAnalysis/interface/NtupleProducer.h"
 
 
-
 // -- constructor
 dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dijet::NtupleProducerGlobalCache* globalCache) : m_configPSet(config) {
     // -- register products
@@ -130,6 +129,41 @@ dijet::NtupleProducer::~NtupleProducer() {
         }
     }
 
+    // -- retrieve names of MET filters in skim
+
+    // retrieve process name from Karma Run InputTag
+    std::string processName = globalCache->pSet_.getParameter<edm::InputTag>("karmaEventSrc").process();
+
+    // if no specific process name, use previous process name
+    if (processName.empty()) {
+        const auto& processHistory = run.processHistory();
+        processName = processHistory.at(processHistory.size() - 2).processName();
+    }
+
+    // retrieve the MET filter names from skim
+    const auto& metFiltersInSkim = karma::util::getModuleParameterFromHistory<std::vector<std::string>>(
+        run, processName, "karmaEvents", "metFilterNames");
+
+    for (const auto& requestedMETFilterName : globalCache->metFilterNames_) {
+        const auto& it = std::find(
+            metFiltersInSkim.begin(),
+            metFiltersInSkim.end(),
+            requestedMETFilterName
+        );
+
+        // throw if MET filter not found for a requested label!
+        if (it == metFiltersInSkim.end()) {
+            edm::Exception exception(edm::errors::NotFound);
+            exception
+                << "Cannot find MET filter for name '" << requestedMETFilterName << "' in skim!";
+            throw exception;
+        }
+
+        // retrieve index
+        int index = std::distance(metFiltersInSkim.begin(), it);
+        runCache->metFilterIndicesInSkim_.emplace_back(index);
+    }
+
     return runCache;
 }
 
@@ -232,8 +266,18 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         }
     }
 
+    // -- MET filter bits
+    dijet::TriggerBits bitsetMETFilterBits;
+    for (size_t iBit = 0; iBit < runCache()->metFilterIndicesInSkim_.size(); ++iBit) {
+        bitsetMETFilterBits[iBit] = false;
+        if (this->karmaEventHandle->metFilterBits.at(runCache()->metFilterIndicesInSkim_[iBit])) {
+            bitsetMETFilterBits[iBit] = true;
+        }
+    }
+
     // encode bitsets as 'unsigned long'
     outputNtupleEntry->hltBits = bitsetHLTBits.to_ulong();
+    outputNtupleEntry->metFilterBits = bitsetMETFilterBits.to_ulong();
 
     // -- generator data (MC-only)
     if (!m_isData) {

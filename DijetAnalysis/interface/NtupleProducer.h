@@ -75,6 +75,7 @@ namespace dijet {
       public:
         NtupleProducerGlobalCache(const edm::ParameterSet& pSet) :
             karma::CacheBase(pSet),
+            metFilterNames_(pSet.getParameter<std::vector<std::string>>("metFilterNames")),
             hltVersionPattern_(boost::regex("(HLT_.*)_v[0-9]+", boost::regex::extended)) {
 
             /// // create the global trigger efficiencies provider instance
@@ -175,6 +176,7 @@ namespace dijet {
             }
         }
 
+        std::vector<std::string> metFilterNames_;  // list of MET filter names that should be written out
         const boost::regex hltVersionPattern_;
         std::vector<std::string> hltPaths_;
         std::vector<double> hltThresholds_;
@@ -202,6 +204,7 @@ namespace dijet {
 
         std::vector<std::string> triggerPathsUnversionedNames_;
         std::vector<int> triggerPathsIndicesInConfig_;
+        std::vector<int> metFilterIndicesInSkim_;
 
     };
 
