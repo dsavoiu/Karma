@@ -7,7 +7,9 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
@@ -20,6 +22,7 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
 
 // -- output data formats
 #include "Karma/SkimmingFormats/interface/Event.h"
@@ -42,7 +45,9 @@ namespace karma {
     class CorrectedValidJetsProducerGlobalCache : public karma::CacheBase {
 
       public:
-        CorrectedValidJetsProducerGlobalCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
+        CorrectedValidJetsProducerGlobalCache(const edm::ParameterSet& pSet) :
+            karma::CacheBase(pSet),
+            jecFromGlobalTag_(pSet.getParameter<bool>("jecFromGlobalTag")) {
 
             // if JetID set to 'None', leave jetIDProvider_ as nullptr
             if (pSet_.getParameter<std::string>("jetIDSpec") != "None") {
@@ -56,13 +61,31 @@ namespace karma {
         };
 
         std::unique_ptr<karma::JetIDProvider> jetIDProvider_;
+        bool jecFromGlobalTag_;
 
+    };
+
+    /** Cache containing resources which do not change
+     *  for the entire duration of a run.
+     */
+    class CorrectedValidJetsProducerRunCache : public karma::CacheBase {
+
+      public:
+        CorrectedValidJetsProducerRunCache(const edm::ParameterSet& pSet) : karma::CacheBase(pSet) {
+
+        };
+
+        std::unique_ptr<FactorizedJetCorrector> jetCorrector_;
+        std::unique_ptr<FactorizedJetCorrector> jetCorrectorL1_;
+        std::unique_ptr<FactorizedJetCorrector> jetCorrectorL1RC_;
+        std::unique_ptr<JetCorrectionUncertainty> jetCorrectionUncertainty_;
     };
 
     // -- main producer
 
     class CorrectedValidJetsProducer : public edm::stream::EDProducer<
-        edm::GlobalCache<karma::CorrectedValidJetsProducerGlobalCache>
+        edm::GlobalCache<karma::CorrectedValidJetsProducerGlobalCache>,
+        edm::RunCache<karma::CorrectedValidJetsProducerRunCache>
     > {
 
       public:
@@ -72,6 +95,10 @@ namespace karma {
         // -- global cache extension
         static std::unique_ptr<karma::CorrectedValidJetsProducerGlobalCache> initializeGlobalCache(const edm::ParameterSet& pSet);
         static void globalEndJob(const karma::CorrectedValidJetsProducerGlobalCache*) {/* noop */};
+
+        // -- run cache extension
+        static std::shared_ptr<karma::CorrectedValidJetsProducerRunCache> globalBeginRun(const edm::Run&, const edm::EventSetup&, const GlobalCache*);
+        static void globalEndRun(const edm::Run&, const edm::EventSetup&, const RunContext*) {/* noop */};
 
         // -- pSet descriptions for CMSSW help info
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

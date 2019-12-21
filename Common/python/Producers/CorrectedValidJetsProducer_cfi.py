@@ -9,6 +9,7 @@ karmaCorrectedValidJetsProducer = cms.EDProducer(
         karmaJetCollectionSrc = cms.InputTag("karmaUpdatedPatJetsNoJEC"),
 
         # -- other configuration
+        jecFromGlobalTag = cms.bool(False),
         jecVersion = cms.string("<REPLACE_ME>"),
         jecAlgoName = cms.string("AK4PFchs"),
         jecLevels = cms.vstring(

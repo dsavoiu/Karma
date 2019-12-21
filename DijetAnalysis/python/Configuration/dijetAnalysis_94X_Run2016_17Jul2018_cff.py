@@ -52,6 +52,12 @@ def register_options(options):
                       type_=str,
                       default=None,
                       description="Tag of JEC version to use for e.g. JEC uncertainties.")
+            .register('jecFromGlobalTag',
+                      type_=bool,
+                      default=False,
+                      description="If True, the JECs will be looked up in the conditions database "
+                                   "(CondDB/Frontier) under the current global tag. If False, the "
+                                   "text files for `jecVersion` will be used.")
             .register('jerVersion',
                       type_=str,
                       default=None,
@@ -233,6 +239,7 @@ def init_modules(process, options, jet_algo_name):
             karmaJetCollectionSrc = cms.InputTag("karmaSelectedPatJets{}".format(jet_algo_name)),
 
             # -- other configuration
+            jecFromGlobalTag = cms.bool(options.jecFromGlobalTag),
             jecVersion = "{}/src/JECDatabase/textFiles/{jec_version}_{data_or_mc}/{jec_version}_{data_or_mc}".format(
                 os.getenv('CMSSW_BASE'),
                 jec_version=options.jecVersion,
