@@ -229,6 +229,59 @@ def init_modules(process, options, jet_algo_name):
 
     # == main collections =================================================
 
+    # -- raw (JEC-uncorrected) valid jets
+    from Karma.Common.Producers.CorrectedValidJetsProducer_cfi import karmaCorrectedValidJetsProducer
+    process.add_module(
+        "rawJets{}".format(jet_algo_name),
+        karmaCorrectedValidJetsProducer.clone(
+            # -- input sources
+            karmaEventSrc = cms.InputTag("karmaEvents"),
+            karmaJetCollectionSrc = cms.InputTag("karmaSelectedPatJets{}".format(jet_algo_name)),
+
+            # -- other configuration
+            jecFromGlobalTag = cms.bool(options.jecFromGlobalTag),
+            jecVersion = "{}/src/JECDatabase/textFiles/{jec_version}_{data_or_mc}/{jec_version}_{data_or_mc}".format(
+                os.getenv('CMSSW_BASE'),
+                jec_version=options.jecVersion,
+                data_or_mc="DATA" if options.isData else "MC",
+            ),
+            jecAlgoName = cms.string(jet_algo_name.replace('CHS', 'chs')),
+            jecLevels = cms.vstring(),
+            jecUncertaintyShift = cms.double(0.0),
+
+            # jet ID (for object-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
+            jetIDSpec = cms.string(options.jetIDSpec if options.useObjectBasedJetID else "None"),
+            jetIDWorkingPoint = cms.string(options.jetIDWorkingPoint or "None"),
+        )
+    )
+
+    # -- raw METs
+
+    from Karma.Common.Producers.CorrectedMETsProducer_cfi import karmaCorrectedMETsProducer
+    process.add_module(
+        "rawMETs{}".format(jet_algo_name),
+        karmaCorrectedMETsProducer.clone(
+            # -- input sources
+            karmaEventSrc = cms.InputTag("karmaEvents"),
+            karmaMETCollectionSrc = cms.InputTag("karmaMETs"),
+
+            # jets for type-I correction
+            karmaCorrectedJetCollectionSrc = cms.InputTag("rawJets{}".format(jet_algo_name)),
+
+            # -- other configuration
+            typeICorrectionMinJetPt = cms.double(15),
+            typeICorrectionMaxTotalEMFraction = cms.double(0.9),
+        )
+    )
+
+    # maps to raw jets
+    _add_jet_maps(
+        process=process,
+        options=options,
+        prefix='raw',
+        jet_algo_name=jet_algo_name
+    )
+
     # -- JEC-corrected valid jets
     from Karma.Common.Producers.CorrectedValidJetsProducer_cfi import karmaCorrectedValidJetsProducer
     process.add_module(
@@ -333,14 +386,14 @@ def init_modules(process, options, jet_algo_name):
     _add_all_shifted(process, options, jet_algo_name=jet_algo_name)
 
 
-def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift, jer_variation=None):
+def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=None, jer_variation=None):
     # -- create pipeline modules
 
     assert jet_algo_name in JET_COLLECTIONS
-    assert jec_shift in JEC_PIPELINES
+    assert jec_shift is None or jec_shift in JEC_PIPELINES
     assert jer_variation is None or jer_variation in JER_PIPELINES
 
-    _jet_collection_suffix = jec_shift + (jer_variation or "")
+    _jet_collection_suffix = (jec_shift or "") + (jer_variation or "")
 
     print('setup_pipeline{}'.format((pipeline_name, jet_algo_name, _jet_collection_suffix)))
 
@@ -350,6 +403,11 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift, je
     _cor_prefix = 'corrected'
     if not options.isData:
         _cor_prefix = 'smearedCorrected'
+
+    # use raw jets if no JEC shift requested
+    if jec_shift is None:
+        assert(jer_variation is None)  # raw JEC + JER variation not supported
+        _cor_prefix = "raw"
 
     process.add_module(
         "ntuple{}".format(pipeline_name),
@@ -475,11 +533,16 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift, je
     _maybe_mc_specific_pre_sequence = cms.Sequence()
     _maybe_mc_specific_post_sequence = cms.Sequence()
     if not options.isData:
-        # need unsmeared jets and genjet map as smearer input
-        _maybe_mc_specific_pre_sequence *= getattr(process, "{}Jets{}{}".format('corrected', jet_algo_name, jec_shift))
-        _maybe_mc_specific_pre_sequence *= getattr(process, "{}JetGenJetMap{}{}".format('corrected', jet_algo_name, jec_shift))
-        # produce genjet map for smeared jets
-        _maybe_mc_specific_post_sequence *= getattr(process, "{}JetGenJetMap{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix))
+        if jec_shift is None:
+            # need raw jets and genjet map as smearer input
+            _maybe_mc_specific_pre_sequence *= getattr(process, "{}Jets{}".format('raw', jet_algo_name))
+            _maybe_mc_specific_pre_sequence *= getattr(process, "{}JetGenJetMap{}".format('raw', jet_algo_name))
+        else:
+            # need unsmeared jets and genjet map as smearer input
+            _maybe_mc_specific_pre_sequence *= getattr(process, "{}Jets{}{}".format('corrected', jet_algo_name, jec_shift))
+            _maybe_mc_specific_pre_sequence *= getattr(process, "{}JetGenJetMap{}{}".format('corrected', jet_algo_name, jec_shift))
+            # produce genjet map for smeared jets
+            _maybe_mc_specific_post_sequence *= getattr(process, "{}JetGenJetMap{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix))
 
     _complete_pipeline_sequence = cms.Sequence(
         _maybe_mc_specific_pre_sequence *
@@ -557,6 +620,14 @@ def configure(process, options):
                             engineName=cms.untracked.string('TRandom3')
                         )
                     })
+
+        # add pipeline without JEC/JER shifts (i.e. raw uncorrected jets)
+        setup_pipeline(
+            process, options,
+            pipeline_name="{}{}".format(jet_collection, 'Raw'),
+            jet_algo_name=jet_collection,
+            jec_shift=None
+        )
 
     # random number generator service (for JER smearing)
     if _rng_engines:
