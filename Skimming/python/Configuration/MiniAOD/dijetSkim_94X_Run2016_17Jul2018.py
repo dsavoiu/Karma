@@ -33,6 +33,7 @@ def register_options(options):
                 # di-jet triggers
                 "HLT_DiPFJetAve[0-9]+_v[0-9]+"
             ])
+            .setDefault('metFiltersProcess', 'DQM')
     )
 
 def configure(process, options):

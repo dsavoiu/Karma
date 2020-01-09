@@ -20,6 +20,7 @@ if not os.getenv("GC_VERSION"):
             .setDefault('globalTag', "94X_dataRun2_v10")
             .setDefault('maxEvents', 12)
             .setDefault('dumpPython', True)
+            .setDefault('metFiltersProcess', 'DQM')
             .setDefault('useHLTFilter', False)
             .setDefault('jsonFilterFile', os.path.realpath("{}/src/Karma/Skimming/data/json/2016/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.json".format(os.getenv("CMSSW_BASE"))))
             .setDefault('withPATCollections', False)
@@ -35,6 +36,7 @@ else:
             .setDefault('globalTag', "__GLOBALTAG__")
             .setDefault('maxEvents', -1)
             .setDefault('dumpPython', False)
+            .setDefault('metFiltersProcess', 'DQM')
             .setDefault('useHLTFilter', False)
             .setDefault('jsonFilterFile', "")  # no filter in MC
             .setDefault('withPATCollections', False)

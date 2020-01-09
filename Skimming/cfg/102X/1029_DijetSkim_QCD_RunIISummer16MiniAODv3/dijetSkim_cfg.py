@@ -20,6 +20,7 @@ if not os.getenv("GC_VERSION"):
             .setDefault('globalTag', "94X_mcRun2_asymptotic_v3")
             .setDefault('maxEvents', 12)
             .setDefault('dumpPython', True)
+            .setDefault('metFiltersProcess', 'PAT')
             .setDefault('useHLTFilter', False)
             .setDefault('jsonFilterFile', "")  # no filter in MC
             .setDefault('withPATCollections', False)
@@ -35,6 +36,7 @@ else:
             .setDefault('globalTag', "__GLOBALTAG__")
             .setDefault('maxEvents', -1)
             .setDefault('dumpPython', False)
+            .setDefault('metFiltersProcess', 'PAT')
             .setDefault('useHLTFilter', False)
             .setDefault('jsonFilterFile', "")  # no filter in MC
             .setDefault('withPATCollections', False)

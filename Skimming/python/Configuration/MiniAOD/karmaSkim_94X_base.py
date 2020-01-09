@@ -49,6 +49,10 @@ def register_options(options):
                       type_=bool,
                       default=None,
                       description="If True, various pre-defined MET correction levels will be written out as edm::ValueMaps.")
+            .register('metFiltersProcess',
+                      type_=str,
+                      default=None,
+                      description="Name of the process whose TriggerResults contain the MET filters (e.g. 'RECO').")
     )
 
 def configure(process, options):
@@ -273,6 +277,7 @@ def configure(process, options):
             # interesting trigger paths must match one of these regexes:
             hltRegexes = cms.vstring(*options.hltRegexes),
             #hltRegexes = cms.vstring("HLT_(AK8)?PFJet[0-9]+_v[0-9]+", "HLT_DiPFJetAve[0-9]+_v[0-9]+"),
+            metFiltersSrc = cms.InputTag("TriggerResults", "", options.metFiltersProcess),
         ),
         on_path='path',
         write_out=True,
