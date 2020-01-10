@@ -6,6 +6,7 @@ import itertools
 import os
 import six
 import warnings
+import ROOT
 
 from copy import deepcopy
 from tqdm import tqdm
@@ -202,6 +203,10 @@ class _ProcessorBase(object):
             show_progress : `bool`
                 if :py:const:`True`, a progress bar will be shown
         """
+
+        # Disable graphical output of ROOT
+        ROOT.gROOT.SetBatch(True)
+
         # -- run over cross product of expansion
 
         # go through each configured action
