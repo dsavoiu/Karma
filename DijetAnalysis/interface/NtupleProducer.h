@@ -256,6 +256,8 @@ namespace dijet {
         std::unique_ptr<karma::PileupWeightProvider> m_puWeightProvider;
         std::unique_ptr<karma::PileupWeightProvider> m_puWeightProviderAlt;
 
+        std::vector<karma::PileupWeightProvider*> m_puWeightProvidersByHLT;
+
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;
         edm::EDGetTokenT<karma::Event> karmaEventToken;

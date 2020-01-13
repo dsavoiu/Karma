@@ -29,6 +29,8 @@ dijetNtupleProducer = cms.EDProducer(
         pileupWeightFileAlt = cms.string("nPUMean_ratio_alternative.root"),
         pileupWeightHistogramName = cms.string("pileup"),
 
+        pileupWeightByHLTFileBasename = cms.string("nPUMean_ratio"),
+
         weightForStitching = cms.double(1.0),
 
         # YAML files specifying analysis binning

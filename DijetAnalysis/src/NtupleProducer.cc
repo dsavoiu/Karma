@@ -5,6 +5,8 @@
 
 #include "Karma/DijetAnalysis/interface/NtupleProducer.h"
 
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
 
 // -- constructor
 dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dijet::NtupleProducerGlobalCache* globalCache) : m_configPSet(config) {
@@ -55,6 +57,25 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
                     m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
                 )
             );
+        }
+        // can provide pileup weight files for each HLT path
+        auto pileupWeightByHLTFileBasename = m_configPSet.getParameter<std::string>("pileupWeightByHLTFileBasename");
+        if (!pileupWeightByHLTFileBasename.empty()) {
+            m_puWeightProvidersByHLT.resize(globalCache->hltPaths_.size());
+            for (size_t iHLTPath = 0; iHLTPath < globalCache->hltPaths_.size(); ++iHLTPath) {
+                std::string pileupWeightFileName = pileupWeightByHLTFileBasename + "_" + globalCache->hltPaths_.at(iHLTPath) + ".root";
+
+                if (!boost::filesystem::exists(pileupWeightFileName)) {
+                    std::cout << "No HLT-dependent pileup weight information found for trigger path: " << globalCache->hltPaths_.at(iHLTPath) << std::endl;
+                    continue;
+                }
+
+                std::cout << "Reading HLT-dependent pileup weight information from file: " << pileupWeightFileName << std::endl;
+                m_puWeightProvidersByHLT[iHLTPath] = new karma::PileupWeightProvider(
+                    pileupWeightByHLTFileBasename + "_" + globalCache->hltPaths_[iHLTPath] + ".root",
+                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+                );
+            }
         }
     }
 
@@ -267,9 +288,11 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->weightForStitching = m_weightForStitching;
 
     // prefiring weights
-    outputNtupleEntry->prefiringWeight = *(this->karmaPrefiringWeightHandle);
-    outputNtupleEntry->prefiringWeightUp = *(this->karmaPrefiringWeightUpHandle);
-    outputNtupleEntry->prefiringWeightDown = *(this->karmaPrefiringWeightDownHandle);
+    if (m_isData) {
+        outputNtupleEntry->prefiringWeight = *(this->karmaPrefiringWeightHandle);
+        outputNtupleEntry->prefiringWeightUp = *(this->karmaPrefiringWeightUpHandle);
+        outputNtupleEntry->prefiringWeightDown = *(this->karmaPrefiringWeightDownHandle);
+    }
 
     // -- trigger results
     dijet::TriggerBits bitsetHLTBits;
@@ -508,6 +531,19 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->sumEt = this->karmaMETCollectionHandle->at(0).sumEt;
     outputNtupleEntry->metRaw = this->karmaMETCollectionHandle->at(0).uncorP4.Pt();
     outputNtupleEntry->sumEtRaw = this->karmaMETCollectionHandle->at(0).uncorSumEt;
+
+    // determine PU weight as a function of the active HLT path
+    if (!m_isData) {
+        if (outputNtupleEntry->indexActiveTriggerPathJet12PtAve >= 0) {
+            auto* puWeightByHLTProvider = m_puWeightProvidersByHLT.at(outputNtupleEntry->indexActiveTriggerPathJet12PtAve);
+            if (puWeightByHLTProvider) {
+                outputNtupleEntry->pileupWeightByActiveHLT = puWeightByHLTProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+            }
+        }
+        else {
+            outputNtupleEntry->pileupWeightByActiveHLT = -1.0;
+        }
+    }
 
     // move outputs to event tree
     event.put(std::move(outputNtupleEntry));

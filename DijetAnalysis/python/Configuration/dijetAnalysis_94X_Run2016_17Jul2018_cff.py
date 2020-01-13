@@ -491,6 +491,10 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
+            pileupWeightByHLTFileBasename = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/byHLT/nPUMean_ratio".format(
+                os.getenv('CMSSW_BASE'),
+                YEAR="2016",
+            ),
             pileupWeightHistogramName = "pileup",
 
             # jet ID (for event-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
