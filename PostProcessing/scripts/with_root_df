@@ -1,4 +1,4 @@
-_root_source_path="/cvmfs/sft.cern.ch/lcg/views/dev4/latest/x86_64-slc6-gcc8-opt/setup.sh"
+_root_source_path="/cvmfs/sft.cern.ch/lcg/releases/LCG_96/ROOT/6.18.00/x86_64-centos7-gcc8-opt/ROOT-env.sh"
 echo "Sourcing master ROOT stack... [$_root_source_path]..."
 source $_root_source_path
 PYTHONPATH=$CMSSW_BASE/python:$PYTHONPATH  # needed for some reason
