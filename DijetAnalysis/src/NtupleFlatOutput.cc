@@ -18,6 +18,9 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, rho, D);
     ADD_BRANCH(tree, productForFill, npv, I);
     ADD_BRANCH(tree, productForFill, npvGood, I);
+    ADD_BRANCH(tree, productForFill, prefiringWeight, D);
+    ADD_BRANCH(tree, productForFill, prefiringWeightUp, D);
+    ADD_BRANCH(tree, productForFill, prefiringWeightDown, D);
     ADD_BRANCH(tree, productForFill, nPUMean, D);
     ADD_BRANCH(tree, productForFill, jet1pt, D);
     ADD_BRANCH(tree, productForFill, jet1phi, D);

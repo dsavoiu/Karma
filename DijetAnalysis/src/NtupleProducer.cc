@@ -80,6 +80,11 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
         karmaJetGenJetMapToken = consumes<karma::JetGenJetMap>(m_configPSet.getParameter<edm::InputTag>("karmaJetGenJetMapSrc"));
         karmaGenParticleCollectionToken = consumes<karma::GenParticleCollection>(m_configPSet.getParameter<edm::InputTag>("karmaGenParticleCollectionSrc"));
     }
+    else {
+        karmaPrefiringWeightToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("karmaPrefiringWeightSrc"));
+        karmaPrefiringWeightUpToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("karmaPrefiringWeightUpSrc"));
+        karmaPrefiringWeightDownToken = consumes<double>(m_configPSet.getParameter<edm::InputTag>("karmaPrefiringWeightDownSrc"));
+    }
 
 }
 
@@ -199,6 +204,12 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         // jet genJet map
         karma::util::getByTokenOrThrow(event, this->karmaJetGenJetMapToken, this->karmaJetGenJetMapHandle);
     }
+    else {
+        // prefiring weights
+        karma::util::getByTokenOrThrow(event, this->karmaPrefiringWeightToken, this->karmaPrefiringWeightHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaPrefiringWeightUpToken, this->karmaPrefiringWeightUpHandle);
+        karma::util::getByTokenOrThrow(event, this->karmaPrefiringWeightDownToken, this->karmaPrefiringWeightDownHandle);
+    }
 
     assert(this->karmaMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
@@ -254,6 +265,11 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // weights
     outputNtupleEntry->weightForStitching = m_weightForStitching;
+
+    // prefiring weights
+    outputNtupleEntry->prefiringWeight = *(this->karmaPrefiringWeightHandle);
+    outputNtupleEntry->prefiringWeightUp = *(this->karmaPrefiringWeightUpHandle);
+    outputNtupleEntry->prefiringWeightDown = *(this->karmaPrefiringWeightDownHandle);
 
     // -- trigger results
     dijet::TriggerBits bitsetHLTBits;

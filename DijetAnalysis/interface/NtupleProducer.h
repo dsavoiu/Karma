@@ -284,6 +284,15 @@ namespace dijet {
         typename edm::Handle<karma::LVCollection> karmaGenJetCollectionHandle;
         edm::EDGetTokenT<karma::LVCollection> karmaGenJetCollectionToken;
 
+        typename edm::Handle<double> karmaPrefiringWeightHandle;
+        edm::EDGetTokenT<double> karmaPrefiringWeightToken;
+
+        typename edm::Handle<double> karmaPrefiringWeightUpHandle;
+        edm::EDGetTokenT<double> karmaPrefiringWeightUpToken;
+
+        typename edm::Handle<double> karmaPrefiringWeightDownHandle;
+        edm::EDGetTokenT<double> karmaPrefiringWeightDownToken;
+
         typename edm::Handle<karma::Run> karmaRunHandle;
         edm::EDGetTokenT<karma::Run> karmaRunToken;
 

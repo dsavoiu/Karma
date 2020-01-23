@@ -179,7 +179,21 @@ def _add_jet_collection_and_dependencies(process, options, prefix, jet_algo_name
             )
         )
 
-    if not options.isData:
+    if options.isData:
+        # data-only
+
+        # -- prefiring Weights
+        _template_prefiring_weights_name = "{}PrefiringWeights{}".format(prefix, jet_algo_name)
+        process.add_module(
+            _template_prefiring_weights_name + suffix,
+            getattr(process, _template_prefiring_weights_name).clone(
+                karmaJetCollectionSrc = cms.InputTag(_template_jet_collection_name + suffix),
+            )
+        )
+    else:
+        # mc-only
+
+        # -- jet-genjet maps
         _template_genjet_map_name = "{}JetGenJetMap{}".format(prefix, jet_algo_name)
         process.add_module(
             _template_genjet_map_name + suffix,
@@ -337,6 +351,38 @@ def init_modules(process, options, jet_algo_name):
         jet_algo_name=jet_algo_name
     )
 
+    # == Data-only items =============================================
+
+    # -- prefiring Weights (raw jets)
+    from Karma.Common.Producers.PrefiringWeightProducer_cfi import karmaPrefiringWeightProducer
+    process.add_module(
+        "rawPrefiringWeights{}".format(jet_algo_name),
+        karmaPrefiringWeightProducer.clone(
+            # -- input sources
+            karmaJetCollectionSrc = cms.InputTag("rawJets{}".format(jet_algo_name)),
+
+            # -- other configuration
+            prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
+            prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
+            prefiringRateSysUnc = cms.double(0.2),
+        )
+    )
+
+    # -- prefiring Weights
+    from Karma.Common.Producers.PrefiringWeightProducer_cfi import karmaPrefiringWeightProducer
+    process.add_module(
+        "correctedPrefiringWeights{}".format(jet_algo_name),
+        karmaPrefiringWeightProducer.clone(
+            # -- input sources
+            karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
+
+            # -- other configuration
+            prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
+            prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
+            prefiringRateSysUnc = cms.double(0.2),
+        )
+    )
+
     # == MC-only main collections =============================================
 
     if not options.isData:
@@ -419,6 +465,10 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
             karmaJetGenJetMapSrc = cms.InputTag("{}JetGenJetMap{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)),
 
             karmaMETCollectionSrc = cms.InputTag("{}METs{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)),
+
+            karmaPrefiringWeightSrc = cms.InputTag("{}PrefiringWeights{}{}:nonPrefiringProb".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)),
+            karmaPrefiringWeightUpSrc = cms.InputTag("{}PrefiringWeights{}{}:nonPrefiringProbUp".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)),
+            karmaPrefiringWeightDownSrc = cms.InputTag("{}PrefiringWeights{}{}:nonPrefiringProbDown".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)),
 
             isData = cms.bool(options.isData),
             weightForStitching = cms.double(options.weightForStitching),
@@ -529,6 +579,9 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
         getattr(process, "{}Jets{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)) *
         getattr(process, "{}JetTriggerObjectMap{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)) *
         getattr(process, "{}METs{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix)))
+
+    if options.isData:
+        _pre_ntuple_sequence *= getattr(process, "{}PrefiringWeights{}{}".format(_cor_prefix, jet_algo_name, _jet_collection_suffix))
 
     _post_ntuple_sequence = cms.Sequence(
         getattr(process, "ntuple{}".format(pipeline_name)) *

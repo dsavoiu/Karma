@@ -15,6 +15,9 @@ dijetNtupleProducer = cms.EDProducer(
         karmaGenJetCollectionSrc = cms.InputTag("karmaGenJets"),
         karmaJetTriggerObjectMapSrc = cms.InputTag("karmaJetTriggerObjectMaps"),
         karmaJetGenJetMapSrc = cms.InputTag("karmaJetTriggerObjectMaps"),
+        karmaPrefiringWeightSrc = cms.InputTag("karmaPrefiringWeightProducer:nonPrefiringProb"),
+        karmaPrefiringWeightUpSrc = cms.InputTag("karmaPrefiringWeightProducer:nonPrefiringProbUp"),
+        karmaPrefiringWeightDownSrc = cms.InputTag("karmaPrefiringWeightProducer:nonPrefiringProbDown"),
 
         # -- other configuration
 

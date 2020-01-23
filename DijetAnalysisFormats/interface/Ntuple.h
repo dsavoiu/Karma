@@ -19,6 +19,12 @@ namespace dijet {
         // number of primary vertices
         int npv = -1;
         int npvGood = -1;
+
+        // prefiring weights
+        double prefiringWeight = 1.0;
+        double prefiringWeightUp = 1.0;
+        double prefiringWeightDown = 1.0;
+
         // leading jet kinematics
         double jet1pt = UNDEFINED_DOUBLE;
         double jet1phi = UNDEFINED_DOUBLE;
