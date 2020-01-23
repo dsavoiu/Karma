@@ -98,25 +98,30 @@ class LumberjackInterfaceBase(object):
             ROOT.ROOT.DisableImplicitMT()  # exlicitly disable multithreading
 
         # -- set up data frame
+        self._df_size = 0
         print("[INFO] Setting up data frame...")
-        print("[INFO] Sample file: {}".format(self._args.input_file))
-
-        # exit if input file does not exist
-        if not os.path.exists(self._args.input_file):
-            print("[ERROR] Input file does not exist: '{}'".format(self._args.input_file))
-            exit(1)
-
-        # exit if tree does not exist in file
-        _f = ROOT.TFile(self._args.input_file, "READ")
-        _tree = _f.Get(self._args.tree)
-        if not isinstance(_tree, ROOT.TTree):
-            print("[ERROR] Input file does not contain TTree '{}'".format(self._args.tree))
-            exit(1)
-        self._df_size = _tree.GetEntries()
-        _f.Close()
-
         print("[INFO] Sample type: {}".format(self._args.input_type))
-        self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
+        _file_names_as_vector = ROOT.std.vector('string')()
+        for _file in self._args.input_file:
+            print("[INFO] Sample file: {}".format(_file))
+
+            # check if file exists (for local files only)
+            if '://' not in _file and not os.path.exists(_file):
+                print("[ERROR] Input file does not exist: '{}'".format(_file))
+                exit(1)
+
+            # exit if tree does not exist in file
+            _f = ROOT.TFile(_file, "READ")
+            _tree = _f.Get(self._args.tree)
+            if not isinstance(_tree, ROOT.TTree):
+                print("[ERROR] Input file '{}' does not contain TTree '{}'".format(_file, self._args.tree))
+                exit(1)
+            self._df_size += _tree.GetEntries()
+            _f.Close()
+
+            _file_names_as_vector.push_back(_file)
+
+        self._df_bare = ROOT_DF_CLASS(self._args.tree, _file_names_as_vector)
 
         # -- add ROOT include paths
         if hasattr(self._config, 'ROOT_INCLUDE_PATHS'):
@@ -563,7 +568,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
             help="Name of the analysis configuration to load (must have a configuration module under 'Lumberjack/cfg/ANALYSIS_NAME')",
             required=True,
             choices=_available_analysis_configs.keys())
-        _required_args.add_argument('-i', '--input-file', metavar='FILE', type=str, help='Input file', required=True)
+        _required_args.add_argument('-i', '--input-file', metavar='FILE', type=str, nargs='+', help='Input file(s)', required=True)
         _required_args.add_argument('--selections', metavar='SELECTION', help='Specification of event selection cuts', nargs='+')
 
         _optional_args = _top_parser.add_argument_group('optional arguments', '')
