@@ -123,7 +123,7 @@ class LumberjackInterfaceBase(object):
             print("[INFO] Adding include paths to ROOT interpreter:")
             for _path in self._config.ROOT_INCLUDE_PATHS:
                 print("    {}".format(_path))
-                ROOT.gInterpreter.AddIncludePath('-I"{}"'.format(_path))
+                ROOT.gInterpreter.AddIncludePath('{}'.format(_path))
 
         # -- load external libraries in ROOT
         if hasattr(self._config, 'ROOT_LOAD_EXTERNAL_LIBRARIES'):
