@@ -446,6 +446,17 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
             # jet ID (for event-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
             jetIDSpec = cms.string(options.jetIDSpec or "None"),
             jetIDWorkingPoint = cms.string(options.jetIDWorkingPoint or "None"),
+
+            # MET filters
+            metFilterNames = cms.vstring(
+                'Flag_goodVertices',
+                'Flag_globalSuperTightHalo2016Filter',
+                'Flag_HBHENoiseFilter',
+                'Flag_HBHENoiseIsoFilter',
+                'Flag_EcalDeadCellTriggerPrimitiveFilter',
+                'Flag_BadPFMuonFilter',
+                'Flag_eeBadScFilter',
+            ),
         )
     )
 
