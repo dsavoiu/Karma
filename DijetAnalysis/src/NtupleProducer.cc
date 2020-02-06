@@ -141,27 +141,32 @@ dijet::NtupleProducer::~NtupleProducer() {
     }
 
     // retrieve the MET filter names from skim
-    const auto& metFiltersInSkim = karma::util::getModuleParameterFromHistory<std::vector<std::string>>(
-        run, processName, "karmaEvents", "metFilterNames");
+    try {
+        const auto& metFiltersInSkim = karma::util::getModuleParameterFromHistory<std::vector<std::string>>(
+            run, processName, "karmaEvents", "metFilterNames");
 
-    for (const auto& requestedMETFilterName : globalCache->metFilterNames_) {
-        const auto& it = std::find(
-            metFiltersInSkim.begin(),
-            metFiltersInSkim.end(),
-            requestedMETFilterName
-        );
+        for (const auto& requestedMETFilterName : globalCache->metFilterNames_) {
+            const auto& it = std::find(
+                metFiltersInSkim.begin(),
+                metFiltersInSkim.end(),
+                requestedMETFilterName
+            );
 
-        // throw if MET filter not found for a requested label!
-        if (it == metFiltersInSkim.end()) {
-            edm::Exception exception(edm::errors::NotFound);
-            exception
-                << "Cannot find MET filter for name '" << requestedMETFilterName << "' in skim!";
-            throw exception;
+            // throw if MET filter not found for a requested label!
+            if (it == metFiltersInSkim.end()) {
+                edm::Exception exception(edm::errors::NotFound);
+                exception
+                    << "Cannot find MET filter for name '" << requestedMETFilterName << "' in skim!";
+                throw exception;
+            }
+
+            // retrieve index
+            int index = std::distance(metFiltersInSkim.begin(), it);
+            runCache->metFilterIndicesInSkim_.emplace_back(index);
         }
-
-        // retrieve index
-        int index = std::distance(metFiltersInSkim.begin(), it);
-        runCache->metFilterIndicesInSkim_.emplace_back(index);
+    }
+    catch (edm::Exception& e) {
+        std::cout << "[WARNING] Could not retrieve MET filters from skim!" << std::endl;
     }
 
     return runCache;
