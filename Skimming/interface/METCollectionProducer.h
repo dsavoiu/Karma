@@ -35,7 +35,7 @@ namespace karma {
             try {
                 return _toCorrectionLevelMap.at(correctionLevelSpec);
             }
-            catch (std::out_of_range) {
+            catch (std::out_of_range&) {
                 edm::Exception exception(edm::errors::Configuration);
                 exception << "Invalid MET correction level specification '" << correctionLevelSpec
                           << "' Available specifications are: " << std::endl;
