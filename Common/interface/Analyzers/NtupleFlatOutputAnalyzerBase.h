@@ -20,8 +20,14 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
+
+#if (CMSSW_MAJOR_VERSION >= 11)
+#include "FWCore/Reflection/interface/TypeWithDict.h"
+#include "FWCore/Reflection/interface/MemberWithDict.h"
+#else
 #include "FWCore/Utilities/interface/TypeWithDict.h"
 #include "FWCore/Utilities/interface/MemberWithDict.h"
+#endif
 
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 
