@@ -49,6 +49,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
                 )
             );
         }
+        /*
         // can provide an alternative pileup weight file
         if (!m_configPSet.getParameter<std::string>("pileupWeightFileAlt").empty()) {
             m_puWeightProviderAlt = std::unique_ptr<karma::PileupWeightProvider>(
@@ -58,6 +59,7 @@ dijet::NtupleProducer::NtupleProducer(const edm::ParameterSet& config, const dij
                 )
             );
         }
+        */
         // can provide pileup weight files for each HLT path
         auto pileupWeightByHLTFileBasename = m_configPSet.getParameter<std::string>("pileupWeightByHLTFileBasename");
         if (!pileupWeightByHLTFileBasename.empty()) {
@@ -259,9 +261,9 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         if (m_puWeightProvider) {
             outputNtupleEntry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleEntry->nPUMean);
         }
-        if (m_puWeightProviderAlt) {
+        /*if (m_puWeightProviderAlt) {
             outputNtupleEntry->pileupWeightAlt = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleEntry->nPUMean);
-        }
+        }*/
     }
 
     // write information related to primary vertices
@@ -296,6 +298,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // -- trigger results
     dijet::TriggerBits bitsetHLTBits;
+    int indexHighestFiredTriggerPath = -1;  // keep track (mainly for simulated PU weight application)
     // go through all triggers in skim
     for (size_t iBit = 0; iBit < this->karmaEventHandle->hltBits.size(); ++iBit) {
         // if trigger fired
@@ -306,6 +309,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             if (idxInConfig >= 0) {
                 // set bit
                 bitsetHLTBits[idxInConfig] = true;
+                indexHighestFiredTriggerPath = idxInConfig;
             }
         }
     }
@@ -534,14 +538,31 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     // determine PU weight as a function of the active HLT path
     if (!m_isData) {
+        // determine PU weight by ptave
+        outputNtupleEntry->pileupWeightActiveHLTByJet12PtAve = -1.0;
         if (outputNtupleEntry->indexActiveTriggerPathJet12PtAve >= 0) {
             auto* puWeightByHLTProvider = m_puWeightProvidersByHLT.at(outputNtupleEntry->indexActiveTriggerPathJet12PtAve);
             if (puWeightByHLTProvider) {
-                outputNtupleEntry->pileupWeightByActiveHLT = puWeightByHLTProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+                outputNtupleEntry->pileupWeightActiveHLTByJet12PtAve = puWeightByHLTProvider->getPileupWeight(outputNtupleEntry->nPUMean);
             }
         }
-        else {
-            outputNtupleEntry->pileupWeightByActiveHLT = -1.0;
+
+        // determine PU weight by mass
+        outputNtupleEntry->pileupWeightActiveHLTByJet12Mass = -1.0;
+        if (outputNtupleEntry->indexActiveTriggerPathJet12Mass >= 0) {
+            auto* puWeightByHLTProvider = m_puWeightProvidersByHLT.at(outputNtupleEntry->indexActiveTriggerPathJet12Mass);
+            if (puWeightByHLTProvider) {
+                outputNtupleEntry->pileupWeightActiveHLTByJet12Mass = puWeightByHLTProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+            }
+        }
+
+        // determine PU weight by simulated trigger
+        outputNtupleEntry->pileupWeightSimulatedHLT = -1.0;
+        if (indexHighestFiredTriggerPath >= 0) {
+            auto* puWeightByHLTProvider = m_puWeightProvidersByHLT.at(indexHighestFiredTriggerPath);
+            if (puWeightByHLTProvider) {
+                outputNtupleEntry->pileupWeightSimulatedHLT = puWeightByHLTProvider->getPileupWeight(outputNtupleEntry->nPUMean);
+            }
         }
     }
 

@@ -122,8 +122,10 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
         ADD_BRANCH(tree, productForFill, generatorWeightProduct, D);
         ADD_BRANCH(tree, productForFill, weightForStitching, D);
         ADD_BRANCH(tree, productForFill, pileupWeight, D);
-        ADD_BRANCH(tree, productForFill, pileupWeightAlt, D);
-        ADD_BRANCH(tree, productForFill, pileupWeightByActiveHLT, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLT, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightActiveHLTByJet12PtAve, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightActiveHLTByJet12Mass, D);
+
         // binning values
         ADD_BRANCH(tree, productForFill, binningValue, D);
     }
