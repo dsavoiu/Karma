@@ -129,12 +129,16 @@ void karma::SmearedJetsProducer::produce(edm::Event& event, const edm::EventSetu
             // (needed in order not to break replay)
             // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEDMRandomNumberGeneratorService#Replay
             CLHEP::RandGaussT::setFlag(false);
-            outputJetCollection->back().p4 *= (
-                1 + (
-                    CLHEP::RandGaussT::shoot(&rngEngine, 0, resolution) *
-                    std::sqrt(std::max(resolutionSF * resolutionSF - 1, 0.0))
-                )
+            double scaleFactor = 1 + (
+                CLHEP::RandGaussT::shoot(&rngEngine, 0, resolution) *
+                std::sqrt(std::max(resolutionSF * resolutionSF - 1, 0.0))
             );
+
+            // prevent negative scale factors
+            if (scaleFactor < 0) scaleFactor = 0.0;
+
+            // apply scale factor
+            outputJetCollection->back().p4 *= scaleFactor;
         }
 
     }
