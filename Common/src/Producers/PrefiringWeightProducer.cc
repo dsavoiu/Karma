@@ -64,8 +64,8 @@ void karma::PrefiringWeightProducer::produce(edm::Event& event, const edm::Event
     for (const auto var : {PrefiringVariation::central, PrefiringVariation::up, PrefiringVariation::down}) {
         for (const auto& inputJet : (*this->karmaJetCollectionHandle)) {
             if ((inputJet.p4.Pt()  < 20.) ||
-                (inputJet.p4.Eta() < 2.0) ||
-                (inputJet.p4.Eta() > 3.0)) {
+                (std::abs(inputJet.p4.Eta()) < 2.0) ||
+                (std::abs(inputJet.p4.Eta()) > 3.0)) {
 
                 continue;
             }
