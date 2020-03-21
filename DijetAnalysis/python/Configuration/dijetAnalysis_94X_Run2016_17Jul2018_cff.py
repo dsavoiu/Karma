@@ -686,6 +686,10 @@ def configure(process, options):
                         "smearedCorrectedJets{}{}{}".format(jet_collection, jec_shift, jer_variation) : cms.PSet(
                             initialSeed=cms.untracked.uint32(83),
                             engineName=cms.untracked.string('TRandom3')
+                        ),
+                        "ntuple{}{}".format(jet_collection, _pipeline_suffix) : cms.PSet(
+                            initialSeed=cms.untracked.uint32(497931),
+                            engineName=cms.untracked.string('TRandom3')
                         )
                     })
 
@@ -696,6 +700,12 @@ def configure(process, options):
             jet_algo_name=jet_collection,
             jec_shift=None
         )
+        _rng_engines.update({
+            "ntuple{}{}".format(jet_collection, 'Raw') : cms.PSet(
+                initialSeed=cms.untracked.uint32(497931),
+                engineName=cms.untracked.string('TRandom3')
+            )
+        })
 
     # random number generator service (for JER smearing)
     if _rng_engines:

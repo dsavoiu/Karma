@@ -236,6 +236,10 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     assert(this->karmaMETCollectionHandle->size() == 1);  // only allow MET collections containing a single MET object
 
+    // get random number generator engine
+    edm::Service<edm::RandomNumberGenerator> rng;
+    CLHEP::HepRandomEngine& rngEngine = rng->getEngine(event.streamID());
+
     // -- populate outputs
 
     // event metadata
@@ -243,6 +247,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     outputNtupleEntry->lumi = event.id().luminosityBlock();
     outputNtupleEntry->event = event.id().event();
     outputNtupleEntry->bx = event.bunchCrossing();
+    outputNtupleEntry->randomUniform = CLHEP::RandFlat::shoot(&rngEngine, 0, 1);
 
     // -- copy event content to ntuple
     outputNtupleEntry->rho     = this->karmaEventHandle->rho;

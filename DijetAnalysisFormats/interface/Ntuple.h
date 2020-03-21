@@ -12,6 +12,7 @@ namespace dijet {
         int lumi = -1;
         long event = -1;
         int bx = -1;
+        double randomUniform = UNDEFINED_DOUBLE;
         // pileup-related
         double rho = UNDEFINED_DOUBLE;      // PU density
         double nPUMean = UNDEFINED_DOUBLE;  // true (MC) or estimated (DATA) mean of Poisson distribution of `nPU`
