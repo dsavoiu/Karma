@@ -9,6 +9,7 @@ import yaml
 
 from copy import deepcopy
 from functools import partial
+from itertools import cycle
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -18,6 +19,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatterSciNotation
 from matplotlib.colors import LogNorm, Normalize, colorConverter
+from matplotlib.legend_handler import HandlerBase, HandlerTuple
 
 from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, F1
 from rootpy.plotting.hist import _Hist, _Hist2D
@@ -70,6 +72,65 @@ class LogFormatterSciNotationForceSublabels(LogFormatterSciNotation):
             self._sublabels = {1.0, 2.0, 5.0, 10.0}
 
         return _ret
+
+# check if HandlerTuple API supports `ndivide` and `pad`
+try:
+    HandlerTuple(ndivide=None, pad=5)
+except TypeError:  # old MPL version -> reimplement with new API
+    class HandlerTuple(HandlerBase):
+        """
+        Handler for Tuple. (reimplemented from matplotlib 2.0)
+
+        Additional kwargs are passed through to `HandlerBase`.
+
+        Parameters
+        ----------
+        ndivide : int, optional
+            The number of sections to divide the legend area into. If None,
+            use the length of the input tuple. Default is 1.
+
+
+        pad : float, optional
+            If None, fall back to ``legend.borderpad`` as the default.
+        In units of fraction of font size. Default is None.
+        """
+
+        def __init__(self, ndivide=1, pad=None, **kwargs):
+
+            self._ndivide = ndivide
+            self._pad = pad
+            HandlerBase.__init__(self, **kwargs)
+
+        def create_artists(self, legend, orig_handle,
+                           xdescent, ydescent, width, height, fontsize,
+                           trans):
+
+            handler_map = legend.get_legend_handler_map()
+
+            if self._ndivide is None:
+                ndivide = len(orig_handle)
+            else:
+                ndivide = self._ndivide
+
+            if self._pad is None:
+                pad = legend.borderpad * fontsize
+            else:
+                pad = self._pad * fontsize
+
+            if ndivide > 1:
+                width = (width - pad * (ndivide - 1)) / ndivide
+
+            xds_cycle = cycle(xdescent - (width + pad) * np.arange(ndivide))
+
+            a_list = []
+            for handle1 in orig_handle:
+                handler = legend.get_legend_handler(handler_map, handle1)
+                _a_list = handler.create_artists(
+                    legend, handle1,
+                    next(xds_cycle), ydescent, width, height, fontsize, trans)
+                a_list.extend(_a_list)
+
+            return a_list
 
 
 def _plot_with_error_band(ax, *args, **kwargs):
@@ -225,7 +286,8 @@ class PlotProcessor(_ProcessorBase):
 
     _DEFAULT_LEGEND_KWARGS = dict(
         ncol=1, numpoints=1, fontsize=12, frameon=False,
-        loc='upper right'
+        loc='upper right',
+        handler_map = {tuple: HandlerTuple(ndivide=None, pad=4)}
     )
     _DEFAULT_LINE_KWARGS = dict(
         linestyle='--', color='gray', linewidth=1, zorder=-99
