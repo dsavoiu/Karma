@@ -524,9 +524,14 @@ class PlotProcessor(_ProcessorBase):
                         markerfacecolor=_kwargs['color'],
                         markeredgewidth=0,
                     )
-                elif _marker_style == 'empty':
+                elif _marker_style == 'white':
                     _kwargs.update(
                         markerfacecolor='w',
+                        markeredgewidth=1,
+                    )
+                elif _marker_style == 'empty':
+                    _kwargs.update(
+                        markerfacecolor='none',
                         markeredgewidth=1,
                     )
                 else:
