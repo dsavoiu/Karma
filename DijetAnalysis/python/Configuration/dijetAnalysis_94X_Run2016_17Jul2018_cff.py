@@ -658,6 +658,12 @@ def configure(process, options):
                     jet_algo_name=jet_collection,
                     jec_shift=jec_shift,
                 )
+                _rng_engines.update({
+                    "ntuple{}{}".format(jet_collection, jec_shift) : cms.PSet(
+                        initialSeed=cms.untracked.uint32(497931),
+                        engineName=cms.untracked.string('TRandom3')
+                    )
+                })
         else:
             # mc -> add pipelines with both JEC shifts and JER smearing
             for jec_shift in JEC_PIPELINES:
