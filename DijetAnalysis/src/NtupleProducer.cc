@@ -488,6 +488,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->indexActiveTriggerPathJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12ptave
                     }).as<int>();
+                    outputNtupleEntry->prescaleActiveTriggerPathJet12PtAve = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve] *
+                                                                             this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve];
                 }
                 catch (const std::out_of_range& err) {
                     // do nothing (leave at default value)
@@ -501,6 +503,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->indexActiveTriggerPathJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12mass
                     }).as<int>();
+                    outputNtupleEntry->prescaleActiveTriggerPathJet12Mass = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass] *
+                                                                            this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass];
                 }
                 catch (const std::out_of_range& err) {
                     // do nothing (leave at default value)

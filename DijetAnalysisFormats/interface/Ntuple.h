@@ -52,6 +52,10 @@ namespace dijet {
         int indexActiveTriggerPathJet12PtAve = -1;
         int indexActiveTriggerPathJet12Mass = -1;
 
+        // prescale of active trigger path
+        int prescaleActiveTriggerPathJet12PtAve = 0;
+        int prescaleActiveTriggerPathJet12Mass = 0;
+
         // jet PF energy fractions
         double jet1NeutralHadronFraction = UNDEFINED_DOUBLE;
         double jet1ChargedHadronFraction = UNDEFINED_DOUBLE;
