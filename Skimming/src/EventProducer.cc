@@ -25,7 +25,9 @@ karma::EventProducer::EventProducer(const edm::ParameterSet& config, const karma
     pileupSummaryInfosToken = consumes<edm::View<PileupSummaryInfo>>(m_configPSet.getParameter<edm::InputTag>("pileupSummaryInfoSrc"));
     triggerResultsToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("triggerResultsSrc"));
     metFiltersToken = consumes<edm::TriggerResults>(m_configPSet.getParameter<edm::InputTag>("metFiltersSrc"));
-    //triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesSrc"));
+    triggerPrescalesToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesSrc"));
+    triggerPrescalesL1MinToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesL1MinSrc"));
+    triggerPrescalesL1MaxToken = consumes<pat::PackedTriggerPrescales>(m_configPSet.getParameter<edm::InputTag>("triggerPrescalesL1MaxSrc"));
     primaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("primaryVerticesSrc"));
     goodPrimaryVerticesToken = consumes<edm::View<reco::Vertex>>(m_configPSet.getParameter<edm::InputTag>("goodPrimaryVerticesSrc"));
 
@@ -211,7 +213,9 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     karma::util::getByTokenOrThrow(event, this->triggerResultsToken, this->triggerResultsHandle);
     // MET filters
     karma::util::getByTokenOrThrow(event, this->metFiltersToken, this->metFiltersHandle);
-    //karma::util::getByTokenOrThrow(event, this->triggerPrescalesToken, this->triggerPrescalesHandle);
+    karma::util::getByTokenOrThrow(event, this->triggerPrescalesToken, this->triggerPrescalesHandle);
+    karma::util::getByTokenOrThrow(event, this->triggerPrescalesL1MinToken, this->triggerPrescalesL1MinHandle);
+    karma::util::getByTokenOrThrow(event, this->triggerPrescalesL1MaxToken, this->triggerPrescalesL1MaxHandle);
     // primary vertices
     karma::util::getByTokenOrThrow(event, this->primaryVerticesToken, this->primaryVerticesHandle);
     karma::util::getByTokenOrThrow(event, this->goodPrimaryVerticesToken, this->goodPrimaryVerticesHandle);
@@ -250,6 +254,7 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     if (globalCache()->writeOutTriggerPrescales_) {
         outputEvent->triggerPathHLTPrescales.resize(numSelectedHLTPaths);
         outputEvent->triggerPathL1Prescales.resize(numSelectedHLTPaths);
+        //outputEvent->triggerPathL1PrescalesMax.resize(numSelectedHLTPaths);
     }
     for (size_t iPath = 0; iPath < numSelectedHLTPaths; ++iPath) {
         // need the original index of the path in the trigger menu to obtain trigger decision
@@ -260,9 +265,15 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
         outputEvent->hltBits[iPath] = this->triggerResultsHandle->accept(triggerIndex);
 
         if (globalCache()->writeOutTriggerPrescales_) {
-            const std::pair<int, int> l1AndHLTPrescales = m_hltPrescaleProvider->prescaleValues(event, setup, triggerName);
-            outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
-            outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
+            // old prescales code: keep for reference
+            //const std::pair<int, int> l1AndHLTPrescales = m_hltPrescaleProvider->prescaleValues(event, setup, triggerName);
+            //outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
+            //outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
+
+            outputEvent->triggerPathHLTPrescales[iPath] = this->triggerPrescalesHandle->getPrescaleForIndex(triggerIndex);
+            outputEvent->triggerPathL1Prescales[iPath] = this->triggerPrescalesL1MinHandle->getPrescaleForIndex(triggerIndex);
+            // define if ever needed
+            ///outputEvent->triggerPathL1PrescalesMax[iPath] = this->triggerPrescalesL1MaxHandle->getPrescaleForIndex(triggerIndex);
         }
     }
 

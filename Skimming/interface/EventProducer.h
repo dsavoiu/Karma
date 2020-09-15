@@ -178,8 +178,14 @@ namespace karma {
         typename edm::Handle<edm::TriggerResults> metFiltersHandle;
         edm::EDGetTokenT<edm::TriggerResults> metFiltersToken;
 
-        //typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
-        //edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken;
+        typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
+        edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken;
+
+        typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesL1MinHandle;
+        edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesL1MinToken;
+
+        typename edm::Handle<pat::PackedTriggerPrescales> triggerPrescalesL1MaxHandle;
+        edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesL1MaxToken;
 
         typename edm::Handle<double> pileupDensityHandle;
         edm::EDGetTokenT<double> pileupDensityToken;

@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 def karmaEventProducer(isData):
-    """create the producer for CHS MET, adding necessary prerequisites to the process"""
+    """create the producer for the karma Event, adding necessary prerequisites to the process"""
 
     return cms.EDProducer(
         "EventProducer",
@@ -11,7 +11,9 @@ def karmaEventProducer(isData):
             pileupDensitySrc = cms.InputTag("fixedGridRhoFastjetAll"),
             pileupSummaryInfoSrc = cms.InputTag("slimmedAddPileupInfo"),
             triggerResultsSrc = cms.InputTag("TriggerResults", "", "HLT"),
-            #triggerPrescalesSrc = cms.InputTag("patTrigger"),
+            triggerPrescalesSrc = cms.InputTag("patTrigger"),
+            triggerPrescalesL1MinSrc = cms.InputTag("patTrigger", "l1min"),
+            triggerPrescalesL1MaxSrc = cms.InputTag("patTrigger", "l1max"),
             primaryVerticesSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
             goodPrimaryVerticesSrc = cms.InputTag("goodOfflinePrimaryVertices"),
 

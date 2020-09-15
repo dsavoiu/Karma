@@ -278,6 +278,7 @@ def configure(process, options):
             hltRegexes = cms.vstring(*options.hltRegexes),
             #hltRegexes = cms.vstring("HLT_(AK8)?PFJet[0-9]+_v[0-9]+", "HLT_DiPFJetAve[0-9]+_v[0-9]+"),
             metFiltersSrc = cms.InputTag("TriggerResults", "", options.metFiltersProcess),
+            writeOutTriggerPrescales = cms.bool(True),
         ),
         on_path='path',
         write_out=True,
