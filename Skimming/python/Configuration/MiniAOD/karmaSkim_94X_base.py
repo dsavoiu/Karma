@@ -522,6 +522,17 @@ def configure(process, options):
             write_out=True,
         )
 
+    # -- Photons ----------------------------------------------------------
+
+    from Karma.Skimming.PhotonCollectionProducer_cfi import karmaPhotonCollectionProducer
+
+    process.add_module(
+        'karmaPhotons',
+        karmaPhotonCollectionProducer.clone(),
+        on_path='path',
+        write_out=True,
+    )
+
     # -- Electrons --------------------------------------------------------
 
     from Karma.Skimming.ElectronCollectionProducer_cfi import karmaElectronCollectionProducer

@@ -146,6 +146,13 @@ namespace {
         karma::GenParticleCollection dict_karmaGenParticleCollection;
         edm::Wrapper<karma::GenParticleCollection> dict_edmWrapperDijetGenParticleCollection;
 
+        // photons
+        karma::Photon dict_karmaPhoton;
+        edm::Wrapper<karma::Photon> dict_edmWrapperDijetPhoton;
+        karma::PhotonCollection dict_karmaPhotonCollection;
+        edm::Wrapper<karma::PhotonCollection> dict_edmWrapperDijetPhotonCollection;
+        edm::RefProd<karma::PhotonCollection> dict_edmRefProdDijetPhotonCollection;
+
         // jets
         karma::Jet dict_karmaJet;
         edm::Wrapper<karma::Jet> dict_edmWrapperDijetJet;

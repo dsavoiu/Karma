@@ -149,6 +149,15 @@ namespace karma {
     typedef std::vector<karma::Lepton> LeptonCollection;
 
     /**
+     * Photon class
+     */
+    class Photon : public karma::LV {
+      public:
+        /* no additional properties (yet) */
+    };
+    typedef std::vector<karma::Photon> PhotonCollection;
+
+    /**
      * Muon class
      */
     class Muon : public karma::Lepton {

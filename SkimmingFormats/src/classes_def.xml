@@ -62,6 +62,12 @@
     <class name="karma::GenParticleCollection"/>
     <class name="edm::Wrapper<karma::GenParticleCollection>"/>
 
+    <!-- karma::Photon -->
+    <class name="karma::Photon"/>
+    <class name="edm::Wrapper<karma::Photon>"/>
+    <class name="karma::PhotonCollection"/>
+    <class name="edm::Wrapper<karma::PhotonCollection>"/>
+
     <!-- karma::Jet -->
     <class name="karma::Jet"/>
     <class name="edm::Wrapper<karma::Jet>"/>
