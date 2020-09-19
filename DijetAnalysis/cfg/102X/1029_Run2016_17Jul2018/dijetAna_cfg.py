@@ -26,11 +26,13 @@ if not os.getenv("GC_VERSION"):
             .setDefault('dumpPython', True)
             .setDefault('useHLTFilter', False)
             .setDefault('useObjectBasedJetID', True)
+            .setDefault('jetCollections', ['AK4PFCHS', 'AK8PFCHS'])
             .setDefault('jetIDSpec', "2016")
             .setDefault('jetIDWorkingPoint', "TightLepVeto")
             .setDefault('numThreads', 1)
-            #.setDefault('jecVersion', "Summer16_07Aug2017GH_V11")
+            .setDefault('jecVersion', "Summer16_07Aug2017GH_V11")  # for JEC uncertainty sources
             .setDefault('jecFromGlobalTag', True)
+            .setDefault('doJECUncertaintySources', True)
             .setDefault('edmOut', True)
     ).parseArguments()
 else:
@@ -48,10 +50,12 @@ else:
             .setDefault('numThreads', 1)
             .setDefault('useHLTFilter', True)
             .setDefault('useObjectBasedJetID', True)
+            .setDefault('jetCollections', [__JET_COLLECTION__])
             .setDefault('jetIDSpec', "2016")
             .setDefault('jetIDWorkingPoint', "TightLepVeto")
             #.setDefault('jecVersion', "__JEC_VERSION__")
             .setDefault('jecFromGlobalTag', True)
+            .setDefault('doJECUncertaintySources', True)
             .setDefault('edmOut', False)
     ).parseArguments()
 

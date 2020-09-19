@@ -14,6 +14,7 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
     const auto& jec = m_configPSet.getParameter<std::string>("jecVersion");
     const auto& jecAlgoName = m_configPSet.getParameter<std::string>("jecAlgoName");
     const auto& jecLevels = m_configPSet.getParameter<std::vector<std::string>>("jecLevels");
+    const auto& jecUncertaintySources = m_configPSet.getParameter<std::vector<std::string>>("jecUncertaintySources");
 
     // -- if JEC should not be taken from the global tag,
     //    initialize FactorizedJetCorrectors from text files
@@ -60,9 +61,34 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
     }
     else {
         // issue a warning in case both GT and text file are specified
-        std::cout << "[CorrectedValidJetsProducer] WARNING: JEC and JEU will be taken from global tag, but parameter "
+        std::cout << "[CorrectedValidJetsProducer] INFO: JEC and JEU will be taken from global tag, even though parameter "
                   << "'jecVersion' parameter points to text files '"
-                  << jec << "_..._" << jecAlgoName << ".txt" << "': the text files will be ignored!" << std::endl;
+                  << jec << "_..._" << jecAlgoName << ".txt" << "': the text files will be ignored for JEC and JEU!" << std::endl;
+    }
+
+    // set up different named JetCorrectionUncertainty Sources
+    std::cout << "[CorrectedValidJetsProducer] Loading JEC uncertainty sources from file '" <<
+                 jec << "_UncertaintySources_" << jecAlgoName << ".txt" << "':" << std::endl;
+    for (const auto& jecUncertaintySource : jecUncertaintySources) {
+        // disallow reserved keyword 'Total'
+        if (jecUncertaintySource == "Total") {
+            throw edm::Exception(
+                edm::errors::ConfigFileReadError,
+                "[CorrectedValidJetsProducer] Invalid entry in 'jecUncertaintySources' parameter: 'Total' (reserved keyword)."
+            );
+        }
+        std::cout << "[CorrectedValidJetsProducer]   - " << jecUncertaintySource << std::endl;
+        m_jetUncertaintySourceNames.push_back(jecUncertaintySource);
+        m_jetUncertaintySourceCorrectors.emplace_back(
+            std::unique_ptr<JetCorrectionUncertainty>(
+                new JetCorrectionUncertainty({
+                    JetCorrectorParameters(
+                        jec + "_UncertaintySources_" + jecAlgoName + ".txt",
+                        jecUncertaintySource
+                    )
+                })
+            )
+        );
     }
 
     // retrieve the configured JEC shift magnitude
@@ -187,9 +213,18 @@ void karma::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
             outputJetCollection->back().p4 = outputJetCollection->back().uncorP4;
         }
 
-        // apply uncertainty shift to output jet
+        // apply uncertainty shift to output jet (and store in transient doubles for potential re-correction)
         setupFactorProvider(*jetCorrectionUncertainty, inputJet);
-        outputJetCollection->back().p4 *= (1.0 + m_jecUncertaintyShift * jetCorrectionUncertainty->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
+        double totalUncShift = (1.0 + m_jecUncertaintyShift * jetCorrectionUncertainty->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
+        outputJetCollection->back().p4 *= totalUncShift;
+        outputJetCollection->back().transientDoubles_["Total"] = totalUncShift;
+
+        // store P4 shift factors for named uncertainty sources in transient list of doubles
+        for (size_t iUnc = 0; iUnc < m_jetUncertaintySourceCorrectors.size(); ++iUnc) {
+            setupFactorProvider(*m_jetUncertaintySourceCorrectors[iUnc], inputJet);
+            outputJetCollection->back().transientDoubles_[m_jetUncertaintySourceNames[iUnc]] = (
+                1.0 + m_jecUncertaintyShift * m_jetUncertaintySourceCorrectors[iUnc]->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
+        }
 
     }
 

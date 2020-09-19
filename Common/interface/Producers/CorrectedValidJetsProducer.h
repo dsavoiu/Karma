@@ -136,6 +136,9 @@ namespace karma {
         std::unique_ptr<JetCorrectionUncertainty> m_jetCorrectionUncertainty;
         double m_jecUncertaintyShift = 0.0;
 
+        std::vector<std::unique_ptr<JetCorrectionUncertainty>> m_jetUncertaintySourceCorrectors;
+        std::vector<std::string> m_jetUncertaintySourceNames;
+
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;
         edm::EDGetTokenT<karma::Event> karmaEventToken;

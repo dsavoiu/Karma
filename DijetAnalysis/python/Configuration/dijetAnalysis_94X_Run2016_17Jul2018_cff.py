@@ -32,7 +32,42 @@ JER_PIPELINES = {
     "JERUp" :      {'variation' : 1},
     "JERDn" :      {'variation' :-1},
 }
+JEC_UNCERTAINTY_SOURCE_SETS = {
+    "AbsoluteStat":     {'sources': ["AbsoluteStat"]},
+    "AbsoluteScale":    {'sources': ["AbsoluteScale"]},
+    "AbsoluteMPFBias":  {'sources': ["AbsoluteMPFBias"]},
+    "Fragmentation":    {'sources': ["Fragmentation"]},
+    "SinglePionECAL":   {'sources': ["SinglePionECAL"]},
+    "SinglePionHCAL":   {'sources': ["SinglePionHCAL"]},
+    "FlavorQCD":        {'sources': ["FlavorQCD"]},
+    "TimePtEta":        {'sources': ["TimePtEta"]},
+    "RelativeJEREC1":   {'sources': ["RelativeJEREC1"]},
+    "RelativeJEREC2":   {'sources': ["RelativeJEREC2"]},
+    "RelativeJERHF":    {'sources': ["RelativeJERHF"]},
+    "RelativePtBB":     {'sources': ["RelativePtBB"]},
+    "RelativePtEC1":    {'sources': ["RelativePtEC1"]},
+    "RelativePtEC2":    {'sources': ["RelativePtEC2"]},
+    "RelativePtHF":     {'sources': ["RelativePtHF"]},
+    "RelativeBal":      {'sources': ["RelativeBal"]},
+    "RelativeSample":   {'sources': ["RelativeSample"]},
+    "RelativeFSR":      {'sources': ["RelativeFSR"]},
+    "RelativeStatFSR":  {'sources': ["RelativeStatFSR"]},
+    "RelativeStatEC":   {'sources': ["RelativeStatEC"]},
+    "RelativeStatHF":   {'sources': ["RelativeStatHF"]},
+    "PileUpDataMC":     {'sources': ["PileUpDataMC"]},
+    "PileUpPtRef":      {'sources': ["PileUpPtRef"]},
+    "PileUpPtBB":       {'sources': ["PileUpPtBB"]},
+    "PileUpPtEC1":      {'sources': ["PileUpPtEC1"]},
+    "PileUpPtEC2":      {'sources': ["PileUpPtEC2"]},
+    "PileUpPtHF":       {'sources': ["PileUpPtHF"]},
+}
+_ALL_JEC_UNCERTAINTY_SOURCES = set(_name for _spec in JEC_UNCERTAINTY_SOURCE_SETS.values() for _name in _spec['sources'])
 
+# expand source sets to both 'Up' and 'Down' variations
+for _unc_src_set, _unc_src_set_spec in JEC_UNCERTAINTY_SOURCE_SETS.items():
+    del JEC_UNCERTAINTY_SOURCE_SETS[_unc_src_set]
+    for _shift_dir, _shift_factor in zip(("Up", "Dn"), (1.0, -1.0)):
+        JEC_UNCERTAINTY_SOURCE_SETS.update({_unc_src_set+_shift_dir: dict(_unc_src_set_spec, shift=_shift_factor)})
 
 
 def register_options(options):
@@ -48,6 +83,11 @@ def register_options(options):
                       default=False,
                       description="If True, only events triggered by one of the skimmed paths will be "
                                   "written out.")
+            .register('jetCollections',
+                      type_=str,
+                      default=[],
+                      multiplicity='list',
+                      description="The names of the jet collections to use (e.g. 'AK4PFCHS').")
             .register('jecVersion',
                       type_=str,
                       default=None,
@@ -90,6 +130,10 @@ def register_options(options):
                       description=("(deprecated) The output branch 'weightForStitching' "
                                    "will contain this value for each event. Can then be "
                                    "used when stitching together different samples."))
+            .register('doJECUncertaintySources',
+                      type_=bool,
+                      default=False,
+                      description="Write out pipelines for variations with individual JEC uncertainty sources.")
             .register('edmOut',
                       type_=bool,
                       default=False,
@@ -146,7 +190,7 @@ def _add_jet_collection_and_dependencies(process, options, prefix, jet_algo_name
     """convenience function for adding a jet collection and the corresponding METs
     and other related collections to the process"""
 
-    assert jet_algo_name in JET_COLLECTIONS
+    assert jet_algo_name in JET_COLLECTIONS, "Unknown jet collection: {}".format(jet_algo_name)
 
     _template_jet_collection_name = "{}Jets{}".format(prefix, jet_algo_name)
     _template_met_collection_name = "{}METs{}".format(prefix, jet_algo_name)
@@ -207,7 +251,7 @@ def _add_jet_collection_and_dependencies(process, options, prefix, jet_algo_name
 
 def _add_all_shifted(process, options, jet_algo_name):
     """convenience function for adding all pipeline-shifted collections to process"""
-    assert jet_algo_name in JET_COLLECTIONS
+    assert jet_algo_name in JET_COLLECTIONS, "Unknown jet collection: {}".format(jet_algo_name)
 
     for _jec_suffix, _jec in JEC_PIPELINES.items():
         _add_jet_collection_and_dependencies(
@@ -235,6 +279,26 @@ def _add_all_shifted(process, options, jet_algo_name):
                         jerVariation = cms.int32(_jer['variation']),
                     ),
                 )
+
+    # jets corrected with one JEC uncertainty source shift
+    if options.doJECUncertaintySources:
+        for _unc_source_set_name, _unc_source_set_spec in JEC_UNCERTAINTY_SOURCE_SETS.items():
+            assert _unc_source_set_name.endswith('Up') or _unc_source_set_name.endswith('Dn'), \
+                "Internal ERROR: _unc_source_set_name should end with 'Up' or 'Dn'"
+            _reference_pipeline = "JEC" + ('Up' if _unc_source_set_name.endswith('Up') else "Dn")
+            assert _reference_pipeline in JEC_PIPELINES, "Pipeline '{}' needed to construct the JEC uncertainty shifts, but it is missing.".format(_reference_pipeline)
+            _add_jet_collection_and_dependencies(
+                process=process,
+                options=options,
+                prefix="uncSourceShifted",
+                jet_algo_name=jet_algo_name,
+                suffix=_unc_source_set_name,
+                jet_kwargs=dict(
+                    karmaJetCollectionSrc = cms.InputTag("correctedJets{}{}".format(jet_algo_name, _reference_pipeline)),
+                    jetUncertaintySources = cms.vstring(_unc_source_set_spec['sources']),
+                    jecUncertaintyShift = cms.double(_unc_source_set_spec['shift']),
+                ),
+            )
 
 
 def init_modules(process, options, jet_algo_name):
@@ -320,6 +384,9 @@ def init_modules(process, options, jet_algo_name):
             ),
             jecUncertaintyShift = cms.double(0.0),
 
+            # uncertainty shifts to store in transient maps
+            jecUncertaintySources = cms.vstring(_ALL_JEC_UNCERTAINTY_SOURCES if options.doJECUncertaintySources else []),
+
             # jet ID (for object-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
             jetIDSpec = cms.string(options.jetIDSpec if options.useObjectBasedJetID else "None"),
             jetIDWorkingPoint = cms.string(options.jetIDWorkingPoint or "None"),
@@ -351,37 +418,61 @@ def init_modules(process, options, jet_algo_name):
         jet_algo_name=jet_algo_name
     )
 
-    # == Data-only items =============================================
-
-    # -- prefiring Weights (raw jets)
-    from Karma.Common.Producers.PrefiringWeightProducer_cfi import karmaPrefiringWeightProducer
+    # -- JEC uncertainty source shifted jets
+    from Karma.Common.Producers.JetUncertaintySourceApplier_cfi import karmaJetUncertaintySourceApplier
     process.add_module(
-        "rawPrefiringWeights{}".format(jet_algo_name),
-        karmaPrefiringWeightProducer.clone(
-            # -- input sources
-            karmaJetCollectionSrc = cms.InputTag("rawJets{}".format(jet_algo_name)),
-
-            # -- other configuration
-            prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
-            prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
-            prefiringRateSysUnc = cms.double(0.2),
-        )
-    )
-
-    # -- prefiring Weights
-    from Karma.Common.Producers.PrefiringWeightProducer_cfi import karmaPrefiringWeightProducer
-    process.add_module(
-        "correctedPrefiringWeights{}".format(jet_algo_name),
-        karmaPrefiringWeightProducer.clone(
+        "uncSourceShiftedJets{}".format(jet_algo_name),
+        karmaJetUncertaintySourceApplier.clone(
             # -- input sources
             karmaJetCollectionSrc = cms.InputTag("correctedJets{}".format(jet_algo_name)),
 
-            # -- other configuration
-            prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
-            prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
-            prefiringRateSysUnc = cms.double(0.2),
+            # specify jet uncertainty sources to apply
+            jetUncertaintySources = cms.vstring(),
         )
     )
+
+    # -- corrected METs
+    from Karma.Common.Producers.CorrectedMETsProducer_cfi import karmaCorrectedMETsProducer
+    process.add_module(
+        "uncSourceShiftedMETs{}".format(jet_algo_name),
+        karmaCorrectedMETsProducer.clone(
+            # -- input sources
+            karmaEventSrc = cms.InputTag("karmaEvents"),
+            karmaMETCollectionSrc = cms.InputTag("karmaMETs"),
+
+            # jets for type-I correction
+            karmaCorrectedJetCollectionSrc = cms.InputTag("uncSourceShiftedJets{}".format(jet_algo_name)),
+
+            # -- other configuration
+            typeICorrectionMinJetPt = cms.double(15),
+            typeICorrectionMaxTotalEMFraction = cms.double(0.9),
+        )
+    )
+
+    _add_jet_maps(
+        process=process,
+        options=options,
+        prefix='uncSourceShifted',
+        jet_algo_name=jet_algo_name
+    )
+
+    # == Data-only items =============================================
+
+    # -- prefiring Weights
+    from Karma.Common.Producers.PrefiringWeightProducer_cfi import karmaPrefiringWeightProducer
+    for _prefix in ('raw', 'corrected', 'uncSourceShifted'):
+        process.add_module(
+            "{}PrefiringWeights{}".format(_prefix, jet_algo_name),
+            karmaPrefiringWeightProducer.clone(
+                # -- input sources
+                karmaJetCollectionSrc = cms.InputTag("{}Jets{}".format(_prefix, jet_algo_name)),
+
+                # -- other configuration
+                prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
+                prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
+                prefiringRateSysUnc = cms.double(0.2),
+            )
+        )
 
     # == MC-only main collections =============================================
 
@@ -435,8 +526,8 @@ def init_modules(process, options, jet_algo_name):
 def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=None, jer_variation=None):
     # -- create pipeline modules
 
-    assert jet_algo_name in JET_COLLECTIONS
-    assert jec_shift is None or jec_shift in JEC_PIPELINES
+    assert jet_algo_name in JET_COLLECTIONS, "Unknown jet collection: {}".format(jet_algo_name)
+    assert jec_shift is None or jec_shift in JEC_PIPELINES or jec_shift in JEC_UNCERTAINTY_SOURCE_SETS
     assert jer_variation is None or jer_variation in JER_PIPELINES
 
     _jet_collection_suffix = (jec_shift or "") + (jer_variation or "")
@@ -454,6 +545,11 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
     if jec_shift is None:
         assert(jer_variation is None)  # raw JEC + JER variation not supported
         _cor_prefix = "raw"
+
+    # use JEC uncertainty-shifted jets as an input
+    if jec_shift in JEC_UNCERTAINTY_SOURCE_SETS:
+        assert jer_variation is None, "Applying both JER and JEC uncertainty source shifts is not supported!"
+        _cor_prefix = "uncSourceShifted"
 
     process.add_module(
         "ntuple{}".format(pipeline_name),
@@ -643,7 +739,7 @@ def configure(process, options):
     # -- configure pipelines
 
     _rng_engines = {}
-    for jet_collection in JET_COLLECTIONS:
+    for jet_collection in options.jetCollections:
         # create modules with nominal configurations for each jet collection
         init_modules(process, options, jet_algo_name=jet_collection)
 
@@ -651,7 +747,7 @@ def configure(process, options):
 
         if options.isData:
             # data -> only add pipelines with JEC shifts (i.e. no JER smearing)
-            for jec_shift in JEC_PIPELINES:
+            for jec_shift in list(JEC_PIPELINES) + (list(JEC_UNCERTAINTY_SOURCE_SETS) if options.doJECUncertaintySources else []):
                 setup_pipeline(
                     process, options,
                     pipeline_name="{}{}".format(jet_collection, jec_shift),
@@ -666,7 +762,7 @@ def configure(process, options):
                 })
         else:
             # mc -> add pipelines with both JEC shifts and JER smearing
-            for jec_shift in JEC_PIPELINES:
+            for jec_shift in list(JEC_PIPELINES) + (list(JEC_UNCERTAINTY_SOURCE_SETS) if options.doJECUncertaintySources else []):
                 for jer_variation in JER_PIPELINES:
                     # do not add pipelines with more than one active variation (JER or JEC)
                     if (jer_variation != 'JERNominal' and jec_shift != 'JECNominal'):

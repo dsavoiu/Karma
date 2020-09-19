@@ -19,6 +19,10 @@ karmaCorrectedValidJetsProducer = cms.EDProducer(
         ),
         jecUncertaintyShift = cms.double(0.0),
 
+        # which jet uncertainty sources to read and store in transient map
+        # (these are then made available to the `JetUncertaintySourceApplier`)
+        jecUncertaintySources = cms.vstring(),
+
         jetIDSpec = cms.string("2016"),   # use "None" for no object-based JetID
         jetIDWorkingPoint = cms.string("TightLepVeto"),
     )
