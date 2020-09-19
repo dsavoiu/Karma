@@ -1,0 +1,6 @@
+#!/bin/sh
+# simple wrapper to call cmsRun with CMSSW config
+
+_path="$CMSSW_BASE/src/Karma/Common/python/Tools/analyzeGenXSec_cfg.py"
+
+cmsRun $_path $@
