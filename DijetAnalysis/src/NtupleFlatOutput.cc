@@ -46,6 +46,7 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, indexActiveTriggerPathJet12Mass, I);
     //ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12PtAve, I);
     //ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12Mass, I);
+    //ADD_BRANCH(tree, productForFill, nTriggers, b); // 8-bit unsigned integer
     ADD_STL_BRANCH(tree, productForFill, triggerPrescales);
     ADD_BRANCH(tree, productForFill, met, D);
     ADD_BRANCH(tree, productForFill, sumEt, D);
@@ -62,6 +63,7 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, hltJet2PtPassThresholdsHLT, L);
     ADD_BRANCH(tree, productForFill, hltJet12PtAvePassThresholdsL1, L);
     ADD_BRANCH(tree, productForFill, hltJet12PtAvePassThresholdsHLT, L);
+    /* -- not needed for now
     // PF energy fractions
     ADD_BRANCH(tree, productForFill, jet1NeutralHadronFraction, D);
     ADD_BRANCH(tree, productForFill, jet1ChargedHadronFraction, D);
@@ -77,7 +79,7 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, jet2ElectronFraction, D);
     ADD_BRANCH(tree, productForFill, jet2HFHadronFraction, D);
     ADD_BRANCH(tree, productForFill, jet2HFEMFraction, D);
-
+    */
     // MC
     if (!m_isData) {
         // number of pile-up interactions
@@ -112,6 +114,7 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
         ADD_BRANCH(tree, productForFill, jet12MatchedGenJetPairYBoost, D);
         ADD_BRANCH(tree, productForFill, binIndexMatchedGenJet12PtAve, I);
         ADD_BRANCH(tree, productForFill, binIndexMatchedGenJet12Mass, I);
+        /* -- not needed for now
         // QCD subprocess info
         ADD_BRANCH(tree, productForFill, incomingParton1Flavor, I);
         ADD_BRANCH(tree, productForFill, incomingParton2Flavor, I);
@@ -124,9 +127,10 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
         ADD_BRANCH(tree, productForFill, jet2PartonFlavor, I);
         ADD_BRANCH(tree, productForFill, jet1HadronFlavor, I);
         ADD_BRANCH(tree, productForFill, jet2HadronFlavor, I);
+        */
         // weights
         ADD_BRANCH(tree, productForFill, generatorWeight, D);
-        ADD_BRANCH(tree, productForFill, generatorWeightProduct, D);
+        //ADD_BRANCH(tree, productForFill, generatorWeightProduct, D);
         ADD_BRANCH(tree, productForFill, weightForStitching, D);
         ADD_BRANCH(tree, productForFill, pileupWeight, D);
         ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLT, D);

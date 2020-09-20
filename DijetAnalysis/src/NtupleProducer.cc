@@ -346,17 +346,20 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
     // -- generator data (MC-only)
     if (!m_isData) {
         outputNtupleEntry->generatorWeight = this->karmaGeneratorQCDInfoHandle->weight;
-        outputNtupleEntry->generatorWeightProduct = this->karmaGeneratorQCDInfoHandle->weightProduct;
+        //outputNtupleEntry->generatorWeightProduct = this->karmaGeneratorQCDInfoHandle->weightProduct;
         if (this->karmaGeneratorQCDInfoHandle->binningValues.size() > 0)
             outputNtupleEntry->binningValue = this->karmaGeneratorQCDInfoHandle->binningValues[0];
         //if (this->karmaGeneratorQCDInfoHandle->binningValues.size() > 1)
         //    outputNtupleEntry->binningValue2 = this->karmaGeneratorQCDInfoHandle->binningValues[1];
+
+        /* -- not needed for now
         outputNtupleEntry->incomingParton1Flavor = this->karmaGeneratorQCDInfoHandle->parton1PdgId;
         outputNtupleEntry->incomingParton2Flavor = this->karmaGeneratorQCDInfoHandle->parton2PdgId;
         outputNtupleEntry->incomingParton1x = this->karmaGeneratorQCDInfoHandle->parton1x;
         outputNtupleEntry->incomingParton2x = this->karmaGeneratorQCDInfoHandle->parton2x;
         outputNtupleEntry->scalePDF = this->karmaGeneratorQCDInfoHandle->scalePDF;
         outputNtupleEntry->alphaQCD = this->karmaGeneratorQCDInfoHandle->alphaQCD;
+        */
 
         // gen jets
         const auto& genJets = this->karmaGenJetCollectionHandle;  // convenience
@@ -411,6 +414,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->jet1eta = jet1->p4.eta();
         outputNtupleEntry->jet1y = jet1->p4.Rapidity();
 
+        /* -- not needed for now
         // PF energy fractions (jet 1)
         outputNtupleEntry->jet1NeutralHadronFraction = jet1->neutralHadronFraction;
         outputNtupleEntry->jet1ChargedHadronFraction = jet1->chargedHadronFraction;
@@ -419,6 +423,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->jet1ElectronFraction = jet1->electronFraction;
         outputNtupleEntry->jet1HFHadronFraction = jet1->hfHadronFraction;
         outputNtupleEntry->jet1HFEMFraction = jet1->hfEMFraction;
+        */
 
         // matched genJet (MC-only)
         const karma::LV* jet1MatchedGenJet = nullptr;
@@ -430,9 +435,11 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                 outputNtupleEntry->jet1MatchedGenJetEta = jet1MatchedGenJet->p4.eta();
                 outputNtupleEntry->jet1MatchedGenJetY = jet1MatchedGenJet->p4.Rapidity();
             }
+            /* -- not needed for now
             // flavor information (jet 1)
             outputNtupleEntry->jet1PartonFlavor = jet1->partonFlavor;
             outputNtupleEntry->jet1HadronFlavor = jet1->hadronFlavor;
+            */
         }
 
         // trigger bitsets
@@ -453,6 +460,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet2eta = jet2->p4.eta();
             outputNtupleEntry->jet2y = jet2->p4.Rapidity();
 
+            /* -- not needed for now
             // PF energy fractions (jet 2)
             outputNtupleEntry->jet2NeutralHadronFraction = jet2->neutralHadronFraction;
             outputNtupleEntry->jet2ChargedHadronFraction = jet2->chargedHadronFraction;
@@ -461,6 +469,7 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
             outputNtupleEntry->jet2ElectronFraction = jet2->electronFraction;
             outputNtupleEntry->jet2HFHadronFraction = jet2->hfHadronFraction;
             outputNtupleEntry->jet2HFEMFraction = jet2->hfEMFraction;
+            */
 
             // matched genJet (MC-only)
             const karma::LV* jet2MatchedGenJet = nullptr;
@@ -472,9 +481,11 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->jet2MatchedGenJetEta = jet2MatchedGenJet->p4.eta();
                     outputNtupleEntry->jet2MatchedGenJetY = jet2MatchedGenJet->p4.Rapidity();
                 }
+                /* -- not needed for now
                 // flavor information (jet 2)
                 outputNtupleEntry->jet2PartonFlavor = jet2->partonFlavor;
                 outputNtupleEntry->jet2HadronFlavor = jet2->hadronFlavor;
+                */
             }
 
             // trigger bitsets

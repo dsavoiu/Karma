@@ -58,9 +58,15 @@ namespace dijet {
         int prescaleActiveTriggerPathJet12Mass = 0;
         */
 
+        /* -- not excplicitly needed
+        // number of trigger paths
+        UChar_t nTriggers;
+        */
+
         // combined L1(min) + HLT prescales
         std::vector<int> triggerPrescales;
 
+        /* -- not needed for now (TODO: make these `float`)
         // jet PF energy fractions
         double jet1NeutralHadronFraction = UNDEFINED_DOUBLE;
         double jet1ChargedHadronFraction = UNDEFINED_DOUBLE;
@@ -77,6 +83,7 @@ namespace dijet {
         double jet2ElectronFraction = UNDEFINED_DOUBLE;
         double jet2HFHadronFraction = UNDEFINED_DOUBLE;
         double jet2HFEMFraction = UNDEFINED_DOUBLE;
+        */
 
         // MET
         double met = UNDEFINED_DOUBLE;
@@ -110,6 +117,7 @@ namespace dijet {
         // pileup truth info
         int nPU = -1;
 
+        /* -- not needed for now
         // qcd subprocess
         int incomingParton1Flavor = -999;
         int incomingParton2Flavor = -999;
@@ -123,10 +131,11 @@ namespace dijet {
         int jet2PartonFlavor = -999;
         int jet1HadronFlavor = -999;
         int jet2HadronFlavor = -999;
+        */
 
         // weights
         double generatorWeight = 1.0;
-        double generatorWeightProduct = 1.0;
+        //double generatorWeightProduct = 1.0;
         double weightForStitching = 1.0;
         double pileupWeight = 1.0;
         double pileupWeightSimulatedHLT = 1.0;
@@ -177,7 +186,6 @@ namespace dijet {
         // global bin indices for reconstructed jet pair
         int binIndexMatchedGenJet12PtAve = -1;
         int binIndexMatchedGenJet12Mass = -1;
-
     };
     typedef std::vector<dijet::NtupleEntry> Ntuple;
 }
