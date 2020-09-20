@@ -33,6 +33,7 @@ if not os.getenv("GC_VERSION"):
             .setDefault('jecVersion', "Summer16_07Aug2017GH_V11")  # for JEC uncertainty sources
             .setDefault('jecFromGlobalTag', True)
             .setDefault('doJECUncertaintySources', True)
+            .setDefault('doPrescales', True)
             .setDefault('edmOut', True)
     ).parseArguments()
 else:
@@ -56,6 +57,7 @@ else:
             #.setDefault('jecVersion', "__JEC_VERSION__")
             .setDefault('jecFromGlobalTag', True)
             .setDefault('doJECUncertaintySources', True)
+            .setDefault('doPrescales', True)
             .setDefault('edmOut', False)
     ).parseArguments()
 

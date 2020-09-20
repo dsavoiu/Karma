@@ -301,17 +301,28 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
         outputNtupleEntry->prefiringWeightDown = *(this->karmaPrefiringWeightDownHandle);
     }
 
-    // -- trigger results
+    // -- trigger results and prescales
+    // number of triggers requested in analysis config
+    //outputNtupleEntry->nTriggers = globalCache()->hltPaths_.size();
+    if (globalCache()->doPrescales_) {
+        outputNtupleEntry->triggerPrescales.resize(globalCache()->hltPaths_.size(), 0);
+    }
+    // store trigger results as `dijet::TriggerBits`
     dijet::TriggerBits bitsetHLTBits;
     int indexHighestFiredTriggerPath = -1;  // keep track (mainly for simulated PU weight application)
     // go through all triggers in skim
     for (size_t iBit = 0; iBit < this->karmaEventHandle->hltBits.size(); ++iBit) {
-        // if trigger fired
-        if (this->karmaEventHandle->hltBits[iBit]) {
-            // get the index of trigger in analysis config
-            const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[iBit];
-            // if trigger present in config
-            if (idxInConfig >= 0) {
+        // the index is < `globalCache()->hltPaths_.size()` by definition
+        const int idxInConfig = runCache()->triggerPathsIndicesInConfig_[iBit];
+
+        if (idxInConfig >= 0) {
+            // store prescale value
+            if (globalCache()->doPrescales_) {
+                outputNtupleEntry->triggerPrescales[idxInConfig] = this->karmaEventHandle->triggerPathHLTPrescales[iBit] *
+                                                                   this->karmaEventHandle->triggerPathL1Prescales[iBit];
+            }
+            // if trigger fired
+            if (this->karmaEventHandle->hltBits[iBit]) {
                 // set bit
                 bitsetHLTBits[idxInConfig] = true;
                 indexHighestFiredTriggerPath = idxInConfig;
@@ -488,8 +499,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->indexActiveTriggerPathJet12PtAve = m_flexGridBinProviderDijetPtAve->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12ptave
                     }).as<int>();
-                    outputNtupleEntry->prescaleActiveTriggerPathJet12PtAve = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve] *
-                                                                             this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve];
+                    //outputNtupleEntry->prescaleActiveTriggerPathJet12PtAve = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve] *
+                    //                                                         this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12PtAve];
                 }
                 catch (const std::out_of_range& err) {
                     // do nothing (leave at default value)
@@ -503,8 +514,8 @@ void dijet::NtupleProducer::produce(edm::Event& event, const edm::EventSetup& se
                     outputNtupleEntry->indexActiveTriggerPathJet12Mass = m_flexGridBinProviderDijetMass->getFlexGridBinMetadata("DiPFJetAveTriggers.activeTriggerPathIndex", {
                         absYStar, absYBoost, outputNtupleEntry->jet12mass
                     }).as<int>();
-                    outputNtupleEntry->prescaleActiveTriggerPathJet12Mass = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass] *
-                                                                            this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass];
+                    //outputNtupleEntry->prescaleActiveTriggerPathJet12Mass = this->karmaEventHandle->triggerPathHLTPrescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass] *
+                    //                                                        this->karmaEventHandle->triggerPathL1Prescales[outputNtupleEntry->indexActiveTriggerPathJet12Mass];
                 }
                 catch (const std::out_of_range& err) {
                     // do nothing (leave at default value)

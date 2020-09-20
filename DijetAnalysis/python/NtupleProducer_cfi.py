@@ -82,6 +82,9 @@ dijetNtupleProducer = cms.EDProducer(
             cms.PSet(name=cms.string("HLT_DiPFJetAve500"),  hltThreshold=cms.double(500), l1Threshold=cms.double(170)),
         ),
 
+        # if true, write out prescales to Ntuple as vector<int>
+        doPrescales = cms.bool(False),
+
         jetIDSpec = cms.string("2016"),
         jetIDWorkingPoint = cms.string("TightLepVeto"),
 

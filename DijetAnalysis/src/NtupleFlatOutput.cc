@@ -4,6 +4,9 @@
  *                                                           branch name               product member name/type
  *                                                                    pointer to product member */
 #define ADD_BRANCH(tree, product, branch, type) tree->Branch(#branch, &product->branch, #branch"/"#type);
+#define ADD_ARRAY_BRANCH(tree, product, branch, size, type) tree->Branch(#branch, &product->branch, #branch"["#size"]/"#type);
+// -- branches of simple STL types (vector, list, deque, etc.) can be added directly
+#define ADD_STL_BRANCH(tree, product, branch) tree->Branch(#branch, &product->branch);
 
 // Note: ADD_BRANCH(tree, product, branch, type) expands to:
 //    tree->Branch("branch", &product->branch, "branch/type")
@@ -41,8 +44,9 @@ void dijet::NtupleFlatOutput::setUpTTree(TTree* tree, dijet::NtupleEntry* produc
     ADD_BRANCH(tree, productForFill, binIndexJet12Mass, I);
     ADD_BRANCH(tree, productForFill, indexActiveTriggerPathJet12PtAve, I);
     ADD_BRANCH(tree, productForFill, indexActiveTriggerPathJet12Mass, I);
-    ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12PtAve, I);
-    ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12Mass, I);
+    //ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12PtAve, I);
+    //ADD_BRANCH(tree, productForFill, prescaleActiveTriggerPathJet12Mass, I);
+    ADD_STL_BRANCH(tree, productForFill, triggerPrescales);
     ADD_BRANCH(tree, productForFill, met, D);
     ADD_BRANCH(tree, productForFill, sumEt, D);
     ADD_BRANCH(tree, productForFill, metRaw, D);

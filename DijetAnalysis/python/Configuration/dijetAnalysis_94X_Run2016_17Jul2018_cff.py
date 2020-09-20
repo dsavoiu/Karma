@@ -134,6 +134,10 @@ def register_options(options):
                       type_=bool,
                       default=False,
                       description="Write out pipelines for variations with individual JEC uncertainty sources.")
+            .register('doPrescales',
+                      type_=bool,
+                      default=False,
+                      description="Write out trigger prescales to Ntuple.")
             .register('edmOut',
                       type_=bool,
                       default=False,
@@ -572,6 +576,8 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
                 os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
+
+            doPrescales = cms.bool(options.doPrescales),  # write out prescales for all trigger paths
 
             # YAML files specifying analysis binning
             flexGridFileDijetPtAve = cms.string(
