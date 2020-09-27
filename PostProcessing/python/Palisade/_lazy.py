@@ -382,9 +382,9 @@ class Try(LazyNodeBase):
 
     def eval(self, context=None):
         try:
-            return self._value.eval()
+            return self._value.eval(context=context)
         except self._exception.eval():
-            return self._value_on_exception.eval()
+            return self._value_on_exception.eval(context=context)
 
 
 class BinOp(LazyNodeBase):
