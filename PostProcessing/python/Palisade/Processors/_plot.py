@@ -766,8 +766,8 @@ class PlotProcessor(_ProcessorBase):
                     #print(_prop_name, _prop_val)
                     getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
 
-            # draw colorbar if there was a 2D plot involved
-            if _pad_config.get('2d_plots', None):
+            # draw colorbar if there was a 2D plot involved and a colorbar should be drawn
+            if _pad_config.get('2d_plots', None) and _pad_config.get('draw_colorbar', True):
                 for _2d_plot in _pad_config['2d_plots']:
                     _cbar = _fig.colorbar(_2d_plot, ax=_ax)
                     _z_label = _pad_config.get('z_label', None)
