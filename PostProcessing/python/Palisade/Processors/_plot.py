@@ -789,7 +789,7 @@ class PlotProcessor(_ProcessorBase):
                         if not isinstance(_axlines_set, list):
                             _axlines_set = [_axlines_set]
                         _axlines_set = dict(values=_axlines_set)
-                    _vals = _axlines_set.pop('values')
+                    _vals = _axlines_set.pop('values', [])
                     # draw the line
                     for _val in _vals:
                         getattr(_ax, _ax_method_name)(_val, **dict(self._DEFAULT_LINE_KWARGS, **_axlines_set))
