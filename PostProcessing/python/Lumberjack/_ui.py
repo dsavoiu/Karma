@@ -84,20 +84,53 @@ class LumberjackInterfaceBase(object):
 
         import ROOT  # do this here to avoid ROOT overriding standard Python behavior
 
+        # -- add ROOT include paths
+        if hasattr(self._config, 'ROOT_INCLUDE_PATHS'):
+            print("[INFO] Adding include paths to ROOT interpreter:")
+            for _path in self._config.ROOT_INCLUDE_PATHS:
+                print("    {}".format(_path))
+                ROOT.gInterpreter.AddIncludePath('{}'.format(_path))
+
+        # -- load external libraries in ROOT
+        if hasattr(self._config, 'ROOT_LOAD_EXTERNAL_LIBRARIES'):
+            print("[INFO] Loading external libraries in ROOT interpreter:")
+            for _so_path in self._config.ROOT_LOAD_EXTERNAL_LIBRARIES:
+                print("    {}".format(_so_path))
+                ROOT.gInterpreter.Load(_so_path)
+
+        # -- execute user-defined ROOT initialization code
+        if hasattr(self._config, 'ROOT_INIT_FUNC'):
+            print("[INFO] Executing ROOT_INIT_FUNC...")
+            self._config.ROOT_INIT_FUNC()
+
+        # -- execute ROOT macro code in interpreter
+        if hasattr(self._config, 'ROOT_MACROS'):
+            print("[INFO] Defining ROOT macros...")
+            ROOT.gInterpreter.Declare(self._config.ROOT_MACROS)
+
+        # -- set up data frame
+
         # determine correct ROOT DataFrame class
         try:
             ROOT_DF_CLASS = ROOT.ROOT.RDataFrame
         except AttributeError:
-            ROOT_DF_CLASS = ROOT.ROOT.Experimental.TDataFrame
+            print("[WARNING] ROOT version {} only contains experimental implementation of RDataFrames. Moderate to severe "
+                  "performance penalties may be encountered. Consider switching to a newer version of ROOT (>=6.14).".format(
+                      ROOT.gROOT.GetVersion()))
+            try:
+                ROOT_DF_CLASS = ROOT.ROOT.Experimental.TDataFrame
+            except AttributeError:
+                print("[ERROR] ROOT version {} does not contain an implementation of RDataFrames. Please switch to a newer "
+                      "version of ROOT (>=6.14).".format(ROOT.gROOT.GetVersion()))
+                exit(1)
 
-        # -- enable multithreading
+        # enable multithreading
         if int(self._args.jobs) > 1:
             print("[INFO] Enabling multithreading with {} threads...".format(self._args.jobs))
             ROOT.ROOT.EnableImplicitMT(int(self._args.jobs))
         else:
             ROOT.ROOT.DisableImplicitMT()  # exlicitly disable multithreading
 
-        # -- set up data frame
         print("[INFO] Setting up data frame...")
         print("[INFO] Sample file: {}".format(self._args.input_file))
 
@@ -117,25 +150,6 @@ class LumberjackInterfaceBase(object):
 
         print("[INFO] Sample type: {}".format(self._args.input_type))
         self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
-
-        # -- add ROOT include paths
-        if hasattr(self._config, 'ROOT_INCLUDE_PATHS'):
-            print("[INFO] Adding include paths to ROOT interpreter:")
-            for _path in self._config.ROOT_INCLUDE_PATHS:
-                print("    {}".format(_path))
-                ROOT.gInterpreter.AddIncludePath('{}'.format(_path))
-
-        # -- load external libraries in ROOT
-        if hasattr(self._config, 'ROOT_LOAD_EXTERNAL_LIBRARIES'):
-            print("[INFO] Loading external libraries in ROOT interpreter:")
-            for _so_path in self._config.ROOT_LOAD_EXTERNAL_LIBRARIES:
-                print("    {}".format(_so_path))
-                ROOT.gInterpreter.Load(_so_path)
-
-        # -- execute ROOT macro code in interpreter
-        if hasattr(self._config, 'ROOT_MACROS'):
-            print("[INFO] Defining ROOT macros...")
-            ROOT.gInterpreter.Declare(self._config.ROOT_MACROS)
 
     def _prepare_data_frame(self):
 
