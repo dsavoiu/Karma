@@ -678,7 +678,10 @@ class PlotProcessor(_ProcessorBase):
                 # some kwargs must be popped and stored for later use
                 _label_bins_with_content = _kwargs.pop('label_bins_with_content', False)
                 _bin_label_format = _kwargs.pop('bin_label_format', "{:f}")
+                if not callable(_bin_label_format):
+                    _bin_label_format = lambda v: _bin_label_format.format(v)
                 _bin_label_color = _kwargs.pop('bin_label_color', 'k')
+                _bin_label_fontsize = _kwargs.pop('bin_label_fontsize', 16)
             else:
                 _args = [_plot_data['x'], _y_data]
 
@@ -710,11 +713,12 @@ class PlotProcessor(_ProcessorBase):
                                     _text_color = 'w' if _patch_color_lightness < 0.5 else 'k'
                                 else:
                                     _text_color = _bin_label_color
-                                _ax.text(_x, _y, _bin_label_format.format(_content),
+                                _ax.annotate(_bin_label_format(_content), (_x, _y),
                                          ha='center', va='center',
-                                         fontsize=16,
+                                         fontsize=_bin_label_fontsize,
                                          color=_text_color,
-                                         transform=_ax.transData
+                                         transform=_ax.transData,
+                                         annotation_clip=True,
                                  )
 
             # write results to config dict that will be dumped

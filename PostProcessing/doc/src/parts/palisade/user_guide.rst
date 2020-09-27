@@ -811,9 +811,12 @@ for specific *plot methods* which can be accessed via the following method-speci
     | (*only for* ``pcolormesh``) | decorate each 2D bin with a text annotation         |              |
     |                             | indicating its content.                             |              |
     +-----------------------------+-----------------------------------------------------+--------------+
-    | **bin_label_format**        | Python format string (with braces). If              | ``{:f}``     |
-    | (*only for* ``pcolormesh``) | **label_bins_with_content** is ``True``, bin        |              |
-    |                             | contents are formatted according to this string.    |              |
+    | **bin_label_format**        | Python format string (with braces) or *callable*.   | ``{:f}``     |
+    | (*only for* ``pcolormesh``) | If **label_bins_with_content** is ``True``, bin     |              |
+    |                             | contents are formatted according to this string. If |              |
+    |                             | a callable is passed, it should take the numerical  |              |
+    |                             | bin content as the only argument and return the     |              |
+    |                             | bin label.                                          |              |
     +-----------------------------+-----------------------------------------------------+--------------+
     | **bin_label_color**         | string indicating a *matplotlib* color. If          | ``auto``     |
     | (*only for* ``pcolormesh``) | **label_bins_with_content** is ``True``, bin        |              |
