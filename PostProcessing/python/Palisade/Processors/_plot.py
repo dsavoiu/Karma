@@ -857,6 +857,8 @@ class PlotProcessor(_ProcessorBase):
                 else:
                     print("WARNING: Bin labels found for axis '{}', but this is not supported. Ignoring...".format(_axis))
 
+            # run user-defined code on axes
+            _pad_config.get('axes_epilog', lambda ax: None)(_ax)
 
         # step 4: text and annotations
 
@@ -906,6 +908,8 @@ class PlotProcessor(_ProcessorBase):
                 ha='right',
             )
 
+        # run user-defined code on figure (and/or axes)
+        config.get('epilog', lambda fig, axes: None)(_fig, [_pc['axes'] for _pc in _pad_configs])
 
         # step 6: save figures
         _make_directory(os.path.dirname(_filename))
