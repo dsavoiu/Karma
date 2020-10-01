@@ -686,7 +686,7 @@ class PlotProcessor(_ProcessorBase):
                 _bin_label_format = _kwargs.pop('bin_label_format', "{:f}")
                 if not callable(_bin_label_format):
                     _bin_label_format = lambda v: _bin_label_format.format(v)
-                _bin_label_color = _kwargs.pop('bin_label_color', 'k')
+                _bin_label_color = _kwargs.pop('bin_label_color', 'auto')
                 _bin_label_fontsize = _kwargs.pop('bin_label_fontsize', 16)
             else:
                 _y_masked = np.ma.masked_where(_mask, _y_data)
