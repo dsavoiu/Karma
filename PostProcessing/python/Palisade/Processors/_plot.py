@@ -559,12 +559,18 @@ class PlotProcessor(_ProcessorBase):
                     for _key, _value in six.iteritems(_plot_data)
                 }
 
-            # extract arrays for keys which cannot be masked
+            # extract arrays for keys which cannot be masked by `mask_zero_errors`
             _plot_data.update({
                 _property_name : np.array(list(getattr(_plot_object, _property_name)()))
                 for _property_name in ('xedges', 'yedges', 'z')
                 if hasattr(_plot_object, _property_name)
             })
+
+            # additional mask using user-supplied function
+            _mask = True  # used below, depending on plotting method
+            _mask_func = _kwargs.pop('mask_func', None)
+            if _mask_func:
+                _mask = _mask_func(_plot_data)
 
             # -- draw
 
@@ -647,8 +653,8 @@ class PlotProcessor(_ProcessorBase):
             # -- sort out positional arguments to plot method
 
             if _plot_method_name == 'pcolormesh':
-                # mask zeros
-                _z_masked = np.ma.array(_plot_data['z'], mask=_plot_data['z']==0)
+                # apply user-supplied mask (if any) to 'z' values
+                _z_masked = np.ma.masked_where(_mask, _plot_data['z'])
 
                 # determine data range in z
                 _z_range = _pad_config.get('z_range', None)
@@ -683,7 +689,8 @@ class PlotProcessor(_ProcessorBase):
                 _bin_label_color = _kwargs.pop('bin_label_color', 'k')
                 _bin_label_fontsize = _kwargs.pop('bin_label_fontsize', 16)
             else:
-                _args = [_plot_data['x'], _y_data]
+                _y_masked = np.ma.masked_where(_mask, _y_data)
+                _args = [_plot_data['x'], _y_masked]
 
             # skip empty arguments
             if len(_args[0]) == 0:
