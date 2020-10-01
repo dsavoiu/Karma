@@ -186,9 +186,9 @@ class PostProcessor(object):
                     if _var_t is not None:
                         _obj_name = 'p3d_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile3DModel(_obj_name, _title,
-                            len(_x_binning)-1, array('f', _x_binning),
-                            len(_y_binning)-1, array('f', _y_binning),
-                            len(_z_binning)-1, array('f', _z_binning),
+                            len(_x_binning)-1, array('d', _x_binning),
+                            len(_y_binning)-1, array('d', _y_binning),
+                            len(_z_binning)-1, array('d', _z_binning),
                             # profiles may have build options
                             _option_string or "")
                         if _weight is None:
@@ -198,8 +198,8 @@ class PostProcessor(object):
                     elif _var_z is not None:
                         _obj_name = 'p2d_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile2DModel(_obj_name, _title,
-                            len(_x_binning)-1, array('f', _x_binning),
-                            len(_y_binning)-1, array('f', _y_binning),
+                            len(_x_binning)-1, array('d', _x_binning),
+                            len(_y_binning)-1, array('d', _y_binning),
                             # profiles may have build options
                             _option_string or "")
                         if _weight is None:
@@ -209,7 +209,7 @@ class PostProcessor(object):
                     else:
                         _obj_name = 'p_' + _name_suffix
                         _obj_model = ROOT.RDF.TProfile1DModel(_obj_name, _title,
-                            len(_x_binning)-1, array('f', _x_binning),
+                            len(_x_binning)-1, array('d', _x_binning),
                             # profiles may have build options
                             _option_string or "")
                         if _weight is None:
