@@ -763,17 +763,17 @@ additional keyword arguments. They are listed in the following overview:
     |                        |     handles will be superimposed.                        |              |
     |                        |                                                          |              |
     +------------------------+----------------------------------------------------------+--------------+
-    | **marker_style**       | either ``full`` or ``empty``.                            | ``full``     |
+    | **marker_style**       | ``full``, ``empty`` or ``white``.                        | ``full``     |
     |                        |                                                          |              |
     |                        | If ``full``, the marker *face* color will be determined  |              |
     |                        | by the ``color`` keyword and no marker edges will be     |              |
     |                        | drawn.                                                   |              |
     |                        |                                                          |              |
-    |                        | If ``empty``, the marker *edge* will be drawn with a     |              |
-    |                        | line width of ``1`` and its color will be determined     |              |
-    |                        | by the ``color`` keyword. The marker *face* face color   |              |
-    |                        | will be set to white (``w``).                            |              |
-    |                        |                                                          |              |
+    |                        | If ``empty`` or ``white``, the marker *edge* will be     |              |
+    |                        | drawn with a line width of ``1`` and its color will be   |              |
+    |                        | determined by the ``color`` keyword. The marker *face*   |              |
+    |                        | will be set to white if ``white`` and left unfilled if   |              |
+    |                        | empty.                                                   |              |
     +------------------------+----------------------------------------------------------+--------------+
     | **mask_zero_errors**   | if ``True``, hide bins/points for which the errors are   | ``False``    |
     |                        | equal to zero                                            |              |
