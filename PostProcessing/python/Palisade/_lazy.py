@@ -9,7 +9,7 @@ import operator
 __all__ = [
     'lazify',
     'LazyNodeBase', 'LazyIterableNodeBase',
-    'Lazy', 'Map', 'List', 'String', 'FormatString',
+    'Lazy', 'Map', 'List', 'String', 'FormatString', 'Context',
     'If', 'Try',
     'BinOp', 'Op', 'Call', 'Attribute']
 
@@ -519,3 +519,22 @@ class String(LazyNodeBase):
             template=self._s,
             context=dict(args=lazify(args),
                          kwargs=lazify(kwargs)))
+
+
+class Context(LazyNodeBase):
+    """A lazy object that returns the evaluation context itself."""
+
+    _fields = tuple()
+
+    def __init__(self):
+        return LazyNodeBase.__init__(self)
+
+    def eval(self, context=None):
+        return context
+
+    def fill_template(self, template):
+        """Use the evaluation context to fill a string template."""
+        return FormatString(
+            template=template,
+            context=dict(kwargs=self)
+        )
