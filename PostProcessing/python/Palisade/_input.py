@@ -112,6 +112,21 @@ class _ROOTObjectFunctions(object):
             return tobject.Clone()
 
     @staticmethod
+    def hist(tobject):
+        """Turn a profile in to a histogram."""
+
+        if not isinstance(tobject, _ProfileBase):
+            return tobject.Clone()  # return direct copy
+
+        _h = tobject.empty_clone(type='D')  # TODO: avoid hardcoding
+
+        for _b_in, _b_out in zip(tobject, _h):
+            _b_out.value = _b_in.value
+            _b_out.error = _b_in.error
+
+        return _h
+
+    @staticmethod
     def histdivide(tobject_1, tobject_2, option=""):
         """divide two histograms, taking error calculation option into account"""
 
@@ -788,8 +803,7 @@ class InputROOT(object):
         _ROOTObjectFunctions.get_all(),
         # add some useful aliases
         **{
-            'h':                                   _ROOTObjectFunctions.project_x,  # alias
-            'hist':                                _ROOTObjectFunctions.project_x,  # alias
+            'h':                                   _ROOTObjectFunctions.hist,  # alias
         }
     )
 
