@@ -477,9 +477,9 @@ class PlotProcessor(_ProcessorBase):
 
         # store `Axes` objects in pad configuration
         for _i_pad, _pad_config in enumerate(_pad_configs):
-            _pad_config['axes'] = _fig.add_subplot(_gs[_i_pad])
+            _pad_config['_axes'] = _fig.add_subplot(_gs[_i_pad])
 
-        _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
+        _stack_bottoms = _pad_config.setdefault('_stack_bottoms', {})
         _bin_labels = _pad_config.setdefault('bin_labels', {})
         _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
 
@@ -505,8 +505,8 @@ class PlotProcessor(_ProcessorBase):
 
             # select pad axes and configuration
             _pad_config = _pad_configs[_pad_id]
-            _ax = _pad_config['axes']
-            _stack_bottoms = _pad_config.setdefault('stack_bottoms', {})
+            _ax = _pad_config['_axes']
+            _stack_bottoms = _pad_config.setdefault('_stack_bottoms', {})
             _stack_labels = _pad_config.setdefault('stack_labels', [])
             _bin_labels = _pad_config.setdefault('bin_labels', {})
             _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
@@ -661,7 +661,7 @@ class PlotProcessor(_ProcessorBase):
 
                 # determine colormap normalization (if not explicitly given)
                 if 'norm' not in _kwargs:
-                    _z_scale = _pad_config.get('z_scale', "linear")
+                    _z_scale = _pad_config.pop('z_scale', "linear")
                     if _z_scale == 'linear':
                         _norm = Normalize(vmin=_z_min, vmax=_z_max)
                     elif _z_scale == 'log':
@@ -757,21 +757,21 @@ class PlotProcessor(_ProcessorBase):
         # step 3: pad adjustments
 
         for _pad_config in _pad_configs:
-            _ax = _pad_config['axes']
+            _ax = _pad_config['_axes']
 
             # simple axes adjustments
             for _prop_name, _meth_dict in six.iteritems(self._PC_KEYS_MPL_AXES_METHODS):
-                _prop_val = _pad_config.get(_prop_name, None)
+                _prop_val = _pad_config.pop(_prop_name, None)
                 if _prop_val is not None:
-                    #print(_prop_name, _prop_val)
                     getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
 
             # draw colorbar if there was a 2D plot involved and a colorbar should be drawn
-            if _pad_config.get('2d_plots', None) and _pad_config.get('draw_colorbar', True):
-                for _2d_plot in _pad_config['2d_plots']:
+            _2d_plots = _pad_config.pop('2d_plots', [])
+            _z_label = _pad_config.pop('z_label', None)
+            _z_labelpad = _pad_config.pop('z_labelpad', None)
+            if _pad_config.pop('draw_colorbar', True):
+                for _2d_plot in _2d_plots:
                     _cbar = _fig.colorbar(_2d_plot, ax=_ax)
-                    _z_label = _pad_config.get('z_label', None)
-                    _z_labelpad = _pad_config.get('z_labelpad', None)
                     if _z_label is not None:
                         _cbar.ax.set_ylabel(_z_label, rotation=90, va="bottom", ha='right', y=1.0, labelpad=_z_labelpad)
 
@@ -800,8 +800,9 @@ class PlotProcessor(_ProcessorBase):
             _hs, _ls = _ax.get_legend_handles_labels()
 
             # re-sort, reversing the order of labels that are part of a stack
-            if _pad_config.get("legend_reverse_stack_order", True):
-                _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_pad_config.get("stack_labels", None))
+            _stack_labels = _pad_config.pop("stack_labels", None)
+            if _pad_config.pop("legend_reverse_stack_order", True):
+                _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_stack_labels)
 
             # merge legend entries with identical labels
             _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)
@@ -812,7 +813,7 @@ class PlotProcessor(_ProcessorBase):
             _ax.legend(_hs, _ls, **_legend_kwargs)
 
             # handle log x-axis formatting (only if 'x_ticklabels' is not given as [])
-            if _pad_config.get('x_scale', None) == 'log' and _pad_config.get('x_ticklabels', True):
+            if _ax.get_xscale() == 'log' and _ax.get_xticklabels():
                 _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
                 _minor_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False, sci_min_exp=4, sublabels_max_exp=3)
                 _major_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=True, sci_min_exp=4)
@@ -828,9 +829,11 @@ class PlotProcessor(_ProcessorBase):
             #    _formatter.set_locs(locs=_log_decade_ticklabels)
 
             # draw bin labels instead of numeric labels at ticks
+            _bl_sets_by_axis = _pad_config.pop("bin_labels", {})
+            _ba_sets_by_axis = _pad_config.pop("bin_label_anchors", {})
             for _axis in "xyz":
-                _bl_sets = _pad_config["bin_labels"].get(_axis, None)
-                _ba_sets = _pad_config["bin_label_anchors"].get(_axis, None)
+                _bl_sets = _bl_sets_by_axis.get(_axis, None)
+                _ba_sets = _ba_sets_by_axis.get(_axis, None)
 
                 # skip for axes without bin labels
                 if not _bl_sets:
@@ -858,7 +861,12 @@ class PlotProcessor(_ProcessorBase):
                     print("WARNING: Bin labels found for axis '{}', but this is not supported. Ignoring...".format(_axis))
 
             # run user-defined code on axes
-            _pad_config.get('axes_epilog', lambda ax: None)(_ax)
+            _pad_config.pop('axes_epilog', lambda ax: None)(_ax)
+
+            # warn about unknown keywords
+            _unknown_kws = sorted([_kw for _kw in _pad_config if not _kw.startswith('_')])
+            if _unknown_kws:
+                print("[WARNING] Unknown or unused keywords supplied to pad config: {}".format(_unknown_kws))
 
         # step 4: text and annotations
 
@@ -867,7 +875,7 @@ class PlotProcessor(_ProcessorBase):
         for _text_config in _text_configs:
             # retrieve target pad
             _pad_id = _text_config.pop('pad', 0)
-            _ax = _pad_configs[_pad_id]['axes']
+            _ax = _pad_configs[_pad_id]['_axes']
 
             # handle deprecated keyword 'transform'
             if 'transform' in _text_config:
@@ -901,7 +909,7 @@ class PlotProcessor(_ProcessorBase):
                 "textcoords='offset points', ha='right', pad=0).", DeprecationWarning)
 
             # place above topmost `Axes`
-            _pad_configs[0]['axes'].annotate(_upper_label, xy=(1, 1),
+            _pad_configs[0]['_axes'].annotate(_upper_label, xy=(1, 1),
                 xycoords='axes fraction',
                 xytext=(0, 5),
                 textcoords='offset points',
@@ -909,7 +917,7 @@ class PlotProcessor(_ProcessorBase):
             )
 
         # run user-defined code on figure (and/or axes)
-        config.get('epilog', lambda fig, axes: None)(_fig, [_pc['axes'] for _pc in _pad_configs])
+        config.get('epilog', lambda fig, axes: None)(_fig, [_pc['_axes'] for _pc in _pad_configs])
 
         # step 6: save figures
         _make_directory(os.path.dirname(_filename))
