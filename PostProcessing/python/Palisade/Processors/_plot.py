@@ -762,15 +762,16 @@ class PlotProcessor(_ProcessorBase):
             _text_file.close()
 
         # step 3: pad adjustments
-
         for _pad_config in _pad_configs:
             _ax = _pad_config['_axes']
 
             # simple axes adjustments
+            _pad_config['_applied_modifiers'] = dict()  # keep track
             for _prop_name, _meth_dict in six.iteritems(self._PC_KEYS_MPL_AXES_METHODS):
                 _prop_val = _pad_config.pop(_prop_name, None)
                 if _prop_val is not None:
                     getattr(_ax, _meth_dict['method'])(_prop_val, **_meth_dict.get('kwargs', {}))
+                    _pad_config['_applied_modifiers'][_prop_name] = _prop_val
 
             # draw colorbar if there was a 2D plot involved and a colorbar should be drawn
             _2d_plots = _pad_config.pop('2d_plots', [])
@@ -820,7 +821,11 @@ class PlotProcessor(_ProcessorBase):
             _ax.legend(_hs, _ls, **_legend_kwargs)
 
             # handle log x-axis formatting (only if 'x_ticklabels' is not given as [])
-            if _ax.get_xscale() == 'log' and _ax.get_xticklabels():
+            _user_suppressed_x_ticklabels = (
+                'x_ticklabels' in _pad_config['_applied_modifiers']
+                and not _pad_config['_applied_modifiers']['x_ticklabels']
+            )
+            if _ax.get_xscale() == 'log' and not _user_suppressed_x_ticklabels:
                 _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
                 _minor_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False, sci_min_exp=4, sublabels_max_exp=3)
                 _major_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=True, sci_min_exp=4)
