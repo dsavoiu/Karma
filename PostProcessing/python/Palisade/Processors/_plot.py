@@ -567,7 +567,7 @@ class PlotProcessor(_ProcessorBase):
             })
 
             # additional mask using user-supplied function
-            _mask = True  # used below, depending on plotting method
+            _mask = False  # used below, depending on plotting method
             _mask_func = _kwargs.pop('mask_func', None)
             if _mask_func:
                 _mask = _mask_func(_plot_data)
