@@ -468,7 +468,7 @@ class PlotProcessor(_ProcessorBase):
             _pad_configs = [dict()]
 
         # get share
-        _height_ratios = [_pc.get('height_share', 1) for _pc in _pad_configs]
+        _height_ratios = [_pc.pop('height_share', 1) for _pc in _pad_configs]
 
         # construct GridSpec from `pad_spec` or make default
         _gridspec_kwargs = config.get('pad_spec', dict())
