@@ -886,9 +886,90 @@ optional keys:
     |                                 | corresponding to the ratio of this value to the sum of   |
     |                                 | the **height_share** values of all pads.                 |
     +---------------------------------+----------------------------------------------------------+
+    | **legend_additional_entries**   | list of dictionaries specifying additional entries       |
+    |                                 | to show in the legend. The dictionaries must contain     |
+    |                                 | a legend handle under the key ``handle``. Optional keys  |
+    |                                 | are ``label`` and ``position``.                          |
+    |                                 |                                                          |
+    |                                 | The ``handle`` can be any object supported by one of     |
+    |                                 | matplotlib's legend handlers. In addition, Palisade also |
+    |                                 | implements custom handlers for strings and matplotlib    |
+    |                                 | ``Text` objects. These handlers can be overridden (and   |
+    |                                 | new handlers for arbitrary objects can be supplied) via  |
+    |                                 | the ``handler_map`` keyword in **legend_kwargs** (see    |
+    |                                 | below).                                                  |
+    |                                 |                                                          |
+    |                                 | The ``label`` is a string that appears next to the       |
+    |                                 | legend handle and can be omitted.                        |
+    |                                 |                                                          |
+    |                                 | The ``position`` is an integer that controls the         |
+    |                                 | position at which the additional entry is inserted.      |
+    |                                 | Common values are ``0`` (insert before the first entry)  |
+    |                                 | and ``-1`` (insert after the last entry). The default is |
+    |                                 | ``-1``.                                                  |
+    |                                 |                                                          |
+    |                                 | For example, the following will add a dummy legend entry |
+    |                                 | at the top of the legend, consisting of the string       |
+    |                                 | ``Symbol`` as a legend handle, and a red rectangular     |
+    |                                 | ``Patch`` labeled as "My Patch" at the end.              |
+    |                                 |                                                          |
+    |                                 | .. code:: python                                         |
+    |                                 |                                                          |
+    |                                 |     'legend_additional_entries' : [                      |
+    |                                 |       {                                                  |
+    |                                 |         'handle' : "Symbol",                             |
+    |                                 |         'position' : 0                                   |
+    |                                 |       },                                                 |
+    |                                 |       {                                                  |
+    |                                 |         'handle' : Rectangle((0, 0), 1, 1, fc='red'),    |
+    |                                 |         'label' : "My Patch",                            |
+    |                                 |         'position' : -1                                  |
+    |                                 |       }                                                  |
+    |                                 |     ]                                                    |
+    +---------------------------------+----------------------------------------------------------+
     | **legend_kwargs**               | a dictionary with keywords to be passed to               |
     |                                 | *matplotlib*'s :py:func:`legend` call (see the           |
     |                                 | *matplotlib* documentation for more details)             |
+    |                                 |                                                          |
+    |                                 | The ``handler_map`` keyword can be used to specify how   |
+    |                                 | legend handles are rendered depending on their type.     |
+    |                                 | It contains a dictionary that maps Python types of       |
+    |                                 | objects used as legend handles to appropriate handlers.  |
+    |                                 |                                                          |
+    |                                 | Palisade provides some custom handlers for common types  |
+    |                                 | like strings and tuples:                                 |
+    |                                 |                                                          |
+    |                                 | .. code:: python                                         |
+    |                                 |                                                          |
+    |                                 |     from Palisade import LegendHandlerTuple              |
+    |                                 |     from Palisade import LegendHandlerString             |
+    |                                 |                                                          |
+    |                                 | These are used as the default handlers for their         |
+    |                                 | respective types and can be customized by passing        |
+    |                                 | keyword arguments to the constructors. To override the   |
+    |                                 | default behavior, appropriate entries must be added to   |
+    |                                 | the ``handler_map``. The default handler configuration   |
+    |                                 | roughly corresponds to:                                  |
+    |                                 |                                                          |
+    |                                 | .. code:: python                                         |
+    |                                 |                                                          |
+    |                                 |     'legend_kwargs' : {                                  |
+    |                                 |       'handler_map' : {                                  |
+    |                                 |         # show merged handles side by side               |
+    |                                 |         tuple : LegendHandlerTuple(ndivide=None, pad=4), |
+    |                                 |         # use bold font for string handles               |
+    |                                 |         str : LegendHandlerString(fontweight='bold')     |
+    |                                 |       }                                                  |
+    |                                 |     }                                                    |
+    |                                 |                                                          |
+    |                                 | For tuples (which are used to implement merged handles,  |
+    |                                 | e.g. for identical labels), the ``ndivide`` keyword      |
+    |                                 | determined the number of columns used to display the     |
+    |                                 | objects in the tuple. For ``None``, this corresponds to  |
+    |                                 | the tuple length, meaning all handles will be shown side |
+    |                                 | by side. Using ``1`` will render all the handles on top  |
+    |                                 | of each other. The ``pad`` keyword controls the spacing  |
+    |                                 | between the handle columns.                              |
     +---------------------------------+----------------------------------------------------------+
     | **legend_reverse_stack_order**  | bool. If ``True`` (default), the order of the legend     |
     |                                 | entries for subplots that belong to a stack will be      |

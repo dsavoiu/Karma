@@ -867,6 +867,29 @@ class PlotProcessor(_ProcessorBase):
             # merge legend entries with identical labels
             _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)
 
+            # handle user-supplied legend entries
+            _add_entries = _pad_config.pop('legend_additional_entries', [])
+            for _i_add_entry, _add_entry in enumerate(_add_entries):
+                _l, _pos = '', -1  # default label/insert position
+                try:
+                    _h = _add_entry['handle']
+                except TypeError:
+                    # non-dict supplied, use as handle
+                    _h = _add_entry
+                except KeyError as e:
+                    # mandatory keyword not supplied, raise
+                    raise ValueError(
+                        "Missing mandatory key 'handle' in 'legend_additional_entries' at position {}: {}".format(
+                            _i_add_entry, _add_entry))
+                else:
+                    # value is dict-like and 'handle' was supplied -> get optional kwargs
+                    _l = _add_entry.get('label', '')
+                    _pos = _add_entry.get('position', -1)
+
+                # insert additional handles/labels at desired position
+                _hs.insert(_pos, _h)
+                _ls.insert(_pos, _l)
+
             # draw legend with user-specified kwargs
             _legend_kwargs = self._DEFAULT_LEGEND_KWARGS.copy()
             _legend_kwargs.update(_pad_config.pop('legend_kwargs', {}))
