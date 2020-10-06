@@ -19,7 +19,11 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatterSciNotation, LogFormatterMathtext
 from matplotlib.colors import LogNorm, Normalize, colorConverter
-from matplotlib.legend_handler import HandlerBase, HandlerTuple
+from matplotlib.text import Text
+from matplotlib.legend_handler import (
+    HandlerBase as LegendHandlerBase,
+    HandlerTuple as LegendHandlerTuple
+)
 
 from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, F1
 from rootpy.plotting.hist import _Hist, _Hist2D
@@ -30,7 +34,10 @@ from .._colormaps import viridis
 
 from ._base import ContextValue, LiteralString, _ProcessorBase, _make_directory
 
-__all__ = ['LogFormatterSciNotationForceSublabels', 'PlotProcessor']
+__all__ = [
+    'LogFormatterSciNotationForceSublabels', 'PlotProcessor',
+    'LegendHandlerTuple', 'LegendHandlerString', 'LegendHandlerText'
+]
 
 
 plt.register_cmap(name='viridis', cmap=viridis)
@@ -144,11 +151,52 @@ class LogFormatterSciNotationForceSublabels(LogFormatterSciNotation):
             return '$%s$' % _mathdefault('%s%s^{%d}' % (sign_string, base, fx))
 
 
-# check if HandlerTuple API supports `ndivide` and `pad`
+# -- custom legend handlers
+
+class LegendHandlerString(LegendHandlerBase):
+    """
+    Handler for bare Python strings. Will render a `Text` artist
+    for strings supplied as legend handles.
+
+    Parameters
+    ----------
+    fontweight : str, optional
+        The font weight to use. Default: 'bold'
+    """
+
+    def __init__(self, fontweight='bold', **kwargs):
+
+        self._fontweight = fontweight
+        LegendHandlerBase.__init__(self, **kwargs)
+
+    def create_artists(self, legend, text, xdescent, ydescent, width, height, fontsize, trans):
+        return [Text(
+            (width-xdescent)/2, (height-ydescent)/2, text,
+            fontsize=fontsize, ha="center", va="center",
+            fontweight=self._fontweight
+        )]
+
+
+class LegendHandlerText(LegendHandlerString):
+    """
+    Handler for using `Text` artists as legend handles.
+
+    Parameters
+    ----------
+    fontweight : str, optional
+        The font weight to use. Default: 'bold'
+    """
+    def create_artists(self, legend, artist, xdescent, ydescent, width, height, fontsize, trans):
+        return super(LegendHandlerText, self).create_artists(
+            legend, artist.get_text(), xdescent, ydescent, width, height, fontsize, trans
+        )
+
+
+# check if LegendHandlerTuple API supports `ndivide` and `pad`
 try:
-    HandlerTuple(ndivide=None, pad=5)
+    LegendHandlerTuple(ndivide=None, pad=5)
 except TypeError:  # old MPL version -> reimplement with new API
-    class HandlerTuple(HandlerBase):
+    class LegendHandlerTuple(LegendHandlerBase):
         """
         Handler for Tuple. (reimplemented from matplotlib 2.0)
 
@@ -170,7 +218,7 @@ except TypeError:  # old MPL version -> reimplement with new API
 
             self._ndivide = ndivide
             self._pad = pad
-            HandlerBase.__init__(self, **kwargs)
+            LegendHandlerBase.__init__(self, **kwargs)
 
         def create_artists(self, legend, orig_handle,
                            xdescent, ydescent, width, height, fontsize,
@@ -358,7 +406,11 @@ class PlotProcessor(_ProcessorBase):
     _DEFAULT_LEGEND_KWARGS = dict(
         ncol=1, numpoints=1, fontsize=12, frameon=False,
         loc='upper right',
-        handler_map = {tuple: HandlerTuple(ndivide=None, pad=4)}
+        handler_map = {
+            tuple: LegendHandlerTuple(ndivide=None, pad=4),
+            Text: LegendHandlerText(fontweight='bold'),
+            str: LegendHandlerString(fontweight='bold'),
+        }
     )
     _DEFAULT_LINE_KWARGS = dict(
         linestyle='--', color='gray', linewidth=1, zorder=-99
