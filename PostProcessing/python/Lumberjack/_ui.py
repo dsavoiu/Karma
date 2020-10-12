@@ -426,6 +426,17 @@ class LumberjackInterfaceBase(object):
 
     # -- subcommand methods
 
+    def _subcommand_load(self):
+
+        from Karma.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
+
+        QUANTITIES = self._config.QUANTITIES
+
+        # -- just prepare RDataFrame
+        self._prepare_bare_data_frame()
+        self._prepare_data_frame()
+
+
     def _subcommand_freestyle(self):
 
         from Karma.PostProcessing.Lumberjack import apply_defines, apply_filters, define_quantities, PostProcessor, Timer
@@ -498,6 +509,9 @@ class LumberjackInterfaceBase(object):
 
         elif self._args.subparser_name == 'freestyle':
             self._subcommand_freestyle()
+
+        elif self._args.subparser_name == 'load':
+            self._subcommand_load()
 
         else:
             raise ValueError("Unknown operation '{}'! Exiting...".format(_args.subparser_name))
@@ -614,6 +628,9 @@ class LumberjackCLI(LumberjackInterfaceBase):
         _subparsers.required = True
 
         _parsers = {}
+
+        # subcommand 'load': just configure RDataFrame, but don't run any tasks. Useful for checking configuration or dropping to an interactive prompt.
+        _parsers['load'] = _subparsers.add_parser('load', help="Just configure RDataFrame based on analysis config, but don't run any tasks")
 
         # subcommand 'task' for executing pre-defined tasks
         _parsers['task'] = _subparsers.add_parser('task', help='Perform a pre-defined task')
