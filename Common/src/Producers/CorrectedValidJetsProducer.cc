@@ -79,6 +79,7 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
         }
         std::cout << "[CorrectedValidJetsProducer]   - " << jecUncertaintySource << std::endl;
         m_jetUncertaintySourceNames.push_back(jecUncertaintySource);
+        m_jetUncertaintySourceShifts.push_back(1.0);  // future: make configurable?
         m_jetUncertaintySourceCorrectors.emplace_back(
             std::unique_ptr<JetCorrectionUncertainty>(
                 new JetCorrectionUncertainty({
@@ -216,18 +217,22 @@ void karma::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
             outputJetCollection->back().p4 = outputJetCollection->back().uncorP4;
         }
 
-        // apply uncertainty shift to output jet (and store in transient doubles for potential re-correction)
+        // apply uncertainty shift to output jet
         setupFactorProvider(*jetCorrectionUncertainty, inputJet);
         double totalUncShift = (1.0 + m_jecUncertaintyShift * jetCorrectionUncertainty->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
         outputJetCollection->back().p4 *= totalUncShift;
-        outputJetCollection->back().transientDoubles_["Total"] = totalUncShift;
 
         // store P4 shift factors for named uncertainty sources in transient list of doubles
         for (size_t iUnc = 0; iUnc < m_jetUncertaintySourceCorrectors.size(); ++iUnc) {
             setupFactorProvider(*m_jetUncertaintySourceCorrectors[iUnc], inputJet);
             outputJetCollection->back().transientDoubles_[m_jetUncertaintySourceNames[iUnc]] = (
-                1.0 + m_jecUncertaintyShift * m_jetUncertaintySourceCorrectors[iUnc]->getUncertainty(/*bool direction = */ m_jecUncertaintyShift > 0.0));
+                m_jetUncertaintySourceShifts[iUnc] * m_jetUncertaintySourceCorrectors[iUnc]->getUncertainty(
+                    /*bool direction = */ m_jetUncertaintySourceShifts[iUnc] > 0.0));
         }
+
+        // also store Total P4 shift factors transient list of doubles
+        setupFactorProvider(*jetCorrectionUncertainty, inputJet);
+        outputJetCollection->back().transientDoubles_["Total"] = jetCorrectionUncertainty->getUncertainty(/*bool direction = */ true);
 
     }
 
