@@ -3,4 +3,9 @@
     <class name="edm::Wrapper<dijet::NtupleEntry>"/>
     <class name="dijet::Ntuple"/>
     <class name="edm::Wrapper<dijet::Ntuple>"/>
+
+    <class name="dijet::NtupleV2Entry"/>
+    <class name="edm::Wrapper<dijet::NtupleV2Entry>"/>
+    <class name="dijet::NtupleV2"/>
+    <class name="edm::Wrapper<dijet::NtupleV2>"/>
 </lcgdict>
