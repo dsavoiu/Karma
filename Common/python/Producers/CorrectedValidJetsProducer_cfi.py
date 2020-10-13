@@ -25,5 +25,7 @@ karmaCorrectedValidJetsProducer = cms.EDProducer(
 
         jetIDSpec = cms.string("2016"),   # use "None" for no object-based JetID
         jetIDWorkingPoint = cms.string("TightLepVeto"),
+
+        minJetPt = cms.double(0.0),
     )
 )

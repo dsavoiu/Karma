@@ -93,6 +93,9 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
 
     // retrieve the configured JEC shift magnitude
     m_jecUncertaintyShift = m_configPSet.getParameter<double>("jecUncertaintyShift");
+
+    // retrieve the configured lower pT limit for jets
+    m_minJetPt = m_configPSet.getParameter<double>("minJetPt");
 }
 
 
@@ -236,6 +239,15 @@ void karma::CorrectedValidJetsProducer::produce(edm::Event& event, const edm::Ev
             return (jet1.p4.pt() > jet2.p4.pt());
         }
     );
+
+    // filter jets by pT
+    outputJetCollection->erase(std::find_if(
+        (*outputJetCollection).begin(),
+        (*outputJetCollection).end(),
+        [this](const karma::Jet& jet) {
+            return (jet.p4.pt() < this->m_minJetPt);
+        }
+    ), (*outputJetCollection).end());
 
     // move outputs to event tree
     event.put(std::move(outputJetCollection));

@@ -130,6 +130,8 @@ namespace karma {
 
         const edm::ParameterSet& m_configPSet;
 
+        double m_minJetPt = 0.0;
+
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector;
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector_L1;
         std::unique_ptr<FactorizedJetCorrector> m_jetCorrector_L1RC;
