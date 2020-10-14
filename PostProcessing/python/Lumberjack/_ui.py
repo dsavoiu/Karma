@@ -14,6 +14,39 @@ import yaml
 
 from contextlib import contextmanager
 from tqdm import tqdm
+try:
+    from tqdm.utils import disp_len
+except ImportError:
+    disp_len = len
+
+try:
+    from tqdm.utils import _unicode
+except ImportError:
+    from tqdm._utils import _unicode
+
+class tqdm_always_newline(tqdm):
+    @staticmethod
+    def status_printer(file):
+        """
+        Manage the printing and in-place updating of a line of characters.
+        Note that if the string is longer than a line, then in-place
+        updating may not work (it will print a new line at each refresh).
+        """
+        fp = file
+        fp_flush = getattr(fp, 'flush', lambda: None)  # pragma: no cover
+
+        def fp_write(s):
+            fp.write(_unicode(s))
+            fp_flush()
+
+        last_len = [0]
+
+        def print_status(s):
+            len_s = disp_len(s)
+            fp_write('\n' + s + (' ' * max(last_len[0] - len_s, 0)))
+            last_len[0] = len_s
+
+        return print_status
 
 __all__ = ["LumberjackInterfaceBase", "LumberjackCLI"]
 
@@ -182,12 +215,14 @@ class LumberjackInterfaceBase(object):
         self._df_count_increment = 100000
 
         if self._args.progress:
-            self._progress = tqdm(
+            _tqdm_class = tqdm_always_newline if self._args.progress_always_newline else tqdm
+            self._progress = _tqdm_class(
                 unit=" events",
                 unit_scale=False,
                 dynamic_ncols=True,
                 desc="Event loop progress",
                 total=self._df_size,
+                mininterval=self._args.progress_mininterval,
             )
             def _progress_callback(count):
                 self._progress.update(self._df_count_increment)
@@ -616,6 +651,10 @@ class LumberjackCLI(LumberjackInterfaceBase):
         _optional_args.add_argument('--log', help="Whether to output a log file.", action="store_true")
         _optional_args.add_argument('--dump-yaml', help="Whether to dump the task configuration as a YAML file.", action="store_true")
         _optional_args.add_argument('--progress', help="Whether to show a progress bar.", action="store_true")
+        _optional_args.add_argument('--progress-always-newline',
+            help="Don't update the progress bar in-place (print a newline on each update, for use with line-buffered streams).", action="store_true")
+        _optional_args.add_argument('--progress-mininterval',
+            help="Minimum interval between two progress bar updates (in seconds).", default=0.1, type=float)
 
         # retrieve analysis config (tasks, splittings, quantities, etc.)
         if _analysis_name is not None:

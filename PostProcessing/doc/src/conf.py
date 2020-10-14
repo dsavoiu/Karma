@@ -50,6 +50,8 @@ MOCK_MODULES = [
     'scipy.special',
     'scipy.stats',
     'tqdm',
+    'tqdm.utils',
+    'tqdm._utils',
     'pandas',
 ]
 for mod_name in MOCK_MODULES:
