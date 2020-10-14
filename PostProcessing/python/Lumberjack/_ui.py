@@ -210,8 +210,9 @@ class LumberjackInterfaceBase(object):
 
         print("[INFO] Defining quantities...")
         # "main" quantities (with binning)
-        _quantities =  dict(QUANTITIES['global'], **QUANTITIES.get(self._args.input_type, {}))
-        self._df = define_quantities(self._df, _quantities)
+        self._df = define_quantities(self._df, QUANTITIES['global'])
+        if self._args.input_type in QUANTITIES:
+            self._df = define_quantities(self._df, QUANTITIES[self._args.input_type])
 
         # other quantities (only given as expressions, no binning)
         self._df = apply_defines(self._df, DEFINES['global'])

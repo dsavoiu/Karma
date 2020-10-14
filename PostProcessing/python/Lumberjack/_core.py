@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import numpy as np
 
+from collections import OrderedDict
 from copy import deepcopy
 
 
@@ -111,7 +112,7 @@ def apply_filters(data_frame, filters):
 
 def define_quantities(data_frame, quantities):
     """Define aliases for quantity expressions as specified in dictionary `quantities`."""
-    _define_dict = {}  # map of quantities by unique name
+    _define_dict = OrderedDict()  # map of quantities by unique name
     for _q_key, _q in quantities.iteritems():
 
         # skip quantities with identical names and expressions (can get by name without Define)
