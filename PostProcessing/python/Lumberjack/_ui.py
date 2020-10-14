@@ -133,6 +133,7 @@ class LumberjackInterfaceBase(object):
 
         print("[INFO] Setting up data frame...")
         print("[INFO] Sample file: {}".format(self._args.input_file))
+        print("[INFO] Sample type: {}".format(self._args.input_type))
 
         # exit if input file does not exist
         if not os.path.exists(self._args.input_file):
@@ -145,11 +146,21 @@ class LumberjackInterfaceBase(object):
         if not isinstance(_tree, ROOT.TTree):
             print("[ERROR] Input file does not contain TTree '{}'".format(self._args.tree))
             exit(1)
-        self._df_size = _tree.GetEntries()
-        _f.Close()
 
-        print("[INFO] Sample type: {}".format(self._args.input_type))
-        self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
+        # handle TChains a little differently
+        if isinstance(_tree, ROOT.TChain):
+            # loading TTrees from a TChain can take a while -> inform user
+            print("[INFO] Input tree is a TChain. Loading underlying TTrees to compute the total number of entries...")
+            self._df_size = _tree.GetEntries()
+            # disown TChain so it persists when file is closed
+            _tree.SetDirectory(0)
+            _f.Close()
+            # construct dataframe directly from TChain
+            self._df_bare = ROOT_DF_CLASS(_tree)
+        else:
+            self._df_size = _tree.GetEntries()
+            # construct dataframe from file and tree names
+            self._df_bare = ROOT_DF_CLASS(self._args.tree, self._args.input_file)
 
     def _prepare_data_frame(self):
 
