@@ -282,8 +282,8 @@ def _plot_as_step(ax, *args, **kwargs):
 
     # kwarg `yerr_as_band` to display
     _show_yerr_as = kwargs.pop('show_yerr_as', None)
-    if _show_yerr_as is not None and _show_yerr_as not in ('errorbar', 'band'):
-        raise ValueError("Invalid value '{}' for 'show_yerr_as'. Available: {}".format(_show_yerr_as, ('errorbar', 'band')))
+    if _show_yerr_as is not None and _show_yerr_as not in ('errorbar', 'band', 'hatch'):
+        raise ValueError("Invalid value '{}' for 'show_yerr_as'. Available: {}".format(_show_yerr_as, ('errorbar', 'band', 'hatch')))
 
     assert 'xerr' in kwargs
     if len(kwargs['xerr']) == 1:
@@ -317,7 +317,7 @@ def _plot_as_step(ax, *args, **kwargs):
 
     # attach y errors (if any) to "bin" center
     if _yerr is not None:
-        if _show_yerr_as == 'band':
+        if _show_yerr_as in ('band', 'hatch'):
             # error band: shade across entire bin width
             _yerr_dn = np.vstack([_zeros, _yerr_dn, _yerr_dn, _yerr_dn, _zeros]).T.flatten()
             _yerr_up = np.vstack([_zeros, _yerr_up, _yerr_up, _yerr_up, _zeros]).T.flatten()
@@ -345,13 +345,71 @@ def _plot_as_step(ax, *args, **kwargs):
         return ax.errorbar(_x, _y, yerr=_yerr if _show_yerr_as else None, **kwargs)
     elif _show_yerr_as == 'band':
         _band_alpha = kwargs.pop('band_alpha', 0.5)
+        _hatch = kwargs.pop('band_hatch', None)
+        _boundary = kwargs.pop('band_boundary', False)
         _capsize = kwargs.pop('capsize', None)
         _markeredgecolor = kwargs.pop('markeredgecolor', None)
+        _color = kwargs.pop('color', None)
+        _alpha = kwargs.pop('alpha', None)
+        _linestyle = kwargs.pop('linestyle', None)
+
+        _return_artists = []
+
+        # compute boundary step
+        _y_shifted = (_y.copy(), _y.copy())
+        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (1.0, -1.0)):
+            _ye = _ye.copy()
+            # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
+            _ye[0::5] = _ye[2::5]
+            _ye[4::5] = _ye[2::5]
+            _ys += _fac * _ye
+
+        if _boundary:
+            _return_artists.extend([
+                ax.errorbar(_x, _y_shifted[0], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, linestyle=_linestyle, **kwargs),
+                ax.errorbar(_x, _y_shifted[1], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, linestyle=_linestyle, **kwargs),
+            ])
+
         if _yerr is None:
             _yerr = 0, 0
+
+        _return_artists.extend([
+            ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, alpha=_alpha, color=_color, **kwargs),
+            ax.fill_between(_x, _y_shifted[0], _y_shifted[1], **dict(kwargs, hatch=_hatch, alpha=_band_alpha, linewidth=0, color=_color))
+            #ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=_band_alpha, linewidth=0, hatch=_hatch, facecolor='none', color=None, edgecolor=kwargs.get('color')))
+        ])
+
+        return tuple(_return_artists)
+
+    elif _show_yerr_as == 'hatch':
+        raise NotImplementedError
+        _band_alpha = kwargs.pop('band_alpha', 0.5)
+        _hatch = kwargs.pop('hatch', '////')
+        _capsize = kwargs.pop('capsize', None)
+        _color = kwargs.pop('color', None)
+        _alpha = kwargs.pop('alpha', None)
+        _markeredgecolor = kwargs.pop('markeredgecolor', None)
+        _linestyle = kwargs.pop('linestyle', None)  # invalid for hatch
+        if _yerr is None:
+            _yerr = 0, 0
+
+        # compute boundary step
+        _y_shifted = (_y.copy(), _y.copy())
+        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (1.0, -1.0)):
+            _ye = _ye.copy()
+            # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
+            _ye[0::5] = _ye[2::5]
+            _ye[4::5] = _ye[2::5]
+            _ys += _fac * _ye
         return (
-            ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, **kwargs),
-            ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=_band_alpha, linewidth=0)))
+            # central value
+            ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, **kwargs),
+            # limiting upper/lower edges of hatch
+            ax.errorbar(_x, _y_shifted[0], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, **kwargs),
+            ax.errorbar(_x, _y_shifted[1], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, **kwargs),
+            # hatch
+            ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, hatch=_hatch, alpha=0.3, facecolor='r', edgecolor='yellow', linewidth=0, color=_color)))
+            #ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(linestyle='solid', hatch=_hatch, facecolor='none', linewidth=0)))
 
 
 class PlotProcessor(_ProcessorBase):
