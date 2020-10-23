@@ -32,6 +32,8 @@ MOCK_MODULES = [
     'matplotlib.patheffects',
     'matplotlib.pyplot',
     'matplotlib.ticker',
+    'matplotlib.text',
+    'matplotlib.legend_handler',
     'numdifftools',
     'numpy',
     'ROOT',
