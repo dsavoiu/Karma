@@ -29,10 +29,12 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, F1
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
+from ..._util import make_directory
+
 from .._input import InputROOT
 from .._colormaps import viridis
 
-from ._base import ContextValue, LiteralString, _ProcessorBase, _make_directory
+from ._base import ContextValue, LiteralString, _ProcessorBase
 
 __all__ = [
     'LogFormatterSciNotationForceSublabels', 'PlotProcessor',
@@ -502,7 +504,7 @@ class PlotProcessor(_ProcessorBase):
         if _dump_yaml:
             _yaml_filename = '.'.join(_filename.split('.')[:-1]) + '.yml'
             # need to create directory first
-            _make_directory(os.path.dirname(_yaml_filename))
+            make_directory(os.path.dirname(_yaml_filename), exist_ok=True)
             # add input files to dump
             _config_for_dump = dict(deepcopy(config), input_files=self._config['input_files'])
         else:
@@ -539,7 +541,7 @@ class PlotProcessor(_ProcessorBase):
         if config.pop("text_output", False):
             _text_filename = '.'.join(_filename.split('.')[:-1]) + '.txt'
             # need to create directory first
-            _make_directory(os.path.dirname(_text_filename))
+            make_directory(os.path.dirname(_text_filename), exist_ok=True)
             _text_file = open(_text_filename, 'w')
         else:
             _text_file = None
@@ -1007,7 +1009,7 @@ class PlotProcessor(_ProcessorBase):
         config.get('epilog', lambda fig, axes: None)(_fig, [_pc['_axes'] for _pc in _pad_configs])
 
         # step 6: save figures
-        _make_directory(os.path.dirname(_filename))
+        make_directory(os.path.dirname(_filename), exist_ok=True)
         _fig.savefig('{}'.format(_filename))
         #plt.close(_fig)  # close figure to save memory
 

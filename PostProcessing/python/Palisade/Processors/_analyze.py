@@ -23,11 +23,12 @@ from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
 
+from ..._util import make_directory
 
 from .._input import InputROOT
 from .._colormaps import viridis
 
-from ._base import ContextValue, LiteralString, _ProcessorBase, _make_directory
+from ._base import ContextValue, LiteralString, _ProcessorBase
 
 __all__ = ['AnalyzeProcessor']
 
@@ -74,7 +75,7 @@ class AnalyzeProcessor(_ProcessorBase):
     def _get_file(self, filename):
         if filename not in self._files:
             _fullpath = os.path.join(self._output_folder, filename)
-            _make_directory(os.path.dirname(_fullpath))
+            make_directory(os.path.dirname(_fullpath), exist_ok=True)
             self._files[filename] = File.Open(_fullpath, 'w')
         return self._files[filename]
 

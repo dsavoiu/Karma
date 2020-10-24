@@ -24,6 +24,8 @@ try:
 except ImportError:
     from tqdm._utils import _unicode
 
+from .._util import product_dict, make_directory, group_by
+
 class tqdm_always_newline(tqdm):
     @staticmethod
     def status_printer(file):
@@ -51,19 +53,6 @@ class tqdm_always_newline(tqdm):
 __all__ = ["LumberjackInterfaceBase", "LumberjackCLI"]
 
 
-def product_dict(**kwargs):
-    """Cartesian product of iterables in dictionary"""
-    import itertools
-    _keys = kwargs.keys()
-    for instance in itertools.product(*kwargs.values()):
-        yield dict(zip(_keys, instance))
-
-def group_by(iterable, n):
-    '''Return list of iterables of elements of `iterable`, grouped in batches of at most `n`'''
-    _l = len(iterable)
-    _n_groups = _l//n + (_l%n>0)
-    _grouped_iterable = [iterable[_i*n:min(_l,(_i+1)*n)] for _i in range(_n_groups)]
-    return _grouped_iterable
 
 
 class StreamDup:
@@ -88,9 +77,9 @@ def log_stdout_to_file(filename):
     if filename is None:
         yield
     else:
+        # create output directory (and intermediate directories) if they do not exist
         _out_dir = os.path.dirname(filename)
-        if _out_dir and not os.path.exists(_out_dir):
-            os.mkdir(_out_dir)
+        make_directory(_out_dir, exist_ok=True)
 
         _old_stdout = sys.stdout
         with open(filename, 'w') as _log:
@@ -350,10 +339,9 @@ class LumberjackInterfaceBase(object):
                 print("[INFO] Task output file exists: '{}' and `--overwrite` not set. Skipping...".format(_task_spec['_filename']))
                 continue
 
-            # create output directory if it does not exist
+            # create output directory (and intermediate directories) if they do not exist
             _out_dir = os.path.dirname(_task_spec['_filename'])
-            if _out_dir and not os.path.exists(_out_dir):
-                os.mkdir(_out_dir)
+            make_directory(_out_dir, exist_ok=True)
 
             # dump task configuration to yml
             if self._args.dump_yaml:

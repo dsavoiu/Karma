@@ -2,9 +2,7 @@ from __future__ import print_function
 
 import abc
 import ast
-import itertools
 import json
-import os
 import six
 import warnings
 import ROOT
@@ -17,24 +15,9 @@ import numpy as np
 from .._input import InputROOT
 from .._lazy import LazyNodeBase, lazify, String
 from .._colormaps import viridis
+from .._util import make_directory, product_dict
 
 __all__ = ['ContextValue', 'LiteralString', 'InputValue']
-
-
-def _make_directory(dir_path):
-    try:
-        os.makedirs(dir_path)
-    except OSError as e:
-        if e.errno == 17:  # File exists
-            pass
-        else:
-            raise
-
-def product_dict(**kwargs):
-    """Cartesian product of iterables in dictionary"""
-    _keys = kwargs.keys()
-    for instance in itertools.product(*kwargs.values()):
-        yield dict(zip(_keys, instance))
 
 
 class ConfigurationError(Exception):
