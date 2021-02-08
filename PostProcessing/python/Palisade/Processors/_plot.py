@@ -727,7 +727,9 @@ class PlotProcessor(_ProcessorBase):
                         markeredgewidth=1,
                     )
                 else:
-                    raise ValueError("Unkown value for 'marker_style': {}".format(_marker_style))
+                    raise ValueError(
+                        "Invalid value '{}' for 'marker_style'. Expected one of: full, white, empty".format(_marker_style)
+                    )
 
             # handle stacking
             _stack_name = _kwargs.pop('stack', None)
