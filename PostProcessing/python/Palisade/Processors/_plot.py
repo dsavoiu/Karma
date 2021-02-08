@@ -969,8 +969,8 @@ class PlotProcessor(_ProcessorBase):
             )
             if _ax.get_xscale() == 'log' and not _user_suppressed_x_ticklabels:
                 _log_decade_ticklabels = _pad_config.get('x_log_decade_ticklabels', {1.0, 2.0, 5.0, 10.0})
-                _minor_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False, sci_min_exp=4, sublabels_max_exp=3)
-                _major_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=True, sci_min_exp=4)
+                _minor_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=False, sci_min_exp=5, sublabels_max_exp=3)
+                _major_formatter = LogFormatterSciNotationForceSublabels(base=10.0, labelOnlyBase=True, sci_min_exp=5)
                 _ax.xaxis.set_minor_formatter(_minor_formatter)
                 _ax.xaxis.set_major_formatter(_major_formatter)
 
