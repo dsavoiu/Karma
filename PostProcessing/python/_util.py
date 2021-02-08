@@ -7,6 +7,8 @@ import os
 
 def make_directory(dir_path, exist_ok=False):
     """Convenience wrapper around os.makedirs, with option to run successfully if the targer directory exists"""
+    if not dir_path:
+        return
     try:
         os.makedirs(dir_path)
     except OSError as e:
