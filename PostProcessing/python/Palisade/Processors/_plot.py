@@ -689,12 +689,15 @@ class PlotProcessor(_ProcessorBase):
             _plot_method_name = _kwargs.pop('plot_method', 'errorbar')
 
             # -- obtain plot method
-            try:
-                # use external method (if available) and curry in the axes object
-                _plot_method = partial(self._EXTERNAL_PLOT_METHODS[_plot_method_name], _ax)
-            except KeyError:
-                #
-                _plot_method = getattr(_ax, _plot_method_name)
+            if callable(_plot_method_name):
+                _plot_method = partial(_plot_method_name, _ax)
+            else:
+                try:
+                    # use external method (if available) and curry in the axes object
+                    _plot_method = partial(self._EXTERNAL_PLOT_METHODS[_plot_method_name], _ax)
+                except KeyError:
+                    #
+                    _plot_method = getattr(_ax, _plot_method_name)
 
             if _plot_method_name in ['errorbar', 'step']:
                 _kwargs.setdefault('capsize', 0)
