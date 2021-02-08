@@ -53,6 +53,10 @@ class tqdm_always_newline(tqdm):
 __all__ = ["LumberjackInterfaceBase", "LumberjackCLI"]
 
 
+def numpy_representer_seq(dumper, data):
+    return dumper.represent_sequence('!ndarray:', data.tolist())
+
+yaml.add_representer(np.ndarray, numpy_representer_seq)
 
 
 class StreamDup:
