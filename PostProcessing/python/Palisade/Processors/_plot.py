@@ -18,7 +18,7 @@ import numpy as np
 
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import LogFormatterSciNotation, LogFormatterMathtext
-from matplotlib.colors import LogNorm, Normalize, colorConverter
+from matplotlib.colors import SymLogNorm, LogNorm, Normalize, colorConverter
 from matplotlib.text import Text
 from matplotlib.legend_handler import (
     HandlerBase as LegendHandlerBase,
@@ -787,6 +787,8 @@ class PlotProcessor(_ProcessorBase):
                         _norm = Normalize(vmin=_z_min, vmax=_z_max)
                     elif _z_scale == 'log':
                         _norm = LogNorm(vmin=_z_min, vmax=_z_max)
+                    elif _z_scale == 'symlog':
+                        _norm = SymLogNorm(linthresh=0.1, vmin=_z_min, vmax=_z_max)
                     else:
                         raise ValueError("Unknown value '{}' for keyword 'z_scale': known are {{'linear', 'log'}}".format(_z_scale))
                     _kwargs['norm'] = _norm
