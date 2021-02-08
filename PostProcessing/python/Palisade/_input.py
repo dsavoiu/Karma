@@ -8,12 +8,13 @@ import operator as op
 import os
 import pandas as pd
 import six
+import sys
 import uuid
 
 from array import array
 
 from rootpy import asrootpy
-from rootpy.io import root_open
+from rootpy.io import root_open, DoesNotExist
 from rootpy.plotting import Hist1D, Hist2D, Profile1D, Efficiency, Graph
 from rootpy.plotting.hist import _Hist, _Hist2D
 from rootpy.plotting.profile import _ProfileBase
@@ -22,6 +23,17 @@ if six.PY2:
     from collections import Mapping
 elif six.PY3:
     from collections.abc import Mapping
+
+try:
+    # import text similarity metric for more helpful alternative suggestions
+    if six.PY2:
+        from textdistance import jaccard as text_similarity_metric
+    elif six.PY3:
+        from textdistance import ratcliff_obershelp as text_similarity_metric
+except ImportError:
+    # use dummy similarity metric (will not sort suggestions by likelihood)
+    def text_similarity_metric(s1, s2):
+        return 1
 
 import scipy.stats as stats
 
@@ -705,7 +717,20 @@ class InputROOTFile(object):
                 _rebin_factor = request_spec.pop('rebin_factor', None)
                 _profile_error_option = request_spec.pop('profile_error_option', None)
 
-                _tobj = _tfile.Get(tobj_path)
+                try:
+                    _tobj = _tfile.Get(tobj_path)
+                except DoesNotExist as e:
+                    _available_paths = ['{}/{}'.format(_path, _obj_name) for _path, _, _obj_names in _tfile.walk() for _obj_name in _obj_names]
+                    if not _available_paths:
+                        six.raise_from(DoesNotExist(e.args[0] + " (file does not seem to contain any objects)."), e)
+
+                    # sort available paths by similarity to original query
+                    _sim_lambda = lambda s: text_similarity_metric(tobj_path, s)
+                    _available_paths.sort(key=lambda s: text_similarity_metric(tobj_path, s), reverse=True)
+
+                    # raise more informative exception
+                    six.raise_from(DoesNotExist(e.args[0] + ". Did you mean '{}'?".format(_available_paths[0].strip('/'))), e)
+
                 # for histograms: move to global directory
                 try:
                     _tobj.SetDirectory(0)
