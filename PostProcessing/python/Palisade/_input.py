@@ -1044,7 +1044,7 @@ class InputROOT(object):
         # register nickname (if given)
         if nickname is not None:
             if nickname in self._file_nick_to_realpath:
-                raise ValueError("Cannot add file for nickname '{}': nickname already registered for file '{}'".format(nickname, filename))
+                raise ValueError("Cannot add file for nickname '{}': nickname already registered for file '{}'".format(nickname, file_path))
             self._file_nick_to_realpath[nickname] = _file_realpath
 
         # create controller for file
