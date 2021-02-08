@@ -55,7 +55,7 @@ class _ContextResolutionError(Exception):
             maybe_spec=(
                 "\n\nThe context value specification was: {}".format(
                     # default to pretty-printed repr (for LazyNodes), if available
-                    getattr(self.spec, '_get_repr', lambda self, **kwargs: repr(self))(pprint=True)
+                    self.spec._get_repr(pprint=True) if hasattr(self.spec, '_get_repr') else repr(self.spec)
                 )
                 if self.spec is not None else ''
             ),
