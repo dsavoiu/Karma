@@ -276,8 +276,8 @@ def _plot_with_error_band(ax, *args, **kwargs):
 def _plot_as_step(ax, *args, **kwargs):
     """display data as horizontal bars with given by `x` +/- `xerr`. `y` error bars are also drawn."""
     assert len(args) == 2
-    _x = np.asarray(args[0])
-    _y = np.asarray(args[1])
+    _x = np.ma.asarray(args[0])
+    _y = np.ma.asarray(args[1])
     _zeros = np.zeros_like(_x)
 
     # kwarg `yerr_as_band` to display
@@ -308,8 +308,8 @@ def _plot_as_step(ax, *args, **kwargs):
     #    |       |
     #    +---+---+
     #  2     3     4
-    _x = np.vstack([_x, _x, _x, _x, _x]).T.flatten()
-    _y = np.vstack([_y, _y, _y, _y, _y]).T.flatten()
+    _x = np.ma.vstack([_x, _x, _x, _x, _x]).T.flatten()
+    _y = np.ma.vstack([_y, _y, _y, _y, _y]).T.flatten()
 
     # stop processing y errors if they are zero
     if np.allclose(_yerr, 0):
