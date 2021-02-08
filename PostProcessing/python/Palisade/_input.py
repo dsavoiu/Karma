@@ -611,12 +611,15 @@ class _ROOTObjectFunctions(object):
             ROOT.TUnfold.kRegModeNone,          # no regularization
             ROOT.TUnfold.kEConstraintNone,      # no constraints
         )
+        # ensure maximal numerical precision on matrix inversion
+        _tunfold.SetEpsMatrix(sys.float_info.epsilon)
+        # set the unfolding input
         _tunfold.SetInput(
             _th1d_input_clone
         )
         _tunfold.DoUnfold(0)
 
-        _th1d_output = th2d_response.ProjectionX(uuid.uuid4().get_hex()) #tobject_reco.Clone()
+        _th1d_output = th2d_response.ProjectionX(uuid.uuid4().get_hex())
         _tunfold.GetOutput(_th1d_output)
 
         _th2d_response_clone.Delete()
