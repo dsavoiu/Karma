@@ -357,7 +357,7 @@ def _plot_as_step(ax, *args, **kwargs):
 
         # compute boundary step
         _y_shifted = (_y.copy(), _y.copy())
-        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (1.0, -1.0)):
+        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (-1.0, 1.0)):
             _ye = _ye.copy()
             # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
             _ye[0::5] = _ye[2::5]
@@ -395,7 +395,7 @@ def _plot_as_step(ax, *args, **kwargs):
 
         # compute boundary step
         _y_shifted = (_y.copy(), _y.copy())
-        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (1.0, -1.0)):
+        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (-1.0, 1.0)):
             _ye = _ye.copy()
             # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
             _ye[0::5] = _ye[2::5]
