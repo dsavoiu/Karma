@@ -7,6 +7,7 @@ import six
 import warnings
 import yaml
 
+from collections import OrderedDict
 from copy import deepcopy
 from functools import partial
 from itertools import cycle
@@ -538,6 +539,61 @@ class PlotProcessor(_ProcessorBase):
         # return as lists
         return list(_hs), list(_ls)
 
+    @staticmethod
+    def _get_validate_pad_id(config_dict, config_dict_name, pad_spec_config, pads_config, pad_configs_are_sparse):
+        '''obtain pad ID from `config_dict` and validate it based on `pads` and `pad_spec` configs'''
+        _pad_id = config_dict.pop('pad', None)
+        _nrows, _ncols = pad_spec_config['nrows'], pad_spec_config['ncols']
+
+        # sparse `pads` specification
+        if pad_configs_are_sparse:
+            if _pad_id is None:
+                raise KeyError(
+                    "Missing mandatory keyword `pad` in `{}` (required when "
+                    "`pads` is provided as a dict of sparse (row, col) combinations).".format(config_dict_name))
+
+            # ensure `pad` is provided as (row, col)
+            try:
+                _pad_row_id, _pad_col_id = _pad_id
+            except TypeError:
+                raise TypeError("Invalid pad specification: expected tuple (row_index, column_index), got {}".format(_pad_id))
+
+            # check (row, col) within bounds
+            for _idx, _n, _dim in zip((_pad_row_id, _pad_col_id), (_nrows, _ncols), ('row', 'column')):
+                if not (-_n <= _idx < _n):
+                    raise ValueError(
+                        "Invalid pad specification {}: {dim} index out of bounds ({n} {dim}s "
+                        "have been configured in `pad_spec`).".format(_pad_id, dim=_dim, n=_n))
+
+            # handle negative row/column indices
+            _pad_id = (
+                _nrows + _pad_row_id if _pad_row_id < 0 else _pad_row_id,
+                _ncols + _pad_col_id if _pad_row_id < 0 else _pad_col_id,
+            )
+
+            # ensure corresponding pad specification exists
+            if _pad_id not in pads_config:
+                raise KeyError(
+                    "Invalid pad specification {}: no such pad declared in `pads` configuration.".format(_pad_id))
+
+        # full `pads` specification
+        else:
+            if _pad_id is None:
+                _pad_id = 0  # use first pad by default
+            elif not isinstance(_pad_id, int):
+                raise TypeError("Invalid pad specification: {}, expected integer".format(_pad_id))
+
+            if not (-len(pads_config) <= _pad_id < len(pads_config)):
+                raise ValueError(
+                    "Invalid pad specification: index {} out of bounds for `pads` configuration "
+                    "with length {}.".format(
+                        _pad_id, len(pads_config)))
+
+            # handle negative pad IDs
+            _pad_id = len(pads_config) + _pad_id if _pad_id < 0 else _pad_id
+
+        return _pad_id
+
     # -- actions
 
     def _request(self, config):
@@ -575,21 +631,107 @@ class PlotProcessor(_ProcessorBase):
 
         # obtain configuration of pads
         _pad_configs = config.get('pads', None)
-        if _pad_configs is None:
-            # default pad configuration
-            _pad_configs = [dict()]
+        _pad_configs_are_sparse = True  # `pad_configs` is dict with keys given as (row, col)
+        if not _pad_configs:
+            # default pad configuration (None, [] or {})
+            _pad_configs_are_sparse = False  # `pad_configs` is full list
+            _pad_configs = OrderedDict({0: dict()})
 
-        # get share
-        _height_ratios = [_pc.pop('height_share', 1) for _pc in _pad_configs]
+        # convert `pad_config` to OrderedDict
+        elif isinstance(_pad_configs, list) or isinstance(_pad_configs, tuple):
+            _pad_configs_are_sparse = False  # `pad_configs` is full list
+            _pad_configs = OrderedDict((_i, _pc) for _i, _pc in enumerate(_pad_configs))
 
-        # construct GridSpec from `pad_spec` or make default
-        _gridspec_kwargs = config.get('pad_spec', dict())
-        _gridspec_kwargs.pop('height_ratios', None)   # ignore explicit user-provided `height_ratios`
-        _gs = GridSpec(nrows=len(_pad_configs), ncols=1, height_ratios=_height_ratios, **_gridspec_kwargs)
+        # get kwargs to construct GridSpec from `pad_spec`
+        _pad_spec_kwargs = config.get('pad_spec', dict())
 
-        # store `Axes` objects in pad configuration
-        for _i_pad, _pad_config in enumerate(_pad_configs):
-            _pad_config['_axes'] = _fig.add_subplot(_gs[_i_pad])
+        # get number of rows/columns from 'grid_shape' kwarg (default: 1)
+        _nrows = _pad_spec_kwargs.get('nrows', None)
+        _ncols = _pad_spec_kwargs.get('ncols', None)
+
+        # must provide nrows and ncols for sparse configurations
+        if _pad_configs_are_sparse:
+            if _nrows is None or _ncols is None:
+                raise ValueError(
+                    "Invalid `pad_spec`: must provide both `nrows` and `ncols` if `pads` is provided "
+                    "as a dict of sparse (row, col) combinations.")
+
+        # can infer one of `nrows` or `ncols` if full `pads` configuration is provided
+        else:
+            if _nrows is None and (_ncols is None or _ncols == 1):
+                # default layout: one column, infer rows
+                _nrows, _ncols = len(_pad_configs), 1
+
+            elif _ncols is None and _nrows == 1:
+                # one row, infer columns
+                _nrows, _ncols = 1, len(_pad_configs)
+
+            else:
+                _nrows = 1 if _nrows is None else _nrows
+                _ncols = 1 if _ncols is None else _ncols
+
+                if _nrows != 1 and _ncols != 1:
+                    raise ValueError(
+                        "Invalid `pad_spec`: cannot supply nontrivial values for both `nrows` ({}) and "
+                        "`ncols` ({}) if `pads` is provided as a full list.".format(_nrows, _ncols))
+                elif _nrows * _ncols != len(_pad_configs):
+                    raise ValueError(
+                        "Invalid `pad_spec`: number of rows/columns ({}) must match the number of "
+                        "`pads` provided ({}).".format(_nrows*_ncols, len(_pad_configs)))
+
+        # get height/width ratios from '*_ratios' in pad_spec (or '*_share' pad kwargs when unambiguous)
+        for _share_key, _dim_expect_one, _dim_name, _pad_spec_key in zip(
+            ('height_share', 'width_share'), (_ncols, _nrows), ('column', 'row'), ('height_ratios', 'width_ratios')
+        ):
+            if any(_share_key in _pc for _pc in _pad_configs.values()):
+                if _pad_spec_key in _pad_spec_kwargs:
+                    warnings.warn(
+                        "Both `{pad_spec_key}` and `{share_key}` were provided in `pad_spec` and `pads`, respectively. "
+                        "The latter will be ignored.".format(share_key=_share_key, pad_spec_key=_pad_spec_key),
+                        UserWarning
+                    )
+                elif _dim_expect_one != 1:
+                    warnings.warn(
+                        "Keyword `{share_key}` provided for a grid with more than one {dim_name} is not well "
+                        "defined and will have no effect. Provide this information using keyword `{pad_spec_key}` "
+                        "in `pad_spec` instead.".format(share_key=_share_key, pad_spec_key=_pad_spec_key, dim_name=_dim_name),
+                        UserWarning
+                    )
+                    _pad_spec_kwargs[_pad_spec_key] = None
+                elif _pad_configs_are_sparse:
+                    warnings.warn(
+                        "Keyword `{share_key}` is not supported when `pads` is provided as a dict of sparse (row, col) "
+                        "combinations. "
+                        "Either provide a full list of `pads` or provide this information using keyword `{pad_spec_key}` "
+                        "in `pad_spec`.".format(share_key=_share_key, pad_spec_key=_pad_spec_key, dim_name=_dim_name),
+                        UserWarning
+                    )
+                    _pad_spec_kwargs[_pad_spec_key] = None
+                else:
+                    _pad_spec_kwargs[_pad_spec_key] = [_pc.pop(_share_key, 1) for _pc in _pad_configs.values()]
+
+        _pad_spec_kwargs['nrows'] = _nrows
+        _pad_spec_kwargs['ncols'] = _ncols
+
+        # init gridspec
+        _gs = GridSpec(**_pad_spec_kwargs)
+
+        # validate `pads` keys; create and store `Axes` objects in pad configuration
+        for _pad_id, _pad_config in six.iteritems(_pad_configs):
+            if _pad_configs_are_sparse:
+                try:
+                    _pad_row_id, _pad_col_id = _pad_id
+                except TypeError:
+                    raise TypeError("Invalid key {} in `pads`: expected tuple (row_index, column_index)".format(_pad_id))
+
+                # check (row, col) within bounds
+                for _idx, _n, _dim in zip((_pad_row_id, _pad_col_id), (_nrows, _ncols), ('row', 'column')):
+                    if not (0 <= _idx < _n):  # disallow negative integers here
+                        raise ValueError(
+                            "Invalid key {} in `pads`: {dim} index out of bounds ({n} {dim}s "
+                            "have been configured in `pad_spec`).".format(_pad_id, dim=_dim, n=_n))
+
+            _pad_config['_axes'] = _fig.add_subplot(_gs[_pad_id])
 
         _stack_bottoms = _pad_config.setdefault('_stack_bottoms', {})
         _bin_labels = _pad_config.setdefault('bin_labels', {})
@@ -611,12 +753,13 @@ class PlotProcessor(_ProcessorBase):
             _kwargs = deepcopy(_pc)
 
             # obtain and validate pad ID
-            _pad_id = _kwargs.pop('pad', 0)
-            if _pad_id >= len(_pad_configs):
-                raise ValueError("Cannot plot to pad {}: only pads up to {} have been configured!".format(_pad_id, len(_pad_configs)-1))
+            _pad_id = self._get_validate_pad_id(
+                _kwargs, 'subplots',
+                pad_spec_config=_pad_spec_kwargs, pads_config=_pad_configs, pad_configs_are_sparse=_pad_configs_are_sparse
+            )
 
             # select pad axes and configuration
-            _pad_config = _pad_configs[_pad_id]
+            _pad_config = _pad_configs[_pad_id]  # key either integer pad id or (row, col) pad spec
             _ax = _pad_config['_axes']
             _stack_bottoms = _pad_config.setdefault('_stack_bottoms', {})
             _stack_labels = _pad_config.setdefault('stack_labels', [])
@@ -823,7 +966,7 @@ class PlotProcessor(_ProcessorBase):
 
             # store 2D plots for displaying color bars
             if _plot_method_name == 'pcolormesh':
-                _pad_config.setdefault('2d_plots', []).append(_plot_handle)
+                _pad_config.setdefault('_2d_plots', []).append(_plot_handle)
                 # add 2D bin annotations, if requested
                 if _label_bins_with_content:
                     _bin_center_x = 0.5 * (_plot_data['xedges'][1:] + _plot_data['xedges'][:-1])
@@ -881,7 +1024,7 @@ class PlotProcessor(_ProcessorBase):
             _text_file.close()
 
         # step 3: pad adjustments
-        for _pad_config in _pad_configs:
+        for _pad_config in _pad_configs.values():
             _ax = _pad_config['_axes']
 
             # simple axes adjustments
@@ -893,7 +1036,7 @@ class PlotProcessor(_ProcessorBase):
                     _pad_config['_applied_modifiers'][_prop_name] = _prop_val
 
             # draw colorbar if there was a 2D plot involved and a colorbar should be drawn
-            _2d_plots = _pad_config.pop('2d_plots', [])
+            _2d_plots = _pad_config.get('_2d_plots', [])
             _z_label = _pad_config.pop('z_label', None)
             _z_labelpad = _pad_config.pop('z_labelpad', None)
             if _pad_config.pop('draw_colorbar', True):
@@ -1027,8 +1170,13 @@ class PlotProcessor(_ProcessorBase):
         # draw text/annotations
         _text_configs = config.pop('texts', [])
         for _text_config in _text_configs:
-            # retrieve target pad
-            _pad_id = _text_config.pop('pad', 0)
+            # obtain and validate target pad ID
+            _pad_id = self._get_validate_pad_id(
+                _text_config, 'texts',
+                pad_spec_config=_pad_spec_kwargs, pads_config=_pad_configs, pad_configs_are_sparse=_pad_configs_are_sparse
+            )
+
+            # retrieve target pad axes
             _ax = _pad_configs[_pad_id]['_axes']
 
             # handle deprecated keyword 'transform'
@@ -1063,7 +1211,12 @@ class PlotProcessor(_ProcessorBase):
                 "textcoords='offset points', ha='right', pad=0).", DeprecationWarning)
 
             # place above topmost `Axes`
-            _pad_configs[0]['_axes'].annotate(_upper_label, xy=(1, 1),
+            if _pad_configs_are_sparse:
+                _topmost_pad = _pad_configs[(_nrows-1, _ncols-1)]
+            else:
+                _topmost_pad = _pad_configs[_ncols-1]
+
+            _topmost_pad['_axes'].annotate(_upper_label, xy=(1, 1),
                 xycoords='axes fraction',
                 xytext=(0, 5),
                 textcoords='offset points',

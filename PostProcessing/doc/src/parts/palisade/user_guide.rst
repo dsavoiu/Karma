@@ -694,11 +694,24 @@ Each figure dictionary must contain the following keys:
     +------------------------+-------------------------------------------------------------------------+
     | **figsize**            | tuple of two floats indicating image width, height in inches.           |
     +------------------------+-------------------------------------------------------------------------+
-    | **pads**               | list of dictionaries, each containing a *pad configuration*             |
-    |                        | (see :ref:`below <user-guide-palisade-multiple-pads>`)                  |
-    +------------------------+-------------------------------------------------------------------------+
     | **pad_spec**           | a dictionary with keywords for customizing the layout of pads contained |
     |                        | in the figure (see :ref:`below <user-guide-palisade-multiple-pads>`)    |
+    +------------------------+-------------------------------------------------------------------------+
+    | **pads**               | a list or dictionary that contains pad-specific information (axis       |
+    |                        | labels, plot ranges, etc.) for all pads contained in the figure.        |
+    |                        |                                                                         |
+    |                        | For simple single-column (or single-row) layouts, a list of dicts       |
+    |                        | can be provided, with *i*-th dictionary containing the configuration    |
+    |                        | of the *i*-th pad from the top (or left).                               |
+    |                        |                                                                         |
+    |                        | For a more sophisticated grid layout with multiple rows and columns,    |
+    |                        | `pads` must be given as a dictionary with keys of the form `(row_index, |
+    |                        | column_index)` mapping to the configuration of pad at that position in  |
+    |                        | the layout. Row and column indices are counted from the top left and    |
+    |                        | should range from 0 to `nrows` and `ncols`, as specified in `pad_spec`. |
+    |                        | Not all cells in a grid need to be present, in which case the           |
+    |                        | corresponding space is left blank.                                      |
+    |                        | (see also :ref:`below <user-guide-palisade-multiple-pads>`)             |
     +------------------------+-------------------------------------------------------------------------+
     | **texts**              | list of dictionaries containing the specification of text elements to   |
     |                        | shown on the figure. (see                                               |
@@ -750,6 +763,22 @@ additional keyword arguments. They are listed in the following overview:
     |                        | :ref:`above <user-guide-palisade-expressions>` for more  |              |
     |                        | information on expressions)                              |              |
     +------------------------+----------------------------------------------------------+--------------+
+    | *Potentially mandatory keys*:                                                                    |
+    +------------------------+----------------------------------------------------------+--------------+
+    | **pad**                | the pad in **pads** to which the subplot should be       | ``0`` (if    |
+    |                        | plotted.                                                 | **pads** is  |
+    |                        |                                                          | list),       |
+    |                        | If **pads** is a list (i.e. for simple                   | otherwise    |
+    |                        | single-column/single-row layouts), this can be an        | *required*   |
+    |                        | integer indicating the position of the pad in the list,  |              |
+    |                        | starting with ``0`` for the topmost/leftmost pad         |              |
+    |                        | (negative values count from the bottom/right instead).   |              |
+    |                        |                                                          |              |
+    |                        | If **pads** is a dictionary (e.g. for grid layouts),     |              |
+    |                        | the **pad** key is mandatory and a pad specification of  |              |
+    |                        | the form `(row_index, column_index)` must be supplied,   |              |
+    |                        | starting from `(0, 0)` for the top left.                 |              |
+    +------------------------+----------------------------------------------------------+--------------+
     | *Optional keys*:                                                                                 |
     +------------------------+----------------------------------------------------------+--------------+
     | **label**              | a string containing a label for this plot. The label     | ``None``     |
@@ -777,9 +806,6 @@ additional keyword arguments. They are listed in the following overview:
     +------------------------+----------------------------------------------------------+--------------+
     | **mask_zero_errors**   | if ``True``, hide bins/points for which the errors are   | ``False``    |
     |                        | equal to zero                                            |              |
-    +------------------------+----------------------------------------------------------+--------------+
-    | **pad**                | index of the pad in **pads** to which the subplot will   | ``0``        |
-    |                        | be plotted                                               |              |
     +------------------------+----------------------------------------------------------+--------------+
     | **plot_method**        | name of the *matplotlib* method to use for plotting.     | ``errorbar`` |
     |                        | Should be a valid method of                              |              |
@@ -842,14 +868,63 @@ Sometimes multiple plot **pads** are needed. A typical use-case for this is to
 show the ratio(s) of two or more objects together with the objects themselves
 in the same figure.
 
-To create multiple pads, two keyword arguments are provided: ``pads``
-and ``pad_spec``. The former contains a list of pad configuration
-dictionaries (one pad is created per dictionary), while the latter controls
-the pad layout (margins, spacings, etc.).
+To create multiple pads, two keyword arguments are provided: ``pad_spec`` and ``pads``. The former controls
+the layout of pads within the figure (e.g. number of rows/columns, margins, spacing), while the latter
+contains configuration dictionaries that control the properties of each pad (e.g. plot ranges, axis labels).
 
-Pad configuration dictionaries in ``pads`` can specify the following
-optional keys:
+The ``pad_spec`` dictionary can be used for adjusting the layout-specific parameters. The following
+keywords can be provided:
 
+.. table::
+    :widths: 20, 80
+
+    +--------------------+----------------------------------------------------------+
+    | Key                | Description                                              |
+    +====================+==========================================================+
+    | **left**,          | floats indicating the area taken up by all pads, as      |
+    | **right**,         | fractions of the figure dimensions.                      |
+    | **top**,           |                                                          |
+    | **bottom**         |                                                          |
+    +--------------------+----------------------------------------------------------+
+    | **wspace**,        | floats indicating amount of space left between pads, as  |
+    | **hspace**         | a fraction of the average axis width/height              |
+    +--------------------+----------------------------------------------------------+
+    | **nrows**,         | integers indicating the number of rows/columns to use    |
+    | **ncols**          | when laying out the pads. If both are omitted, a         |
+    |                    | single-column layout is assumed (the number of rows is   |
+    |                    | inferred from the number of entries in ``pads``).        |
+    +--------------------+----------------------------------------------------------+
+    | **height_ratios**, | list of `nrows`/`ncols` floats indicating the share of   |
+    | **width_ratios**   | the total plot height or width.                          |
+    |                    | Pads in a row (column) will take up a fraction of the    |
+    |                    | total plot height (width) corresponding to the ratio of  |
+    |                    | the corresponding value in **height_ratios**             |
+    |                    | (**width_ratios**) to the sum of all values.             |
+    |                    |                                                          |
+    +--------------------+----------------------------------------------------------+
+
+All the above ``pad_spec`` keywords are passed to the constructor of a
+:py:class:`matplotlib.gridspec.GridSpec` object for the current axes. For more
+details, consult the *matplotlib* documentation.
+
+The properties of individual pads are supplied via the ``pads`` configuration entry.
+For simple layouts that contain only one pad or several pads arranged in a single
+column or a single row, the ``pads`` entry can simply consist of a list of
+pad configuration dictionaries. The *i*-th list entry corresponds to the configurations of
+the pad in the *i*-th row (for single-column layouts) or column (for single-row layouts),
+counting from the top/left starting from ``0``.
+
+For more sophisticated layouts with pads arranged on a grid in multiple rows and columns,
+the ``pads`` entry must be supplied as a dictionary with keys of the form `(row_index,
+column_index)` mapping to the configuration of the pad that should appear at that
+position in the grid, again counting row and column indices starting from ``0`` at the top
+left.
+It is not necessary to provide a pad configuration for all grid positions (in case none
+exists, the corresponding grid cell will be left blank), but row and column indices may
+not be negative or exceed the value of `nrows` and `ncols`, as supplied in the ``pad_spec``
+configuration entry.
+
+The pad configuration dictionaries contained in ``pads`` supports the following keys:
 
 .. table::
     :widths: 20, 80
@@ -881,10 +956,21 @@ optional keys:
     |                                 |       }                                                  |
     |                                 |     ]                                                    |
     +---------------------------------+----------------------------------------------------------+
-    | **height_share**                | float indicating the share of the total plot height.     |
-    |                                 | The pad will take up a fraction of the plot height       |
-    |                                 | corresponding to the ratio of this value to the sum of   |
-    |                                 | the **height_share** values of all pads.                 |
+    | **height_share**,               | float indicating the share of the total plot height      |
+    | **width_share**                 | or width. The pad will take up a fraction of the plot    |
+    |                                 | height (width) corresponding to the ratio of this value  |
+    |                                 | to the sum of the **height_share** (**width_share**) of  |
+    |                                 | all pads.                                                |
+    |                                 |                                                          |
+    |                                 | .. note::                                                |
+    |                                 |     Only one of these keywords can be used at a time:    |
+    |                                 |     **height_share** for single-column (``ncols = 1``)   |
+    |                                 |     **width_share** for single-row (``nrows = 1``)       |
+    |                                 |     layouts. For grid layouts, these keywords will have  |
+    |                                 |     no effect, and instead the relative cell dimensions  |
+    |                                 |     should be set using the **height_ratios** and        |
+    |                                 |     **width_ratios** keywords in ``pad_spec``.           |
+    |                                 |                                                          |
     +---------------------------------+----------------------------------------------------------+
     | **legend_additional_entries**   | list of dictionaries specifying additional entries       |
     |                                 | to show in the legend. The dictionaries must contain     |
@@ -999,36 +1085,6 @@ optional keys:
 
 .. TODO: add undocumented keywords: stack_bottoms, bin_labels, bin_label_anchors,
 
-The ``pad_spec`` dictionary can be used for adjusting some
-layout-specific parameters such as *margins* or the spacing between pads.
-The following keywords are supported:
-
-.. table::
-    :widths: 20, 80
-
-    +-------------------+----------------------------------------------------------+
-    | Key               | Description                                              |
-    +===================+==========================================================+
-    | **left**,         | floats indicating the area taken up by all pads, as      |
-    | **right**,        | fractions of the figure dimensions.                      |
-    | **top**,          |                                                          |
-    | **bottom**        |                                                          |
-    +-------------------+----------------------------------------------------------+
-    | **wspace**,       | floats indicating amount of space left between pads, as  |
-    | **hspace**        | a fraction of the average axis width/height              |
-    +-------------------+----------------------------------------------------------+
-
-All the above ``pad_spec`` keywords are passed to the constructor of a
-:py:class:`matplotlib.gridspec.GridSpec` object for the current axes. For more
-details, consult the *matplotlib* documentation.
-
-.. note::
-
-  At the moment, only a vertical arrangement of pads is supported. In a future
-  release, support for other layouts may be provided (to the extent that they
-  are supported by the :py:class:`~matplotlib.gridspec.GridSpec` interface
-  in *matplotlib*).
-
 .. _user-guide-palisade-texts:
 
 Adding text annotations to plots
@@ -1043,7 +1099,6 @@ which it should appear in the image. The annotation can optionally be placed at 
 position by additionally specifying the keyword **xytext**. This is typically accompanied by
 an arrow pointing from the annotation to the point *xy*.
 
-The following table contains a summary of keywords
 These and other aspects of the annotation can be controlled via a number of optional keywords,
 which are summarized in the table below:
 
@@ -1063,6 +1118,24 @@ which are summarized in the table below:
     |                          | should be annotated. This is also the position of the   |              |
     |                          | annotation text, unless it is overridden via the        |              |
     |                          | optional keyword **xytext**.                            |              |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | *Potentially mandatory keys*:                                                                     |
+    +--------------------------+---------------------------------------------------------+--------------+
+    | **pad**                  | the pad in **pads** in which the annotation should      | ``0`` (if    |
+    |                          | appear. While annotations are always bound to a `pad`,  | **pads** is  |
+    |                          | they can also be placed outside of it by specifying     | list),       |
+    |                          | ``xy`` and/or ``xytext`` accordingly.                   | otherwise    |
+    |                          |                                                         | *required*   |
+    |                          | If **pads** is a list (i.e. for simple                  |              |
+    |                          | single-column/single-row layouts), this can be an       |              |
+    |                          | integer indicating the position of the pad in the list, |              |
+    |                          | starting with ``0`` for the topmost/leftmost pad        |              |
+    |                          | (negative values count from the bottom/right instead).  |              |
+    |                          |                                                         |              |
+    |                          | If **pads** is a dictionary (e.g. for grid layouts),    |              |
+    |                          | the **pad** key is mandatory and a pad specification of |              |
+    |                          | the form `(row_index, column_index)` must be supplied,  |              |
+    |                          | starting from `(0, 0)` for the top left.                |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | *Optional keys*:                                                                                  |
     +--------------------------+---------------------------------------------------------+--------------+
@@ -1107,9 +1180,6 @@ which are summarized in the table below:
     |                          |                                                         |              |
     |                          | Consult the `matplotlib documentation`_ for more        |              |
     |                          | details about the meaning of the above specifications.  |              |
-    +--------------------------+---------------------------------------------------------+--------------+
-    | **pad**                  | index of the pad in **pads** in which the text will     | ``0``        |
-    |                          | be plotted                                              |              |
     +--------------------------+---------------------------------------------------------+--------------+
     | **transform**            | .. warning::                                            | ``axes``     |
     |                          |     This keyword is deprecated. Use ``xycoords`` and    |              |
