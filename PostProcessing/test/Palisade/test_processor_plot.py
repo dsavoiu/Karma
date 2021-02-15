@@ -490,3 +490,93 @@ class TestPlotProcessor(unittest.TestCase):
         #assert len(_obj_yml_dicts) == 1  # should be present twice
         #self._assert_yml_equal_to_ref(_obj_yml_dicts[0], self._REF_OBJECTS['h1'])
         #self._assert_yml_equal_to_ref(_obj_yml_dicts[1], self._REF_OBJECTS['h1'])
+
+
+    def test_layout_pads_list(self):
+        for _n_pads, _layout, _target_pads, _expect_err, _err_validator in [
+            # one pad
+            (1, None, [None], None, None),          # default
+            (1, (None, None), [None], None, None),  # alt default
+            (1, (None, 1), [None], None, None),     # ncols=1
+            (1, (1, None), [None], None, None),     # nrows=1
+            (1, (1, 1), [None], None, None),        # nrows=ncols=1
+            # two pads
+            (2, None, [0, 1, 1, -1], None, None),
+            (2, None, [42], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid pad specification", "index 42 out of bounds", "length 2"))),
+            # multiple pads (only one of `nrows` and `ncols` may be supplied and must match _n_pads)
+            (4, (None, 4), [None], None, None), # explicit nrows, matches _n_pads) -> OK
+            (4, (4, None), [None], None, None), # explicit ncols, matches _n_pads) -> OK
+
+            # either `nrows` or `ncols`, does not match _n_pads -> ERROR
+            (4, (None, 3), [None], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "number of rows/columns (3) must match", "number of `pads` provided (4)"))),
+            (4, (3, None), [None], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "number of rows/columns (3) must match", "number of `pads` provided (4)"))),
+
+            # both `nrows` and `ncols` -> ERROR (must provide `pads` as dict, even if nrows * ncols = _n_pads)
+            (4, (3, 2), [None], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "cannot supply nontrivial values", "`nrows` (3)", "`ncols` (2)", "`pads` is provided as a full list"))),
+            (4, (2, 2), [None], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "cannot supply nontrivial values", "`nrows` (2)", "`ncols` (2)", "`pads` is provided as a full list"))),
+        ]:
+
+            _cfg = deepcopy(self.BASE_CFG)
+            _fig = _cfg['figures'][0]
+            _fig['pad_spec'] = {} if _layout is None else {"nrows": _layout[0], "ncols": _layout[1]}
+            _fig['pads'] = [{}] * _n_pads
+            _fig['subplots'] = [
+                dict(expression='"test:h1"', pad=_i)
+                for _i in _target_pads
+            ]
+
+            if _expect_err:
+                with self.assertRaises(_expect_err) as _err:
+                    self._run_palisade(config=_cfg)
+                if _err_validator:
+                    _err_validator(_err.exception)
+            else:
+                self._run_palisade(config=_cfg)
+
+    def test_layout_pads_dict(self):
+        for _spec_layout, _pad_layout, _target_pads, _expect_err, _err_validator in [
+            # -- one pad
+            (None, (0, 0), [None], None, None),    # default (one implicit, undeclared, implicitly targeted pad) -> OK
+            (None, (0, 0), [0], None, None),       # one implicit, undeclared, explicitly integer-targeted pad -> OK
+            # one implicit, undeclared, explicitly tuple-targeted pad -> ERROR (cannot use tuple)
+            (None, (0, 0), [(0, 0)], TypeError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid pad specification: (0, 0), expected integer",))),
+            # one explicit, undeclared pad -> ERROR (always need to declare)
+            (None, (1, 1), [(0, 0)], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "provide both `nrows` and `ncols`", "`pads` is provided as a dict of sparse (row, col) combinations"))),
+            # one explicit, incompletely declared pad -> ERROR (always need to declare both `nrows` and `ncols`)
+            ((None, 1), (1, 1), [(0, 0)], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "provide both `nrows` and `ncols`", "`pads` is provided as a dict of sparse (row, col) combinations"))),
+            ((1, None), (1, 1), [(0, 0)], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid `pad_spec`", "provide both `nrows` and `ncols`", "`pads` is provided as a dict of sparse (row, col) combinations"))),
+            # one explicit, correctly declared pad -> OK
+            ((1, 1), (1, 1), [(0, 0)], None, None),
+            # -- multiple pads
+            ((2, 3), (2, 3), [(0, 0)], None, None), # OK
+            ((2, 3), (2, 3), [(i, j) for i in range(2) for j in range(3)], None, None), # OK
+            ((2, 3), (2, 3), [7], TypeError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid pad specification: expected tuple (row_index, column_index), got 7",))),
+            ((2, 3), (2, 3), [(10, 0)], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid pad specification (10, 0):", "row index out of bounds", "2 rows have been configured in `pad_spec`"))),
+            ((2, 3), (2, 3), [(0, 10)], ValueError, lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid pad specification (0, 10):", "column index out of bounds", "3 columns have been configured in `pad_spec`"))),
+            # declared grid larger than declared pads -> OK
+            ((5, 6), (2, 3), [(0, 0)], None, None),
+            ((5, 6), (2, 3), [], None, None),
+            # declared grid smaller than declared pads -> ERROR
+            ((2, 3), (5, 6), [], ValueError,  lambda e: tuple(self.assertIn(_s, str(e)) for _s in ("Invalid key", "in `pads`", "index out of bounds"))),
+        ]:
+
+            _cfg = deepcopy(self.BASE_CFG)
+            _fig = _cfg['figures'][0]
+            _fig['pad_spec'] = {} if _spec_layout is None else {"nrows": _spec_layout[0], "ncols": _spec_layout[1]}
+            _fig['pads'] = {
+                (_i_row, _i_col) : {}
+                for _i_row in range(_pad_layout[0])
+                for _i_col in range(_pad_layout[1])
+            }
+            _fig['subplots'] = [
+                dict(expression='"test:h1"', pad=_i)
+                for _i in _target_pads
+            ]
+
+            if _expect_err:
+                with self.assertRaises(_expect_err) as _err:
+                    self._run_palisade(config=_cfg)
+                if _err_validator:
+                    _err_validator(_err.exception)
+            else:
+                self._run_palisade(config=_cfg)
