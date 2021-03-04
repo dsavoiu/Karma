@@ -12,10 +12,10 @@ from tqdm import tqdm
 
 import numpy as np
 
+from ..._util import make_directory, product_dict
 from .._input import InputROOT
 from .._lazy import LazyNodeBase, lazify, String
 from .._colormaps import viridis
-from .._util import make_directory, product_dict
 
 __all__ = ['ContextValue', 'LiteralString', 'InputValue']
 
