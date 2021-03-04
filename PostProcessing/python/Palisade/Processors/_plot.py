@@ -1158,7 +1158,7 @@ class PlotProcessor(_ProcessorBase):
                     print("WARNING: Bin labels found for axis '{}', but this is not supported. Ignoring...".format(_axis))
 
             # run user-defined code on axes
-            _pad_config.pop('axes_epilog', lambda ax: None)(_ax)
+            _pad_config.pop('axes_epilog', lambda **kwargs: None)(ax=_ax, pad_config=_pad_config)
 
             # warn about unknown keywords
             _unknown_kws = sorted([_kw for _kw in _pad_config if not _kw.startswith('_')])
@@ -1224,7 +1224,7 @@ class PlotProcessor(_ProcessorBase):
             )
 
         # run user-defined code on figure (and/or axes)
-        config.get('epilog', lambda fig, axes: None)(_fig, [_pc['_axes'] for _pc in _pad_configs])
+        config.get('epilog', lambda **kwargs: None)(figure=_fig, axes=[_pc['_axes'] for _pc in _pad_configs.values()], pad_configs=_pad_configs)
 
         # step 6: save figures
         make_directory(os.path.dirname(_filename), exist_ok=True)
