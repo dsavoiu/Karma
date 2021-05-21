@@ -926,8 +926,18 @@ class PlotProcessor(_ProcessorBase):
                     _z_min, _z_max = _z_masked.min(), _z_masked.max()
 
                 # determine colormap normalization (if not explicitly given)
-                if 'norm' not in _kwargs:
+                if 'norm' not in _kwargs or _kwargs['norm'] is None:
                     _z_scale = _pad_config.pop('z_scale', "linear")
+
+                    # prevent failure when using log with negative/zero data
+                    if _z_scale in ('log', 'symlog') and _z_min <= 0 or _z_max <= 0:
+                        warnings.warn(
+                            "Full data range {} cannot be mapped to colorbar using scale '{}'. "
+                            "Falling back to matplotlib default.".format((_z_min, _z_max), _z_scale),
+                            UserWarning
+                        )
+                        _z_min, _z_max = None, None
+
                     if _z_scale == 'linear':
                         _norm = Normalize(vmin=_z_min, vmax=_z_max)
                     elif _z_scale == 'log':
@@ -935,7 +945,7 @@ class PlotProcessor(_ProcessorBase):
                     elif _z_scale == 'symlog':
                         _norm = SymLogNorm(linthresh=0.1, vmin=_z_min, vmax=_z_max)
                     else:
-                        raise ValueError("Unknown value '{}' for keyword 'z_scale': known are {{'linear', 'log'}}".format(_z_scale))
+                        raise ValueError("Unknown value '{}' for keyword 'z_scale': known are {{'linear', 'log', 'symlog'}}".format(_z_scale))
                     _kwargs['norm'] = _norm
 
                 # Z array needs to be transposed because 'X' refers to columns and 'Y' to rows...
