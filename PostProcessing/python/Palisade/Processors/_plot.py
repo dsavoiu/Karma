@@ -519,8 +519,9 @@ class PlotProcessor(_ProcessorBase):
         return _seen_label_handles, _seen_labels
 
     @staticmethod
-    def _sort_legend_handles_labels(handles, labels, stack_labels=None):
+    def _sort_legend_reverse_stacks(handles, labels, stack_labels=None):
         '''sort handles and labels, reversing the order of those that are part of a stack'''
+
         # if no stacks or a stack with a single label, don't sort
         if stack_labels is None or len(stack_labels) <= 1:
             return handles, labels
@@ -538,6 +539,23 @@ class PlotProcessor(_ProcessorBase):
 
         # return as lists
         return list(_hs), list(_ls)
+
+    @staticmethod
+    def _sort_legend_by_label(handles, labels, key=None):
+        '''sort legend handles and labels according to a key'''
+
+        # no sorting if no key
+        if key is None:
+            return handles, labels
+
+        # indices that would sort the label list according to `key`
+        _idx_sorted = [i for i, _ in sorted(enumerate(labels), key=lambda (idx, label): key(label))]
+
+        handles = [handles[_idx] for _idx in _idx_sorted]
+        labels = [labels[_idx] for _idx in _idx_sorted]
+
+        # return as lists
+        return handles, labels
 
     @staticmethod
     def _get_validate_pad_id(config_dict, config_dict_name, pad_spec_config, pads_config, pad_configs_are_sparse):
@@ -763,8 +781,15 @@ class PlotProcessor(_ProcessorBase):
             _ax = _pad_config['_axes']
             _stack_bottoms = _pad_config.setdefault('_stack_bottoms', {})
             _stack_labels = _pad_config.setdefault('stack_labels', [])
+            _labels = _pad_config.setdefault('_labels', [])
+            _legend_order = _pad_config.setdefault('_legend_order', [])
             _bin_labels = _pad_config.setdefault('bin_labels', {})
             _bin_label_anchors = _pad_config.setdefault('bin_label_anchors', {})
+
+            # keep track of labels and user-supplied legend order information
+            # (used to determine the order of legend entries later)
+            _labels.append(_kwargs.get('label', None))
+            _legend_order.append(_kwargs.pop('legend_order', None))
 
             _expression = _kwargs.pop('expression')
             #("PLT {}".format(_expression))
@@ -1079,10 +1104,28 @@ class PlotProcessor(_ProcessorBase):
             # obtain legend handles and labels
             _hs, _ls = _ax.get_legend_handles_labels()
 
+            # retrieve labels of sublots in this pad
+            _pad_labels = _pad_config.pop("_labels")
+            assert all(_l in _pad_labels for _l in _ls), (
+                "Internal error: some labels returned by get_legend_handles_labels are "
+                "not present in pad config under '_labels': {}".format(
+                    ', '.join(_l for _l in _ls if _l in (_pad_labels or []))
+                )
+            )
+
+            # if unspecified legend order/indices, use order in 'subplots'
+            _pad_legend_order = _pad_config.pop("_legend_order")
+            assert len(_pad_labels) == len(_pad_legend_order)  # internal error
+            _missing_orders = six.moves.filterfalse(lambda x: x in _pad_legend_order, range(len(_pad_legend_order)))
+            _pad_legend_order = [_plo if _plo is not None else _missing_orders.next() for _plo in _pad_legend_order]
+
+            # sort legend entries according to specified/default order
+            _hs, _ls = self._sort_legend_by_label(_hs, _ls, key=lambda l: _pad_legend_order[_pad_labels.index(l)])
+
             # re-sort, reversing the order of labels that are part of a stack
             _stack_labels = _pad_config.pop("stack_labels", None)
             if _pad_config.pop("legend_reverse_stack_order", True):
-                _hs, _ls = self._sort_legend_handles_labels(_hs, _ls, stack_labels=_stack_labels)
+                _hs, _ls = self._sort_legend_reverse_stacks(_hs, _ls, stack_labels=_stack_labels)
 
             # merge legend entries with identical labels
             _hs, _ls = self._merge_legend_handles_labels(_hs, _ls)

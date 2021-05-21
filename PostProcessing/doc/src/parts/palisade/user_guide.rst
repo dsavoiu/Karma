@@ -817,6 +817,11 @@ additional keyword arguments. They are listed in the following overview:
     | **stack**              | subplots with the same **stack** are stacked on top of   | ``None``     |
     |                        | each other. If ``None``, subplots are not stacked.       |              |
     +------------------------+----------------------------------------------------------+--------------+
+    | **legend_order**       | integer that specifies the index of the corresponding    | ``None``     |
+    |                        | entry in the legend. If ``None`` or if more than one     |              |
+    |                        | subplot has the same ``legend_order``, the entries       |              |
+    |                        | are inserted in the order they appear in `subplots`.     |              |
+    +------------------------+----------------------------------------------------------+--------------+
     | **color**,             | *all other keyword arguments are passed to the*          | *...*        |
     | **linestyle**, **...** | matplotlib *plot method*                                 |              |
     +------------------------+----------------------------------------------------------+--------------+
