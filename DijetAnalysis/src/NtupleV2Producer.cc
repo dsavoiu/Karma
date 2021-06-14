@@ -360,6 +360,7 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
     outputNtupleV2Entry->Jet_rawFactor.resize(nJet);
     outputNtupleV2Entry->Jet_hadronFlavor.resize(nJet);
     outputNtupleV2Entry->Jet_partonFlavor.resize(nJet);
+    outputNtupleV2Entry->Jet_genJetMatch.resize(nJet);
     outputNtupleV2Entry->Jet_jerSmearingFactor.resize(nJet);
     outputNtupleV2Entry->Jet_jerScaleFactor.resize(nJet);
     outputNtupleV2Entry->Jet_hltMatch.resize(nJet);
@@ -411,8 +412,8 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
 
         // matched genJet (MC-only)
         if (!m_isData) {
-            // TODO: implement gen-to-jet matches
-            ///outputNtupleV2Entry->Jet_iMatchedGenJet[iJet] = getMatchedGenJetIndex(iJet);
+            // index of matched gen jet
+            outputNtupleV2Entry->Jet_genJetMatch[iJet] = getMatchedGenJetIndex(iJet);
             // flavor information
             outputNtupleV2Entry->Jet_partonFlavor[iJet] = jet.partonFlavor;
             outputNtupleV2Entry->Jet_hadronFlavor[iJet] = jet.hadronFlavor;

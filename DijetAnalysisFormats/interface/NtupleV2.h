@@ -35,6 +35,7 @@ namespace dijet {
         std::vector<double> Jet_rawFactor;
         std::vector<int>    Jet_hadronFlavor;
         std::vector<int>    Jet_partonFlavor;
+        std::vector<int>    Jet_genJetMatch;
         std::vector<double> Jet_jerScaleFactor;
         std::vector<double> Jet_jerSmearingFactor;
 
