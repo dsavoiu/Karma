@@ -13,7 +13,7 @@ if not os.getenv("GC_VERSION"):
         dijetAnalysis_94X_Run2016_17Jul2018_v2_cff.register_options(KarmaOptions())
             #.setDefault('inputFiles', "root://cmsxrootd-redirectors.gridka.de//store/user/dsavoiu/Dijet/skims/KarmaSkim_QCD_Pt_600to800_RunIISummer16MiniAODv3_2019-05-23/job_350_output.root")
             #.setDefault('inputFiles', "root://cmsxrootd-redirectors.gridka.de//store/user/dsavoiu/Dijet/skims/KarmaSkim_QCD_Pt_80to120_RunIISummer16MiniAODv3_2020-01-09/job_485_output.root")
-            .setDefault('inputFiles', "root://cmsxrootd-redirectors.gridka.de//store/user/dsavoiu/Dijet/skims/KarmaSkim_QCD_Pt_470to600_RunIISummer16MiniAODv3_2020-01-09/job_714_output.root")
+            .setDefault('inputFiles', "root://cmsxrootd-redirectors.gridka.de//store/user/dsavoiu/Dijet/skims/KarmaSkim_QCD_HT300to500_madgraphMLM-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_2020-09-15/job_666_output.root")
             .setDefault('outputFile', "testFullMCAnalysis_out.root")
             .setDefault('maxEvents', 1000).setDefault('maxEvents', -1)
             .setDefault('isData', False)
