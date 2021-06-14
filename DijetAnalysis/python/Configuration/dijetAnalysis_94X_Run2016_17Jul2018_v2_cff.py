@@ -114,6 +114,14 @@ def register_options(options):
                       type_=str,
                       default=None,
                       description="Working point of Jet ID to use (e.g. 'TightLepVeto').")
+            .register('prefiringWeightFilePath',
+                      type_=str,
+                      default="",
+                      description="Path to ROOT file containing prefiring weights.")
+            .register('prefiringWeightHistName',
+                      type_=str,
+                      default="",
+                      description="Name of histogram inside prefiring weights file (e.g. 'L1prefiring_jetpt_2016BCD').")
             .register('useObjectBasedJetID',
                       type_=bool,
                       default=False,
@@ -476,8 +484,8 @@ def init_modules(process, options, jet_algo_name):
                 karmaJetCollectionSrc = cms.InputTag("{}Jets{}".format(_prefix, jet_algo_name)),
 
                 # -- other configuration
-                prefiringWeightFilePath = cms.string(os.getenv('CMSSW_BASE') + "/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root"),
-                prefiringWeightHistName = cms.string("L1prefiring_jetpt_2016BtoH"),
+                prefiringWeightFilePath = cms.string(options.prefiringWeightFilePath),
+                prefiringWeightHistName = cms.string(options.prefiringWeightHistName),
                 prefiringRateSysUnc = cms.double(0.2),
             )
         )
