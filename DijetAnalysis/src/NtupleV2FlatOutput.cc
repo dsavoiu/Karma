@@ -38,6 +38,8 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
     ADD_STL_BRANCH(tree, productForFill, Jet_rawFactor);
     ADD_STL_BRANCH(tree, productForFill, Jet_hadronFlavor);
     ADD_STL_BRANCH(tree, productForFill, Jet_partonFlavor);
+    ADD_STL_BRANCH(tree, productForFill, Jet_jerScaleFactor);
+    ADD_STL_BRANCH(tree, productForFill, Jet_jerSmearingFactor);
     ADD_STL_BRANCH(tree, productForFill, Jet_hltMatch);
     ADD_STL_BRANCH(tree, productForFill, Jet_l1Match);
     ADD_STL_BRANCH(tree, productForFill, Jet_hltPassPtAveThreshold);

@@ -35,6 +35,9 @@ namespace dijet {
         std::vector<double> Jet_rawFactor;
         std::vector<int>    Jet_hadronFlavor;
         std::vector<int>    Jet_partonFlavor;
+        std::vector<double> Jet_jerScaleFactor;
+        std::vector<double> Jet_jerSmearingFactor;
+
         // trigger object matches and pt threshold checks
         std::vector<unsigned long>   Jet_hltMatch;
         std::vector<unsigned long>   Jet_l1Match;

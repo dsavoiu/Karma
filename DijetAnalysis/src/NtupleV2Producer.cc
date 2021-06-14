@@ -360,6 +360,8 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
     outputNtupleV2Entry->Jet_rawFactor.resize(nJet);
     outputNtupleV2Entry->Jet_hadronFlavor.resize(nJet);
     outputNtupleV2Entry->Jet_partonFlavor.resize(nJet);
+    outputNtupleV2Entry->Jet_jerSmearingFactor.resize(nJet);
+    outputNtupleV2Entry->Jet_jerScaleFactor.resize(nJet);
     outputNtupleV2Entry->Jet_hltMatch.resize(nJet);
     outputNtupleV2Entry->Jet_l1Match.resize(nJet);
     outputNtupleV2Entry->Jet_hltPassPtAveThreshold.resize(nJet);
@@ -402,7 +404,7 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
         outputNtupleV2Entry->Jet_NumConst[iJet] = jet.nConstituents;
         outputNtupleV2Entry->Jet_NumNeutralParticles[iJet] = jet.nConstituents - jet.nCharged;
         */
-
+        // factors used for individual JEC uncertainties
         for (const auto& jesUncSrc : globalCache()->jesUncertaintySources_) {
             outputNtupleV2Entry->Jet_jesUncertaintyFactors[iJet].push_back(jet.transientDoubles_.at(jesUncSrc));
         };
@@ -414,6 +416,16 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
             // flavor information
             outputNtupleV2Entry->Jet_partonFlavor[iJet] = jet.partonFlavor;
             outputNtupleV2Entry->Jet_hadronFlavor[iJet] = jet.hadronFlavor;
+            // factors used for JER smearing
+            try {
+                outputNtupleV2Entry->Jet_jerSmearingFactor[iJet] = jet.transientDoubles_.at("JERSmearingFactor");
+                outputNtupleV2Entry->Jet_jerScaleFactor[iJet] = jet.transientDoubles_.at("JERScaleFactor");
+            }
+            catch (const std::out_of_range& err) {
+                // factors not calculated (jets not being smeared) -> set to unity
+                outputNtupleV2Entry->Jet_jerSmearingFactor[iJet] = 1.0;
+                outputNtupleV2Entry->Jet_jerScaleFactor[iJet] = 1.0;
+            }
         }
 
         // trigger bitsets

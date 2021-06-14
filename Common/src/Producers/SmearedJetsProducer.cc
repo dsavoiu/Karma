@@ -116,11 +116,14 @@ void karma::SmearedJetsProducer::produce(edm::Event& event, const edm::EventSetu
             }
         }
 
+        // jet pT will be multiplied by this factor for JER smearing
+        double smearingFactor = 1.0;
+
         // check for valid matched gen jet
         if (matchedGenJet) {
             // matched gen jet valid for JER -> use SCALING smearing
             double ptDiff = outputJetCollection->back().p4.Pt() - matchedGenJet->p4.Pt();
-            outputJetCollection->back().p4 *= 1 + (resolutionSF - 1) * ptDiff/outputJetCollection->back().p4.Pt();
+            smearingFactor = 1 + (resolutionSF - 1) * ptDiff/outputJetCollection->back().p4.Pt();
         }
         else {
             // matched gen jet invalid for JER -> use STOCHASTIC smearing
@@ -129,18 +132,19 @@ void karma::SmearedJetsProducer::produce(edm::Event& event, const edm::EventSetu
             // (needed in order not to break replay)
             // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEDMRandomNumberGeneratorService#Replay
             CLHEP::RandGaussT::setFlag(false);
-            double scaleFactor = 1 + (
+            smearingFactor = 1 + (
                 CLHEP::RandGaussT::shoot(&rngEngine, 0, resolution) *
                 std::sqrt(std::max(resolutionSF * resolutionSF - 1, 0.0))
             );
-
-            // prevent negative scale factors
-            if (scaleFactor < 0) scaleFactor = 0.0;
-
-            // apply scale factor
-            outputJetCollection->back().p4 *= scaleFactor;
         }
 
+        // prevent negative scale factors
+        if (smearingFactor < 0) smearingFactor = 0.0;
+
+        // apply smearing factor (and store further information in transient map)
+        outputJetCollection->back().p4 *= smearingFactor;
+        outputJetCollection->back().transientDoubles_["JERScaleFactor"] = resolutionSF;
+        outputJetCollection->back().transientDoubles_["JERSmearingFactor"] = smearingFactor;
     }
 
     // re-sort jets by pT
