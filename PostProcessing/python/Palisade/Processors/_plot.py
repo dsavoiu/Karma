@@ -376,7 +376,8 @@ def _plot_as_step(ax, *args, **kwargs):
 
         _return_artists.extend([
             ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, alpha=_alpha, color=_color, **kwargs),
-            ax.fill_between(_x, _y_shifted[0], _y_shifted[1], **dict(kwargs, hatch=_hatch, alpha=_band_alpha, linewidth=0, color=_color))
+            ax.fill_between(_x, _y_shifted[0], _y_shifted[1], **dict(kwargs, hatch=_hatch, alpha=_band_alpha,
+                            facecolor='none' if _hatch else _color, linewidth=0, edgecolor=_color))
             #ax.fill_between(_x, _y-_yerr[0], _y+_yerr[1], **dict(kwargs, alpha=_band_alpha, linewidth=0, hatch=_hatch, facecolor='none', color=None, edgecolor=kwargs.get('color')))
         ])
 
