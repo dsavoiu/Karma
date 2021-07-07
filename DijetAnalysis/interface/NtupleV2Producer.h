@@ -198,6 +198,8 @@ namespace dijet {
 
         /// std::unique_ptr<karma::TriggerEfficienciesProvider> m_triggerEfficienciesProvider;
         std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider;
+        std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider_minBiasXSUp;
+        std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider_minBiasXSDown;
         std::unique_ptr<karma::PileupWeightProvider> m_puWeightProvider;
         std::unique_ptr<karma::PileupWeightProvider> m_puWeightProviderAlt;
 

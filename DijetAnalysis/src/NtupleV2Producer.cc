@@ -30,13 +30,18 @@ dijet::NtupleV2Producer::NtupleV2Producer(const edm::ParameterSet& config, const
 
     // load external file to get `nPUMean` in data
     if (m_isData) {
+        double minBiasXS = m_configPSet.getParameter<double>("minBiasCrossSection");
+        double minBiasXSRelUnc = m_configPSet.getParameter<double>("minBiasCrossSectionRelativeUncertainty");
+        std::string npuMeanFile = m_configPSet.getParameter<std::string>("npuMeanFile");
+
+        std::cout << "Reading nPUMean information from file: " << npuMeanFile << std::endl;
+
         m_npuMeanProvider = std::unique_ptr<karma::NPUMeanProvider>(
-            new karma::NPUMeanProvider(
-                m_configPSet.getParameter<std::string>("npuMeanFile"),
-                m_configPSet.getParameter<double>("minBiasCrossSection")
-            )
-        );
-        std::cout << "Reading nPUMean information from file: " << m_configPSet.getParameter<std::string>("npuMeanFile") << std::endl;
+            new karma::NPUMeanProvider(npuMeanFile, minBiasXS));
+        m_npuMeanProvider_minBiasXSUp = std::unique_ptr<karma::NPUMeanProvider>(
+            new karma::NPUMeanProvider(npuMeanFile, minBiasXS * (1.0 + minBiasXSRelUnc)));
+        m_npuMeanProvider_minBiasXSDown = std::unique_ptr<karma::NPUMeanProvider>(
+            new karma::NPUMeanProvider(npuMeanFile, minBiasXS * (1.0 - minBiasXSRelUnc)));
     }
 
     // load external file to get `pileupWeight` in MC
@@ -244,12 +249,15 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
     outputNtupleV2Entry->rho     = this->karmaEventHandle->rho;
     if (m_isData) {
         // nPUMean estimate in data, taken from external file
-        if (m_npuMeanProvider) {
+        if (m_npuMeanProvider)
             outputNtupleV2Entry->nPUMean = m_npuMeanProvider->getNPUMean(
-                outputNtupleV2Entry->run,
-                outputNtupleV2Entry->lumi
-            );
-        }
+                outputNtupleV2Entry->run, outputNtupleV2Entry->lumi);
+        if (m_npuMeanProvider_minBiasXSUp)
+            outputNtupleV2Entry->nPUMeanUp = m_npuMeanProvider_minBiasXSUp->getNPUMean(
+                outputNtupleV2Entry->run, outputNtupleV2Entry->lumi);
+        if (m_npuMeanProvider_minBiasXSDown)
+            outputNtupleV2Entry->nPUMeanDown = m_npuMeanProvider_minBiasXSDown->getNPUMean(
+                outputNtupleV2Entry->run, outputNtupleV2Entry->lumi);
     }
     else {
         outputNtupleV2Entry->nPU     = this->karmaEventHandle->nPU;

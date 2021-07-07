@@ -15,7 +15,10 @@ namespace dijet {
         double randomUniform = UNDEFINED_DOUBLE;
         // pileup-related
         double rho = UNDEFINED_DOUBLE;      // PU density
-        double nPUMean = UNDEFINED_DOUBLE;  // true (MC) or estimated (DATA) mean of Poisson distribution of `nPU`
+        // true (MC) or estimated (DATA) mean of Poisson distribution of `nPU` + syst. unc.
+        double nPUMean = UNDEFINED_DOUBLE;
+        double nPUMeanUp = UNDEFINED_DOUBLE;
+        double nPUMeanDown = UNDEFINED_DOUBLE;
 
         // number of primary vertices
         int npv = -1;

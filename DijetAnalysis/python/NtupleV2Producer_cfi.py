@@ -23,7 +23,9 @@ dijetNtupleV2Producer = cms.EDProducer(
 
         #triggerEfficienciesFile = cms.string("trigger_efficiencies.root"),
         npuMeanFile = cms.string("npumean.txt"),
+        # values from [https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData]
         minBiasCrossSection = cms.double(69.2),  # in mb
+        minBiasCrossSectionRelativeUncertainty = cms.double(0.046),  # 4.6%
 
         pileupWeightFile = cms.string("nPUMean_ratio.root"),
         pileupWeightFileAlt = cms.string("nPUMean_ratio_alternative.root"),

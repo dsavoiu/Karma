@@ -22,6 +22,12 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
 
     ADD_BRANCH(tree, productForFill, rho, D);
     ADD_BRANCH(tree, productForFill, nPUMean, D);
+    if (m_isData) {
+        // shifts based on minBias XS uncertainty, only
+        // relevant in DATA
+        ADD_BRANCH(tree, productForFill, nPUMeanUp, D);
+        ADD_BRANCH(tree, productForFill, nPUMeanDown, D);
+    }
 
     ADD_BRANCH(tree, productForFill, npv, I);
     ADD_BRANCH(tree, productForFill, npvGood, I);
