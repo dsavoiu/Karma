@@ -77,8 +77,13 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
 
     // MC
     if (!m_isData) {
+        // per-trigger pileup weights
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeights);
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsAlt);
+
         // number of pile-up interactions
         ADD_BRANCH(tree, productForFill, nPU, I);
+
 
         /* -- not needed for now
         // QCD subprocess info
@@ -99,6 +104,7 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
         ADD_BRANCH(tree, productForFill, generatorWeight, D);
         ADD_BRANCH(tree, productForFill, stitchingWeight, D);
         ADD_BRANCH(tree, productForFill, pileupWeight, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightAlt, D);
         ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLT, D);
 
         // binning values

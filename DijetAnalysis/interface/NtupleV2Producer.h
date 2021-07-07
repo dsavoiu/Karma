@@ -29,7 +29,7 @@
 #include "Karma/Common/interface/Providers/TriggerEfficienciesProvider.h"
 #include "Karma/Common/interface/Providers/NPUMeanProvider.h"
 #include "Karma/Common/interface/Providers/JetIDProvider.h"
-#include "Karma/Common/interface/Providers/PileupWeightProvider.h"
+#include "Karma/Common/interface/Providers/PileupWeightProviderV2.h"
 
 // -- output data formats
 #include "Karma/DijetAnalysisFormats/interface/NtupleV2.h"
@@ -101,6 +101,17 @@ namespace dijet {
             for (size_t iPath = 0; iPath < hltPathsCfg.size(); ++iPath) {
                 const auto& hltPathCfg = hltPathsCfg[iPath];
                 hltPaths_.push_back(hltPathCfg.getParameter<std::string>("name"));
+
+                if (hltPathCfg.existsAs<std::string>("puProfileFile"))
+                    hltPUProfileFileNames_.push_back(hltPathCfg.getParameter<std::string>("puProfileFile"));
+                else
+                    hltPUProfileFileNames_.push_back("");
+
+                if (hltPathCfg.existsAs<std::string>("puProfileFileAlt"))
+                    hltPUProfileFileNamesAlt_.push_back(hltPathCfg.getParameter<std::string>("puProfileFileAlt"));
+                else
+                    hltPUProfileFileNamesAlt_.push_back("");
+
                 l1Thresholds_.push_back(hltPathCfg.getParameter<double>("l1Threshold"));
                 hltThresholds_.push_back(hltPathCfg.getParameter<double>("hltThreshold"));
                 hltZeroThresholdMask_[iPath] = (hltPathCfg.getParameter<double>("hltThreshold") == 0);
@@ -128,6 +139,8 @@ namespace dijet {
 
         const boost::regex hltVersionPattern_;
         std::vector<std::string> hltPaths_;
+        std::vector<std::string> hltPUProfileFileNames_;
+        std::vector<std::string> hltPUProfileFileNamesAlt_;
         std::vector<double> hltThresholds_;
         std::vector<double> l1Thresholds_;
         // bit *i* is set iff non-zero threshold configured for path with index *i*
@@ -200,10 +213,14 @@ namespace dijet {
         std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider;
         std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider_minBiasXSUp;
         std::unique_ptr<karma::NPUMeanProvider> m_npuMeanProvider_minBiasXSDown;
-        std::unique_ptr<karma::PileupWeightProvider> m_puWeightProvider;
-        std::unique_ptr<karma::PileupWeightProvider> m_puWeightProviderAlt;
 
-        std::vector<karma::PileupWeightProvider*> m_puWeightProvidersByHLT;
+        // providers for PU weights
+        std::unique_ptr<karma::PileupWeightProviderV2> m_puWeightProvider; // trigger-independent
+        std::vector<karma::PileupWeightProviderV2*> m_puWeightProvidersByHLT;  // trigger-dependent
+
+        // providers for PU weights (alternative profiles)
+        std::unique_ptr<karma::PileupWeightProviderV2> m_puWeightProviderAlt; // trigger-independent
+        std::vector<karma::PileupWeightProviderV2*> m_puWeightProvidersByHLTAlt;  // trigger-dependent
 
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;

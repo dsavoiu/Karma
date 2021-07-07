@@ -565,6 +565,69 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
         assert jer_variation is None, "Applying both JER and JEC uncertainty source shifts is not supported!"
         _cor_prefix = "uncSourceShifted"
 
+    # explicit trigger configuration (used in ntuple)
+    hltPaths = cms.VPSet(
+        cms.PSet(name=cms.string("HLT_IsoMu24"),        hltThreshold=cms.double(0),   l1Threshold=cms.double(0),   ),
+        #
+        cms.PSet(name=cms.string("HLT_PFJet40"),        hltThreshold=cms.double(40),  l1Threshold=cms.double(0),   ),
+        cms.PSet(name=cms.string("HLT_PFJet60"),        hltThreshold=cms.double(60),  l1Threshold=cms.double(35),  ),
+        cms.PSet(name=cms.string("HLT_PFJet80"),        hltThreshold=cms.double(80),  l1Threshold=cms.double(60),  ),
+        cms.PSet(name=cms.string("HLT_PFJet140"),       hltThreshold=cms.double(140), l1Threshold=cms.double(90),  ),
+        cms.PSet(name=cms.string("HLT_PFJet200"),       hltThreshold=cms.double(200), l1Threshold=cms.double(120), ),
+        cms.PSet(name=cms.string("HLT_PFJet260"),       hltThreshold=cms.double(260), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_PFJet320"),       hltThreshold=cms.double(320), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_PFJet400"),       hltThreshold=cms.double(400), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_PFJet450"),       hltThreshold=cms.double(450), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_PFJet500"),       hltThreshold=cms.double(500), l1Threshold=cms.double(170), ),
+        #
+        cms.PSet(name=cms.string("HLT_AK8PFJet40"),     hltThreshold=cms.double(40),  l1Threshold=cms.double(0),   ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet60"),     hltThreshold=cms.double(60),  l1Threshold=cms.double(35),  ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet80"),     hltThreshold=cms.double(80),  l1Threshold=cms.double(60),  ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet140"),    hltThreshold=cms.double(140), l1Threshold=cms.double(90),  ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet200"),    hltThreshold=cms.double(200), l1Threshold=cms.double(120), ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet260"),    hltThreshold=cms.double(260), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet320"),    hltThreshold=cms.double(320), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet400"),    hltThreshold=cms.double(400), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet450"),    hltThreshold=cms.double(450), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_AK8PFJet500"),    hltThreshold=cms.double(500), l1Threshold=cms.double(170), ),
+        #
+        cms.PSet(name=cms.string("HLT_DiPFJetAve40"),   hltThreshold=cms.double(40),  l1Threshold=cms.double(0),   ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve60"),   hltThreshold=cms.double(60),  l1Threshold=cms.double(0),   ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve80"),   hltThreshold=cms.double(80),  l1Threshold=cms.double(60),  ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve140"),  hltThreshold=cms.double(140), l1Threshold=cms.double(90),  ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve200"),  hltThreshold=cms.double(200), l1Threshold=cms.double(120), ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve260"),  hltThreshold=cms.double(260), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve320"),  hltThreshold=cms.double(320), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve400"),  hltThreshold=cms.double(400), l1Threshold=cms.double(170), ),
+        cms.PSet(name=cms.string("HLT_DiPFJetAve500"),  hltThreshold=cms.double(500), l1Threshold=cms.double(170), ),
+    )
+    for _pset in hltPaths:
+        _file = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_{TRIGGER}.root".format(
+            CMSSW_BASE=os.getenv('CMSSW_BASE'),
+            YEAR="2016",
+            TRIGGER=_pset.name.value(),
+        )
+        if os.path.exists(_file):
+            _pset.puProfileFile = cms.string(_file)
+
+        # as an alternative, use trigger weights for whole trigger set (e.g. 'HLT_PFJet*')
+
+        _alt_suffix = None
+        if "HLT_PFJet" in _pset.name.value():
+            _alt_suffix = "HLT_PFJet_All"
+        elif "HLT_AK8PFJet" in _pset.name.value():
+            _alt_suffix = "HLT_AK8PFJet_All"
+        elif "HLT_DiPFJetAve" in _pset.name.value():
+            _alt_suffix = "HLT_DiPFJetAve_All"
+        if _alt_suffix:
+            _file_alt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_{SUFFIX}.root".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                YEAR="2016",
+                SUFFIX=_alt_suffix,
+            )
+            if os.path.exists(_file):
+                _pset.puProfileFileAlt = cms.string(_file_alt)
+
     process.add_module(
         "ntuple{}".format(pipeline_name),
         dijetNtupleV2Producer.clone(
@@ -582,27 +645,33 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
 
             isData = cms.bool(options.isData),
             stitchingWeight = cms.double(options.stitchingWeight),
-            npuMeanFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_data_zeroBias.txt".format(
-                os.getenv('CMSSW_BASE'),
+            npuMeanFile = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/pileup_latest_2021-04-17.txt".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
 
             doPrescales = cms.bool(options.doPrescales),  # write out prescales for all trigger paths
 
-            # YAML files specifying analysis binning
-            pileupWeightFile = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_jetHT.root".format(
-                os.getenv('CMSSW_BASE'),
+            # pileup weight files
+            pileupWeightNumeratorProfileFile = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_HLT_All.root".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
-            pileupWeightFileAlt = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_ratio_zeroBias.root".format(
-                os.getenv('CMSSW_BASE'),
+            pileupWeightDenominatorProfileFile = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/QCD_PtBinned_TuneCUETP8M1_pythia8/pileup_80bins_QCD_PtBinned_TuneCUETP8M1_pythia8_FromSkim.root".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
-            pileupWeightByHLTFileBasename = "{}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/byHLT/nPUMean_ratio".format(
-                os.getenv('CMSSW_BASE'),
+            pileupWeightNumeratorProfileFileAlt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_data_jetHT.root".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
                 YEAR="2016",
             ),
-            pileupWeightHistogramName = "pileup",
+            pileupWeightDenominatorProfileFileAlt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_mc.root".format(
+                CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                YEAR="2016",
+            ),
+
+            hltPaths = hltPaths,
+            pileupHistogramName = "pileup",
 
             # jet ID (for event-based jet ID in PostProcessing using branches 'jet1id', 'jet2id')
             jetIDSpec = cms.string(options.jetIDSpec or "None"),

@@ -92,6 +92,9 @@ namespace dijet {
 
         // combined L1(min) + HLT prescales
         std::vector<int> triggerPrescales;
+        // per-trigger PU weights
+        std::vector<double> triggerPileupWeights;
+        std::vector<double> triggerPileupWeightsAlt;
 
         // todo: refactor
         /*
@@ -149,6 +152,7 @@ namespace dijet {
         double generatorWeight = 1.0;
         double stitchingWeight = 1.0;
         double pileupWeight = 1.0;
+        double pileupWeightAlt = 1.0;
         double pileupWeightSimulatedHLT = 1.0;
 
         // binning values

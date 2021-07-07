@@ -44,45 +44,95 @@ dijet::NtupleV2Producer::NtupleV2Producer(const edm::ParameterSet& config, const
             new karma::NPUMeanProvider(npuMeanFile, minBiasXS * (1.0 - minBiasXSRelUnc)));
     }
 
-    // load external file to get `pileupWeight` in MC
+    // load PU profiles from external files to compute `pileupWeight` in MC
     if (!m_isData) {
-        if (!m_configPSet.getParameter<std::string>("pileupWeightFile").empty()) {
-            m_puWeightProvider = std::unique_ptr<karma::PileupWeightProvider>(
-                new karma::PileupWeightProvider(
-                    m_configPSet.getParameter<std::string>("pileupWeightFile"),
-                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
-                )
+
+        // required: provider for trigger-independent PU weights
+        const std::string& numFile = m_configPSet.getParameter<std::string>("pileupWeightNumeratorProfileFile");
+        if (numFile.empty() || !boost::filesystem::exists(numFile)) {
+            throw std::invalid_argument("Filename '" + numFile + "' (pileupWeightNumeratorProfileFile) empty or file does not exist. Aborting.");
+        }
+        std::cout << "Loading nominal PU profile for reweighting (numerator)   from file: " << numFile << std::endl;
+        const std::string& denFile = m_configPSet.getParameter<std::string>("pileupWeightDenominatorProfileFile");
+        if (denFile.empty() || !boost::filesystem::exists(denFile)) {
+            throw std::invalid_argument("Filename '" + denFile + "' (pileupWeightDenominatorProfileFile) empty or file does not exist. Aborting.");
+        }
+        std::cout << "Loading nominal PU profile for reweighting (denominator) from file: " << denFile << std::endl;
+        m_puWeightProvider = std::unique_ptr<karma::PileupWeightProviderV2>(
+            new karma::PileupWeightProviderV2(
+                numFile,
+                denFile,
+                m_configPSet.getParameter<std::string>("pileupHistogramName")
+            )
+        );
+
+        // optional: per-trigger pileup profiles for individual HLT paths
+        m_puWeightProvidersByHLT.resize(globalCache->hltPaths_.size());
+        m_puWeightProvidersByHLTAlt.resize(globalCache->hltPaths_.size());  // (alternative weights, filled below)
+        for (size_t iHLTPath = 0; iHLTPath < globalCache->hltPaths_.size(); ++iHLTPath) {
+            const std::string& hltNumFile = globalCache->hltPUProfileFileNames_.at(iHLTPath);
+
+            // if not provided -> skip
+            if (hltNumFile.empty())
+                continue;
+            // if provided and does not exist -> throw
+            else if (!boost::filesystem::exists(hltNumFile))
+                throw std::invalid_argument("File '" + hltNumFile + "' (puProfileFile for HLT path '" + globalCache->hltPaths_.at(iHLTPath) + "') does not exist. Aborting.");
+
+            std::cout << "Loading trigger-dependent PU profile for reweighting (" << globalCache->hltPaths_.at(iHLTPath) << ") from file: " << hltNumFile << std::endl;
+            m_puWeightProvidersByHLT[iHLTPath] = new karma::PileupWeightProviderV2(
+                /*numeratorRootFile = */ hltNumFile,
+                /*denominatorRootFile = */ denFile,  // denominator is trigger-independent!
+                m_configPSet.getParameter<std::string>("pileupHistogramName")
             );
         }
-        /*
-        // can provide an alternative pileup weight file
-        if (!m_configPSet.getParameter<std::string>("pileupWeightFileAlt").empty()) {
-            m_puWeightProviderAlt = std::unique_ptr<karma::PileupWeightProvider>(
-                new karma::PileupWeightProvider(
-                    m_configPSet.getParameter<std::string>("pileupWeightFileAlt"),
-                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+
+        // optional: alternative trigger-independent PU weights
+        const std::string& numFileAlt = m_configPSet.getParameter<std::string>("pileupWeightNumeratorProfileFileAlt");
+        const std::string& denFileAlt = m_configPSet.getParameter<std::string>("pileupWeightDenominatorProfileFileAlt");
+        if (numFileAlt.empty() != denFileAlt.empty()) {
+            throw std::invalid_argument(
+                "Can either specify both 'pileupWeightNumeratorProfileFileAlt' and 'pileupWeightDenominatorProfileFileAlt' or neither."
+                "Got: '" + numFileAlt + "' and '" + denFileAlt + "'");
+        }
+        if (!denFileAlt.empty()) {
+            if (!boost::filesystem::exists(numFileAlt)) {
+                throw std::invalid_argument("File '" + numFileAlt + "' (pileupWeightNumeratorProfileFileAlt) does not exist. Aborting.");
+            }
+            std::cout << "Loading alternative PU profile for reweighting (numerator)   from file: " << numFileAlt << std::endl;
+            if (!boost::filesystem::exists(denFileAlt)) {
+                throw std::invalid_argument("File '" + denFileAlt + "' (pileupWeightDenominatorProfileFileAlt) does not exist. Aborting.");
+            }
+            std::cout << "Loading alternative PU profile for reweighting (denominator) from file: " << denFileAlt << std::endl;
+            m_puWeightProviderAlt = std::unique_ptr<karma::PileupWeightProviderV2>(
+                new karma::PileupWeightProviderV2(
+                    numFileAlt,
+                    denFileAlt,
+                    m_configPSet.getParameter<std::string>("pileupHistogramName")
                 )
             );
-        }
-        */
-        // can provide pileup weight files for each HLT path
-        auto pileupWeightByHLTFileBasename = m_configPSet.getParameter<std::string>("pileupWeightByHLTFileBasename");
-        if (!pileupWeightByHLTFileBasename.empty()) {
-            m_puWeightProvidersByHLT.resize(globalCache->hltPaths_.size());
+
+            // optional: alternative per-trigger pileup profiles for individual HLT paths
             for (size_t iHLTPath = 0; iHLTPath < globalCache->hltPaths_.size(); ++iHLTPath) {
-                std::string pileupWeightFileName = pileupWeightByHLTFileBasename + "_" + globalCache->hltPaths_.at(iHLTPath) + ".root";
+                const std::string& hltNumFileAlt = globalCache->hltPUProfileFileNamesAlt_.at(iHLTPath);
 
-                if (!boost::filesystem::exists(pileupWeightFileName)) {
-                    std::cout << "No HLT-dependent pileup weight information found for trigger path: " << globalCache->hltPaths_.at(iHLTPath) << std::endl;
+                // if not provided -> skip
+                if (hltNumFileAlt.empty())
                     continue;
-                }
+                // if provided and does not exist -> throw
+                else if (!boost::filesystem::exists(hltNumFileAlt))
+                    throw std::invalid_argument("File '" + hltNumFileAlt + "' (puProfileFileAlt for HLT path '" + globalCache->hltPaths_.at(iHLTPath) + "') does not exist. Aborting.");
 
-                std::cout << "Reading HLT-dependent pileup weight information from file: " << pileupWeightFileName << std::endl;
-                m_puWeightProvidersByHLT[iHLTPath] = new karma::PileupWeightProvider(
-                    pileupWeightByHLTFileBasename + "_" + globalCache->hltPaths_[iHLTPath] + ".root",
-                    m_configPSet.getParameter<std::string>("pileupWeightHistogramName")
+                std::cout << "Loading alternative trigger-dependent PU profile for reweighting (" << globalCache->hltPaths_.at(iHLTPath) << ") from file: " << hltNumFileAlt << std::endl;
+                m_puWeightProvidersByHLTAlt[iHLTPath] = new karma::PileupWeightProviderV2(
+                    /*numeratorRootFile = */ hltNumFileAlt,
+                    /*denominatorRootFile = */ denFileAlt,  // denominator is trigger-independent! (use alternative profile)
+                    m_configPSet.getParameter<std::string>("pileupHistogramName")
                 );
             }
+        }
+        else {
+            std::cout << "Not computing alternative PU weights (no alternative PU profiles specified)" << std::endl;
         }
     }
 
@@ -265,9 +315,22 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
         if (m_puWeightProvider) {
             outputNtupleV2Entry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleV2Entry->nPUMean);
         }
-        /*if (m_puWeightProviderAlt) {
+        if (m_puWeightProviderAlt) {
             outputNtupleV2Entry->pileupWeightAlt = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleV2Entry->nPUMean);
-        }*/
+        }
+
+        // determine PU weight by trigger path
+        outputNtupleV2Entry->triggerPileupWeights.resize(globalCache()->hltPaths_.size(), -1);
+        for (size_t i = 0; i < globalCache()->hltPaths_.size(); ++i) {
+            if (m_puWeightProvidersByHLT.at(i))
+                outputNtupleV2Entry->triggerPileupWeights[i] = m_puWeightProvidersByHLT.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean);
+        }
+        // determine PU weight by trigger path (alternative profiles)
+        outputNtupleV2Entry->triggerPileupWeightsAlt.resize(globalCache()->hltPaths_.size(), -1);
+        for (size_t i = 0; i < globalCache()->hltPaths_.size(); ++i) {
+            if (m_puWeightProvidersByHLTAlt.at(i))
+                outputNtupleV2Entry->triggerPileupWeightsAlt[i] = m_puWeightProvidersByHLTAlt.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean);
+        }
     }
 
     // write information related to primary vertices
