@@ -749,7 +749,8 @@ def configure(process, options):
     # -- configure pipelines
 
     _rng_engines = {}
-    for jet_collection in options.jetCollections:
+    # need set() here because of CMSSW VarParsing append bug!
+    for jet_collection in set(options.jetCollections):
         # create modules with nominal configurations for each jet collection
         init_modules(process, options, jet_algo_name=jet_collection)
 
@@ -758,14 +759,15 @@ def configure(process, options):
         if options.isData:
             # data -> only add pipelines with JEC shifts (i.e. no JER smearing)
             for jec_shift in list(JEC_PIPELINES) + (list(JEC_UNCERTAINTY_SOURCE_SETS) if options.doJECUncertaintySources else []):
+                _pipeline_suffix = "Nominal" if jec_shift == 'JECNominal' else jec_shift
                 setup_pipeline(
                     process, options,
-                    pipeline_name="{}{}".format(jet_collection, jec_shift),
+                    pipeline_name="{}{}".format(jet_collection, _pipeline_suffix),
                     jet_algo_name=jet_collection,
                     jec_shift=jec_shift,
                 )
                 _rng_engines.update({
-                    "ntuple{}{}".format(jet_collection, jec_shift) : cms.PSet(
+                    "ntuple{}{}".format(jet_collection, _pipeline_suffix) : cms.PSet(
                         initialSeed=cms.untracked.uint32(497931),
                         engineName=cms.untracked.string('TRandom3')
                     )
