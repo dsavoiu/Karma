@@ -21,6 +21,9 @@ To use:
 import os
 import FWCore.ParameterSet.Config as cms
 
+from collections import OrderedDict
+
+
 JET_COLLECTIONS = ('AK4PFCHS', 'AK8PFCHS')
 JEC_PIPELINES = {
     "JECNominal" : {'shift' :  0.0},
@@ -32,42 +35,37 @@ JER_PIPELINES = {
     "JERUp" :      {'variation' : 1},
     "JERDn" :      {'variation' :-1},
 }
-JEC_UNCERTAINTY_SOURCE_SETS = {
-    "AbsoluteStat":     {'sources': ["AbsoluteStat"]},
-    "AbsoluteScale":    {'sources': ["AbsoluteScale"]},
-    "AbsoluteMPFBias":  {'sources': ["AbsoluteMPFBias"]},
-    "Fragmentation":    {'sources': ["Fragmentation"]},
-    "SinglePionECAL":   {'sources': ["SinglePionECAL"]},
-    "SinglePionHCAL":   {'sources': ["SinglePionHCAL"]},
-    "FlavorQCD":        {'sources': ["FlavorQCD"]},
-    "TimePtEta":        {'sources': ["TimePtEta"]},
-    "RelativeJEREC1":   {'sources': ["RelativeJEREC1"]},
-    "RelativeJEREC2":   {'sources': ["RelativeJEREC2"]},
-    "RelativeJERHF":    {'sources': ["RelativeJERHF"]},
-    "RelativePtBB":     {'sources': ["RelativePtBB"]},
-    "RelativePtEC1":    {'sources': ["RelativePtEC1"]},
-    "RelativePtEC2":    {'sources': ["RelativePtEC2"]},
-    "RelativePtHF":     {'sources': ["RelativePtHF"]},
-    "RelativeBal":      {'sources': ["RelativeBal"]},
-    "RelativeSample":   {'sources': ["RelativeSample"]},
-    "RelativeFSR":      {'sources': ["RelativeFSR"]},
-    "RelativeStatFSR":  {'sources': ["RelativeStatFSR"]},
-    "RelativeStatEC":   {'sources': ["RelativeStatEC"]},
-    "RelativeStatHF":   {'sources': ["RelativeStatHF"]},
-    "PileUpDataMC":     {'sources': ["PileUpDataMC"]},
-    "PileUpPtRef":      {'sources': ["PileUpPtRef"]},
-    "PileUpPtBB":       {'sources': ["PileUpPtBB"]},
-    "PileUpPtEC1":      {'sources': ["PileUpPtEC1"]},
-    "PileUpPtEC2":      {'sources': ["PileUpPtEC2"]},
-    "PileUpPtHF":       {'sources': ["PileUpPtHF"]},
-}
+JEC_UNCERTAINTY_SOURCE_SETS = OrderedDict([
+    ("AbsoluteStat",     {'sources': ["AbsoluteStat"]}),
+    ("AbsoluteScale",    {'sources': ["AbsoluteScale"]}),
+    ("AbsoluteMPFBias",  {'sources': ["AbsoluteMPFBias"]}),
+    ("Fragmentation",    {'sources': ["Fragmentation"]}),
+    ("SinglePionECAL",   {'sources': ["SinglePionECAL"]}),
+    ("SinglePionHCAL",   {'sources': ["SinglePionHCAL"]}),
+    ("FlavorQCD",        {'sources': ["FlavorQCD"]}),
+    ("TimePtEta",        {'sources': ["TimePtEta"]}),
+    ("RelativeJEREC1",   {'sources': ["RelativeJEREC1"]}),
+    ("RelativeJEREC2",   {'sources': ["RelativeJEREC2"]}),
+    ("RelativeJERHF",    {'sources': ["RelativeJERHF"]}),
+    ("RelativePtBB",     {'sources': ["RelativePtBB"]}),
+    ("RelativePtEC1",    {'sources': ["RelativePtEC1"]}),
+    ("RelativePtEC2",    {'sources': ["RelativePtEC2"]}),
+    ("RelativePtHF",     {'sources': ["RelativePtHF"]}),
+    ("RelativeBal",      {'sources': ["RelativeBal"]}),
+    ("RelativeSample",   {'sources': ["RelativeSample"]}),
+    ("RelativeFSR",      {'sources': ["RelativeFSR"]}),
+    ("RelativeStatFSR",  {'sources': ["RelativeStatFSR"]}),
+    ("RelativeStatEC",   {'sources': ["RelativeStatEC"]}),
+    ("RelativeStatHF",   {'sources': ["RelativeStatHF"]}),
+    ("PileUpDataMC",     {'sources': ["PileUpDataMC"]}),
+    ("PileUpPtRef",      {'sources': ["PileUpPtRef"]}),
+    ("PileUpPtBB",       {'sources': ["PileUpPtBB"]}),
+    ("PileUpPtEC1",      {'sources': ["PileUpPtEC1"]}),
+    ("PileUpPtEC2",      {'sources': ["PileUpPtEC2"]}),
+    ("PileUpPtHF",       {'sources': ["PileUpPtHF"]}),
+])
 _ALL_JEC_UNCERTAINTY_SOURCES = set(_name for _spec in JEC_UNCERTAINTY_SOURCE_SETS.values() for _name in _spec['sources'])
 
-# expand source sets to both 'Up' and 'Down' variations
-for _unc_src_set, _unc_src_set_spec in JEC_UNCERTAINTY_SOURCE_SETS.items():
-    del JEC_UNCERTAINTY_SOURCE_SETS[_unc_src_set]
-    for _shift_dir, _shift_factor in zip(("Up", "Dn"), (1.0, -1.0)):
-        JEC_UNCERTAINTY_SOURCE_SETS.update({_unc_src_set+_shift_dir: dict(_unc_src_set_spec, shift=_shift_factor)})
 
 
 def register_options(options):
@@ -613,7 +611,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
             # JEC uncertainty shift factors (only for nominal pipeline)
             jesUncertaintySources = cms.VPSet(
                 cms.PSet(name=cms.string(_n))
-                for _n in _ALL_JEC_UNCERTAINTY_SOURCES
+                for _n in ["Total"] + list(JEC_UNCERTAINTY_SOURCE_SETS)
             ) if (options.doJECUncertaintySources and jer_variation is None) else cms.VPSet(),
 
             # MET filters
