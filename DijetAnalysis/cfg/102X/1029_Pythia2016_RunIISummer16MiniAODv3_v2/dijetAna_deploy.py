@@ -42,7 +42,7 @@ NUMBER_OF_EVENTS_LOOKUP = {
 if __name__ == "__main__":
 
     _deployer = KarmaAnalysisDeployerGC(
-        nick="DijetAna_Pythia2016_RunIISummer16MiniAODv3_2021-06-14_hybridJER_ntupleV2",
+        nick="DijetAna_Pythia2016_RunIISummer16MiniAODv3_2021-06-15_hybridJER_fixGenJetMatch_ntupleV2",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/Karma/DijetAnalysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="/work/{}/Dijet/.workdirs/dijet_ana".format(os.getenv("USER")),
