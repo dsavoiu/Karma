@@ -79,11 +79,14 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
     if (!m_isData) {
         // per-trigger pileup weights
         ADD_STL_BRANCH(tree, productForFill, triggerPileupWeights);
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsUp);
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsDown);
         ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsAlt);
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsAltUp);
+        ADD_STL_BRANCH(tree, productForFill, triggerPileupWeightsAltDown);
 
         // number of pile-up interactions
         ADD_BRANCH(tree, productForFill, nPU, I);
-
 
         /* -- not needed for now
         // QCD subprocess info
@@ -104,8 +107,14 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
         ADD_BRANCH(tree, productForFill, generatorWeight, D);
         ADD_BRANCH(tree, productForFill, stitchingWeight, D);
         ADD_BRANCH(tree, productForFill, pileupWeight, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightUp, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightDown, D);
         ADD_BRANCH(tree, productForFill, pileupWeightAlt, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightAltUp, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightAltDown, D);
         ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLT, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLTUp, D);
+        ADD_BRANCH(tree, productForFill, pileupWeightSimulatedHLTDown, D);
 
         // binning values
         ADD_BRANCH(tree, productForFill, binningValue, D);

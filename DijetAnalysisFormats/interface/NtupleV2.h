@@ -94,7 +94,11 @@ namespace dijet {
         std::vector<int> triggerPrescales;
         // per-trigger PU weights
         std::vector<double> triggerPileupWeights;
+        std::vector<double> triggerPileupWeightsUp;
+        std::vector<double> triggerPileupWeightsDown;
         std::vector<double> triggerPileupWeightsAlt;
+        std::vector<double> triggerPileupWeightsAltUp;
+        std::vector<double> triggerPileupWeightsAltDown;
 
         // todo: refactor
         /*
@@ -152,8 +156,15 @@ namespace dijet {
         double generatorWeight = 1.0;
         double stitchingWeight = 1.0;
         double pileupWeight = 1.0;
+        double pileupWeightUp = 1.0;
+        double pileupWeightDown = 1.0;
         double pileupWeightAlt = 1.0;
+        double pileupWeightAltUp = 1.0;
+        double pileupWeightAltDown = 1.0;
+
         double pileupWeightSimulatedHLT = 1.0;
+        double pileupWeightSimulatedHLTUp = 1.0;
+        double pileupWeightSimulatedHLTDown = 1.0;
 
         // binning values
         double binningValue = UNDEFINED_DOUBLE;

@@ -602,31 +602,19 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
         cms.PSet(name=cms.string("HLT_DiPFJetAve500"),  hltThreshold=cms.double(500), l1Threshold=cms.double(170), ),
     )
     for _pset in hltPaths:
-        _file = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_{TRIGGER}.root".format(
-            CMSSW_BASE=os.getenv('CMSSW_BASE'),
-            YEAR="2016",
-            TRIGGER=_pset.name.value(),
-        )
-        if os.path.exists(_file):
-            _pset.puProfileFile = cms.string(_file)
-
-        # as an alternative, use trigger weights for whole trigger set (e.g. 'HLT_PFJet*')
-
-        _alt_suffix = None
-        if "HLT_PFJet" in _pset.name.value():
-            _alt_suffix = "HLT_PFJet_All"
-        elif "HLT_AK8PFJet" in _pset.name.value():
-            _alt_suffix = "HLT_AK8PFJet_All"
-        elif "HLT_DiPFJetAve" in _pset.name.value():
-            _alt_suffix = "HLT_DiPFJetAve_All"
-        if _alt_suffix:
-            _file_alt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_{SUFFIX}.root".format(
+        # sets of PU profiles to use for PU weight calculation
+        for _key, _file_suffix, _kwarg_suffix in [
+            ("nominal",     "FromLumberjack", ""),
+            ("alternative", "FromBrilcalc",   "Alt")
+        ]:
+            _file = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_{TRIGGER}_{SUFFIX}.root".format(
                 CMSSW_BASE=os.getenv('CMSSW_BASE'),
                 YEAR="2016",
-                SUFFIX=_alt_suffix,
+                TRIGGER=_pset.name.value(),
+                SUFFIX=_file_suffix,
             )
             if os.path.exists(_file):
-                _pset.puProfileFileAlt = cms.string(_file_alt)
+                setattr(_pset, 'puProfileFile{}'.format(_kwarg_suffix), cms.string(_file))
 
     process.add_module(
         "ntuple{}".format(pipeline_name),
@@ -652,22 +640,36 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
 
             doPrescales = cms.bool(options.doPrescales),  # write out prescales for all trigger paths
 
-            # pileup weight files
-            pileupWeightNumeratorProfileFile = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_Nominal_HLT_All.root".format(
-                CMSSW_BASE=os.getenv('CMSSW_BASE'),
-                YEAR="2016",
+            # main profiles for pileup reweighting (from analysis ntuples)
+            pileupWeightNumeratorProfileFile = (
+                "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
+                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromLumberjack.root".format(
+                    CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                )
             ),
-            pileupWeightDenominatorProfileFile = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/QCD_PtBinned_TuneCUETP8M1_pythia8/pileup_80bins_QCD_PtBinned_TuneCUETP8M1_pythia8_FromSkim.root".format(
-                CMSSW_BASE=os.getenv('CMSSW_BASE'),
-                YEAR="2016",
+            pileupWeightDenominatorProfileFile = (
+                "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
+                "2016_new/QCD_PtBinned_TuneCUETP8M1_pythia8/pileup_80bins_QCD_PtBinned_TuneCUETP8M1_pythia8_FromLumberjack.root".format(
+                    CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                )
             ),
-            pileupWeightNumeratorProfileFileAlt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_data_jetHT.root".format(
-                CMSSW_BASE=os.getenv('CMSSW_BASE'),
-                YEAR="2016",
+
+            # alternative profiles for pileup reweighting (from brilcalc/skim)
+            pileupWeightNumeratorProfileFileAlt = (
+                "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
+                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromBrilcalc.root".format(
+                    CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                )
             ),
-            pileupWeightDenominatorProfileFileAlt = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/{YEAR}/nPUMean_mc.root".format(
-                CMSSW_BASE=os.getenv('CMSSW_BASE'),
-                YEAR="2016",
+            pileupWeightDenominatorProfileFileAlt = (
+                "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
+                "2016_new/QCD_PtBinned_TuneCUETP8M1_pythia8/pileup_80bins_QCD_PtBinned_TuneCUETP8M1_pythia8_FromSkim.root".format(
+                    CMSSW_BASE=os.getenv('CMSSW_BASE'),
+                    YEAR="2016",
+                )
             ),
 
             hltPaths = hltPaths,

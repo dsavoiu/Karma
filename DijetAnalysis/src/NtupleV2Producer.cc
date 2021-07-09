@@ -313,23 +313,37 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
         outputNtupleV2Entry->nPU     = this->karmaEventHandle->nPU;
         outputNtupleV2Entry->nPUMean = this->karmaEventHandle->nPUTrue;
         if (m_puWeightProvider) {
-            outputNtupleV2Entry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleV2Entry->nPUMean);
+            outputNtupleV2Entry->pileupWeight = this->m_puWeightProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::central);
+            outputNtupleV2Entry->pileupWeightUp = this->m_puWeightProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::up);
+            outputNtupleV2Entry->pileupWeightDown = this->m_puWeightProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::down);
         }
         if (m_puWeightProviderAlt) {
-            outputNtupleV2Entry->pileupWeightAlt = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleV2Entry->nPUMean);
+            outputNtupleV2Entry->pileupWeightAlt = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::central);
+            outputNtupleV2Entry->pileupWeightAltUp = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::up);
+            outputNtupleV2Entry->pileupWeightAltDown = this->m_puWeightProviderAlt->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::down);
         }
 
         // determine PU weight by trigger path
         outputNtupleV2Entry->triggerPileupWeights.resize(globalCache()->hltPaths_.size(), -1);
+        outputNtupleV2Entry->triggerPileupWeightsUp.resize(globalCache()->hltPaths_.size(), -1);
+        outputNtupleV2Entry->triggerPileupWeightsDown.resize(globalCache()->hltPaths_.size(), -1);
         for (size_t i = 0; i < globalCache()->hltPaths_.size(); ++i) {
-            if (m_puWeightProvidersByHLT.at(i))
-                outputNtupleV2Entry->triggerPileupWeights[i] = m_puWeightProvidersByHLT.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean);
+            if (m_puWeightProvidersByHLT.at(i)) {
+                outputNtupleV2Entry->triggerPileupWeights[i] = m_puWeightProvidersByHLT.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::central);
+                outputNtupleV2Entry->triggerPileupWeightsUp[i] = m_puWeightProvidersByHLT.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::up);
+                outputNtupleV2Entry->triggerPileupWeightsDown[i] = m_puWeightProvidersByHLT.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::down);
+            }
         }
         // determine PU weight by trigger path (alternative profiles)
         outputNtupleV2Entry->triggerPileupWeightsAlt.resize(globalCache()->hltPaths_.size(), -1);
+        outputNtupleV2Entry->triggerPileupWeightsAltUp.resize(globalCache()->hltPaths_.size(), -1);
+        outputNtupleV2Entry->triggerPileupWeightsAltDown.resize(globalCache()->hltPaths_.size(), -1);
         for (size_t i = 0; i < globalCache()->hltPaths_.size(); ++i) {
-            if (m_puWeightProvidersByHLTAlt.at(i))
-                outputNtupleV2Entry->triggerPileupWeightsAlt[i] = m_puWeightProvidersByHLTAlt.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean);
+            if (m_puWeightProvidersByHLTAlt.at(i)) {
+                outputNtupleV2Entry->triggerPileupWeightsAlt[i] = m_puWeightProvidersByHLTAlt.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::central);
+                outputNtupleV2Entry->triggerPileupWeightsAltUp[i] = m_puWeightProvidersByHLTAlt.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::up);
+                outputNtupleV2Entry->triggerPileupWeightsAltDown[i] = m_puWeightProvidersByHLTAlt.at(i)->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::down);
+            }
         }
     }
 
@@ -544,10 +558,14 @@ void dijet::NtupleV2Producer::produce(edm::Event& event, const edm::EventSetup& 
     if (!m_isData) {
         // determine PU weight by simulated trigger
         outputNtupleV2Entry->pileupWeightSimulatedHLT = -1.0;
+        outputNtupleV2Entry->pileupWeightSimulatedHLTUp = -1.0;
+        outputNtupleV2Entry->pileupWeightSimulatedHLTDown = -1.0;
         if (indexHighestFiredTriggerPath >= 0) {
             auto* puWeightByHLTProvider = m_puWeightProvidersByHLT.at(indexHighestFiredTriggerPath);
             if (puWeightByHLTProvider) {
-                outputNtupleV2Entry->pileupWeightSimulatedHLT = puWeightByHLTProvider->getPileupWeight(outputNtupleV2Entry->nPUMean);
+                outputNtupleV2Entry->pileupWeightSimulatedHLT = puWeightByHLTProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::central);
+                outputNtupleV2Entry->pileupWeightSimulatedHLTUp = puWeightByHLTProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::up);
+                outputNtupleV2Entry->pileupWeightSimulatedHLTDown = puWeightByHLTProvider->getPileupWeight(outputNtupleV2Entry->nPUMean, karma::PileupVariation::down);
             }
         }
     }
