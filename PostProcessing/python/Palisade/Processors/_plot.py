@@ -528,15 +528,20 @@ class PlotProcessor(_ProcessorBase):
             return handles, labels
 
         # temporarily cast to array to use numpy indexing
-        _hs, _ls = np.asarray(handles), np.asarray(labels)
+        # note: explicitly use object arrays to prevent
+        # creation of 2d arrays when handle type is iterable
+        _hs = np.empty(len(handles), dtype=object)
+        _ls = np.empty(len(labels), dtype=object)
+        _hs[:] = handles
+        _ls[:] = labels
+
+        # use criterion as a bool index to operate only
+        # on handles that are part of a stack
         _criterion = np.vectorize(lambda label: label in stack_labels)
 
         # reverse sublist selected by criterion
         _ls[_criterion(_ls)] = _ls[_criterion(_ls)][::-1]
         _hs[_criterion(_ls)] = _hs[_criterion(_ls)][::-1]
-
-        # cast back to artist container (artist container)
-        _hs = map(tuple, _hs)
 
         # return as lists
         return list(_hs), list(_ls)
