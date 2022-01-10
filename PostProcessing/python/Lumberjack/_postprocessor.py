@@ -9,6 +9,7 @@ import time
 
 from array import array
 from enum import Enum
+from collections import OrderedDict
 
 
 __all__ = ["PostProcessor", "Timer"]
@@ -259,11 +260,13 @@ class PostProcessor(object):
 
         # write out ROOT objects
         if isinstance(object_or_dict, dict):
+            # sort dict, so that the output inside the root file is sorted
+            _od = OrderedDict(sorted(object_or_dict.iteritems()))
             # create the output directory inside the ROOT file (if it does not exist)
             if not output_file.GetDirectory(output_path):
                 output_file.mkdir(output_path)
             # recurse through all the subdictionaries
-            for _subkey, _subobject_or_dict in object_or_dict.iteritems():
+            for _subkey, _subobject_or_dict in _od.iteritems():
                 _subdir = "{}/{}".format(output_path, _subkey)
                 PostProcessor._write_output_recursively(_subobject_or_dict, output_file, _subdir)
         else:
