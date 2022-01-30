@@ -193,6 +193,9 @@ class LazyNodeBase(object):
             ]) + ('\n'+(level-1) * '  ' if pprint and level > 0 else '')
         )
 
+    def __reduce__(self):
+        return (self.__class__, tuple())
+
     def __repr__(self):
         return self._get_repr()
 
