@@ -883,7 +883,7 @@ class PlotProcessor(_ProcessorBase):
                 if _marker_style == 'full':
                     _kwargs.update(
                         markerfacecolor=_kwargs['color'],
-                        markeredgewidth=0,
+                        markeredgewidth=1,
                     )
                 elif _marker_style == 'white':
                     _kwargs.update(
@@ -894,6 +894,13 @@ class PlotProcessor(_ProcessorBase):
                     _kwargs.update(
                         markerfacecolor='none',
                         markeredgewidth=1,
+                    )
+                elif _marker_style in ('left', 'right', 'top', 'bottom'):
+                    _kwargs.update(
+                        markerfacecolor=_kwargs['color'],
+                        markerfacecoloralt='none',
+                        markeredgewidth=1,
+                        fillstyle=_marker_style,
                     )
                 else:
                     raise ValueError(

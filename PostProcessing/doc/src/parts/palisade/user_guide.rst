@@ -792,17 +792,19 @@ additional keyword arguments. They are listed in the following overview:
     |                        |     handles will be superimposed.                        |              |
     |                        |                                                          |              |
     +------------------------+----------------------------------------------------------+--------------+
-    | **marker_style**       | ``full``, ``empty`` or ``white``.                        | ``full``     |
+    | **marker_style**       | ``full``, ``empty``, ``white``, ``left``, ``right``,     | ``full``     |
+    |                        | ``top``, ``bottom``                                      |              |
     |                        |                                                          |              |
-    |                        | If ``full``, the marker *face* color will be determined  |              |
-    |                        | by the ``color`` keyword and no marker edges will be     |              |
-    |                        | drawn.                                                   |              |
+    |                        | If ``full``, both the marker *face* and *edge* colors    |              |
+    |                        | will be set according to the ``color`` keyword. If       |              |
+    |                        | ``empty``, only the marker edge will be set and the face |              |
+    |                        | will be left unfilled. If ``white``, the face will be    |              |
+    |                        | filled with a white color instead of ``color``.          |              |
     |                        |                                                          |              |
-    |                        | If ``empty`` or ``white``, the marker *edge* will be     |              |
-    |                        | drawn with a line width of ``1`` and its color will be   |              |
-    |                        | determined by the ``color`` keyword. The marker *face*   |              |
-    |                        | will be set to white if ``white`` and left unfilled if   |              |
-    |                        | empty.                                                   |              |
+    |                        | The values ``left``, ``right``, ``top`` and ``bottom``   |              |
+    |                        | can be used to fill only one half of the marker face.    |              |
+    |                        | The marker edge will still be drawn around the whole     |              |
+    |                        | and the empty half will remain unfilled.                 |              |
     +------------------------+----------------------------------------------------------+--------------+
     | **mask_zero_errors**   | if ``True``, hide bins/points for which the errors are   | ``False``    |
     |                        | equal to zero                                            |              |
