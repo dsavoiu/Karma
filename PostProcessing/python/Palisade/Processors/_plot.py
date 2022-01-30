@@ -1001,6 +1001,11 @@ class PlotProcessor(_ProcessorBase):
             if len(_args[0]) == 0:
                 continue
 
+            # remove kwargs that are `None`
+            _to_remove = {_k for _k, _v in six.iteritems(_kwargs) if _v is None}
+            for _k in _to_remove:
+                _kwargs.pop(_k)
+
             # run the plot method
             _plot_handle = _plot_method(
                 *_args,
