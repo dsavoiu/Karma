@@ -23,6 +23,7 @@ if not os.getenv("GC_VERSION"):
             .setDefault('jecVersion', "Summer16_07Aug2017_V11")
             .setDefault('jerVersion', "Summer16_25nsV1")
             .setDefault('jerMethod', "hybrid")
+            .setDefault('jerGenMatchPtSigma', "1.0")
             .setDefault('stitchingWeight', 1.0)  # ignore for testing
             .setDefault('jecFromGlobalTag', False)
             .setDefault('useObjectBasedJetID', False)
@@ -47,6 +48,7 @@ else:
             .setDefault('jecVersion', "__JEC_VERSION__")
             .setDefault('jerVersion', "__JER_VERSION__")
             .setDefault('jerMethod', "hybrid")
+            .setDefault('jerGenMatchPtSigma', "1.0")
             .setDefault('stitchingWeight', float(__CROSS_SECTION__) / float(__NUMBER_OF_EVENTS__))
             .setDefault('jecFromGlobalTag', True)
             .setDefault('useObjectBasedJetID', False)

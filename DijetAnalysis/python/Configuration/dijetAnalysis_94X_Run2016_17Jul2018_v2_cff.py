@@ -104,6 +104,10 @@ def register_options(options):
                       type_=str,
                       default='stochastic',
                       description="Method to use for JER smearing. One of: 'stochastic', 'hybrid'")
+            .register('jerGenMatchPtSigma',
+                      type_=float,
+                      default=3.0,
+                      description="Size of Gaussian core for 'hybrid' JER smearing.")
             .register('jetIDSpec',
                       type_=str,
                       default=None,
@@ -510,7 +514,8 @@ def init_modules(process, options, jet_algo_name):
                 ),
                 jetAlgoName = cms.string(jet_algo_name.replace('CHS', 'chs')),
                 jerVariation = cms.int32(0),  # -1 for 'DOWN', 0 for 'NOMINAL', 1 for 'UP
-                jerMethod = cms.string(options.jerMethod)
+                jerMethod = cms.string(options.jerMethod),
+                jerGenMatchPtSigma = cms.double(options.jerGenMatchPtSigma),
             )
         )
 
