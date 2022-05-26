@@ -44,6 +44,7 @@ karma::SmearedJetsProducer::SmearedJetsProducer(const edm::ParameterSet& config)
                 "[SmearedJetsProducer] Invalid value for 'jerMethod' parameter. Expected one of: 'hybrid', 'stochastic'."
             );
 
+        m_jerGenMatchPtSigma = m_configPSet.getParameter<double>("jerGenMatchPtSigma");
     }
 
     // -- declare which collections are consumed and create tokens
@@ -108,10 +109,10 @@ void karma::SmearedJetsProducer::produce(edm::Event& event, const edm::EventSetu
             matchedGenJet = getMatchedGenJet(iJet);
         }
 
-        // additional matching criterion: pT less than 3-sigma away
+        // additional matching criterion: pT less than <m_jerGenMatchPtSigma>-sigma away
         if (matchedGenJet) {
             double ptDiff = outputJetCollection->back().p4.Pt() - matchedGenJet->p4.Pt();
-            if (std::abs(ptDiff) > 3 * resolution * outputJetCollection->back().p4.Pt()) {
+            if (std::abs(ptDiff) > m_jerGenMatchPtSigma * resolution * outputJetCollection->back().p4.Pt()) {
                 matchedGenJet = nullptr;
             }
         }

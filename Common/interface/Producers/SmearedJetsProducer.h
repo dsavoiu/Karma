@@ -73,6 +73,7 @@ namespace karma {
         std::unique_ptr<JME::JetResolutionScaleFactor> m_jetResolutionScaleFactorProvider;
         Variation m_jerVariation = Variation::NOMINAL;
         bool m_stochasticOnly = true;
+        double m_jerGenMatchPtSigma = 3.0;
 
         // -- handles and tokens
         typename edm::Handle<karma::Event> karmaEventHandle;
