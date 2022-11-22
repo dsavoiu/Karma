@@ -358,21 +358,22 @@ def _plot_as_step(ax, *args, **kwargs):
 
         # compute boundary step
         _y_shifted = (_y.copy(), _y.copy())
-        for _ys, _ye, _fac in zip(_y_shifted, _yerr, (-1.0, 1.0)):
-            _ye = _ye.copy()
-            # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
-            _ye[0::5] = _ye[2::5]
-            _ye[4::5] = _ye[2::5]
-            _ys += _fac * _ye
+
+        if _yerr is not None:
+            for _ys, _ye, _fac in zip(_y_shifted, _yerr, (-1.0, 1.0)):
+                _ye = _ye.copy()
+                # set shift size at bin anchors 0,4 to y error (only at bin anchors 1,2,3)
+                _ye[0::5] = _ye[2::5]
+                _ye[4::5] = _ye[2::5]
+                _ys += _fac * _ye
+        else:
+            _yerr = 0, 0
 
         if _boundary:
             _return_artists.extend([
                 ax.errorbar(_x, _y_shifted[0], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, linestyle=_linestyle, **kwargs),
                 ax.errorbar(_x, _y_shifted[1], yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, color=_color, linestyle=_linestyle, **kwargs),
             ])
-
-        if _yerr is None:
-            _yerr = 0, 0
 
         _return_artists.extend([
             ax.errorbar(_x, _y, yerr=None, capsize=_capsize, markeredgecolor=_markeredgecolor, alpha=_alpha, color=_color, **kwargs),
