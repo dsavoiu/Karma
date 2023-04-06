@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import errno
 import subprocess
 import sys
 
@@ -8,40 +9,90 @@ from setuptools import find_packages, setup
 from setuptools.command.develop import develop
 
 
+# -- helper functions
+
+def mkdirs_exist_ok(dir_name):
+    """
+    Ensure a directory and all intermediate directories exist.
+    """
+    try:
+        os.makedirs(dir_name)
+    except OSError as exc: # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise
+
+
+def create_if_not_exists(path, directory=False):
+    """
+    Create an empty file (or directory if `directory` is True)
+    at `path` if it does not exist.
+    """
+    if os.path.exists(path):
+        return
+
+    if directory:
+        mkdirs_exist_ok(path)
+    else:
+        # ensure parent directory exists
+        mkdirs_exist_ok(os.path.dirname(path))
+        # create file
+        open(path, 'a').close()
+
+
+def iter_intermediate_paths(path):
+    """
+    Generator to yield all intermediate paths.
+    """
+    other_ancestors, inner_dir = os.path.split(path)
+    if other_ancestors:
+        for ancestor in iter_ancestors(other_ancestors):
+            yield ancestor
+    yield inner_dir
+
+
+def ensure_dir_exists_importable(dir_path, check_intermediate=False):
+    """
+    Ensure a directory (and optionally all intermediate directories) is
+    importable as a Python package.
+    """
+    # ensure directory exists
+    create_if_not_exists(dir_path, directory=True)
+    create_if_not_exists('{}/__init__.py'.format(dir_path))
+
+    if not check_intermediate:
+        return
+
+    # ensure it (and all intermediate diretories) are importable
+    for intermediate_path in iter_intermediate_paths(dir_path):
+        create_if_not_exists('{}/__init__.py'.format(intermediate_path))
+
+
+# -- custom install routine to ensure the creation of an importable
+#    package path
+
 class CustomDevelopCommand(develop):
     """Custom handler for 'develop' command."""
 
-    @staticmethod
-    def _ensure_standalone_package_path(final_symlink_path):
-        '''ensure that a dummy prefix path exists which is importable as a package'''
-
-        _final_symlink_path_split = final_symlink_path.split('/')
-
-        _cumulated_paths = ''
-        for _i in range(len(_final_symlink_path_split)):
-            _cumulated_path = os.path.join(*_final_symlink_path_split[:_i+1])
-            # create directory
-            if not os.path.exists(_cumulated_path):
-                os.mkdir(_cumulated_path)
-            # 'touch' __init__ file to ensure it exists
-            _initfile_path = '{}/__init__.py'.format(_cumulated_path)
-            if not os.path.exists(_initfile_path):
-                open(_initfile_path, 'a').close()
-
-        if not os.path.exists(final_symlink_path):
-            os.symlink(os.path.join(*(['..']*(len(_final_symlink_path_split)-1)+['python'])), final_symlink_path)
+    STANDALONE_PACKAGE_DIR = "Karma/PostProcessing"
 
     def run(self):
         print('custom_develop!')
-        # create 'dummy' path with '__init__' files and symlink to '/python'
-        self._ensure_standalone_package_path('Karma/PostProcessing')
+
+        # ensure importable directory hierarchy up to STANDALONE_PACKAGE_DIR
+        last_intermediate_path, _ = os.path.split(self.STANDALONE_PACKAGE_DIR)
+        ensure_dir_exists_importable(last_intermediate_path, check_intermediate=True)
+
+        # ensure a relative symlink that points to the 'python' directory
+        # exists at the STANDALONE_PACKAGE_DIR
+        if not os.path.exists(self.STANDALONE_PACKAGE_DIR):
+            link = os.path.relpath("python", last_intermediate_path)
+            os.symlink(link, self.STANDALONE_PACKAGE_DIR)
+
         # call super
         develop.run(self)
-        # 'touch' final __init__ file to ensure it exists
-        _final_initfile_path = 'Karma/PostProcessing/__init__.py'
-        if not os.path.exists(_final_initfile_path):
-            open(_final_initfile_path, 'a').close()
 
+        # ensure STANDALONE_PACKAGE_DIR is importable
+        ensure_dir_exists_importable(self.STANDALONE_PACKAGE_DIR)
 
 
 def get_version():
