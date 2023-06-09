@@ -32,7 +32,7 @@ NUMBER_OF_EVENTS_LOOKUP = {
 if __name__ == "__main__":
 
     _deployer = KarmaAnalysisDeployerGC(
-        nick="DijetAna_Madgraph2016_RunIISummer16MiniAODv3_2021-06-15_hybridJER_fixGenJetMatch_ntupleV2",
+        nick="DijetAna_Madgraph2016_RunIISummer16MiniAODv3_2022-08-01_smoothJEC_jerDASv2_sigma1_ntupleV2",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/Karma/DijetAnalysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="/work/{}/Dijet/.workdirs/dijet_ana".format(os.getenv("USER")),
@@ -63,8 +63,8 @@ if __name__ == "__main__":
 
     _deployer.add_constant("GLOBALTAG", "94X_mcRun2_asymptotic_v3")
     _deployer.add_constant("IS_DATA", "False")
-    _deployer.add_constant("JEC_VERSION", "Summer16_07Aug2017_V11")
-    _deployer.add_constant("JER_VERSION", "Summer16_25nsV1")
+    _deployer.add_constant("JEC_VERSION", "Summer16_07Aug2017_V11Smooth")
+    _deployer.add_constant("JER_VERSION", "Summer16_25nsV1_DAS_v2")
 
     _deployer.add_lookup_parameter("CROSS_SECTION", CROSS_SECTION_LOOKUP, key="DATASETNICK")
     _deployer.add_lookup_parameter("NUMBER_OF_EVENTS", NUMBER_OF_EVENTS_LOOKUP, key="DATASETNICK")

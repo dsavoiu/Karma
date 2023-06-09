@@ -609,8 +609,8 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
     for _pset in hltPaths:
         # sets of PU profiles to use for PU weight calculation
         for _key, _file_suffix, _kwarg_suffix in [
-            ("nominal",     "FromLumberjack", ""),
-            ("alternative", "FromBrilcalc",   "Alt")
+            ("nominal",     "FromLumberjack_WithPrescales", ""),
+            ("alternative", "FromLumberjack",   "Alt")
         ]:
             _file = "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_{TRIGGER}_{SUFFIX}.root".format(
                 CMSSW_BASE=os.getenv('CMSSW_BASE'),
@@ -648,7 +648,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
             # main profiles for pileup reweighting (from analysis ntuples)
             pileupWeightNumeratorProfileFile = (
                 "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
-                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromLumberjack.root".format(
+                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromBrilcalc.root".format(
                     CMSSW_BASE=os.getenv('CMSSW_BASE'),
                     YEAR="2016",
                 )
@@ -664,7 +664,7 @@ def setup_pipeline(process, options, pipeline_name, jet_algo_name, jec_shift=Non
             # alternative profiles for pileup reweighting (from brilcalc/skim)
             pileupWeightNumeratorProfileFileAlt = (
                 "{CMSSW_BASE}/src/Karma/DijetAnalysis/data/pileup/"
-                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromBrilcalc.root".format(
+                "2016_new/Run2016BCDEFGH_07Aug17/pileup_80bins_Run2016BCDEFGH_07Aug17_HLT_All_FromLumberjack.root".format(
                     CMSSW_BASE=os.getenv('CMSSW_BASE'),
                     YEAR="2016",
                 )

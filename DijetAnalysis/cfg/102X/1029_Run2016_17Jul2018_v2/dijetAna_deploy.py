@@ -5,14 +5,14 @@ from Karma.Common.Tools.karmaAnalysisDeployers import KarmaAnalysisDeployerGC
 
 
 JEC_VERSION_LOOKUP = {
-    "JetHT_Run2016B_ver1"  : "Summer16_07Aug2017BCD_V11",
-    "JetHT_Run2016B_ver2"  : "Summer16_07Aug2017BCD_V11",
-    "JetHT_Run2016C"       : "Summer16_07Aug2017BCD_V11",
-    "JetHT_Run2016D"       : "Summer16_07Aug2017BCD_V11",
-    "JetHT_Run2016E"       : "Summer16_07Aug2017EF_V11",
-    "JetHT_Run2016F"       : "Summer16_07Aug2017EF_V11",
-    "JetHT_Run2016G"       : "Summer16_07Aug2017GH_V11",
-    "JetHT_Run2016H"       : "Summer16_07Aug2017GH_V11",
+    "JetHT_Run2016B_ver1"  : "Summer16_07Aug2017BCD_V11Smooth",
+    "JetHT_Run2016B_ver2"  : "Summer16_07Aug2017BCD_V11Smooth",
+    "JetHT_Run2016C"       : "Summer16_07Aug2017BCD_V11Smooth",
+    "JetHT_Run2016D"       : "Summer16_07Aug2017BCD_V11Smooth",
+    "JetHT_Run2016E"       : "Summer16_07Aug2017EF_V11Smooth",
+    "JetHT_Run2016F"       : "Summer16_07Aug2017EF_V11Smooth",
+    "JetHT_Run2016G"       : "Summer16_07Aug2017GH_V11Smooth",
+    "JetHT_Run2016H"       : "Summer16_07Aug2017GH_V11Smooth",
 }
 PREFIRING_WEIGHT_HIST_NAME_LOOKUP = {
     "JetHT_Run2016B_ver1"  : "L1prefiring_jetpt_2016BCD",
@@ -28,7 +28,7 @@ PREFIRING_WEIGHT_HIST_NAME_LOOKUP = {
 if __name__ == "__main__":
 
     _deployer = KarmaAnalysisDeployerGC(
-        nick="DijetAna_JetHT_Run2016BCDEFGH-17Jul2018_2021-06-14_prefiringByIOV_ntupleV2",
+        nick="DijetAna_JetHT_Run2016BCDEFGH-17Jul2018_2022-08-01_smoothJEC_ntupleV2",
         cmsrun_config="dijetAna_cfg.py",
         gc_config_base="{}/src/Karma/DijetAnalysis/cfg/gc/dijetAna_base_gc.conf".format(os.getenv("CMSSW_BASE")),
         work_directory="/work/{}/Dijet/.workdirs/dijet_ana".format(os.getenv("USER")),
@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
     _deployer.add_constant("GLOBALTAG", "94X_dataRun2_v10")
     _deployer.add_constant("IS_DATA", "True")
+    _deployer.add_constant("PREFIRING_WEIGHT_HIST_NAME", "L1prefiring_jetpt_2016BtoH")  # average map, currently hard-coded in dijet_cfg.py
 
     _deployer.add_lookup_parameter("JEC_VERSION", JEC_VERSION_LOOKUP, key="DATASETNICK")
-    _deployer.add_lookup_parameter("PREFIRING_WEIGHT_HIST_NAME", PREFIRING_WEIGHT_HIST_NAME_LOOKUP, key="DATASETNICK")
 
     _deployer.deploy()

@@ -29,8 +29,12 @@ if not os.getenv("GC_VERSION"):
             .setDefault('jetCollections', ['AK4PFCHS', 'AK8PFCHS'])
             .setDefault('jetIDSpec', "2016")
             .setDefault('jetIDWorkingPoint', "TightLepVeto")
-            .setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/JetPrefiringMapsperIOV_EOY.root".format(os.getenv("CMSSW_BASE"))))
-            .setDefault('prefiringWeightHistName', "L1prefiring_jetpt_2016FGH")
+            # -- prefiring maps per era
+            #.setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/JetPrefiringMapsperIOV_EOY.root".format(os.getenv("CMSSW_BASE"))))
+            #.setDefault('prefiringWeightHistName', "L1prefiring_jetpt_2016FGH")
+            # -- average prefiring maps
+            .setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root".format(os.getenv("CMSSW_BASE"))))
+            .setDefault('prefiringWeightHistName', "L1prefiring_jetpt_2016BtoH")
             .setDefault('numThreads', 1)
             .setDefault('jecVersion', "Summer16_07Aug2017GH_V11")  # for JEC uncertainty sources
             .setDefault('jecFromGlobalTag', True)
@@ -56,8 +60,12 @@ else:
             .setDefault('jetCollections', ['AK4PFCHS', 'AK8PFCHS'])
             .setDefault('jetIDSpec', "2016")
             .setDefault('jetIDWorkingPoint', "TightLepVeto")
-            .setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/JetPrefiringMapsperIOV_EOY.root".format(os.getenv("CMSSW_BASE"))))
-            .setDefault('prefiringWeightHistName', "__PREFIRING_WEIGHT_HIST_NAME__")
+            # -- prefiring maps per era
+            #.setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/JetPrefiringMapsperIOV_EOY.root".format(os.getenv("CMSSW_BASE"))))
+            #.setDefault('prefiringWeightHistName', "__PREFIRING_WEIGHT_HIST_NAME__")
+            # -- average prefiring maps
+            .setDefault('prefiringWeightFilePath', os.path.realpath("{}/src/Karma/DijetAnalysis/data/prefiring/L1prefiring_jetpt_2016BtoH.root".format(os.getenv("CMSSW_BASE"))))
+            .setDefault('prefiringWeightHistName', "L1prefiring_jetpt_2016BtoH")
             .setDefault('jecVersion', "__JEC_VERSION__")
             .setDefault('jecFromGlobalTag', True)
             .setDefault('doJECUncertaintySources', True)
