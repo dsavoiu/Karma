@@ -696,7 +696,7 @@ class LumberjackCLI(LumberjackInterfaceBase):
         _parsers['freestyle'] = _subparsers.add_parser('freestyle', help='Specify desired objects by hand')
         #_parsers['freestyle'].add_argument('--input-type', metavar='TYPE', type=str, help='Sample type Choices: {%(choices)s}', choices=_allowed_input_types, required=True)
         _parsers['freestyle'].add_argument('SPLITTING_KEY', type=str, help='Key(s) which identify the set of cuts used for '
-                                           'separating the sample into subsamples. Choices: {%(choices)s}', nargs='+', choices=SPLITTINGS, metavar='SPLITTING')
+                                           'separating the sample into subsamples. Choices: {%(choices)s}', nargs='+', metavar='SPLITTING')
         _parsers['freestyle'].add_argument('--histograms', metavar='HISTOGRAM', help='Specification of histograms', nargs='+')
         _parsers['freestyle'].add_argument('--profiles', metavar='PROFILE', help='Specification of profiles', nargs='+')
         _parsers['freestyle'].add_argument('--output-file', metavar='OUTPUT', help="Name of the output file.", required=True)
