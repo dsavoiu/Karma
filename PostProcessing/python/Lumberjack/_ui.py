@@ -8,47 +8,54 @@ import time
 import numpy as np
 import os
 import re
+import six
 import sys
 import yaml
 #import ROOT
 
 from contextlib import contextmanager
-from tqdm import tqdm
 try:
-    from tqdm.utils import disp_len
+    from tqdm import tqdm
 except ImportError:
-    disp_len = len
+    tqdm = None
+    tqdm_always_newline = None
+else:
+    try:
+        from tqdm.utils import disp_len
+    except ImportError:
+        disp_len = len
 
-try:
-    from tqdm.utils import _unicode
-except ImportError:
-    from tqdm._utils import _unicode
+    try:
+        from tqdm.utils import _unicode
+    except ImportError:
+        from tqdm._utils import _unicode
+
+    class tqdm_always_newline(tqdm):
+        @staticmethod
+        def status_printer(file):
+            """
+            Manage the printing and in-place updating of a line of characters.
+            Note that if the string is longer than a line, then in-place
+            updating may not work (it will print a new line at each refresh).
+            """
+            fp = file
+            fp_flush = getattr(fp, 'flush', lambda: None)  # pragma: no cover
+
+            def fp_write(s):
+                fp.write(_unicode(s))
+                fp_flush()
+
+            last_len = [0]
+
+            def print_status(s):
+                len_s = disp_len(s)
+                fp_write('\n' + s + (' ' * max(last_len[0] - len_s, 0)))
+                last_len[0] = len_s
+
+            return print_status
 
 from .._util import product_dict, make_directory, group_by
 
-class tqdm_always_newline(tqdm):
-    @staticmethod
-    def status_printer(file):
-        """
-        Manage the printing and in-place updating of a line of characters.
-        Note that if the string is longer than a line, then in-place
-        updating may not work (it will print a new line at each refresh).
-        """
-        fp = file
-        fp_flush = getattr(fp, 'flush', lambda: None)  # pragma: no cover
-
-        def fp_write(s):
-            fp.write(_unicode(s))
-            fp_flush()
-
-        last_len = [0]
-
-        def print_status(s):
-            len_s = disp_len(s)
-            fp_write('\n' + s + (' ' * max(last_len[0] - len_s, 0)))
-            last_len[0] = len_s
-
-        return print_status
 
 __all__ = ["LumberjackInterfaceBase", "LumberjackCLI"]
 
@@ -208,40 +215,43 @@ class LumberjackInterfaceBase(object):
         self._df_count_increment = 100000
 
         if self._args.progress:
-            _tqdm_class = tqdm_always_newline if self._args.progress_always_newline else tqdm
-            self._progress = _tqdm_class(
-                unit=" events",
-                unit_scale=False,
-                dynamic_ncols=True,
-                desc="Event loop progress",
-                total=self._df_size,
-                mininterval=self._args.progress_mininterval,
-            )
-            def _progress_callback(count):
-                self._progress.update(self._df_count_increment)
+            if tqdm is None:
+                print("[ERROR] Requested --progress, but tqdm is not installed. Progress bar will not be displayed.")
+            else:
+                _tqdm_class = tqdm_always_newline if self._args.progress_always_newline else tqdm
+                self._progress = _tqdm_class(
+                    unit=" events",
+                    unit_scale=False,
+                    dynamic_ncols=True,
+                    desc="Event loop progress",
+                    total=self._df_size,
+                    mininterval=self._args.progress_mininterval,
+                )
+                def _progress_callback(count):
+                    self._progress.update(self._df_count_increment)
 
-            _func_basename = "my_callback_py_f"
-            _func_idstring = hashlib.md5(hex(id(_progress_callback))).hexdigest()  # unique ID
-            _func_fullname = _func_basename + '_' + _func_idstring
-            _func_slotcallback_fullname = _func_basename + '_slot_' + _func_idstring
+                _func_basename = "my_callback_py_f"
+                _func_idstring = hashlib.md5(hex(id(_progress_callback))).hexdigest()  # unique ID
+                _func_fullname = _func_basename + '_' + _func_idstring
+                _func_slotcallback_fullname = _func_basename + '_slot_' + _func_idstring
 
-            import ROOT
+                import ROOT
 
-            # black magic to obtain pointer to Python function in ROOT's interpreter
-            ROOT.gInterpreter.ProcessLine("#include <Python.h>")
-            ROOT.gInterpreter.ProcessLine("long long "+_func_fullname+"_addr = " + hex(id(_progress_callback)) + ";")
-            ROOT.gInterpreter.ProcessLine("PyObject* "+_func_fullname+" = reinterpret_cast<PyObject*>("+_func_fullname+"_addr);")
-            ROOT.gInterpreter.ProcessLine("Py_INCREF("+_func_fullname+");")  # prevent garbage collection
+                # black magic to obtain pointer to Python function in ROOT's interpreter
+                ROOT.gInterpreter.ProcessLine("#include <Python.h>")
+                ROOT.gInterpreter.ProcessLine("long long "+_func_fullname+"_addr = " + hex(id(_progress_callback)) + ";")
+                ROOT.gInterpreter.ProcessLine("PyObject* "+_func_fullname+" = reinterpret_cast<PyObject*>("+_func_fullname+"_addr);")
+                ROOT.gInterpreter.ProcessLine("Py_INCREF("+_func_fullname+");")  # prevent garbage collection
 
-            # define a thread-safe std::function for the progress callback and register it
-            ROOT.gInterpreter.ProcessLine("std::mutex partialResultMutex_"+_func_idstring+";")
-            ROOT.gInterpreter.ProcessLine(
-                "std::function<void(unsigned int, ULong64_t&)> "+_func_slotcallback_fullname+" = [](unsigned int /*slot*/, ULong64_t& count) { "
-                    "std::lock_guard<std::mutex> lock(partialResultMutex_"+_func_idstring+"); "
-                    "PyEval_CallObject("+_func_fullname+", Py_BuildValue(\"(i)\", count)); "
-                "};"
-            )
-            self._df_count.OnPartialResultSlot(self._df_count_increment, getattr(ROOT, _func_slotcallback_fullname))
+                # define a thread-safe std::function for the progress callback and register it
+                ROOT.gInterpreter.ProcessLine("std::mutex partialResultMutex_"+_func_idstring+";")
+                ROOT.gInterpreter.ProcessLine(
+                    "std::function<void(unsigned int, ULong64_t&)> "+_func_slotcallback_fullname+" = [](unsigned int /*slot*/, ULong64_t& count) { "
+                        "std::lock_guard<std::mutex> lock(partialResultMutex_"+_func_idstring+"); "
+                        "PyEval_CallObject("+_func_fullname+", Py_BuildValue(\"(i)\", count)); "
+                    "};"
+                )
+                self._df_count.OnPartialResultSlot(self._df_count_increment, getattr(ROOT, _func_slotcallback_fullname))
 
         # -- apply basic analysis selection
 
