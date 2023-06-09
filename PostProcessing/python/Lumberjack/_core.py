@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import numpy as np
+import six
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -23,7 +24,7 @@ class Quantity(object):
     def __repr__(self):
         return "{}({})".format(
             self.__class__.name,
-            ", ".join(["{}={}".format(_k, repr(_v)) for _k, _v in self._dict.iteritems()])
+            ", ".join(["{}={}".format(_k, repr(_v)) for _k, _v in six.iteritems(self._dict)])
         )
 
     @property
@@ -91,7 +92,7 @@ class Quantity(object):
 def apply_defines(data_frame, defines):
     """Applies all 'Defines' specified in a dictionary to an data frame."""
     _df = data_frame
-    for _k, _v in defines.iteritems():
+    for _k, _v in six.iteritems(defines):
         print("[apply_defines] Defining quantity '{}': {}".format(_k, _v))
         try:
             _df = _df.Define(_k, _v)
@@ -113,7 +114,7 @@ def apply_filters(data_frame, filters):
 def define_quantities(data_frame, quantities):
     """Define aliases for quantity expressions as specified in dictionary `quantities`."""
     _define_dict = OrderedDict()  # map of quantities by unique name
-    for _q_key, _q in quantities.iteritems():
+    for _q_key, _q in six.iteritems(quantities):
 
         # skip quantities with identical names and expressions (can get by name without Define)
         if _q.name == _q.expression:

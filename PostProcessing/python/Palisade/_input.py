@@ -90,7 +90,7 @@ class HashableMap(Mapping):
         if self._hash is None:
             # hash computed from hashes of keys and values
             self._hash = 0
-            for key, value in self.iteritems():
+            for key, value in six.iteritems(self):
                 self._hash ^= hash(key)
                 self._hash ^= hash(value)
 

@@ -231,7 +231,7 @@ class LumberjackInterfaceBase(object):
                     self._progress.update(self._df_count_increment)
 
                 _func_basename = "my_callback_py_f"
-                _func_idstring = hashlib.md5(hex(id(_progress_callback))).hexdigest()  # unique ID
+                _func_idstring = hashlib.md5(hex(id(_progress_callback)).encode("utf8")).hexdigest()  # unique ID
                 _func_fullname = _func_basename + '_' + _func_idstring
                 _func_slotcallback_fullname = _func_basename + '_slot_' + _func_idstring
 
@@ -449,7 +449,7 @@ class LumberjackInterfaceBase(object):
 
                 print("[INFO] Running Task '{}':".format(_task_name))
                 print("    - splitting RDataFrame by keys: {}".format(
-                    ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in _splitting_specs.iteritems()])
+                    ", ".join(["{} ({} subdivisions)".format(_key, len(_splitting)) for _key, _splitting in six.iteritems(_splitting_specs)])
                 ))
                 print("        -> total number of subdivisions: {}\n".format(_n_subdiv))
                 print("    - requested number of objects per subdivision: {}\n".format(_n_obj))

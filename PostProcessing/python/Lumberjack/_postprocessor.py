@@ -5,6 +5,7 @@ import numpy as np
 import os
 import ROOT
 import re
+import six
 import time
 
 from array import array
@@ -74,9 +75,9 @@ class PostProcessor(object):
     def _split_df(self):
         # -- create splits
         self._split_dfs = {}
-        for _split_name, _split_dict in self._splitting_spec.iteritems():
+        for _split_name, _split_dict in six.iteritems(self._splitting_spec):
             self._split_dfs[_split_name] = self._df_bare
-            for _var, _bin_spec in _split_dict.iteritems():
+            for _var, _bin_spec in six.iteritems(_split_dict):
                 if isinstance(_bin_spec, tuple):
                     self._split_dfs[_split_name] = self._split_dfs[_split_name].Filter("{lo}<={var}&&{var}<{hi}".format(lo=_bin_spec[0], hi=_bin_spec[1], var=_var))
                 else:
@@ -109,7 +110,7 @@ class PostProcessor(object):
         # -- create quantity shape histograms for each split
         self._root_objects = {}  # keys are paths of the form 'splitting_key1:splitting_value1/.../splitting_keyN:splitting_valueN'
 
-        for _split_name, _split_df in self._split_dfs.iteritems():
+        for _split_name, _split_df in six.iteritems(self._split_dfs):
             self._root_objects[_split_name] = {}
 
             _split_dict = dict([_path_element.split(':', 1) for _path_element in _split_name.split('/')])
@@ -263,7 +264,7 @@ class PostProcessor(object):
             if not output_file.GetDirectory(output_path):
                 output_file.mkdir(output_path)
             # recurse through all the subdictionaries
-            for _subkey, _subobject_or_dict in object_or_dict.iteritems():
+            for _subkey, _subobject_or_dict in six.iteritems(object_or_dict):
                 _subdir = "{}/{}".format(output_path, _subkey)
                 PostProcessor._write_output_recursively(_subobject_or_dict, output_file, _subdir)
         else:
