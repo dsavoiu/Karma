@@ -55,7 +55,7 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
     ADD_STL_BRANCH(tree, productForFill, Jet_hltPassPtThreshold);
     ADD_STL_BRANCH(tree, productForFill, Jet_l1PassPtThreshold);
     ADD_STL_BRANCH(tree, productForFill, Jet_jetId);
-    /* -- not needed for now
+    // PF energy fractions & multiplicities
     ADD_STL_BRANCH(tree, productForFill, Jet_NHF);
     ADD_STL_BRANCH(tree, productForFill, Jet_NEMF);
     ADD_STL_BRANCH(tree, productForFill, Jet_CHF);
@@ -63,7 +63,6 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
     ADD_STL_BRANCH(tree, productForFill, Jet_CEMF);
     ADD_STL_BRANCH(tree, productForFill, Jet_NumConst);
     ADD_STL_BRANCH(tree, productForFill, Jet_NumNeutralParticles);
-    */
     ADD_STL_BRANCH(tree, productForFill, Jet_jesUncertaintyFactors);
 
     ADD_BRANCH(tree, productForFill, MET_pt, D);
@@ -88,7 +87,6 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
         // number of pile-up interactions
         ADD_BRANCH(tree, productForFill, nPU, I);
 
-        /* -- not needed for now
         // QCD subprocess info
         ADD_BRANCH(tree, productForFill, incomingParton1Flavor, I);
         ADD_BRANCH(tree, productForFill, incomingParton2Flavor, I);
@@ -97,6 +95,7 @@ void dijet::NtupleV2FlatOutput::setUpTTree(TTree* tree, dijet::NtupleV2Entry* pr
         ADD_BRANCH(tree, productForFill, alphaQCD, D);
         ADD_BRANCH(tree, productForFill, scalePDF, D);
         // flavor
+        /* -- not needed for now
         ADD_BRANCH(tree, productForFill, jet1PartonFlavor, I);
         ADD_BRANCH(tree, productForFill, jet2PartonFlavor, I);
         ADD_BRANCH(tree, productForFill, jet1HadronFlavor, I);
