@@ -226,28 +226,28 @@ namespace {
         edm::Wrapper<karma::JetTriggerObjectsMap> dict_edmWrapperDijetJetTriggerObjectsMap;
         karma::JetTriggerObjectsMaps dict_karmaJetTriggerObjectsMaps;
         edm::Wrapper<karma::JetTriggerObjectsMaps> dict_edmWrapperDijetJetTriggerObjectsMaps;
-        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::TriggerObject> > > dict_edmKeyValDijetJetToTriggerObject;
+        edm::helpers::KeyVal<edm::RefProd<std::vector<karma::Jet> >,edm::RefProd<std::vector<karma::TriggerObject> > > dict_edmKeyValDijetJetToTriggerObject;
 
         // jet-muon association map
         karma::JetMuonsMap dict_karmaJetMuonsMap;
         edm::Wrapper<karma::JetMuonsMap> dict_edmWrapperDijetJetMuonsMap;
         karma::JetMuonsMaps dict_karmaJetMuonsMaps;
         edm::Wrapper<karma::JetMuonsMaps> dict_edmWrapperDijetJetMuonsMaps;
-        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::Muon> > > dict_edmKeyValDijetJetToMuon;
+        edm::helpers::KeyVal<edm::RefProd<std::vector<karma::Jet> >,edm::RefProd<std::vector<karma::Muon> > > dict_edmKeyValDijetJetToMuon;
 
         // jet-electron association map
         karma::JetElectronsMap dict_karmaJetElectronsMap;
         edm::Wrapper<karma::JetElectronsMap> dict_edmWrapperDijetJetElectronsMap;
         karma::JetElectronsMaps dict_karmaJetElectronsMaps;
         edm::Wrapper<karma::JetElectronsMaps> dict_edmWrapperDijetJetElectronsMaps;
-        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::Electron> > > dict_edmKeyValDijetJetToElectron;
+        edm::helpers::KeyVal<edm::RefProd<std::vector<karma::Jet> >,edm::RefProd<std::vector<karma::Electron> > > dict_edmKeyValDijetJetToElectron;
 
         // jet-genJet association map
         karma::JetGenJetMap dict_karmaJetGenJetMap;
         edm::Wrapper<karma::JetGenJetMap> dict_edmWrapperDijetJetGenJetMap;
         karma::JetGenJetMaps dict_karmaJetGenJetMaps;
         edm::Wrapper<karma::JetGenJetMaps> dict_edmWrapperDijetJetGenJetMaps;
-        edm::helpers::KeyVal<edm::RefProd<vector<karma::Jet> >,edm::RefProd<vector<karma::LV> > > dict_edmKeyValDijetJetToGenJetLV;
+        edm::helpers::KeyVal<edm::RefProd<std::vector<karma::Jet> >,edm::RefProd<std::vector<karma::LV> > > dict_edmKeyValDijetJetToGenJetLV;
 
         // value maps to LV
         edm::ValueMap<karma::LorentzVector> dict_karmaLVValueMap;
