@@ -44,7 +44,8 @@ namespace karma {
 
         std::shared_ptr<TH1D> makeHist1D(const std::string& name, const std::string& title, const std::vector<double>& bins) {
             // serialized creation of histogram in file
-            queue_.pushAndWait(
+            queue_.push(
+                task_group_,
                 [&]() {
                     edm::LogInfo("GlobalCacheWithOutputFile") << "Creating histogram '" << name << "' in output file...";
                     outputHistograms_[name] = std::make_shared<TH1D>(name.c_str(), title.c_str(), bins.size() - 1, &bins[0]);
@@ -60,7 +61,8 @@ namespace karma {
 
         void addToHist1D(const std::string& name, const std::shared_ptr<TH1D>& hist2) const {
             // serialized addition to file
-            queue_.pushAndWait(
+            queue_.push(
+                task_group_,
                 [&]() {
                     edm::LogInfo("GlobalCacheWithOutputFile") << "Adding to histogram '" << name << "' in output file...";
                     outputHistograms_[name]->Add(&(*hist2));
@@ -89,6 +91,7 @@ namespace karma {
         // -- output file, memory histogram storage and control structures
         mutable std::unique_ptr<TFile> outputFile_;
         mutable edm::SerialTaskQueue queue_;
+        mutable oneapi::tbb::task_group task_group_;
         mutable std::map<std::string, std::shared_ptr<TH1D>> outputHistograms_;
 
     };
