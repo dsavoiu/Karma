@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include "Karma/SkimmingFormats/interface/Event.h"

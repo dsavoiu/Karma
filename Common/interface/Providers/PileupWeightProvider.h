@@ -1,3 +1,6 @@
+#pragma once
+
+#include <string>
 #include <memory>
 
 #include "TH1D.h"

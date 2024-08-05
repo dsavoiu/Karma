@@ -1,5 +1,7 @@
-#include <map>
+#pragma once
 
+#include <string>
+#include <map>
 
 namespace karma {
     class NPUMeanProvider {
