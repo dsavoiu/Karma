@@ -270,10 +270,10 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
             //outputEvent->triggerPathL1Prescales[iPath] = l1AndHLTPrescales.first;
             //outputEvent->triggerPathHLTPrescales[iPath] = l1AndHLTPrescales.second;
 
-            outputEvent->triggerPathHLTPrescales[iPath] = this->triggerPrescalesHandle->getPrescaleForIndex(triggerIndex);
-            outputEvent->triggerPathL1Prescales[iPath] = this->triggerPrescalesL1MinHandle->getPrescaleForIndex(triggerIndex);
+            outputEvent->triggerPathHLTPrescales[iPath] = this->triggerPrescalesHandle->getPrescaleForIndex<double>(triggerIndex);
+            outputEvent->triggerPathL1Prescales[iPath] = this->triggerPrescalesL1MinHandle->getPrescaleForIndex<double>(triggerIndex);
             // define if ever needed
-            ///outputEvent->triggerPathL1PrescalesMax[iPath] = this->triggerPrescalesL1MaxHandle->getPrescaleForIndex(triggerIndex);
+            ///outputEvent->triggerPathL1PrescalesMax[iPath] = this->triggerPrescalesL1MaxHandle->getPrescaleForIndex<double>(triggerIndex);
         }
     }
 

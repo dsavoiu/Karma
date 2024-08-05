@@ -37,10 +37,10 @@ namespace karma {
         std::vector<bool> metFilterBits;
 
         // it's easier to store these once per event rather than once per lumi-section
-        std::vector<int> triggerPathHLTPrescales;
-        std::vector<int> triggerPathL1Prescales;
+        std::vector<double> triggerPathHLTPrescales;
+        std::vector<double> triggerPathL1Prescales;
         // define if ever needed
-        //std::vector<int> triggerPathL1PrescalesMax;
+        //std::vector<double> triggerPathL1PrescalesMax;
 
     };
     typedef std::vector<karma::Event> EventCollection;
