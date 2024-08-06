@@ -1,6 +1,7 @@
 #pragma once
 
 // system include files
+#include <string>
 #include <memory>
 #include <numeric>
 #include <algorithm>

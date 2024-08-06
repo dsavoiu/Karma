@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "CollectionProducer.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"

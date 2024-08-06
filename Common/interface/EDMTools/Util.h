@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/Registry.h"
 #include "FWCore/Utilities/interface/EDMException.h"
