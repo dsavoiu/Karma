@@ -1,2 +1,2 @@
-from karmaOptions import *
-from karmaProcess import *
+from .karmaOptions import *
+from .karmaProcess import *
