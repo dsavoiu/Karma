@@ -259,8 +259,8 @@ void karma::EventProducer::produce(edm::Event& event, const edm::EventSetup& set
     for (size_t iPath = 0; iPath < numSelectedHLTPaths; ++iPath) {
         // need the original index of the path in the trigger menu to obtain trigger decision
         const int& triggerIndex = runCache()->hltPathInfos_[iPath].indexInMenu_;
-        // need the full trigger name to obtain trigger prescale
-        const std::string& triggerName = runCache()->hltPathInfos_[iPath].name_;
+        // old: need the full trigger name to obtain trigger prescale
+        //const std::string& triggerName = runCache()->hltPathInfos_[iPath].name_;
 
         outputEvent->hltBits[iPath] = this->triggerResultsHandle->accept(triggerIndex);
 
