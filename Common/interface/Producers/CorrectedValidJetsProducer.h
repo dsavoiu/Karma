@@ -2,6 +2,7 @@
 
 // system include files
 #include <string>
+#include <mutex>
 #include <memory>
 
 // user include files
@@ -61,9 +62,25 @@ namespace karma {
             }
         };
 
+        void setJetCorrectorParametersCollectionESToken(
+            const edm::ESGetToken<JetCorrectorParametersCollection, JetCorrectionsRecord>& newToken
+        ) const {
+            // lock the mutex (will unlock when it goes out of scope)
+            const std::lock_guard<std::mutex> lock(jetCorrectorParametersCollectionESTokenMutex);
+            // update the token
+            jetCorrectorParametersCollectionESToken = newToken;
+        }
+
+        const auto& getJetCorrectorParametersCollectionESToken() const {
+            return this->jetCorrectorParametersCollectionESToken;
+        }
+
         std::unique_ptr<karma::JetIDProvider> jetIDProvider_;
         bool jecFromGlobalTag_;
 
+      private:
+        mutable edm::ESGetToken<JetCorrectorParametersCollection, JetCorrectionsRecord> jetCorrectorParametersCollectionESToken;
+        mutable std::mutex jetCorrectorParametersCollectionESTokenMutex;
     };
 
     /** Cache containing resources which do not change

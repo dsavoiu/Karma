@@ -60,6 +60,13 @@ karma::CorrectedValidJetsProducer::CorrectedValidJetsProducer(const edm::Paramet
                      jec << "_Uncertainty_" << jecAlgoName << ".txt" << "'" << std::endl;
     }
     else {
+        // declare JEC record in event setup as input and set access token
+        // https://github.com/cms-sw/cmssw/commit/2c2b1fa04a0fa6c48469284d2dfb5093272ff39d
+        std::string jecPayloadName = jecAlgoName;  // is this the correct payload name?
+        globalCache->setJetCorrectorParametersCollectionESToken(
+            esConsumes<JetCorrectorParametersCollection, JetCorrectionsRecord>(edm::ESInputTag("", jecPayloadName))
+        );
+
         // issue a warning in case both GT and text file are specified
         std::cout << "[CorrectedValidJetsProducer] INFO: JEC and JEU will be taken from global tag, even though parameter "
                   << "'jecVersion' parameter points to text files '"
@@ -125,8 +132,9 @@ karma::CorrectedValidJetsProducer::~CorrectedValidJetsProducer() {
         const auto& jecLevels = globalCache->pSet_.getParameter<std::vector<std::string>>("jecLevels");
 
         // retrieve the jet energy corrections record from the conditions database
-        edm::ESHandle<JetCorrectorParametersCollection> parameters;
-        setup.get<JetCorrectionsRecord>().get(jecAlgoName, parameters);
+        edm::ESHandle<JetCorrectorParametersCollection> parameters = setup.getHandle(
+            globalCache->getJetCorrectorParametersCollectionESToken()
+        );
 
         // -- retrieve the jet energy correction parameters
 
