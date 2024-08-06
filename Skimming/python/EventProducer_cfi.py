@@ -26,6 +26,7 @@ def karmaEventProducer(isData):
 
             # HLTPrescaleProvider (similar to HLTConfigProvider) configuration
             hltConfigAndPrescaleProvider = cms.PSet(
+                stageL1Trigger = cms.uint32(1),
                 l1GtRecordInputTag = cms.InputTag("l1GtTriggerMenuLite"),
                 l1GtReadoutRecordInputTag = cms.InputTag(""),
                 l1GtTriggerMenuLiteInputTag =  cms.InputTag("l1GtTriggerMenuLite"),
