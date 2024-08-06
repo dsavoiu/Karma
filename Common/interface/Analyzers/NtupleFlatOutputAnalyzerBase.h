@@ -147,7 +147,7 @@ namespace karma {
 
                 if (mismatchedBranches.size() > 0) {
                     std::cout << "Declared branch type mismatch for the following Ntuple data members: " << std::endl;
-                    for (const auto branchNameSizePair : mismatchedBranches) {
+                    for (const auto& branchNameSizePair : mismatchedBranches) {
                         std::cout << "    " << branchNameSizePair.first << ":" << std::endl;
                         std::cout << "        declared in Ntuple data format: " << branchNameSizePair.second.first << std::endl;
                         std::cout << "        declared in NtupleFlatOutput constructor (TTree leaf): " << branchNameSizePair.second.second << std::endl;
