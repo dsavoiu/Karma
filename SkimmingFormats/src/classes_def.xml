@@ -124,6 +124,9 @@
     <class name="karma::JetGenJetMaps"/>
     <class name="edm::Wrapper<karma::JetGenJetMaps>"/>
 
+    <!--- std::vectors -->
+    <class name="std::vector<karma::LorentzVector>"/>
+
     <!-- edm::ValueMaps -->
     <class name="edm::ValueMap<karma::LorentzVector>"/>
     <class name="edm::Wrapper<edm::ValueMap<karma::LorentzVector> >"/>

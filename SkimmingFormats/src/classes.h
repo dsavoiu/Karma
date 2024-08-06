@@ -250,6 +250,7 @@ namespace {
         edm::helpers::KeyVal<edm::RefProd<std::vector<karma::Jet> >,edm::RefProd<std::vector<karma::LV> > > dict_edmKeyValDijetJetToGenJetLV;
 
         // value maps to LV
+        std::vector<karma::LorentzVector> dict_karmaLVVector;
         edm::ValueMap<karma::LorentzVector> dict_karmaLVValueMap;
         edm::Wrapper<edm::ValueMap<karma::LorentzVector>> dict_edmWrapperDijetLVValueMap;
 
