@@ -64,13 +64,13 @@ class KarmaProcess(cms.Process):
         ))
 
         # -- print process configuration
-        print "\n----- Process configuration -----"
-        print "input:          ", (self.source.fileNames[0] if len(self.source.fileNames) else ""), ("... (%d files)" % len(self.source.fileNames) if len(self.source.fileNames) > 1 else "")
-        print "file type:      ", "miniAOD"
-        print "global tag:     ", global_tag
-        print "max events:     ", (str(self.maxEvents.input)[20:-1])
-        print "cmssw version:  ", os.environ["CMSSW_VERSION"]
-        print "---------------------------------\n"
+        print("\n----- Process configuration -----")
+        print("input:          ", (self.source.fileNames[0] if len(self.source.fileNames) else ""), ("... (%d files)" % len(self.source.fileNames) if len(self.source.fileNames) > 1 else ""))
+        print("file type:      ", "miniAOD")
+        print("global tag:     ", global_tag)
+        print("max events:     ", (str(self.maxEvents.input)[20:-1]))
+        print("cmssw version:  ", os.environ["CMSSW_VERSION"])
+        print("---------------------------------\n")
 
         #################
         # CMSSW modules #
@@ -110,11 +110,11 @@ class KarmaProcess(cms.Process):
 
         _v = ExpandVisitor(type(path))
         path.visit(_v)
-        print "\n[karmaProcess] CMSSW modules in {} '{}':".format(type(path).__name__, path_name)
+        print("\n[karmaProcess] CMSSW modules in {} '{}':".format(type(path).__name__, path_name))
         for _module in _v.l:
             print('\t{}'.format(_module))
         if _v.taskLeaves:
-            print "\n[karmaProcess] CMSSW modules on tasks associated to {} '{}':".format(type(path).__name__, path_name)
+            print("\n[karmaProcess] CMSSW modules on tasks associated to {} '{}':".format(type(path).__name__, path_name))
             for _task_module in sorted([str(_t) for _t in _v.taskLeaves]):
                 print('\t{}'.format(_task_module))
 
@@ -235,19 +235,19 @@ class KarmaProcess(cms.Process):
     def print_configuration(self):
 
         # paths
-        print "\n[karmaProcess] CMSSW Paths configured: {}".format(', '.join(list(self.paths)))
+        print("\n[karmaProcess] CMSSW Paths configured: {}".format(', '.join(list(self.paths))))
         for _path_name, _path in self.paths.items():
             self._print_path(_path, _path_name)
 
         # endpaths
-        print "\n[karmaProcess] CMSSW EndPaths configured: {}".format(', '.join(list(self.endpaths)))
+        print("\n[karmaProcess] CMSSW EndPaths configured: {}".format(', '.join(list(self.endpaths))))
         for _endpath_name, _endpath in self.endpaths.items():
             self._print_path(_endpath, _endpath_name)
 
     def dump_python(self, filename, overwrite=False):
         '''for debugging: dump entire cmsRun python configuration'''
 
-        print "[karmaProcess] Dumping Python configuration to file '{}'...".format(filename)
+        print("[karmaProcess] Dumping Python configuration to file '{}'...".format(filename))
         if os.path.exists(filename) and not overwrite:
             raise IOError("Cannot dump Python: file '{}' exists and 'overwrite' not given!".format(filename))
 

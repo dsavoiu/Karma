@@ -104,7 +104,7 @@ def addJetToolboxSequences(process, isData,
                 _pat_jet_module = getattr(process, "selectedPatJets{}".format(patJetCollectionName))
                 _pat_jet_module.cut = "pt()>{:f}".format(min_jet_pt)
 
-            print "[karmaJetToolbox] Add pat::Jet collection '{}'".format(patJetCollectionName)
+            print("[karmaJetToolbox] Add pat::Jet collection '{}'".format(patJetCollectionName))
             _jet_collection_names.append("selectedPatJets{}".format(patJetCollectionName))
 
     # cleanup unused modules added by jet toolbox

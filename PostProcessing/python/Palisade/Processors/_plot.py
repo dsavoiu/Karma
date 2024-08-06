@@ -555,7 +555,7 @@ class PlotProcessor(_ProcessorBase):
             return handles, labels
 
         # indices that would sort the label list according to `key`
-        _idx_sorted = [i for i, _ in sorted(enumerate(labels), key=lambda (idx, label): key(label))]
+        _idx_sorted = [i for i, _ in sorted(enumerate(labels), key=lambda idx, label: key(label))]
 
         handles = [handles[_idx] for _idx in _idx_sorted]
         labels = [labels[_idx] for _idx in _idx_sorted]
