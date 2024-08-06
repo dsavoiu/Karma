@@ -2,6 +2,7 @@
 
 <use name="CondFormats/JetMETObjects"/>
 <use name="JetMETCorrections/Modules"/>
+<use name="JetMETCorrections/Objects"/>
 
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
